@@ -18,20 +18,20 @@ import {
     CardFooter,
     CardHeader,
     CardTitle,
-} from "@/components/ui/card"
-import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+} from "@/src/components/ui/card"
+import { Button } from '@/src/components/ui/button';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/src/components/ui/form';
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
-import { Input } from '@/components/ui/input';
-import { useState } from 'react';
+import { Input } from '@/src/components/ui/input';
+//HERE// import { useState } from 'react';
 
 export default function Home() {
 
     const router = useRouter();
 
-    const [username, setUsername] = useState()
+    //HERE// const [username, setUsername] = useState()
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
