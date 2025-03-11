@@ -29,37 +29,37 @@ export default function AuthProvider({ children }: AuthProviderProps) {
 
         const response = await usuarioServices.checkLogin(credenciais);
         const test = true;
-        if (response instanceof ApiException) {
-            setAuthToken(null)
-            setCurrentUser(null)
+        if (test) {
+            let mock: Usuario = {
+                Usuario_id: 2,
+                Usuario_dataCriacao: new Date,
+                Usuario_email: "test@t.est",
+                Usuario_nome: "Test",
+                Usuario_senha: "",
+                Usuario_status: true,
+                Cargo_id: 0
+
+            }
+            let authToken = "test"
+            setAuthToken(authToken)
+            setCurrentUser(mock)
+            localStorage.setItem('authToken', authToken);
+            localStorage.setItem('currentUser', JSON.stringify(mock))
             setIsLoading(false);
-            if (test) {
-                let mock: Usuario = {
-                    Usuario_id: 2,
-                    Usuario_dataCriacao: new Date,
-                    Usuario_email: "test@t.est",
-                    Usuario_nome: "Test",
-                    Usuario_senha: "",
-                    Usuario_status: true,
-                    Cargo_id: 0
-                    
-                }
-                let authToken = "test"
+        } else
+            if (response instanceof ApiException) {
+                setAuthToken(null)
+                setCurrentUser(null)
+                setIsLoading(false);
+                throw new Error(response.message)
+            } else {
+                const { usuarioLogin, authToken } = response
                 setAuthToken(authToken)
-                setCurrentUser(mock)
+                setCurrentUser(usuarioLogin)
                 localStorage.setItem('authToken', authToken);
-                localStorage.setItem('currentUser', JSON.stringify(mock))
+                localStorage.setItem('currentUser', JSON.stringify(usuarioLogin))
                 setIsLoading(false);
             }
-            throw new Error(response.message)
-        } else {
-            const { usuarioLogin, authToken } = response
-            setAuthToken(authToken)
-            setCurrentUser(usuarioLogin)
-            localStorage.setItem('authToken', authToken);
-            localStorage.setItem('currentUser', JSON.stringify(usuarioLogin))
-            setIsLoading(false);
-        }
     }
 
     async function handleLogout() {

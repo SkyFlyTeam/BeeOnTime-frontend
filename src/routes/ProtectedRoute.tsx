@@ -20,7 +20,8 @@ export default function ProtectedRoute({allowedRoles, children}: ProtectedRouteP
 
     if(!(allowedRoles && allowedRoles.includes(currentUser.Cargo_id))){
 
-        return <Navigate to="/unauthorized" />
+        //return <Navigate to="/unauthorized" />
+        return <div>{currentUser.Usuario_nome} não autorizado.</div>
     }
 
     return <>{children}</>

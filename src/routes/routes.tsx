@@ -31,7 +31,7 @@ function MainRoutes(){
                     {/* Rota protótipo */}
                     <Route path="/hi" element={<Sample />}/>
                     {/* Rotas protegidas */}
-                    <Route path="/home" element={<ProtectedRoute allowedRoles={[ID.Funcionario]}><Sample /></ProtectedRoute>}/>
+                    <Route path="/inicio" element={<ProtectedRoute allowedRoles={[ID.Admin, ID.Funcionario]}><Sample /></ProtectedRoute>}/>
                     <Route path="/horas" element={<ProtectedRoute allowedRoles={[ID.Admin, ID.Funcionario]}><Sample /></ProtectedRoute>}/>
                     <Route path="/ausencias" element={<ProtectedRoute allowedRoles={[ID.Admin]}><Sample /></ProtectedRoute>}/>
                     <Route path="/falhas" element={<ProtectedRoute allowedRoles={[ID.Admin]}><Sample /></ProtectedRoute>}/>
