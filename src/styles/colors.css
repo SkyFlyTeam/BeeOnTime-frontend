@@ -7,9 +7,13 @@
     /* Black */
     --black: #242223;
 
+    /* White */ 
+    --white-pure: #FFFFFF;
+    --white-bg: #FAFBFC;
+
     /* Gray */
     --gray: #A7A7A7;
-
+    --gray-dark: #7C7A7B;
 
     /* Bluegray */
     --blue-gray-light: #CBD5E1;
