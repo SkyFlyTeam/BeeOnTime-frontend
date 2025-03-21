@@ -2,13 +2,18 @@
 import styles from '../styles/Home.module.css';
 import { useRouter } from 'next/router';
 
+import { FaRegEnvelope } from "react-icons/fa";
+import { HiOutlineLockClosed } from "react-icons/hi";
+
+import Image from 'next/image'
+
+
  
 import { z } from "zod"
  
 const formSchema = z.object({
-  username: z.string().min(2).max(50),
-  password: z.string().min(2).max(50),
-  rememberMe: z.boolean().default(false),
+  email: z.string().min(2).max(50),
+  senha: z.string().min(2).max(50),
 })
 
 import {
@@ -25,6 +30,9 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { Input } from '@/src/components/ui/input';
+import { sources } from 'next/dist/compiled/webpack/webpack';
+import { url } from 'inspector';
+import { useEffect, useState } from 'react';
 //HERE// import { useState } from 'react';
 
 export default function Home() {
@@ -36,9 +44,8 @@ export default function Home() {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-          username: "",
-          password: "",
-          rememberMe: false,
+          email: "",
+          senha: "",
         },
     })
      
@@ -49,72 +56,156 @@ export default function Home() {
         console.log(values)
       }
     
+      const [isMobile, setIsMobile] = useState(false);
+
+  // Check screen size on mount and when the window is resized
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setIsMobile(true); // Mobile screen size
+      } else {
+        setIsMobile(false); // Desktop or larger screen size
+      }
+    };
+
+    handleResize(); // Initial check on component mount
+    window.addEventListener('resize', handleResize); // Listen for window resizing
+
+    return () => {
+      window.removeEventListener('resize', handleResize); // Clean up on component unmount
+    };
+  }, []);
+    
 
     return(
+        <div>
+
+        {!isMobile ? (     
+        
+        <div style={{display: 'flex', flexDirection: 'row'}}>
+
+        <div className={styles.headder1}>
+            <div className='float-left pl-12 pr-3'>
+                <Image 
+                src="/images/Logo.svg"
+                alt="Logo"
+                width={90}
+                height={63}
+                />
+            </div>
+            <div>
+                <p className={styles.headderTittle}>BeeOnTime</p>
+                <p className='text-xs'>O ritmo perfeito da sua equipe, como em uma colmeia!</p>
+            </div>
+        </div>
+
+        <div className={styles.headder2}>
+            <div>
+                <p className='text-sm'>É novo aqui? Cadastre sua empresa!</p>
+            </div>
+            <div className='pr-12 pl-5 pt-5'>
+                <Button className=" bg-yellow-400 text-black mt-6 mb-12" style={{boxShadow: ' 0px 5px 50px 1px #1a202c'}}
+                onClick={() => router.push("/about")}>
+                    Cadastro
+                </Button>
+            </div>
+        </div>
+
+        </div>
+        ): (
+        <div style={{display: 'flex', flexDirection: 'row'}}>
+
+        <div className={styles.headder1}>
+            <div className='pl-12 pr-3'>
+                <Image 
+                src="/images/Logo.svg"
+                alt="Logo"
+                width={90}
+                height={63}
+                />
+            </div>
+            <div className='pr-12'>
+                <p className={styles.headderTittle}>BeeOnTime</p>
+                <p className='text-xs'>O ritmo perfeito da sua equipe, como em uma colmeia!</p>
+            </div>
+        </div>
+        </div>
+        )}
+
+
         <div className={styles.container}>
             <Card className={styles.card}>
-                <CardHeader>
-                    <CardTitle>Sign in</CardTitle>
-                    <CardDescription>Fill in the fields.</CardDescription>
+                <CardHeader className={styles.cardTitle}>
+                    <CardTitle className='text-3xl'>Bem vindo de volta!</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
                             <FormField
                                 control={form.control}
-                                name="username"
+                                name="email"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Username</FormLabel>
+                                        <FormLabel>E-mail</FormLabel>
                                         <FormControl>
-                                            <Input  {...field} />
+                                        <div className="relative">
+                                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                                                {/* Replace with your icon */}
+                                                <i><FaRegEnvelope /></i>
+                                            </span>
+                                            <Input className='w-full pl-12'  {...field} />
+                                        </div>
                                         </FormControl>
-                                        <FormDescription>This is your public display name.</FormDescription>
                                         <FormMessage />
                                     </FormItem>
                                 )}
                             />
                             <FormField
                                 control={form.control}
-                                name="password"
+                                name="senha"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Password</FormLabel>
+                                        <FormLabel>Senha</FormLabel>
                                         <FormControl>
-                                            <Input type={'password'} {...field} />
+                                        <div className="relative">
+                                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                                                {/* Replace with your icon */}
+                                                <i><HiOutlineLockClosed /></i>
+                                            </span>
+                                            <Input className='w-full pl-12' type={'password'} {...field} />
+                                        </div>
                                         </FormControl>
-                                        <FormDescription>This is your public display name.</FormDescription>
                                         <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="rememberMe"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormControl>
-                                            <label className="inline-flex items-center">
-                                                <input type="checkbox" checked={field.value} onChange={field.onChange} onBlur={field.onBlur} name={field.name} ref={field.ref} className="form-checkbox h-4 w-4 text-blue-600" />
-                                                <span className="ml-2 text-sm text-gray-700">Remember me</span>
-                                            </label>
-                                        </FormControl>
                                     </FormItem>
                                 )}
                             />
                         </form>
+                        
+                        <div className='w-full text-center mt-2'>
+                        <a href="" className='text-sm' style={{textAlign: 'center'}}>
+                            Esqueceu sua senha? Redefina aqui!
+                        </a>
+                        </div>
+
+                        <Button type="submit" className="w-full bg-yellow-400 text-black mt-6 mb-2"
+                        onClick={() => router.push("/about")}>
+                            Entrar
+                        </Button>
+
+                        {isMobile ? (
+                            <div className='w-full text-center mb-2'>
+                            <a href='' className='text-sm' style={{textAlign: 'center'}}>
+                                É novo aqui? Cadastre sua empresa!
+                            </a>
+                            </div>
+                        ) : (null)}
+
                     </Form>
                 </CardContent>
-                <CardFooter className="flex justify-between">
-                    {/* Botão de login */}
-                    <Button onClick={() => router.push('/about')}>Log in</Button>
-                    <div className="flex flex-col">
-                        {/* Links para 'Esqueci minha senha' e 'Cadastro novo' */}
-                        <button className="text-sm text-blue-600 hover:underline" onClick={() => router.push('/forgot-password')}>Forgot password?</button>
-                        <button className="text-sm text-blue-600 hover:underline" onClick={() => router.push('/signup')}>Create a new account</button>
-                    </div>
-                </CardFooter>
             </Card>
+        </div>
+
+
         </div>
     )
 }

@@ -1,11 +1,63 @@
+@font-face {
+    font-family: Lohit-Tamil;
+    src: url(../../public/fonts/Lohit-Tamil.ttf);
+    font-weight: bold;
+}
+
+.headder1{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: start;
+    height: 15vh;
+    width: 50rem;
+}
+
+.headder2{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: end;
+    height: 15vh;
+    width: 50rem;
+}
+
+.headderTittle{
+    font-family: Lohit-Tamil;
+    font-size: x-large;
+}
+
 .container{
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    height: 85vh;
 }
 
 .card{
-    width: 25rem;
+    display: flex;
+    flex-direction: column;
+    width: 30rem;
+}
+
+.cardTitle{
+    margin-top: 35px;
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+body{
+    background-image: url("../../public/images/Paralax.svg");
+}
+
+@media (max-width: 768px){
+    .headder1 {
+        justify-content: center;
+        width: 100rem;
+    }
+
+    .card {
+        width: 75%;
+    }
 }
