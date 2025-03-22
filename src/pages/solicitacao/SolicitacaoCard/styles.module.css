@@ -1,0 +1,80 @@
+@import url('../../../styles/colors.css');
+
+.card {
+    background-color: var(--white-pure);
+    padding: 1.5rem;
+    border-radius: .5rem;
+    margin-bottom: 1rem;
+    transition: transform 0.3s ease;  
+}
+
+.card:hover {
+    transform: scale(1.012);
+}
+
+.card_content {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+}
+
+.aprovada::before {
+    content: 'Aprovada';
+    display: inline-block;
+    margin-right: 8px; 
+}
+
+.aprovada {
+    color: #01900b;
+    display: inline-flex; 
+    align-items: center;  
+}
+
+.recusada::before {
+    content: 'Recusada';
+    display: inline-block;
+    margin-right: 8px; 
+}
+
+.recusada {
+    color: #f80707;
+    display: inline-flex; 
+    align-items: center; 
+}
+
+
+
+.card_data {
+    margin-left: 2rem;
+}
+
+.column_one {
+    display: flex;
+    column-gap: 2rem;
+}
+
+.column_two_pendentes {
+    display: flex;
+    justify-content: space-between;
+}
+
+.column_two {
+    display: flex;
+    justify-content: space-between;
+    width: 55%;
+}
+
+.card_status {
+    display: flex;
+    column-gap: .5rem;
+    align-items: center;
+}
+
+.data_span {
+    display: flex;
+    column-gap: 1rem;
+}
+
+.botao_excluir {
+    cursor: pointer;
+}

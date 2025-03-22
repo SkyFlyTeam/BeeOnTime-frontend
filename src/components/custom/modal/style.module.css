@@ -1,0 +1,31 @@
+@import url('../../../styles/colors.css');
+
+.modal_container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000; 
+  background-color: rgba(0, 0, 0, 0.5); 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+  
+.modal {
+  background-color: var(--white-bg);
+  border-radius: .5rem;
+  height: 25rem;
+  width: 20rem;
+  display: flex;
+  flex-direction: column;
+  row-gap: .5rem;
+  padding: 1rem;
+}
+
+.button_container {
+  display: flex;
+  justify-content: end;
+  column-gap: 1rem;
+}
