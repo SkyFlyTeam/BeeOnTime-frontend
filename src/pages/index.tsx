@@ -2,8 +2,11 @@
 import styles from '../styles/Home.module.css';
 import { useRouter } from 'next/router';
 
+//Icons
 import { FaRegEnvelope } from "react-icons/fa";
 import { HiOutlineLockClosed } from "react-icons/hi";
+import { FaRegEye } from "react-icons/fa";
+import { FaRegEyeSlash } from "react-icons/fa";
 
 import Image from 'next/image'
 
@@ -12,9 +15,12 @@ import Image from 'next/image'
 import { z } from "zod"
  
 const formSchema = z.object({
-  email: z.string().min(2).max(50),
-  senha: z.string().min(2).max(50),
-})
+    email: z.string()
+      .min(2, { message: "O e-mail deve ter pelo menos 2 caracteres." })
+      .email({ message: "Por favor, insira um e-mail válido." }), // You can add more specific validation like email format
+    senha: z.string()
+      .min(2, { message: "A senha deve ter pelo menos 2 caracteres." })
+  });
 
 import {
     Card,
@@ -39,7 +45,13 @@ export default function Home() {
 
     const router = useRouter();
 
-    //HERE// const [username, setUsername] = useState()
+      // State que registra o togle da senha
+    const [isShowingPassword, setIsShowingPassword] = useState(true);
+
+    const changeIsShowingPassword = () => {
+        setIsShowingPassword(!isShowingPassword);
+    }
+
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -49,30 +61,30 @@ export default function Home() {
         },
     })
      
-      // 2. Define a submit handler.
+      // 2. Define um controle de submit.
       function onSubmit(values: z.infer<typeof formSchema>) {
-        // Do something with the form values.
-        // ✅ This will be type-safe and validated.
+        // Faz algo com os valores do form.
+        // ✅ Isso vai ser tipadamente seguro e validado.
         console.log(values)
       }
     
       const [isMobile, setIsMobile] = useState(false);
 
-  // Check screen size on mount and when the window is resized
+  // Checa o tamanho da tela em pixels quando a janela é reajustada
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 768) {
-        setIsMobile(true); // Mobile screen size
+        setIsMobile(true); // Tamanho da tela mobile
       } else {
-        setIsMobile(false); // Desktop or larger screen size
+        setIsMobile(false); // Desktop ou em telas maiores
       }
     };
 
-    handleResize(); // Initial check on component mount
-    window.addEventListener('resize', handleResize); // Listen for window resizing
+    handleResize(); // Checagem inicial do tamanho quando o componente é montado (onMount)
+    window.addEventListener('resize', handleResize); // Escuta mudança do tamanho de tela
 
     return () => {
-      window.removeEventListener('resize', handleResize); // Clean up on component unmount
+      window.removeEventListener('resize', handleResize); // Limpa o componente quando ele é descarregado (unMount)
     };
   }, []);
     
@@ -82,7 +94,7 @@ export default function Home() {
 
         {!isMobile ? (     
         
-        <div style={{display: 'flex', flexDirection: 'row'}}>
+        <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
 
         <div className={styles.headder1}>
             <div className='float-left pl-12 pr-3'>
@@ -94,7 +106,7 @@ export default function Home() {
                 />
             </div>
             <div>
-                <p className={styles.headderTittle}>BeeOnTime</p>
+                <p className={styles.headderTittle}>Bee<span style={{color: '#FFB503'}}>On</span>Time</p>
                 <p className='text-xs'>O ritmo perfeito da sua equipe, como em uma colmeia!</p>
             </div>
         </div>
@@ -104,7 +116,7 @@ export default function Home() {
                 <p className='text-sm'>É novo aqui? Cadastre sua empresa!</p>
             </div>
             <div className='pr-12 pl-5 pt-5'>
-                <Button className=" bg-yellow-400 text-black mt-6 mb-12" style={{boxShadow: ' 0px 5px 50px 1px #1a202c'}}
+                <Button className="mt-6 mb-12" style={{boxShadow: '0px 10px 25px 0px rgba(123, 104, 238, 50%)'}}
                 onClick={() => router.push("/about")}>
                     Cadastro
                 </Button>
@@ -125,7 +137,7 @@ export default function Home() {
                 />
             </div>
             <div className='pr-12'>
-                <p className={styles.headderTittle}>BeeOnTime</p>
+                <p className={styles.headderTittle}>Bee<span style={{color: '#FFB503'}}>On</span>Time</p>
                 <p className='text-xs'>O ritmo perfeito da sua equipe, como em uma colmeia!</p>
             </div>
         </div>
@@ -150,10 +162,9 @@ export default function Home() {
                                         <FormControl>
                                         <div className="relative">
                                             <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                                                {/* Replace with your icon */}
                                                 <i><FaRegEnvelope /></i>
                                             </span>
-                                            <Input className='w-full pl-12'  {...field} />
+                                            <Input className='w-full pl-12' placeholder='SkyFly'  {...field} />
                                         </div>
                                         </FormControl>
                                         <FormMessage />
@@ -169,28 +180,36 @@ export default function Home() {
                                         <FormControl>
                                         <div className="relative">
                                             <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                                                {/* Replace with your icon */}
                                                 <i><HiOutlineLockClosed /></i>
                                             </span>
-                                            <Input className='w-full pl-12' type={'password'} {...field} />
+                                            <button className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                                                type='button'
+                                                onClick={() => changeIsShowingPassword()}>
+                                                {!isShowingPassword ? (<FaRegEye />) : (<FaRegEyeSlash />)}
+                                            </button>
+                                            {isShowingPassword ? (
+                                                <Input className='w-full pl-12 pr-12' placeholder='Educação e Tecnologia' type={'password'} {...field} />
+                                            ) : 
+                                            (<Input className='w-full pl-12 pr-12' placeholder='Educação e Tecnologia' {...field} />)}
+                                            
                                         </div>
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
                                 )}
                             />
+                        <Button type="submit" className="w-full mt-6 mb-2">
+                            Entrar
+                        </Button>
                         </form>
                         
-                        <div className='w-full text-center mt-2'>
+                        {/* <div className='w-full text-center mt-2'>
                         <a href="" className='text-sm' style={{textAlign: 'center'}}>
                             Esqueceu sua senha? Redefina aqui!
                         </a>
-                        </div>
+                        </div> */}
 
-                        <Button type="submit" className="w-full bg-yellow-400 text-black mt-6 mb-2"
-                        onClick={() => router.push("/about")}>
-                            Entrar
-                        </Button>
+
 
                         {isMobile ? (
                             <div className='w-full text-center mb-2'>
