@@ -1,5 +1,4 @@
 import clsx from "clsx"
-import { Button } from "../../ui/button"
 import styles from "./styles.module.css"
 
 interface SolicitacaoButton {

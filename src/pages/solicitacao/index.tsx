@@ -1,15 +1,16 @@
+import { useEffect, useState } from "react";
 import { ApiException } from "@/src/config/apiExceptions";
 import { solicitacaoServices } from "@/src/services/solicitacaoServices";
-import { useEffect, useState } from "react";
 import SolicitationCard from "@/src/pages/solicitacao/SolicitacaoCard";
 import styles from './Solicitacao.module.css';
 import Tab from "@/src/components/custom/tab";
 import Modal from "@/src/components/custom/modal";
-import SolicitacaoInterface from '../../interfaces/Solicitacao'
+import SolicitacaoInterface from '../../interfaces/Solicitacao';
+import { useAuth } from "@/src/context/AuthContext"; 
 
 const Solicitacao = () => {
-  const [toogle, setToogle] = useState(false)
-
+  const { usuarioCargo, usuarioCod } = useAuth(); 
+  const [toogle, setToogle] = useState(false);
   const [solicitacoesData, setSolicitacoesData] = useState<{
     all: SolicitacaoInterface[] | ApiException;
     pendentes: SolicitacaoInterface[] | ApiException;
@@ -21,11 +22,12 @@ const Solicitacao = () => {
   });
 
   const [openModal, setOpenModal] = useState<{
-    [key: string]: boolean; 
+    [key: string]: boolean;
   }>({});
 
   const fetchSolicitacoes = async () => {
     const result = await solicitacaoServices.getAllSolicitacao();
+  
     if (result instanceof ApiException) {
       setSolicitacoesData({
         all: result,
@@ -33,13 +35,26 @@ const Solicitacao = () => {
         historico: result,
       });
     } else {
+      let filteredSolicitacoes = result
+      if (usuarioCargo === "Funcionário") {
+        filteredSolicitacoes = result.filter(solicitacao => solicitacao.usuarioCod === usuarioCod);
+      } else if (usuarioCargo === "Gestor") {
+        filteredSolicitacoes = result.filter(
+          solicitacao => solicitacao.usuarioCod === usuarioCod || solicitacao.usuarioCargo === "Funcionário"
+        );
+      } else if (usuarioCargo === "Administrador") {
+        filteredSolicitacoes = result;
+      }
+  
       setSolicitacoesData({
-        all: result.filter((solicitacao: SolicitacaoInterface) => solicitacao.solicitacaoStatus !== "PENDENTE"),
-        pendentes: result.filter((solicitacao: SolicitacaoInterface) => solicitacao.solicitacaoStatus === "PENDENTE"),
-        historico: result.filter((solicitacao: SolicitacaoInterface) => solicitacao.solicitacaoStatus !== "PENDENTE"),
+        all: filteredSolicitacoes.filter(solicitacao => solicitacao.solicitacaoStatus !== "PENDENTE"),
+        pendentes: filteredSolicitacoes.filter(solicitacao => solicitacao.solicitacaoStatus === "PENDENTE"),
+        historico: filteredSolicitacoes.filter(solicitacao => solicitacao.solicitacaoStatus !== "PENDENTE"),
       });
     }
   };
+  
+  
 
   const handleModal = (solicitacaoCod: number, status: boolean) => {
     setOpenModal(prevState => ({
@@ -54,25 +69,24 @@ const Solicitacao = () => {
       all: prevState[status],
     }));
 
-    setToogle(status === 'pendentes')
+    setToogle(status === 'pendentes');
   };
 
   const handleSolicitacaoUpdate = async () => {
     await fetchSolicitacoes();
-  
+
     if (toogle) {
       setSolicitacoesData(prevState => ({
         ...prevState,
-        all: prevState.pendentes,  
+        all: prevState.pendentes,
       }));
     } else {
       setSolicitacoesData(prevState => ({
         ...prevState,
-        all: prevState.historico,  
+        all: prevState.historico,
       }));
     }
   };
-   
 
   useEffect(() => {
     fetchSolicitacoes();
@@ -80,13 +94,11 @@ const Solicitacao = () => {
 
   return (
     <div className={styles.solicitacao_container}>
-
       <div className={styles.card_container}>
-
         <h1>Solicitações</h1>
 
-        <Tab 
-          toogle = {toogle}
+        <Tab
+          toogle={toogle}
           onClick={handleClick}
           pendentes_length={Array.isArray(solicitacoesData.pendentes) ? solicitacoesData.pendentes.length : 0}
         />
@@ -99,15 +111,18 @@ const Solicitacao = () => {
                   key={solicitacao.solicitacaoCod}
                   solicitacao={solicitacao}
                   onClick={() => handleModal(solicitacao.solicitacaoCod, true)}
-                  onSolicitacaoUpdate={handleSolicitacaoUpdate}
+                  onSolicitacaoUpdate={handleSolicitacaoUpdate} 
+                  usuarioCargo={solicitacao.usuarioCargo} 
+                  usuarioCod={solicitacao.usuarioCod}               
                 />
 
                 <Modal
-                key={`${solicitacao.solicitacaoCod}-modal`}
+                  key={`${solicitacao.solicitacaoCod}-modal`}
                   isOpen={openModal[solicitacao.solicitacaoCod]}
                   onClick={() => handleModal(solicitacao.solicitacaoCod, false)}
                   solicitacao={solicitacao}
-                  onSolicitacaoUpdate={handleSolicitacaoUpdate}
+                  onSolicitacaoUpdate={handleSolicitacaoUpdate} 
+                  usuarioLogadoCod={usuarioCod}                
                 />
               </>
             ))
@@ -115,9 +130,7 @@ const Solicitacao = () => {
             <p>Não há solicitações {toogle ? <span>pendentes</span> : <span>a serem exibidas</span>}.</p>
           )}
         </div>
-
       </div>
-
     </div>
   );
 };
