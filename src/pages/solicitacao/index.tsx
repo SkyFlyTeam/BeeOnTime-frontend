@@ -8,34 +8,45 @@ import Modal from "@/src/components/custom/modal";
 import SolicitacaoInterface from '../../interfaces/Solicitacao';
 import { useAuth } from "@/src/context/AuthContext"; 
 
+interface SolicitacoesState {
+  all: SolicitacaoInterface[];
+  pendentes: SolicitacaoInterface[];
+  historico: SolicitacaoInterface[];
+}
+
 const Solicitacao = () => {
   const { usuarioCargo, usuarioCod } = useAuth(); 
   const [toogle, setToogle] = useState(false);
-  const [solicitacoesData, setSolicitacoesData] = useState<{
-    all: SolicitacaoInterface[] | ApiException;
-    pendentes: SolicitacaoInterface[] | ApiException;
-    historico: SolicitacaoInterface[] | ApiException;
-  }>({
+
+  const [solicitacoesData, setSolicitacoesData] = useState<SolicitacoesState>({
     all: [],
     pendentes: [],
     historico: [],
-  });
+  }); 
+
+  const [displayedSolicitacoes, setDisplayedSolicitacoes] = useState<SolicitacaoInterface[]>([]); // Dados a serem exibidos
 
   const [openModal, setOpenModal] = useState<{
     [key: string]: boolean;
   }>({});
+  
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5); 
+  const [totalItems, setTotalItems] = useState(0); 
 
   const fetchSolicitacoes = async () => {
     const result = await solicitacaoServices.getAllSolicitacao();
-  
+
     if (result instanceof ApiException) {
       setSolicitacoesData({
-        all: result,
-        pendentes: result,
-        historico: result,
+        all: [],
+        pendentes: [],
+        historico: [],
       });
+      setTotalItems(0);
     } else {
-      let filteredSolicitacoes = result
+      let filteredSolicitacoes = result;
+
       if (usuarioCargo === "Funcionário") {
         filteredSolicitacoes = result.filter(solicitacao => solicitacao.usuarioCod === usuarioCod);
       } else if (usuarioCargo === "Gestor") {
@@ -45,16 +56,25 @@ const Solicitacao = () => {
       } else if (usuarioCargo === "Administrador") {
         filteredSolicitacoes = result;
       }
-  
+
       setSolicitacoesData({
-        all: filteredSolicitacoes.filter(solicitacao => solicitacao.solicitacaoStatus !== "PENDENTE"),
+        all: filteredSolicitacoes,
         pendentes: filteredSolicitacoes.filter(solicitacao => solicitacao.solicitacaoStatus === "PENDENTE"),
         historico: filteredSolicitacoes.filter(solicitacao => solicitacao.solicitacaoStatus !== "PENDENTE"),
       });
+      setTotalItems(filteredSolicitacoes.length); 
     }
   };
-  
-  
+
+  const paginateData = () => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    setDisplayedSolicitacoes(solicitacoesData.all.slice(startIndex, endIndex));
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   const handleModal = (solicitacaoCod: number, status: boolean) => {
     setOpenModal(prevState => ({
@@ -64,33 +84,27 @@ const Solicitacao = () => {
   };
 
   const handleClick = (status: 'pendentes' | 'historico') => {
-    setSolicitacoesData(prevState => ({
+    setSolicitacoesData((prevState) => ({
       ...prevState,
-      all: prevState[status],
+      all: prevState[status], 
     }));
-
     setToogle(status === 'pendentes');
   };
 
   const handleSolicitacaoUpdate = async () => {
     await fetchSolicitacoes();
-
-    if (toogle) {
-      setSolicitacoesData(prevState => ({
-        ...prevState,
-        all: prevState.pendentes,
-      }));
-    } else {
-      setSolicitacoesData(prevState => ({
-        ...prevState,
-        all: prevState.historico,
-      }));
-    }
+    paginateData(); 
   };
 
   useEffect(() => {
     fetchSolicitacoes();
-  }, []);
+  }, []); 
+
+  useEffect(() => {
+    paginateData(); 
+  }, [currentPage, solicitacoesData]);
+
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
 
   return (
     <div className={styles.solicitacao_container}>
@@ -100,12 +114,12 @@ const Solicitacao = () => {
         <Tab
           toogle={toogle}
           onClick={handleClick}
-          pendentes_length={Array.isArray(solicitacoesData.pendentes) ? solicitacoesData.pendentes.length : 0}
+          pendentes_length={solicitacoesData.pendentes.length}
         />
 
         <div className={styles.container}>
-          {Array.isArray(solicitacoesData.all) && solicitacoesData.all.length > 0 ? (
-            solicitacoesData.all.map((solicitacao: SolicitacaoInterface) => (
+          {displayedSolicitacoes.length > 0 ? (
+            displayedSolicitacoes.map((solicitacao: SolicitacaoInterface) => (
               <>
                 <SolicitationCard
                   key={solicitacao.solicitacaoCod}
@@ -127,7 +141,63 @@ const Solicitacao = () => {
               </>
             ))
           ) : (
-            <p>Não há solicitações {toogle ? <span>pendentes</span> : <span>a serem exibidas</span>}.</p>
+            <div className={styles.no_content}>
+              <img src="https://i.ibb.co/zWfRsSzj/Vetor-sem-dados.jpg" alt="" />
+              <p>Ops! Parece que não tem nada aqui!</p>
+            </div>
+          )}
+
+          {displayedSolicitacoes.length > 0 &&(
+            <div className={styles.pagination}>
+              <button
+                className={styles.pageButton}
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                &lt;
+              </button>
+
+              {Array.from({ length: totalPages }, (_, index) => {
+                const page = index + 1;
+                if (
+                  page === 1 ||
+                  page === totalPages ||
+                  Math.abs(page - currentPage) <= 1
+                ) {
+                  return (
+                    <button
+                      key={page}
+                      className={`${styles.pageButton} ${
+                        currentPage === page ? styles.activePage : ""
+                      }`}
+                      onClick={() => handlePageChange(page)}
+                    >
+                      {page}
+                    </button>
+                  );
+                } else if (
+                  Math.abs(page - currentPage) === 2 &&
+                  page < currentPage
+                ) {
+                  return <span key={`left-ellipsis`} className={styles.ellipsis}>...</span>;
+                } else if (
+                  Math.abs(page - currentPage) === 2 &&
+                  page > currentPage
+                ) {
+                  return <span key={`right-ellipsis`} className={styles.ellipsis}>...</span>;
+                }
+
+                return null;
+              })}
+
+              <button
+                className={styles.pageButton}
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                &gt;
+              </button>
+            </div>
           )}
         </div>
       </div>

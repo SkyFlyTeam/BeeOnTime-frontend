@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './styles.module.css'
-import { CircleCheck, SquareX, XCircle } from 'lucide-react';
+import { CircleCheck, Pencil, Trash, Trash2, XCircle } from 'lucide-react';
 import clsx from 'clsx';
 import Flag from '@/src/components/custom/flag';
 import SolicitacaoInterface from '@/src/interfaces/Solicitacao';
@@ -57,14 +57,17 @@ const SolicitacaoCard = ({ solicitacao, onClick, onSolicitacaoUpdate }: Solicita
               <span>Data solicitação:</span> <span>{dataFormatada}</span>
             </div>
             {solicitacao?.solicitacaoStatus == 'PENDENTE' && isOwnSolicitacao && (
-              <div
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  handleDelete(solicitacao?.solicitacaoCod);
-                }}
-              >
-                <SquareX strokeWidth={0.75} size={24} className={styles.botao_excluir} />
+              <div className={styles.icons}>
+                <Pencil strokeWidth={0.5} size={22} color='blue' fill='blue' className={styles.icon_button}/>
+                <div
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    handleDelete(solicitacao?.solicitacaoCod);
+                  }}
+                >
+                  <Trash strokeWidth={0.5} size={22} color='red' fill='red' className={styles.icon_button}/>
+                </div>
               </div>
             )}
           </div>

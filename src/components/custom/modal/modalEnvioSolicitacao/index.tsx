@@ -26,7 +26,6 @@ const ModalCriarSolicitacao: React.FC<ModalCriarSolicitacaoProps> = ({
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const uploaded = e.target.files?.[0];
     if (uploaded) {
-      console.log("Arquivo selecionado:", uploaded.name); // debug
       setFile(uploaded);
     }
   }

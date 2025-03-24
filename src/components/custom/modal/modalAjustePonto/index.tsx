@@ -104,7 +104,7 @@ const ModalAjustePonto: React.FC<AjusteProps> = ({
               <input
                 type='text'
                 value={solicitacao?.solicitacaoMensagem}
-                readOnly={usuarioLogadoCod !== solicitacao.usuarioCod}
+                readOnly={usuarioLogadoCod !== solicitacao.usuarioCod || solicitacao.solicitacaoStatus !== "PENDENTE"}
                 onChange={(e) => {
                   if (usuarioLogadoCod === solicitacao.usuarioCod) {
                     setSolicitacao(prev => ({
@@ -130,7 +130,7 @@ const ModalAjustePonto: React.FC<AjusteProps> = ({
         </div>
 
 
-        {usuarioLogadoCod !== solicitacao.usuarioCod && (
+        {usuarioLogadoCod !== solicitacao.usuarioCod && solicitacao.solicitacaoStatus === "PENDENTE" && (
           <div className={styles.button_container}>
             <Button
               variant='outline-danger'
@@ -149,7 +149,7 @@ const ModalAjustePonto: React.FC<AjusteProps> = ({
           </div>
         )}
 
-        {usuarioLogadoCod === solicitacao.usuarioCod && (
+        {(usuarioLogadoCod === solicitacao.usuarioCod && solicitacao.solicitacaoStatus === "PENDENTE") && (
           <div className={styles.button_container}>
             <Button
               variant='warning'
