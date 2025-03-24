@@ -39,7 +39,25 @@ body {
         --chart-4: 43 74% 66%;
         --chart-5: 27 87% 67%;
         --radius: 0.5rem;
-    }
+            /* Yellow tones */
+        --yellow: #FFB503;
+        --light-opacity-yellow: #FFF4D9;
+
+        /* Black */
+        --black: #242223;
+
+        /* White */ 
+        --white-pure: #FFFFFF;
+        --white-bg: #FAFBFC;
+
+        /* Gray */
+        --gray: #A7A7A7;
+        --gray-light: #E0E0E0;
+        --gray-dark: #7C7A7B;
+
+        /* Bluegray */
+        --blue-gray-light: #CBD5E1;
+    } 
   .dark {
         --background: 240 10% 3.9%;
         --foreground: 0 0% 98%;
