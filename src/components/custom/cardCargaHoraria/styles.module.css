@@ -51,3 +51,20 @@
 .jornada span:first-child {
     color: var(--gray);
 }
+
+@media (max-width: 520px) {
+    .card_container {
+        width: 90%;
+        font-size: .85rem;
+    }
+
+    .carga_horaria {
+        flex-direction: column;
+    }
+
+    .jornada {
+        display: flex;
+        flex-direction: column;
+        margin-top: 1rem;
+    }
+}
