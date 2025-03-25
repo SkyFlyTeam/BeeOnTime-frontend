@@ -19,7 +19,7 @@
 .headderTittle{
     font-family: 'Inter';
     font-size: x-large;
-    color: #42130F;
+    color: var(--Brown);
     font-weight: 700;
 }
 
@@ -35,11 +35,13 @@
     display: flex;
     flex-direction: column;
     width: 30rem;
+    box-shadow: 0px 24px 64px 0px rgba(38, 33, 74, 10%); 
 }
 
 .cardTitle{
-    margin-top: 35px;
-    margin-bottom: 25px;
+    margin-top: 6px;
+    margin-bottom: 6px;
+    font-size: 35px;
     text-align: center;
 }
 
@@ -47,6 +49,7 @@ body{
     background-image: url("../../public/images/Paralax.svg");
     font-family: 'Inter';
     font-weight: 500;
+    background-color: var(--white-bg);
 }
 
 @media (max-width: 768px){
@@ -56,6 +59,6 @@ body{
     }
 
     .card {
-        width: 75%;
+        width: 90%;
     }
 }

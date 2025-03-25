@@ -9,6 +9,9 @@ export default {
   ],
   theme: {
   	extend: {
+		boxShadow: {
+			'card': '0px 24px 64px 0px rgba(38, 33, 74, 0.1)',
+		  },
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',

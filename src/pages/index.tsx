@@ -16,10 +16,10 @@ import { z } from "zod"
  
 const formSchema = z.object({
     email: z.string()
-      .min(2, { message: "O e-mail deve ter pelo menos 2 caracteres." })
+      .min(1, { message: "Campo obrigatório." })
       .email({ message: "Por favor, insira um e-mail válido." }), // You can add more specific validation like email format
     senha: z.string()
-      .min(2, { message: "A senha deve ter pelo menos 2 caracteres." })
+      .min(1, { message: "Campo obrigatório." })
   });
 
 import {
@@ -198,9 +198,11 @@ export default function Home() {
                                     </FormItem>
                                 )}
                             />
+                        <div className='pb-2'>
                         <Button type="submit" className="w-full mt-6 mb-2">
                             Entrar
                         </Button>
+                        </div>
                         </form>
                         
                         {/* <div className='w-full text-center mt-2'>
