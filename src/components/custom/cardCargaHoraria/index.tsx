@@ -34,7 +34,7 @@ const CardCargaHoraria = (cargaHoraria: CargaHoraria ) => {
     const jornadaTotal = (horaSaida - horaEntrada) + (minutoSaida - minutoEntrada) / 60;
     const horasTrabalhadas = cargaHoraria.horasTrabalhadas;
 
-    const barraProgresso = (horasTrabalhadas / jornadaTotal) * 100;
+    const barraProgresso = Math.min((horasTrabalhadas / jornadaTotal) * 100, 100);
 
     return (
         <div className={styles.card_container}>
