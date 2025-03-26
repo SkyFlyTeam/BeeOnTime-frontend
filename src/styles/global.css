@@ -1,11 +1,13 @@
 /* styles/global.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+
 body {
-    font-family: Arial, sans-serif;
-    background-color: #e1ae65;
+    font-family: 'Inter', sans-serif;
+    background-color: #ffffff;
     margin: 0;
     padding: 0;
     width: 100vw;

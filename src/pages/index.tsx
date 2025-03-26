@@ -2,14 +2,25 @@
 import styles from '../styles/Home.module.css';
 import { useRouter } from 'next/router';
 
+//Icons
+import { FaRegEnvelope } from "react-icons/fa";
+import { HiOutlineLockClosed } from "react-icons/hi";
+import { FaRegEye } from "react-icons/fa";
+import { FaRegEyeSlash } from "react-icons/fa";
+
+import Image from 'next/image'
+
+
  
 import { z } from "zod"
  
 const formSchema = z.object({
-  username: z.string().min(2).max(50),
-  password: z.string().min(2).max(50),
-  rememberMe: z.boolean().default(false),
-})
+    email: z.string()
+      .min(1, { message: "Campo obrigatório." })
+      .email({ message: "Por favor, insira um e-mail válido." }), // You can add more specific validation like email format
+    senha: z.string()
+      .min(1, { message: "Campo obrigatório." })
+  });
 
 import {
     Card,
@@ -24,66 +35,165 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
-import { Input } from '@/components/ui/input';
+import { Input } from '@/src/components/ui/input';
+import { sources } from 'next/dist/compiled/webpack/webpack';
+import { url } from 'inspector';
+import { useEffect, useState } from 'react';
 //HERE// import { useState } from 'react';
 
 export default function Home() {
 
     const router = useRouter();
 
-    //HERE// const [username, setUsername] = useState()
+      // State que registra o togle da senha
+    const [isShowingPassword, setIsShowingPassword] = useState(true);
+
+    const changeIsShowingPassword = () => {
+        setIsShowingPassword(!isShowingPassword);
+    }
+
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-          username: "",
-          password: "",
-          rememberMe: false,
+          email: "",
+          senha: "",
         },
     })
      
-      // 2. Define a submit handler.
+      // 2. Define um controle de submit.
       function onSubmit(values: z.infer<typeof formSchema>) {
-        // Do something with the form values.
-        // ✅ This will be type-safe and validated.
+        // Faz algo com os valores do form.
+        // ✅ Isso vai ser tipadamente seguro e validado.
         console.log(values)
       }
     
+      const [isMobile, setIsMobile] = useState(false);
+
+  // Checa o tamanho da tela em pixels quando a janela é reajustada
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setIsMobile(true); // Tamanho da tela mobile
+      } else {
+        setIsMobile(false); // Desktop ou em telas maiores
+      }
+    };
+
+    handleResize(); // Checagem inicial do tamanho quando o componente é montado (onMount)
+    window.addEventListener('resize', handleResize); // Escuta mudança do tamanho de tela
+
+    return () => {
+      window.removeEventListener('resize', handleResize); // Limpa o componente quando ele é descarregado (unMount)
+    };
+  }, []);
+    
 
     return(
+        <div>
+
+        {!isMobile ? (     
+        
+        <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
+
+        <div className={styles.headder1}>
+            <div className='float-left pl-12 pr-3'>
+                <Image 
+                src="/images/Logo.svg"
+                alt="Logo"
+                width={90}
+                height={63}
+                />
+            </div>
+            <div>
+                <p className={styles.headderTittle}>Bee<span style={{color: '#FFB503'}}>On</span>Time</p>
+                <p className='text-xs'>O ritmo perfeito da sua equipe, como em uma colmeia!</p>
+            </div>
+        </div>
+
+        <div className={styles.headder2}>
+            <div>
+                <p className='text-sm'>É novo aqui? Cadastre sua empresa!</p>
+            </div>
+            <div className='pr-12 pl-5 pt-5'>
+                <Button className="mt-6 mb-12" style={{boxShadow: '0px 10px 25px 0px rgba(123, 104, 238, 50%)'}}
+                onClick={() => router.push("/about")}>
+                    Cadastro
+                </Button>
+            </div>
+        </div>
+
+        </div>
+        ): (
+        <div style={{display: 'flex', flexDirection: 'row'}}>
+
+        <div className={styles.headder1}>
+            <div className='pl-12 pr-3'>
+                <Image 
+                src="/images/Logo.svg"
+                alt="Logo"
+                width={90}
+                height={63}
+                />
+            </div>
+            <div className='pr-12'>
+                <p className={styles.headderTittle}>Bee<span style={{color: '#FFB503'}}>On</span>Time</p>
+                <p className='text-xs'>O ritmo perfeito da sua equipe, como em uma colmeia!</p>
+            </div>
+        </div>
+        </div>
+        )}
+
+
         <div className={styles.container}>
             <Card className={styles.card}>
-                <CardHeader>
-                    <CardTitle>Sign in</CardTitle>
-                    <CardDescription>Fill in the fields.</CardDescription>
+                <CardHeader className={styles.cardTitle}>
+                    <CardTitle className='text-3xl'>Bem vindo de volta!</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
                             <FormField
                                 control={form.control}
-                                name="username"
-                                render={({ field }: { field: import("react-hook-form").ControllerRenderProps<z.infer<typeof formSchema>, "username"> }) => (
+                                name="email"
+                                render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Username</FormLabel>
+                                        <FormLabel>E-mail</FormLabel>
                                         <FormControl>
-                                            <Input  {...field} />
+                                        <div className="relative">
+                                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                                                <i><FaRegEnvelope /></i>
+                                            </span>
+                                            <Input className='w-full pl-12' placeholder='SkyFly'  {...field} />
+                                        </div>
                                         </FormControl>
-                                        <FormDescription>This is your public display name.</FormDescription>
                                         <FormMessage />
                                     </FormItem>
                                 )}
                             />
                             <FormField
                                 control={form.control}
-                                name="password"
-                                render={({ field }: { field: import("react-hook-form").ControllerRenderProps<z.infer<typeof formSchema>, "password"> }) => (
+                                name="senha"
+                                render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Password</FormLabel>
+                                        <FormLabel>Senha</FormLabel>
                                         <FormControl>
-                                            <Input type={'password'} {...field} />
+                                        <div className="relative">
+                                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                                                <i><HiOutlineLockClosed /></i>
+                                            </span>
+                                            <button className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                                                type='button'
+                                                onClick={() => changeIsShowingPassword()}>
+                                                {!isShowingPassword ? (<FaRegEye />) : (<FaRegEyeSlash />)}
+                                            </button>
+                                            {isShowingPassword ? (
+                                                <Input className='w-full pl-12 pr-12' placeholder='Educação e Tecnologia' type={'password'} {...field} />
+                                            ) : 
+                                            (<Input className='w-full pl-12 pr-12' placeholder='Educação e Tecnologia' {...field} />)}
+                                            
+                                        </div>
                                         </FormControl>
-                                        <FormDescription>This is your public display name.</FormDescription>
                                         <FormMessage />
                                     </FormItem>
                                 )}
@@ -102,19 +212,35 @@ export default function Home() {
                                     </FormItem>
                                 )}
                             />
+                        <div className='pb-2'>
+                          <Button type="submit" className="w-full mt-6 mb-2">
+                            Entrar
+                          </Button>
+                        </div>
                         </form>
+                        
+                        {/* <div className='w-full text-center mt-2'>
+                        <a href="" className='text-sm' style={{textAlign: 'center'}}>
+                            Esqueceu sua senha? Redefina aqui!
+                        </a>
+                        </div> */}
+
+
+
+                        {isMobile ? (
+                            <div className='w-full text-center mb-2'>
+                            <a href='' className='text-sm' style={{textAlign: 'center'}}>
+                                É novo aqui? Cadastre sua empresa!
+                            </a>
+                            </div>
+                        ) : (null)}
+
                     </Form>
                 </CardContent>
-                <CardFooter className="flex justify-between">
-                    {/* Botão de login */}
-                    <Button onClick={() => router.push('/about')}>Log in</Button>
-                    <div className="flex flex-col">
-                        {/* Links para 'Esqueci minha senha' e 'Cadastro novo' */}
-                        <button className="text-sm text-blue-600 hover:underline" onClick={() => router.push('/forgot-password')}>Forgot password?</button>
-                        <button className="text-sm text-blue-600 hover:underline" onClick={() => router.push('/signup')}>Create a new account</button>
-                    </div>
-                </CardFooter>
             </Card>
+        </div>
+
+
         </div>
     )
 }
