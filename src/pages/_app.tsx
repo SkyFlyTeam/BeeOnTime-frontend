@@ -1,7 +1,7 @@
 import '../styles/global.css';
 import type { AppProps } from 'next/app';
 import { useRouter } from 'next/router';
-import { AppSidebar } from '@/components/app-sidebar';
+import { AppSidebar } from '@/components/custom/app-sidebar';
 import { SidebarProvider, SidebarInset, SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import { Separator } from '@/components/ui/separator';
 

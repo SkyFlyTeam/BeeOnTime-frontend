@@ -1,8 +1,8 @@
 import * as React from "react";
 import { usePathname } from "next/navigation";
-import { LayoutGrid, Users, FileText, Settings, Database, LifeBuoy, LucideIcon, AlertCircle, Bell, Briefcase, Building, Calendar, Clock, Home, LogOut, MessageSquare } from "lucide-react";
+import { LayoutGrid, Users, FileText, Settings, Database, LifeBuoy, LucideIcon, AlertCircle, Bell, Briefcase, Building, Calendar, Clock, Home, LogOut, MessageSquare, AlarmClockCheck } from "lucide-react";
 
-import { RoleSwitcher} from "@/components/role-switcher";
+import { RoleSwitcher} from "@/components/custom/role-switcher";
 import {
   Sidebar,
   SidebarContent,
@@ -41,24 +41,14 @@ const rolesData: Record<RoleKey, { navMain: NavItem[]; navSecondary: SubNavItem[
       {
         title: "ATIVIDADES",
         items: [
-          { title: "Início", url: "/inicio", icon: Home },
-          { title: "Notificações", url: "/notificacoes", icon: Bell },
-          { title: "Solicitações", url: "/solicitacoes", icon: MessageSquare },
           { title: "Colaboradores", url: "/colaboradores", icon: Users },
-        ],
-      },
-      {
-        title: "RELATÓRIOS",
-        items: [
-          { title: "Banco de Horas", url: "/banco-de-horas", icon: Clock },
-          { title: "Ausências", url: "/ausencias", icon: Users },
-          { title: "Falha em Marcações", url: "/falha-marcacoes", icon: AlertCircle },
+          { title: "Solicitações", url: "/solicitacoes", icon: MessageSquare },
+          
         ],
       },
       {
         title: "GESTÃO DA EMPRESA",
         items: [
-          { title: "Calendário", url: "/calendario", icon: Calendar },
           { title: "Empresa", url: "/empresa", icon: Building },
         ],
       },
@@ -74,15 +64,19 @@ const rolesData: Record<RoleKey, { navMain: NavItem[]; navSecondary: SubNavItem[
         title: "ATIVIDADES",
         items: [
           { title: "Início", url: "/inicio", icon: Home },
-          { title: "Notificações", url: "/notificacoes", icon: Bell },
           { title: "Solicitações", url: "/solicitacoes", icon: MessageSquare },
         ],
       },
       {
-        title: "RELATÓRIOS",
+        title: "MARCAÇÕES",
         items: [
-          { title: "Banco de Horas", url: "/banco-de-horas", icon: Clock },
-          { title: "Ausências", url: "/ausencias", icon: Users },
+          {title: "Meus Pontos", url: "/meusPontos", icon: AlarmClockCheck}
+        ]
+      },
+      {
+        title: "GESTÃO DA EMPRESA",
+        items: [
+          { title: "Empresa", url: "/empresa", icon: Building },
         ],
       },
     ],
@@ -100,6 +94,12 @@ const rolesData: Record<RoleKey, { navMain: NavItem[]; navSecondary: SubNavItem[
           { title: "Solicitações", url: "/solicitacoes", icon: MessageSquare },
         ],
       },
+      {
+        title: "MARCAÇÕES",
+        items: [
+          {title: "Meus Pontos", url: "/meusPontos", icon: AlarmClockCheck}
+        ]
+      }
     ],
     navSecondary: [
       { title: "Funcionário", url: "/funcionario", icon: Briefcase },
