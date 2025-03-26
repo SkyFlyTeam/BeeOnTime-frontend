@@ -3,12 +3,15 @@ import type { Config } from "tailwindcss";
 export default {
     darkMode: ["class"],
     content: [
-    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
   	extend: {
+		boxShadow: {
+			'card': '0px 24px 64px 0px rgba(38, 33, 74, 0.1)',
+		  },
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
@@ -21,8 +24,10 @@ export default {
   				foreground: 'hsl(var(--popover-foreground))'
   			},
   			primary: {
-  				DEFAULT: 'hsl(var(--primary))',
-  				foreground: 'hsl(var(--primary-foreground))'
+  				DEFAULT: '#FFB503',
+				hover: "#FFCB50",
+  				foreground: '#42130F',
+				
   			},
   			secondary: {
   				DEFAULT: 'hsl(var(--secondary))',

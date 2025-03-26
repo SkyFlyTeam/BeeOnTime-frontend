@@ -2,10 +2,14 @@
 
     /* Yellow tones */
     --yellow: #FFB503;
+    --yellow-light: #FFCB50;
     --light-opacity-yellow: #FFF4D9;
 
     /* Black */
     --black: #242223;
+
+    /* Brown */
+    --brown: #42130F;
 
     /* White */ 
     --white-pure: #FFFFFF;
