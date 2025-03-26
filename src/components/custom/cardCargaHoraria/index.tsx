@@ -54,7 +54,9 @@ const CardCargaHoraria = (cargaHoraria: CargaHoraria ) => {
             </div>
             <div className={styles.jornada}>
                 <span>Jornada de trabalho: {jornadaHorarioEntrada} às {jornadaHorarioSaida}</span>
-                <span>Horas extras: {cargaHoraria.horasExtra}h</span>
+                {cargaHoraria.horasExtra > 0 && (
+                    <span>Horas extras: {cargaHoraria.horasExtra}h</span>
+                )}
             </div>
         </div>
     );
