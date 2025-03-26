@@ -7,6 +7,7 @@ import SolicitacaoInterface from '@/src/interfaces/Solicitacao';
 import { solicitacaoServices } from '@/src/services/solicitacaoServices';
 import { ApiException } from '@/src/config/apiExceptions';
 import { useAuth } from '@/src/context/AuthContext';
+import ModalDevolutiva from '@/src/components/custom/modal/modalDevolutiva';
 
 interface SolicitacaoCard {
   solicitacao: SolicitacaoInterface;

@@ -7,6 +7,7 @@ import Tab from "@/src/components/custom/tab";
 import Modal from "@/src/components/custom/modal";
 import SolicitacaoInterface from '../../interfaces/Solicitacao';
 import { useAuth } from "@/src/context/AuthContext"; 
+import ModalDevolutiva from "@/src/components/custom/modal/modalDevolutiva";
 
 interface SolicitacoesState {
   all: SolicitacaoInterface[];
@@ -15,6 +16,7 @@ interface SolicitacoesState {
 }
 
 const Solicitacao = () => {
+  const [openDevolutivaModal, setOpenDevolutivaModal] = useState<boolean>(false); 
   const { usuarioCargo, usuarioCod } = useAuth(); 
   const [toogle, setToogle] = useState(false);
 
@@ -24,12 +26,12 @@ const Solicitacao = () => {
     historico: [],
   }); 
 
-  const [displayedSolicitacoes, setDisplayedSolicitacoes] = useState<SolicitacaoInterface[]>([]); // Dados a serem exibidos
+  const [displayedSolicitacoes, setDisplayedSolicitacoes] = useState<SolicitacaoInterface[]>([]); 
 
   const [openModal, setOpenModal] = useState<{
     [key: string]: boolean;
   }>({});
-  
+
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5); 
   const [totalItems, setTotalItems] = useState(0); 
@@ -58,7 +60,7 @@ const Solicitacao = () => {
       }
 
       setSolicitacoesData({
-        all: filteredSolicitacoes,
+        all: filteredSolicitacoes.filter(solicitacao => solicitacao.solicitacaoStatus !== "PENDENTE"),
         pendentes: filteredSolicitacoes.filter(solicitacao => solicitacao.solicitacaoStatus === "PENDENTE"),
         historico: filteredSolicitacoes.filter(solicitacao => solicitacao.solicitacaoStatus !== "PENDENTE"),
       });
@@ -67,9 +69,10 @@ const Solicitacao = () => {
   };
 
   const paginateData = () => {
+    const dataToDisplay = toogle ? solicitacoesData.pendentes : solicitacoesData.historico;
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    setDisplayedSolicitacoes(solicitacoesData.all.slice(startIndex, endIndex));
+    setDisplayedSolicitacoes(dataToDisplay.slice(startIndex, endIndex));
   };
 
   const handlePageChange = (page: number) => {
@@ -81,9 +84,21 @@ const Solicitacao = () => {
       ...prevState,
       [solicitacaoCod]: status,
     }));
+  
+    if (status === true) {
+      handleDevolutivaModal(false); 
+    }
   };
 
+  const handleDevolutivaModal = (status: boolean) => {
+    setOpenDevolutivaModal(status); 
+  };
+  
+  
+
   const handleClick = (status: 'pendentes' | 'historico') => {
+    setCurrentPage(1);
+
     setSolicitacoesData((prevState) => ({
       ...prevState,
       all: prevState[status], 
@@ -102,9 +117,11 @@ const Solicitacao = () => {
 
   useEffect(() => {
     paginateData(); 
-  }, [currentPage, solicitacoesData]);
+  }, [currentPage, solicitacoesData, toogle]);
 
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const totalPages = Math.ceil(
+    (toogle ? solicitacoesData.pendentes.length : solicitacoesData.historico.length) / itemsPerPage
+  );
 
   return (
     <div className={styles.solicitacao_container}>
@@ -129,7 +146,6 @@ const Solicitacao = () => {
                   usuarioCargo={solicitacao.usuarioCargo} 
                   usuarioCod={solicitacao.usuarioCod}               
                 />
-
                 <Modal
                   key={`${solicitacao.solicitacaoCod}-modal`}
                   isOpen={openModal[solicitacao.solicitacaoCod]}
@@ -138,6 +154,16 @@ const Solicitacao = () => {
                   onSolicitacaoUpdate={handleSolicitacaoUpdate} 
                   usuarioLogadoCod={usuarioCod}                
                 />
+
+                {openDevolutivaModal && (
+                  <ModalDevolutiva
+                    isOpen={openDevolutivaModal}
+                    onClose={() => handleDevolutivaModal(false)}
+                    solicitacaoDevolutiva=""
+                    onConfirmReject={() => { /* Lógica de rejeição */ }}
+                  />
+                )}
+
               </>
             ))
           ) : (
@@ -147,7 +173,7 @@ const Solicitacao = () => {
             </div>
           )}
 
-          {displayedSolicitacoes.length > 0 &&(
+          {displayedSolicitacoes.length > 0 && totalPages > 1 && (
             <div className={styles.pagination}>
               <button
                 className={styles.pageButton}

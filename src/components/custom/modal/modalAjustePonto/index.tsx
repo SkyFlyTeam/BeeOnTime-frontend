@@ -5,6 +5,7 @@ import SolicitacaoInterface from '@/src/interfaces/Solicitacao'
 import { useEffect, useState } from 'react'
 import Button from 'react-bootstrap/Button'
 import { solicitacaoServices } from '@/src/services/solicitacaoServices'
+import ModalDevolutiva from '../modalDevolutiva' // Import the Devolutiva modal
 
 interface AjusteProps {
   diaSelecionado: string
@@ -22,6 +23,8 @@ const ModalAjustePonto: React.FC<AjusteProps> = ({
   usuarioLogadoCod
 }) => {
   const [solicitacao, setSolicitacao] = useState<SolicitacaoInterface>(solicitacaoSelected)
+  const [showDevolutivaModal, setShowDevolutivaModal] = useState(false) // State to control Devolutiva modal
+  const [devolutivaMessage, setDevolutivaMessage] = useState('')
 
   useEffect(() => {
     const decodeBase64ToByteArray = (base64: string): number[] => {
@@ -42,8 +45,8 @@ const ModalAjustePonto: React.FC<AjusteProps> = ({
     setSolicitacao(ajustada);
   }, [solicitacaoSelected]);
 
-  const handleSolicitacao = async (status: string) => {
-    const updatedSolicitacao = { ...solicitacao, solicitacaoStatus: status }
+  const handleSolicitacao = async (status: string, message?: string) => {
+    const updatedSolicitacao = { ...solicitacao, solicitacaoStatus: status, solicitacaoDevolutiva: message || solicitacao.solicitacaoDevolutiva }
     await solicitacaoServices.updateSolicitacao(updatedSolicitacao)
     onSolicitacaoUpdate(updatedSolicitacao)
     onClose()
@@ -51,13 +54,10 @@ const ModalAjustePonto: React.FC<AjusteProps> = ({
 
   const handleDownload = () => {
     if (!solicitacao?.solicitacaoAnexo || solicitacao.solicitacaoAnexo.length === 0) return;
-    console.log(solicitacao?.solicitacaoAnexo)
     const byteArray = new Uint8Array(solicitacao.solicitacaoAnexo);
     const blob = new Blob([byteArray], {
       type: 'application/octet-stream',
     });
-    console.log(byteArray)
-    console.log(blob)
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
@@ -67,8 +67,14 @@ const ModalAjustePonto: React.FC<AjusteProps> = ({
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
   };
-  
-  
+
+  const openDevolutivaModal = () => {
+    setShowDevolutivaModal(true);
+  };
+
+  const closeDevolutivaModal = () => {
+    setShowDevolutivaModal(false);
+  };
 
   return (
     <>
@@ -114,7 +120,6 @@ const ModalAjustePonto: React.FC<AjusteProps> = ({
                   }
                 }}
               />
-              
               {solicitacao?.solicitacaoAnexo && (
                 <button
                   type="button"
@@ -129,12 +134,11 @@ const ModalAjustePonto: React.FC<AjusteProps> = ({
           </div>
         </div>
 
-
         {usuarioLogadoCod !== solicitacao.usuarioCod && solicitacao.solicitacaoStatus === "PENDENTE" && (
           <div className={styles.button_container}>
             <Button
               variant='outline-danger'
-              onClick={() => handleSolicitacao("REPROVADA")}
+              onClick={openDevolutivaModal} // Open Devolutiva modal instead of directly rejecting
               size='sm'
             >
               Recusar
@@ -161,6 +165,18 @@ const ModalAjustePonto: React.FC<AjusteProps> = ({
           </div>
         )}
       </form>
+
+      {showDevolutivaModal && (
+        <ModalDevolutiva
+          isOpen={showDevolutivaModal}
+          onClose={closeDevolutivaModal}
+          solicitacaoDevolutiva={devolutivaMessage}
+          onConfirmReject={(message: string | undefined) => {
+            handleSolicitacao("REPROVADA", message); 
+            closeDevolutivaModal(); 
+          }}
+        />
+      )}
     </>
   )
 }
