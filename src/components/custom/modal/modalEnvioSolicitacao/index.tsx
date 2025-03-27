@@ -1,27 +1,34 @@
 import styles from './styles.module.css'
 import { Paperclip } from 'lucide-react'
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Button from 'react-bootstrap/Button'
 import { solicitacaoServices } from '@/src/services/solicitacaoServices'
+import { pontoServices } from '@/src/services/pontoServices'
+import PontoProv from '@/src/interfaces/pontoProv'
 
-interface ModalCriarSolicitacaoProps {
-  isOpen: boolean
-  onClose: () => void
-  diaSelecionado: string
-  usuarioCod: number
-  tipoSolicitacaoCod: number
+interface Ponto {
+  id: string;
+  usuarioCod: number;
+  horasCod: number;
+  data: string | Date;
+  pontos: { horarioPonto: string | Date; tipoPonto: number }[];
 }
 
-const ModalCriarSolicitacao: React.FC<ModalCriarSolicitacaoProps> = ({
-  isOpen,
-  onClose,
-  diaSelecionado,
-  usuarioCod,
-  tipoSolicitacaoCod
-}) => {
-  const [mensagem, setMensagem] = useState('')
-  const [file, setFile] = useState<File | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+interface ModalCriarSolicitacaoProps {
+  isOpen: boolean;
+  onClose: () => void;
+  ponto: Ponto;
+}
+
+const ModalCriarSolicitacao = ({ isOpen, onClose, ponto }: ModalCriarSolicitacaoProps) => {
+  const [mensagem, setMensagem] = useState('');
+  const [file, setFile] = useState<File | null>(null);
+  const [entrada, setEntrada] = useState<string | null>(null); 
+  const [inicioAlmoco, setInicioAlmoco] = useState<string | null>(null); 
+  const [fimAlmoco, setFimAlmoco] = useState<string | null>(null);  
+  const [saida, setSaida] = useState<string | null>(null);  
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const uploaded = e.target.files?.[0];
@@ -34,37 +41,75 @@ const ModalCriarSolicitacao: React.FC<ModalCriarSolicitacaoProps> = ({
     try {
       const solicitacaoJson = {
         solicitacaoMensagem: mensagem,
-        usuarioCod,
-        solicitacaoDataPeriodo: diaSelecionado,
+        usuarioCod: ponto.usuarioCod,
+        solicitacaoDataPeriodo: ponto.data,
         tipoSolicitacaoCod: {
-          tipoSolicitacaoCod
+          tipoSolicitacaoCod: 1
         }
       };
-  
+
       const formData = new FormData();
       formData.append("solicitacaoJson", JSON.stringify(solicitacaoJson));
       if (file) {
         formData.append("solicitacaoAnexo", file);
       }
-  
+
       const result = await solicitacaoServices.createSolicitacao(formData);
+      const solicitacaoPonto: PontoProv = {
+        id: ponto.id,
+        usuarioCod: ponto.usuarioCod,
+        solicitacaoCod: 'solicitacaoCod' in result ? result.solicitacaoCod : 0,
+        horasCod: ponto.horasCod,
+        data: ponto.data,
+        pontos: [
+          { horarioPonto: entrada, tipoPonto: 0 },
+          { horarioPonto: inicioAlmoco, tipoPonto: 2 },
+          { horarioPonto: fimAlmoco, tipoPonto: 2 },
+          { horarioPonto: saida, tipoPonto: 1 }
+        ]
+      }
+      const resultPonto = await pontoServices.createSolicitacaoPonto(solicitacaoPonto)
       onClose();
-  
     } catch (error: any) {
       console.error("Erro ao enviar solicitação:", error.message);
       alert("Erro ao enviar solicitação: " + error.message);
     }
   };
 
-  const [ano, mes, dia] = diaSelecionado.split("-");
+  const organizarHorarios = () => {
+    const tipoEntrada = ponto.pontos.find(p => p.tipoPonto === 0);
+    const tipoAlmoco = ponto.pontos.filter(p => p.tipoPonto === 2);
+    const tipoSaida = ponto.pontos.find(p => p.tipoPonto === 1);
+
+    if (tipoEntrada) setEntrada(tipoEntrada.horarioPonto as string); 
+    if (tipoAlmoco.length > 1) {
+      const [almoco1, almoco2] = tipoAlmoco;
+      const [almocoInicio, almocoFim] = almoco1.horarioPonto < almoco2.horarioPonto ? [almoco1.horarioPonto, almoco2.horarioPonto] : [almoco2.horarioPonto, almoco1.horarioPonto];
+      
+      setInicioAlmoco(almocoInicio as string);  
+      setFimAlmoco(almocoFim as string);  
+    }
+
+    if (tipoSaida) setSaida(tipoSaida.horarioPonto as string);  
+  };
+
+  const [ano, mes, dia] = typeof ponto.data === 'string'
+    ? ponto.data.split("-")
+    : new Date(ponto.data).toISOString().split("T")[0].split("-");
+
   const dataFormatada = `${String(dia).padStart(2, '0')}/${String(mes).padStart(2, '0')}/${ano}`;
-  
 
   const abrirSeletorArquivo = () => {
-    fileInputRef.current?.click()
-  }
+    fileInputRef.current?.click();
+  };
 
-  if (!isOpen) return null
+  useEffect(() => {
+    if (isOpen) {
+      organizarHorarios(); 
+    }
+  }, [isOpen, ponto]); 
+
+  if (!isOpen) return null;
 
   return (
     <div className={styles.modal_container} onClick={onClose}>
@@ -76,22 +121,46 @@ const ModalCriarSolicitacao: React.FC<ModalCriarSolicitacaoProps> = ({
           <div className={styles.column}>
             <span className={styles.FormGroup}>
               <label htmlFor='entrada'>Entrada</label>
-              <input type='time' className={styles.inputTime} id='entrada' />
+              <input
+                type='time'
+                className={styles.inputTime}
+                id='entrada'
+                value={entrada || ''}
+                onChange={(e) => setEntrada(e.target.value)}
+              />
             </span>
             <span className={styles.FormGroup}>
               <label htmlFor='inicio_almoco'>Início Almoço</label>
-              <input type='time' className={styles.inputTime} id='inicio_almoco' />
+              <input
+                type='time'
+                className={styles.inputTime}
+                id='inicio_almoco'
+                value={inicioAlmoco || ''}
+                onChange={(e) => setInicioAlmoco(e.target.value)}
+              />
             </span>
           </div>
 
           <div className={styles.column}>
             <span className={styles.FormGroup}>
               <label htmlFor='fim_almoco'>Fim Almoço</label>
-              <input type='time' className={styles.inputTime} id='fim_almoco' />
+              <input
+                type='time'
+                className={styles.inputTime}
+                id='fim_almoco'
+                value={fimAlmoco || ''}
+                onChange={(e) => setFimAlmoco(e.target.value)}
+              />
             </span>
             <span className={styles.FormGroup}>
               <label htmlFor='saida'>Saída</label>
-              <input type='time' className={styles.inputTime} id='saida' />
+              <input
+                type='time'
+                className={styles.inputTime}
+                id='saida'
+                value={saida || ''}
+                onChange={(e) => setSaida(e.target.value)}
+              />
             </span>
           </div>
 
@@ -128,7 +197,7 @@ const ModalCriarSolicitacao: React.FC<ModalCriarSolicitacaoProps> = ({
         </form>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ModalCriarSolicitacao
+export default ModalCriarSolicitacao;

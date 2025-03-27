@@ -5,7 +5,10 @@ import SolicitacaoInterface from '@/src/interfaces/Solicitacao'
 import { useEffect, useState } from 'react'
 import Button from 'react-bootstrap/Button'
 import { solicitacaoServices } from '@/src/services/solicitacaoServices'
-import ModalDevolutiva from '../modalDevolutiva' // Import the Devolutiva modal
+import ModalDevolutiva from '../modalDevolutiva' 
+import { pontoServices } from '@/src/services/pontoServices'
+import { Ponto } from '@/src/interfaces/hisPonto'
+import PontoProv, { AprovarPonto } from '@/src/interfaces/pontoProv'
 
 interface AjusteProps {
   diaSelecionado: string
@@ -23,8 +26,38 @@ const ModalAjustePonto: React.FC<AjusteProps> = ({
   usuarioLogadoCod
 }) => {
   const [solicitacao, setSolicitacao] = useState<SolicitacaoInterface>(solicitacaoSelected)
-  const [showDevolutivaModal, setShowDevolutivaModal] = useState(false) // State to control Devolutiva modal
+  const [showDevolutivaModal, setShowDevolutivaModal] = useState(false) 
   const [devolutivaMessage, setDevolutivaMessage] = useState('')
+  const [ponto, setPonto] = useState<PontoProv>()
+  const [idApproved, setIdToApproved] = useState<string>('')
+  const [entrada, setEntrada] = useState<string | null>(null); 
+  const [inicioAlmoco, setInicioAlmoco] = useState<string | null>(null); 
+  const [fimAlmoco, setFimAlmoco] = useState<string | null>(null);  
+  const [saida, setSaida] = useState<string | null>(null); 
+
+  const fetchPonto = async (solicitacaoCod: number) => {
+    try {
+      const ponto = await pontoServices.getSolicitacaoPonto(solicitacaoCod)
+      setPonto(ponto)
+      setIdToApproved(ponto.id)
+      const tipoEntrada = ponto.pontos.find((p: Ponto) => p.tipoPonto === 0); 
+      const tipoAlmoco = ponto.pontos.filter((p: Ponto) => p.tipoPonto === 2); 
+      const tipoSaida = ponto.pontos.find((p: Ponto) => p.tipoPonto === 1);
+
+      if (tipoEntrada) setEntrada(tipoEntrada.horarioPonto as string); 
+      if (tipoAlmoco.length > 1) {
+        const [almoco1, almoco2] = tipoAlmoco;
+        const [almocoInicio, almocoFim] = almoco1.horarioPonto < almoco2.horarioPonto ? [almoco1.horarioPonto, almoco2.horarioPonto] : [almoco2.horarioPonto, almoco1.horarioPonto];
+        
+        setInicioAlmoco(almocoInicio as string);  
+        setFimAlmoco(almocoFim as string);  
+      }
+
+      if (tipoSaida) setSaida(tipoSaida.horarioPonto as string); 
+    } catch (error) {
+      
+    }
+  }
 
   useEffect(() => {
     const decodeBase64ToByteArray = (base64: string): number[] => {
@@ -41,17 +74,22 @@ const ModalAjustePonto: React.FC<AjusteProps> = ({
     if (typeof ajustada.solicitacaoAnexo === 'string') {
       ajustada.solicitacaoAnexo = decodeBase64ToByteArray(ajustada.solicitacaoAnexo);
     }
-  
     setSolicitacao(ajustada);
+    fetchPonto(ajustada.solicitacaoCod)
   }, [solicitacaoSelected]);
 
   const handleSolicitacao = async (status: string, message?: string) => {
     const updatedSolicitacao = { ...solicitacao, solicitacaoStatus: status, solicitacaoDevolutiva: message || solicitacao.solicitacaoDevolutiva }
     await solicitacaoServices.updateSolicitacao(updatedSolicitacao)
+    if (ponto && status == "APROVADA") {
+      const solicitacaoPonto: AprovarPonto= {
+        id: idApproved,
+      };
+      const result = pontoServices.aproveSolicitacaoPonto(solicitacaoPonto, solicitacao.solicitacaoCod)
+    } 
     onSolicitacaoUpdate(updatedSolicitacao)
     onClose()
   }
-
   const handleDownload = () => {
     if (!solicitacao?.solicitacaoAnexo || solicitacao.solicitacaoAnexo.length === 0) return;
     const byteArray = new Uint8Array(solicitacao.solicitacaoAnexo);
@@ -86,21 +124,45 @@ const ModalAjustePonto: React.FC<AjusteProps> = ({
         <div className={styles.column}>
           <span className={styles.FormGroup}>
             <label htmlFor='entrada'>Entrada</label>
-            <input type='time' className={styles.inputTime} id='entrada' />
+            <input
+                type='time'
+                className={styles.inputTime}
+                id='entrada'
+                value={entrada || ''}
+                onChange={(e) => setEntrada(e.target.value)}
+              />
           </span>
           <span className={styles.FormGroup}>
             <label htmlFor='inicio_almoco'>Início Almoço</label>
-            <input type='time' className={styles.inputTime} id='inicio_almoco' />
+            <input
+                type='time'
+                className={styles.inputTime}
+                id='inicio_almoco'
+                value={inicioAlmoco || ''}
+                onChange={(e) => setInicioAlmoco(e.target.value)}
+              />
           </span>
         </div>
         <div className={styles.column}>
           <span className={styles.FormGroup}>
             <label htmlFor='fim_almoco'>Fim Almoço</label>
-            <input type='time' className={styles.inputTime} id='fim_almoco' />
+            <input
+                type='time'
+                className={styles.inputTime}
+                id='fim_almoco'
+                value={fimAlmoco || ''}
+                onChange={(e) => setFimAlmoco(e.target.value)}
+              />
           </span>
           <span className={styles.FormGroup}>
             <label htmlFor='saida'>Saída</label>
-            <input type='time' className={styles.inputTime} id='saida' />
+            <input
+                type='time'
+                className={styles.inputTime}
+                id='saida'
+                value={saida || ''}
+                onChange={(e) => setSaida(e.target.value)}
+              />
           </span>
         </div>
         <div className={clsx(styles.FormGroup, styles.justificativa)}>
@@ -138,7 +200,7 @@ const ModalAjustePonto: React.FC<AjusteProps> = ({
           <div className={styles.button_container}>
             <Button
               variant='outline-danger'
-              onClick={openDevolutivaModal} // Open Devolutiva modal instead of directly rejecting
+              onClick={openDevolutivaModal} 
               size='sm'
             >
               Recusar
