@@ -4,11 +4,9 @@ import { Horas } from "../interfaces/horasInterface";
 
 const getHora = async (usuarioCod: number, date: string | Date): Promise<Horas> => {
     try {
-        const dateToSend = {
-            "data": date
-        }
-        const { data } = await Api.post(`/horas/usuario/${usuarioCod}/dia`, dateToSend, {
-            headers: { 'Content-Type': 'multipart/form-data' }
+        const formData = new FormData();
+        formData.append("data", date.toString());
+        const { data } = await Api.post(`/horas/usuario/${usuarioCod}/dia`, formData, {
         });
 
         return data
