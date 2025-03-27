@@ -20,7 +20,7 @@ function MyApp({ Component, pageProps }: AppProps) {
       <AppSidebar />
       <SidebarInset>
         <Header />
-        <main className="flex flex-1 flex-col gap-4 px-9 py-0">
+        <main className="flex flex-1 flex-col gap-4 px-0 md:px-9 py-0">
           <Component {...pageProps} />
         </main>
       </SidebarInset>
@@ -32,7 +32,7 @@ function MyApp({ Component, pageProps }: AppProps) {
 function Header() {
   const { state, isMobile, openMobile } = useSidebar();
   return (
-    <header className="flex h-8 shrink-0 items-center gap-2 px-7 py-9">
+    <header className="flex h-8 shrink-0 items-center gap-2 px-7 py-9" style={{ backgroundColor: "#fafbfc" }}>
       {(!isMobile && state === "collapsed") || (isMobile && !openMobile) ? (
         <SidebarTrigger className="-ml-1" />
       ) : null}

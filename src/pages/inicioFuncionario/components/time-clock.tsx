@@ -12,6 +12,9 @@ export default function TimeClock() {
   // Estado para rastrear o horário de entrada
   const [entryTime, setEntryTime] = useState<Date | null>(null);
 
+  // Estado para rastrear o horário de saída
+  const [exitTime, setExitTime] = useState<Date | null>(null);
+
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
@@ -26,9 +29,11 @@ export default function TimeClock() {
     minute: "2-digit",
   });
 
-  // Verifica se está no horário restrito (23h às 4h)
+  // Verifica se está no horário restrito (23h às 4h) ou se é o mesmo dia da última saída
   const currentHour = currentTime.getHours();
-  const isRestrictedTime = currentHour >= 23 || currentHour < 4;
+  const isTimeRestricted = currentHour >= 23 || currentHour < 4;
+  const isSameDayAsExit = exitTime ? currentTime.getDate() === exitTime.getDate() : false;
+  const isRestrictedTime = isTimeRestricted || isSameDayAsExit;
 
   // Funções para lidar com os cliques nos botões
   const handleEntrada = () => {
@@ -57,6 +62,7 @@ export default function TimeClock() {
       if (hoursWorked >= 0) { // Ajustado para 0 para testar a qualquer hora
         setWorkState("initial");
         setEntryTime(null); // Reseta o horário de entrada
+        setExitTime(new Date()); // Registra o horário de saída
       }
     }
   };
@@ -69,7 +75,7 @@ export default function TimeClock() {
         return (
           <>
             <Button
-              className={`w-40 font-semibold ${!isRestrictedTime ? "bg-yellow-500 hover:bg-yellow-600 text-black" : "bg-gray-200 text-gray-600 cursor-not-allowed"}`}
+              className={`w-40 font-semibold ${!isRestrictedTime ? "bg-[#FFB503] hover:bg-[#FFCB50] text-[#42130F]" : "bg-gray-200 text-gray-600 cursor-not-allowed"}`}
               onClick={handleEntrada}
               disabled={isRestrictedTime}
             >
@@ -96,7 +102,7 @@ export default function TimeClock() {
               SAÍDA
             </Button>
             <Button
-              className={`w-40 font-semibold ${entryTime && (currentTime.getTime() - entryTime.getTime()) / (1000 * 60 * 60) >= 0 ? "bg-yellow-500 hover:bg-yellow-600 text-black" : "bg-gray-200 text-gray-600 cursor-not-allowed"}`}
+              className={`w-40 font-semibold ${entryTime && (currentTime.getTime() - entryTime.getTime()) / (1000 * 60 * 60) >= 0 ? "bg-[#FFB503] hover:bg-[#FFCB50] text-[#42130F]" : "bg-gray-200 text-gray-600 cursor-not-allowed"}`}
               onClick={handleInicioIntervalo}
               disabled={!(entryTime && (currentTime.getTime() - entryTime.getTime()) / (1000 * 60 * 60) >= 0)}
             >
@@ -116,7 +122,7 @@ export default function TimeClock() {
               SAÍDA
             </Button>
             <Button
-              className="w-40 font-semibold bg-yellow-500 hover:bg-yellow-600 text-black"
+              className="w-40 font-semibold bg-[#FFB503] hover:bg-[#FFCB50] text-[#42130F]"
               onClick={handleFimIntervalo}
             >
               FIM INTERVALO
@@ -128,7 +134,7 @@ export default function TimeClock() {
         return (
           <>
             <Button
-              className={`w-40 font-semibold ${entryTime && (currentTime.getTime() - entryTime.getTime()) / (1000 * 60 * 60) >= 0 ? "bg-yellow-500 hover:bg-yellow-600 text-black" : "bg-gray-200 text-gray-600 cursor-not-allowed"}`}
+              className={`w-40 font-semibold ${entryTime && (currentTime.getTime() - entryTime.getTime()) / (1000 * 60 * 60) >= 0 ? "bg-[#FFB503] hover:bg-[#FFCB50] text-[#42130F]" : "bg-gray-200 text-gray-600 cursor-not-allowed"}`}
               onClick={handleSaida}
               disabled={!(entryTime && (currentTime.getTime() - entryTime.getTime()) / (1000 * 60 * 60) >= 0)}
             >

@@ -16,7 +16,7 @@ body {
 
 @layer base {
   :root {
-        --background: 0 0% 100%;
+        --background: 210 25% 98%; /* Ajeitado para cor padrão */
         --foreground: 240 10% 3.9%;
         --card: 0 0% 100%;
         --card-foreground: 240 10% 3.9%;
@@ -91,7 +91,7 @@ body {
     @apply border-border;
     }
   body {
-    @apply bg-background text-foreground;
+    /* @apply bg-background text-foreground; */
     }
 }
   
