@@ -246,7 +246,7 @@ export default function CadastroForm({ onClose }: { onClose: () => void }) {
           <button
             type="button"
             onClick={handleNext}
-            className="bg-[#FFB503] text-white p-2 rounded-md"
+            className="bg-[#FFB503] hover:bg-[#FFCB50] text-white p-2 rounded-md"
           >
             Próximo
           </button>
