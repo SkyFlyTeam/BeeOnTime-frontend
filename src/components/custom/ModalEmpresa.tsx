@@ -9,7 +9,7 @@ interface ModalProps {
   etapaAtual: number;
 }
 
-import "./styles/modalEmpresa.css";
+import "../../styles/modalEmpresa.css";
 
 export default function Modal({ isOpen, onClose, title, children, etapaAtual }: ModalProps) {
   if (!isOpen) return null;
