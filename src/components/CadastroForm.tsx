@@ -198,24 +198,28 @@ export default function CadastroForm({ onClose }: { onClose: () => void }) {
                 className="border p-2 rounded-md w-full"
                 >
                   <option value="">Selecione o cargo</option>
-                  <option value="CLT">Cargo 1</option>
-                  <option value="PJ">Cargo 2</option>
-                  <option value="Estágio">Cargo 3</option>
+                  <option value="cargo_1">Cargo 1</option>
+                  <option value="cargo_2">Cargo 2</option>
+                  <option value="cargo_3">Cargo 3</option>
               </select>
               {formErrors.usuario_cargo && <p className="text-red-500">{formErrors.usuario_cargo._errors[0]}</p>}
             </div>
 
             <div className="flex-1">
               <label htmlFor="nivelAcesso" className="mb-2">Nível de Acesso</label>
-              <input
+              <select
                 id="nivelAcesso"
-                type="text"
                 name="nivelAcesso"
                 // value={formData.nivelAcesso}
                 // onChange={handleChange}
                 required
                 className="border p-2 rounded-md w-full"
-              />
+              >
+                <option value="">Selecione o tipo de acesso</option>
+                <option value="acesso_1">Acesso 1</option>
+                <option value="acesso_2">Acesso 2</option>
+                <option value="acesso_3">Acesso 3</option>
+              </select>
               {formErrors.nivelAcesso && <p className="text-red-500">{formErrors.nivelAcesso._errors[0]}</p>}
             </div>
 
