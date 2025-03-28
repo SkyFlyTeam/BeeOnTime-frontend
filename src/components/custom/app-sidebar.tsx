@@ -1,6 +1,6 @@
 import * as React from "react";
 import { usePathname } from "next/navigation";
-import { LayoutGrid, Users, FileText, Settings, Database, LifeBuoy, LucideIcon, AlertCircle, Bell, Briefcase, Building, Calendar, Clock, Home, LogOut, MessageSquare, AlarmClockCheck } from "lucide-react";
+import { LayoutGrid, Users, FileText, Settings, Database, LifeBuoy, LucideIcon, AlertCircle, Bell, UserRound, Building, Calendar, Clock, Home, LogOut, MessageSquare, AlarmClockCheck } from "lucide-react";
 
 import { RoleSwitcher} from "@/components/custom/role-switcher";
 import {
@@ -54,7 +54,7 @@ const rolesData: Record<RoleKey, { navMain: NavItem[]; navSecondary: SubNavItem[
       },
     ],
     navSecondary: [
-      { title: "Administrador", url: "/administrador", icon: Briefcase },
+      { title: "Administrador", url: "/administrador", icon: UserRound },
       { title: "Sair", url: "/logout", icon: LogOut },
     ],
   },
@@ -81,7 +81,7 @@ const rolesData: Record<RoleKey, { navMain: NavItem[]; navSecondary: SubNavItem[
       },
     ],
     navSecondary: [
-      { title: "Gestor", url: "/gestor", icon: Briefcase },
+      { title: "Gestor", url: "/gestor", icon: UserRound },
       { title: "Sair", url: "/logout", icon: LogOut },
     ],
   },
@@ -102,7 +102,7 @@ const rolesData: Record<RoleKey, { navMain: NavItem[]; navSecondary: SubNavItem[
       }
     ],
     navSecondary: [
-      { title: "Funcionário", url: "/funcionario", icon: Briefcase },
+      { title: "Funcionário", url: "/funcionario", icon: UserRound },
       { title: "Sair", url: "/logout", icon: LogOut },
     ],
   },
@@ -114,15 +114,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const {state, isMobile, openMobile} = useSidebar();
   const pathname = usePathname(); //consegue a url q ta
   const [selectedRole, setSelectedRole] = React.useState<RoleKey>("Administrador");  //Entrar como cargo padrão
+  const [ enterpriseName , setEnterpriseName ] =  React.useState<String>("NectoSystems");
 
   return (
     <Sidebar {...props}>
       <SidebarHeader>
         <div className="p-3">
-          <h1 > NectoSystems </h1>
+          <h1 > {enterpriseName} </h1>
           {((!isMobile && state === "expanded") || (isMobile && openMobile)) && <SidebarTrigger />} {/* Exibe o botão dentro da sidebar quando expandida */}
         </div>
-        <RoleSwitcher roles={roles} defaultRole={selectedRole} onRoleChange={setSelectedRole} />
       </SidebarHeader>
       <SidebarContent>
         {/* Renderiza cada seção da sidebar com base no seu cargo */}

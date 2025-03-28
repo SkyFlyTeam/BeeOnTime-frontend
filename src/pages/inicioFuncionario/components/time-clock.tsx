@@ -75,7 +75,7 @@ export default function TimeClock() {
         return (
           <>
             <Button
-              className={`w-40 font-semibold ${!isRestrictedTime ? "bg-[#FFB503] hover:bg-[#FFCB50] text-[#42130F]" : "bg-gray-200 text-gray-600 cursor-not-allowed"}`}
+              className={`w-40 font-semibold ${!isRestrictedTime ? "bg-[#FFB503] hover:bg-[#FFCB50] text-[#42130F]" : "bg-[#F0F0F0] text-gray-600 border-gray-400 cursor-not-allowed"}`}
               onClick={handleEntrada}
               disabled={isRestrictedTime}
             >
