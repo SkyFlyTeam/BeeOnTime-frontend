@@ -41,6 +41,7 @@ body {
         --chart-4: 43 74% 66%;
         --chart-5: 27 87% 67%;
         --radius: 0.5rem;
+
         --sidebar-background: 0 0% 100%;
         --sidebar-foreground: 240 5.3% 26.1%;
         --sidebar-primary: 240 5.9% 10%;
@@ -49,7 +50,27 @@ body {
         --sidebar-accent-foreground: 240 5.9% 10%;
         --sidebar-border: 220 13% 91%;
         --sidebar-ring: 217.2 91.2% 59.8%;
-    }
+
+            /* Yellow tones */
+        --yellow: #FFB503;
+        --light-opacity-yellow: #FFF4D9;
+
+        /* Black */
+        --black: #242223;
+
+        /* White */ 
+        --white-pure: #FFFFFF;
+        --white-bg: #FAFBFC;
+
+        /* Gray */
+        --gray: #A7A7A7;
+        --gray-light: #E0E0E0;
+        --gray-dark: #7C7A7B;
+
+        /* Bluegray */
+        --blue-gray-light: #CBD5E1;
+    } 
+
   .dark {
         --background: 240 10% 3.9%;
         --foreground: 0 0% 98%;
