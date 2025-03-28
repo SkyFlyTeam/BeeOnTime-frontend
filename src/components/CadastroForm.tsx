@@ -189,15 +189,19 @@ export default function CadastroForm({ onClose }: { onClose: () => void }) {
           <div className="flex gap-4"> {/* Usando flex para cargo, nível de acesso e setor na mesma linha */}
             <div className="flex-1">
               <label htmlFor="usuario_cargo" className="mb-2">Cargo</label>
-              <input
+              <select
                 id="usuario_cargo"
-                type="text"
                 name="usuario_cargo"
                 value={formData.usuario_cargo}
                 onChange={handleChange}
                 required
                 className="border p-2 rounded-md w-full"
-              />
+                >
+                  <option value="">Selecione o cargo</option>
+                  <option value="CLT">Cargo 1</option>
+                  <option value="PJ">Cargo 2</option>
+                  <option value="Estágio">Cargo 3</option>
+              </select>
               {formErrors.usuario_cargo && <p className="text-red-500">{formErrors.usuario_cargo._errors[0]}</p>}
             </div>
 
