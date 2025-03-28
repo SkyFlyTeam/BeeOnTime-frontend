@@ -40,13 +40,34 @@ export default function CadastroForm({ onClose }: { onClose: () => void }) {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+  
+    const novoValor = name === "usuario_cpf"
+      ? formatarCPF(value)
+      : value;
+  
+    setFormData({ ...formData, [name]: novoValor });
   };
+  
 
   const handleNext = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSecondModalOpen(true);
   };
+
+  const formatarCPF = (cpf: string) => {
+    const apenasNumeros = cpf.replace(/\D/g, '');
+  
+    if (apenasNumeros.length <= 3) {
+      return apenasNumeros;
+    } else if (apenasNumeros.length <= 6) {
+      return `${apenasNumeros.slice(0, 3)}.${apenasNumeros.slice(3)}`;
+    } else if (apenasNumeros.length <= 9) {
+      return `${apenasNumeros.slice(0, 3)}.${apenasNumeros.slice(3, 6)}.${apenasNumeros.slice(6)}`;
+    } else {
+      return `${apenasNumeros.slice(0, 3)}.${apenasNumeros.slice(3, 6)}.${apenasNumeros.slice(6, 9)}-${apenasNumeros.slice(9, 11)}`;
+    }
+  };
+  
 
   return (
     <div>
