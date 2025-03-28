@@ -7,7 +7,8 @@ import SolicitacaoInterface from '@/src/interfaces/Solicitacao';
 import { solicitacaoServices } from '@/src/services/solicitacaoServices';
 import { ApiException } from '@/src/config/apiExceptions';
 import { useAuth } from '@/src/context/AuthContext';
-import ModalDevolutiva from '@/src/components/custom/modal/modalDevolutiva';
+import { BiSolidEditAlt } from "react-icons/bi";
+import { AiFillDelete } from "react-icons/ai";
 
 interface SolicitacaoCard {
   solicitacao: SolicitacaoInterface;
@@ -59,7 +60,7 @@ const SolicitacaoCard = ({ solicitacao, onClick, onSolicitacaoUpdate }: Solicita
             </div>
             {solicitacao?.solicitacaoStatus == 'PENDENTE' && isOwnSolicitacao && (
               <div className={styles.icons}>
-                <Pencil strokeWidth={0.5} size={22} color='blue' fill='blue' className={styles.icon_button}/>
+                <BiSolidEditAlt size={22} color='#4179C9' className={styles.icon_button}/>
                 <div
                   onClick={(e) => {
                     e.stopPropagation();
@@ -67,7 +68,7 @@ const SolicitacaoCard = ({ solicitacao, onClick, onSolicitacaoUpdate }: Solicita
                     handleDelete(solicitacao?.solicitacaoCod);
                   }}
                 >
-                  <Trash strokeWidth={0.5} size={22} color='red' fill='red' className={styles.icon_button}/>
+                  <AiFillDelete size={22} color='#E83838' className={styles.icon_button}/>
                 </div>
               </div>
             )}

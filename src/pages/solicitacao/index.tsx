@@ -160,7 +160,7 @@ const Solicitacao = () => {
                     isOpen={openDevolutivaModal}
                     onClose={() => handleDevolutivaModal(false)}
                     solicitacaoDevolutiva=""
-                    onConfirmReject={() => { /* Lógica de rejeição */ }}
+                    onConfirmReject={() => {}}
                   />
                 )}
 
@@ -168,7 +168,7 @@ const Solicitacao = () => {
             ))
           ) : (
             <div className={styles.no_content}>
-              <img src="https://i.ibb.co/zWfRsSzj/Vetor-sem-dados.jpg" alt="" />
+              <img src="./sem_conteudo.svg" alt="" />
               <p>Ops! Parece que não tem nada aqui!</p>
             </div>
           )}

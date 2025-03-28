@@ -85,17 +85,29 @@
 
 @media (max-width: 595px) {
   .card_content {
-    flex-direction: column;
-    align-items: flex-start;
     font-size: 1rem;
   }
 
   .column_two,
   .column_two_pendente {
-    align-items: end;
     gap: 0.5rem;
     width: 100%;
   }
+
+  .data_span {
+    align-items: end;
+    justify-content: end;
+  }
+}
+
+@media (max-width: 600px) {
+  .column_two,
+  .column_two_pendente {
+    align-items: end;
+    width: 100%;
+    flex-direction: column;
+  }
+
 }
 
 @media (max-width: 470px) {
@@ -116,7 +128,6 @@
   }
 
   .card_content {
-    flex-direction: column;
     align-items: flex-start;
     font-size: 1rem;
   }
@@ -126,6 +137,7 @@
     align-items: end;
     gap: 0.5rem;
     width: 100%;
+    flex-direction: column;
   }
 
   .aprovada::before {
@@ -136,8 +148,11 @@
     content: '';
   }
 
-  .card_status {
-    margin-top: 0.5rem;
+  .data_span {
+    justify-content: space-between;
+    flex-direction: column;
+    align-items: end;
+    row-gap: 1rem;
   }
 
   .data_span span {
@@ -154,6 +169,11 @@
     height: 24px;
   }
 
+  .icon_button {
+    width: 18px;
+    height: 18px;
+}
+
   .flag {
     font-size: 0.75rem;
     padding: 0.25rem 0.5rem;
@@ -168,7 +188,6 @@
   }
 
   .card_content {
-    flex-direction: column;
     align-items: flex-start;
     font-size: .85rem;
   }
@@ -186,10 +205,6 @@
 
   .recusada::before {
     content: '';
-  }
-
-  .card_status {
-    margin-top: 0.5rem;
   }
 
   .data_span span {

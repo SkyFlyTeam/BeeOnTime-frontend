@@ -5,9 +5,13 @@ import { AuthProvider } from '../context/AuthContext';
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <AuthProvider>
-      <Component {...pageProps} />
-    </AuthProvider>
+    // <AuthProvider>
+    //   <Component {...pageProps} />
+    // </AuthProvider>
+
+    <AuthProvider initialCargo="Funcionário" initialCod={17}> 
+       <Component {...pageProps} />
+     </AuthProvider>
   );
 }
 
