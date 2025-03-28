@@ -14,7 +14,7 @@
 .modal {
   background-color: var(--white-bg);
   border-radius: .5rem;
-  height: 25rem;
+  height: fit-content;
   width: 20rem;
   display: flex;
   flex-direction: column;
@@ -34,7 +34,6 @@
   .modal {
     background-color: var(--white-bg);
     border-radius: .5rem;
-    height: 22.5rem;
     width: 16rem;
     display: flex;
     flex-direction: column;

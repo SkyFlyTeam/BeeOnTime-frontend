@@ -45,6 +45,11 @@
     }
 }
 
+.devolutiva {
+    display: flex;
+    flex-direction: column;
+}
+
 .data_group {
     display: flex;
 }

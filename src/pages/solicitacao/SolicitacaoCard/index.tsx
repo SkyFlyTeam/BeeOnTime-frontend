@@ -38,23 +38,36 @@ const SolicitacaoCard = ({ solicitacao, onClick, onSolicitacaoUpdate }: Solicita
     }
   };
 
+  const showName = usuarioCargo !== 'Funcionário' && solicitacao?.usuarioCod !== usuarioCod
+
   return (
     <div className={styles.card} onClick={() => onClick()}>
-      <div className={styles.card_content}>
-        <div className={styles.column_one}>
+      <div className={clsx({
+        [styles.card_content]: !(showName),
+        [styles.card_content_name]: showName
+      })}>
+        <div className={clsx({
+          [styles.column_one]: !showName,
+          [styles.column_one_name]: showName
+        })}>
           <Flag status={solicitacao?.tipoSolicitacaoCod?.tipoSolicitacaoNome || 'Desconhecido'} />
-          {usuarioCargo !== 'Funcionário' && solicitacao?.usuarioCod !== usuarioCod && (
+          {showName && (
             <span>{solicitacao?.usuarioNome}</span>
           )}
         </div>
 
         <div
           className={clsx({
-            [styles.column_two_pendente]: solicitacao?.solicitacaoStatus === 'PENDENTE',
-            [styles.column_two]: solicitacao?.solicitacaoStatus !== 'PENDENTE',
+            [styles.column_two_pendente]: !showName && solicitacao?.solicitacaoStatus === 'PENDENTE',
+            [styles.column_two]: !showName && solicitacao?.solicitacaoStatus !== 'PENDENTE',
+            [styles.column_two_pendente_name]: showName && solicitacao?.solicitacaoStatus === 'PENDENTE',
+            [styles.column_two_name]: showName && solicitacao?.solicitacaoStatus !== 'PENDENTE'
           })}
         >
-          <div className={styles.data_span}>
+          <div className={clsx({
+            [styles.data_span]: !showName,
+            [styles.data_span_name]: showName
+          })}>
             <div>
               <span>Data solicitação:</span> <span>{dataFormatada}</span>
             </div>

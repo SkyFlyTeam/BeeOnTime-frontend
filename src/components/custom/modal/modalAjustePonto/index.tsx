@@ -196,6 +196,27 @@ const ModalAjustePonto: React.FC<AjusteProps> = ({
           </div>
         </div>
 
+        {solicitacao.solicitacaoStatus === "RECUSADA" && (
+          <div className={clsx(styles.FormGroup, styles.justificativa, styles.devolutiva)}>
+            <label>Devolutiva</label>
+            <div className={styles.justificativa_content}>
+              <input
+                type='text'
+                value={solicitacao?.solicitacaoDevolutiva}
+                readOnly
+                onChange={(e) => {
+                  if (usuarioLogadoCod === solicitacao.usuarioCod) {
+                    setSolicitacao(prev => ({
+                      ...prev,
+                      solicitacaoDevolutiva: e.target.value
+                    }));
+                  }
+                }}
+              />
+          </div>
+        </div>
+        )}
+
         {usuarioLogadoCod !== solicitacao.usuarioCod && solicitacao.solicitacaoStatus === "PENDENTE" && (
           <div className={styles.button_container}>
             <Button
