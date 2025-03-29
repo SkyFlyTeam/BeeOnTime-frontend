@@ -24,6 +24,7 @@ export default function CadastroFormJornada({ formData, onClose, onSave }:
 
     try {
       // Envia os dados combinados (do primeiro e segundo modal)
+      console.log("Dados enviados para o backend:", formData);
       await cadastrarUsuarioComJornada(formData, jornadaData);
       onClose(); // Fecha o modal após o envio
       onSave(true);
