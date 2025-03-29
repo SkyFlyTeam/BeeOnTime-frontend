@@ -3,9 +3,12 @@
 import { ChangeEvent, useEffect, useState } from "react";
 import { cadastrarEmpresa } from "@/src/services/empresaService";
 import { cadastrarSetor } from "@/src/services/setorService";
+import { cadastrarUsuarioComJornada } from "@/src/services/usuarioService";
 import { z } from "zod";
 import ModalEmpresa from "./ModalEmpresa";
 import router from "next/router";
+import { useToast } from "@/src/hooks/use-toast";
+import { Toaster } from "@/src/components/ui/toaster";
 
 // Interfaces e Schemas
 interface EmpresaFormData {
@@ -48,7 +51,6 @@ interface CadastroEmpresaFormProps {
   isMobile: boolean;
 }
 
-// Componente Principal
 export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormProps) {
   const [isOpen, setIsOpen] = useState(true);
   const [modalAtual, setModalAtual] = useState(1);
@@ -73,9 +75,36 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
   const [setorInput, setSetorInput] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  const { toast } = useToast();
+
+  // Função para resetar todos os estados
+  const resetForm = () => {
+    setModalAtual(1);
+    setEmpresaData({
+      empNome: "",
+      empRazaoSocial: "",
+      empCnpj: "",
+      empCep: "",
+      empCidade: "",
+      empEstado: "",
+      empEndereco: "",
+    });
+    setSetores([]);
+    setAdminData({
+      admin_nome: "",
+      admin_email: "",
+      admin_setor: "",
+      admin_tipoContrato: "CLT",
+      admin_cargo: "",
+      admin_nvlAcesso: "Administrador",
+    });
+    setSetorInput("");
+    setErrors({});
+  };
+
   // Efeitos
   useEffect(() => {
-    if (!isOpen) setModalAtual(1);
+    if (!isOpen) resetForm(); // Resetar ao fechar o modal também, se desejado
   }, [isOpen]);
 
   useEffect(() => {
@@ -87,7 +116,7 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
         const response = await fetch(`https://viacep.com.br/ws/${cepNumerico}/json/`);
         const data = await response.json();
         if (data.erro) throw new Error("CEP não encontrado");
-        
+
         setEmpresaData((prev) => ({
           ...prev,
           empCidade: data.localidade,
@@ -181,34 +210,69 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
   };
 
   const handleNextStep = (nextStep: number) => {
-    // Validação para os passos 1 e 3 (já existente)
     if ((modalAtual === 1 || modalAtual === 3) && !validateStep(modalAtual)) return;
-  
-    // Validação específica para o passo 2: exige pelo menos um setor
     if (modalAtual === 2 && setores.length === 0) {
       setErrors((prev) => ({ ...prev, setores: "É necessário cadastrar pelo menos um setor" }));
       return;
     }
-  
-    // Se passou nas validações, avança para o próximo passo
-    setErrors({}); // Limpa erros antes de avançar
+    setErrors({});
     setModalAtual(nextStep);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateStep(3)) return;
-    cadastrarEmpresa(empresaData);
-    cadastrarSetor(setores);
-    console.log("Dados enviados:", { empresaData, setores, adminData });
-    setIsOpen(false);
-    router.push("/")
+
+    try {
+      const empCod = await cadastrarEmpresa(empresaData);
+      const setorResponse = await cadastrarSetor(setores);
+      const setorCodMap = setorResponse.reduce((acc: Record<string, number>, setor: any) => {
+        acc[setor.setorNome] = setor.setorCod;
+        return acc;
+      }, {});
+
+      const usuarioData = {
+        usuario_nome: adminData.admin_nome,
+        usuarioEmail: adminData.admin_email,
+        usuario_cargo: adminData.admin_cargo,
+        usuarioTipoContratacao: adminData.admin_tipoContrato,
+        usuario_senha: "admin123",
+        empCod: 1, // Usar o empCod real retornado
+        setorCod: 1,
+        nivelAcesso_cod: 1,
+        usuario_cpf: null,
+        usuario_nrRegistro: null,
+        usuario_cargaHoraria: null,
+        usuario_dataContratacao: null,
+        usuario_DataNascimento: null,
+      };
+
+      await cadastrarUsuarioComJornada(usuarioData, {});
+
+      toast({
+        title: "Cadastro concluído!",
+        description: "Empresa, setores e administrador foram cadastrados com sucesso.",
+        variant: "default",
+      });
+
+      console.log("Dados enviados:", { empresaData, setores, adminData });
+      
+      // Resetar o formulário e voltar para a etapa 1
+      resetForm();
+      
+      // Opcional: redirecionar ou fechar o modal após o sucesso
+      // setIsOpen(false);
+      // router.push("/");
+    } catch (error) {
+      console.error("Erro ao cadastrar:", error);
+      setErrors((prev) => ({ ...prev, submit: "Erro ao finalizar cadastro" }));
+    }
   };
 
   // Render
   return (
     <div>
-      {/* Modal 1 - Empresa */}
+      <Toaster />
       {modalAtual === 1 && (
         <ModalEmpresa isOpen={isOpen} onClose={() => setIsOpen(false)} title="Seja Bem Vindo!" etapaAtual={1}>
           <div className="w-[85%] mx-auto">
@@ -248,7 +312,6 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
         </ModalEmpresa>
       )}
 
-      {/* Modal 2 - Setores */}
       {modalAtual === 2 && (
         <ModalEmpresa isOpen={isOpen} onClose={() => setIsOpen(false)} title="Seja Bem Vindo!" etapaAtual={2}>
           <div className="grid grid-rows-[1fr_auto] min-h-[40vh] gap-4">
@@ -287,7 +350,6 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
                   ))}
                 </div>
               )}
-              {/* Exibir erro se não houver setores */}
               {errors.setores && <p className="text-red-500 mt-2">{errors.setores}</p>}
             </div>
             <button
@@ -300,7 +362,7 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
           </div>
         </ModalEmpresa>
       )}
-      {/* Modal 3 - Administrador */}
+
       {modalAtual === 3 && (
         <ModalEmpresa isOpen={isOpen} onClose={() => setIsOpen(false)} title="Seja Bem Vindo!" etapaAtual={3}>
           <div className="w-[85%] mx-auto">
@@ -331,9 +393,15 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
               <div className="flex gap-5">
                 <div className="flex-1">
                   <label htmlFor="admin_tipoContrato" className="mb-2">Tipo de Contrato</label>
-                  <select id="admin_tipoContrato" name="admin_tipoContrato" value={adminData.admin_tipoContrato} onChange={handleAdminChange} className="border p-2 rounded-md w-full">
+                  <select
+                    id="admin_tipoContrato"
+                    name="admin_tipoContrato"
+                    value={adminData.admin_tipoContrato}
+                    onChange={handleAdminChange}
+                    className="border p-2 rounded-md w-full"
+                    disabled
+                  >
                     <option value="CLT">CLT</option>
-                    <option value="Estagio">Estágio</option>
                   </select>
                   {errors.admin_tipoContrato && <p className="text-red-500">{errors.admin_tipoContrato}</p>}
                 </div>
@@ -344,6 +412,7 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
               </div>
               <button type="submit" className="text-black p-2 rounded-md bg-[#FFB503]">Finalizar</button>
             </form>
+            {errors.submit && <p className="text-red-500 mt-2">{errors.submit}</p>}
           </div>
         </ModalEmpresa>
       )}
