@@ -67,7 +67,7 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
     admin_email: "",
     admin_setor: "",
     admin_tipoContrato: "CLT",
-    admin_cargo: "Administrador",
+    admin_cargo: "",
     admin_nvlAcesso: "Administrador",
   });
   const [setorInput, setSetorInput] = useState("");
@@ -181,7 +181,17 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
   };
 
   const handleNextStep = (nextStep: number) => {
+    // Validação para os passos 1 e 3 (já existente)
     if ((modalAtual === 1 || modalAtual === 3) && !validateStep(modalAtual)) return;
+  
+    // Validação específica para o passo 2: exige pelo menos um setor
+    if (modalAtual === 2 && setores.length === 0) {
+      setErrors((prev) => ({ ...prev, setores: "É necessário cadastrar pelo menos um setor" }));
+      return;
+    }
+  
+    // Se passou nas validações, avança para o próximo passo
+    setErrors({}); // Limpa erros antes de avançar
     setModalAtual(nextStep);
   };
 
@@ -224,9 +234,16 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
                 {errors.empCep && <p className="text-red-500">{errors.empCep}</p>}
               </div>
               {empresaData.empCidade && <p className="endereco-label">{`${empresaData.empEndereco}, ${empresaData.empCidade} - ${empresaData.empEstado}`}</p>}
-              <button type="button" onClick={() => handleNextStep(2)} className="text-black p-2 rounded-md bg-[#FFB503]">Próximo</button>
+              <button type="button" onClick={() => handleNextStep(2)} className="text-black p-2 rounded-md bg-[#FFB503]">Prosseguir</button>
             </form>
-            {isMobile && <span>Entra ai viado</span>}
+            {isMobile && (
+              <span
+                style={{ display: "block", textAlign: "center", marginTop: "2%" }}
+                onClick={() => router.push("/")}
+              >
+                Já tem uma conta? Faça Login!
+              </span>
+            )}
           </div>
         </ModalEmpresa>
       )}
@@ -239,27 +256,50 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
               <div className="flex items-center gap-2">
                 <div className="flex-1">
                   <label htmlFor="setorInput" className="mb-2">Nome do Setor:</label>
-                  <input id="setorInput" value={setorInput} onChange={handleSetorChange} placeholder="Digite o nome do setor" className="border p-2 rounded-md w-full" />
+                  <input
+                    id="setorInput"
+                    value={setorInput}
+                    onChange={handleSetorChange}
+                    placeholder="Digite o nome do setor"
+                    className="border p-2 rounded-md w-full"
+                  />
                   {errors.setorInput && <p className="text-red-500 mt-1">{errors.setorInput}</p>}
                 </div>
-                <button onClick={handleAddSetor} className="bg-[#FFB503] text-black w-10 h-10 rounded-full flex items-center justify-center mt-6 border-none cursor-pointer text-lg">+</button>
+                <button
+                  onClick={handleAddSetor}
+                  className="bg-[#FFB503] text-black w-10 h-10 rounded-full flex items-center justify-center mt-6 border-none cursor-pointer text-lg"
+                >
+                  +
+                </button>
               </div>
               {setores.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-2">
                   {setores.map((setor, index) => (
                     <div key={index} className="relative inline-block">
                       <span className="border border-[#bbbbbb] rounded-md p-2">{setor}</span>
-                      <button onClick={() => handleRemoveSetor(index)} className="absolute -top-2 -right-2 bg-[#D61818] text-white w-5 h-5 rounded-full flex items-center justify-center border-none cursor-pointer text-xs">×</button>
+                      <button
+                        onClick={() => handleRemoveSetor(index)}
+                        className="absolute -top-2 -right-2 bg-[#D61818] text-white w-5 h-5 rounded-full flex items-center justify-center border-none cursor-pointer text-xs"
+                      >
+                        ×
+                      </button>
                     </div>
                   ))}
                 </div>
               )}
+              {/* Exibir erro se não houver setores */}
+              {errors.setores && <p className="text-red-500 mt-2">{errors.setores}</p>}
             </div>
-            <button type="button" onClick={() => handleNextStep(3)} className="text-black p-2 rounded-md bg-[#FFB503] w-full">Próximo</button>
+            <button
+              type="button"
+              onClick={() => handleNextStep(3)}
+              className="text-black p-2 rounded-md bg-[#FFB503] w-full"
+            >
+              Prosseguir
+            </button>
           </div>
         </ModalEmpresa>
       )}
-
       {/* Modal 3 - Administrador */}
       {modalAtual === 3 && (
         <ModalEmpresa isOpen={isOpen} onClose={() => setIsOpen(false)} title="Seja Bem Vindo!" etapaAtual={3}>
@@ -277,17 +317,8 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
               </div>
               <div className="flex-1">
                 <label htmlFor="admin_cargo" className="mb-2">Cargo</label>
-                <select
-                  id="admin_cargo"
-                  name="admin_cargo"
-                  value={adminData.admin_cargo}
-                  onChange={handleAdminChange}
-                  className="border p-2 rounded-md w-full"
-                >
-                  <option value="Administrador">Administrador</option>
-                  <option value="Gerente">Gerente</option>
-                  <option value="Funcionário">Funcionário</option>
-                </select>
+                <input id="admin_cargo" name="admin_cargo" value={adminData.admin_cargo} onChange={handleAdminChange} className="border p-2 rounded-md w-full" />
+                {errors.admin_cargo && <p className="text-red-500">{errors.admin_cargo}</p>}
               </div>
               <div className="flex-1">
                 <label htmlFor="admin_setor" className="mb-2">Setor</label>

@@ -24,12 +24,12 @@ export default function Modal({ isOpen, onClose, title, children, etapaAtual }: 
           <div className="progress">
             <div className={`circle ${etapaAtual >= 1 ? "active" : "done"}`}>
               <div className="label"></div>
-              <div className={`title ${etapaAtual === 1 ? "active" : ""}`}>Empresa</div>
+              <div className={`title ${etapaAtual >= 1 ? "active" : ""}`}>Empresa</div>
             </div>
             <div className={`bar ${etapaAtual > 1 ? "active" : "done"}`}></div>
             <div className={`circle ${etapaAtual >= 2 ? "active" : etapaAtual > 2 ? "done" : ""}`}>
               <div className="label"></div>
-              <div className={`title ${etapaAtual === 2 ? "active" : ""}`}>Setores</div>
+              <div className={`title ${etapaAtual >= 2 ? "active" : ""}`}>Setores</div>
             </div>
             <div className={`bar ${etapaAtual >= 3 ? "active" : "done"}`}></div>
             <div className={`circle ${etapaAtual === 3 ? "active" : ""}`}>

@@ -215,7 +215,7 @@ export default function Home() {
 
                         {isMobile ? (
                             <div className='w-full text-center mb-2'>
-                            <a href='' className='text-sm' style={{textAlign: 'center'}}>
+                            <a href='' className='text-sm' style={{textAlign: 'center'}} onClick={() => router.push("/cadastro-empresa")}>
                                 É novo aqui? Cadastre sua empresa!
                             </a>
                             </div>
