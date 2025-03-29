@@ -1,108 +1,146 @@
-import { NextResponse } from 'next/server'
-import { NextRequest } from 'next/server'
+import { NextResponse, NextRequest } from 'next/server'
+import { hasAuthCookie } from './lib/server/auth/cookie';
+import { attemptGetLocalUserRoleID } from './lib/server/auth/login';
+import { checkAccess } from './lib/permissions';
 
 
 
-interface User {
-    name: string
-    pass: string
-    role: number
-}
-const ROLES = {
-    ADMIN: 0,
-    GESTOR: 1,
-    FUNCIONARIO: 2,
-    ESTAGIARIO: 3
-}
-const currentUser: User = {
-    name: "me",
-    pass: "me",
-    //role: ROLES.ADMIN
-    role: -1
-}
-const accessRoutes = {
-    ADMIN: [
-        "/inicio",
-        "/horas",
-        "/ausencias",
-        "/falhas",
-        "/colaboradores",
-        "/solicitacoes",
-        "/pendencias",
-        "/calendario",
-        "/empresa",
-        "/perfil"
-    ],
-    GESTOR: [
-        "/inicio",
-        "/horas",
-        "/ausencias",
-        "/falhas",
-        "/colaboradores",
-        "/solicitacoes",
-        "/pendencias",
-        "/calendario",
-        "/perfil"
-    ],
-    FUNCIONARIO: [
-        "/inicio",
-        "/solicitacoes",
-        "/marcacoes",
-        "/horas",
-        "/pendencias"
-    ]/*,
-    ESTAGIARIO: [
-        "/inicio",
-        "/solicitacoes",
-        "/marcacoes",
-        "/horas",
-        "/pendencias"
-    ]*/
+
+
+async function myDEBUG(req: NextRequest){
+    
+    const tester = await attemptGetLocalUserRoleID(req);
+    const test = await tester.text();
+    const role = test == undefined ? -1 : JSON.parse(test).role;
+    console.log(`
+        ${req.nextUrl.pathname}
+
+        hasAuthCookie(): ${await hasAuthCookie()}
+        attemptGetLocalUserRoleID(): ${tester}
+            .text(): ${test}
+            .role(): ${role}
+        checkAccess(): ${checkAccess(role, req)}
+        
+        isAuthenticated(): ${await isAuthenticated(req)}
+        isAuthorized(): ${await isAuthorized(role, req)}
+        
+        `)
 }
 
-function isPathLogin(path: string) {
-    if (path === "/login")
-        return true
-    return false
+
+function isPath(targetName: String, req: NextRequest): boolean {
+    return req.nextUrl.pathname === targetName;
 }
-function getRoleName(roleID: number): string {
-    const name = Object.keys(ROLES).find(name => ROLES[name as keyof typeof ROLES] === roleID)
-    if (typeof name === "undefined")
-        return ""
-    return name;
+async function isAuthenticated(req: NextRequest){
+    if(!(await hasAuthCookie()))
+        return undefined;
+
+    const res = await attemptGetLocalUserRoleID();
+    if(res.status == 200)
+        return (await res.json()).role
+    return undefined;
 }
-function isUserAllowed(user: User, path: string): boolean {
-    const role = getRoleName(user.role)
-    return accessRoutes[role as keyof typeof accessRoutes].includes(path);
+async function isAuthorized(roleID: number, req: NextRequest) {
+    return checkAccess(roleID, req);
 }
-function isUserLogged(user: User): boolean {
-    if (typeof user === "undefined")
-        return false
-    else
-        if (user.role === -1)
-            return false
-    return Object.values(ROLES).includes(+user.role);
-}
+
+
 
 
 // This function can be marked `async` if using `await` inside
-export function middleware(request: NextRequest) {/*
-    console.log(isUserLogged(currentUser))
-    if (!isUserLogged(currentUser))
-        return NextResponse.redirect(new URL("/login", request.url));
-    
-    console.log("pass")
-    if (isPathLogin(request.nextUrl.pathname))
-        return NextResponse.redirect(new URL("/inicio", request.url))
+export async function middleware(req: NextRequest) {
+    myDEBUG(req);
 
-    if (!isUserAllowed(currentUser, request.nextUrl.pathname))
-        return new NextResponse("Não autorizado.");
+    if(isPath("/test", req))
+        return NextResponse.next();
     
-    return NextResponse.rewrite(new URL("/test", request.url))
-*/
+
+    const role = await isAuthenticated(req);
+    if(role === undefined)
+        if(isPath("/login", req))
+            return NextResponse.next();
+        else
+            return NextResponse.rewrite(new URL("/login", req.url));
+    
+
+    
+    if(isPath("/logout", req)){
+        const res = new NextResponse("Logged out.");
+        res.cookies.delete('auth-token');
+        return res;
+    }
+
+
+    if(!(await isAuthorized(role, req)))
+        if(isPath("/login", req) || isPath("/", req))
+            return NextResponse.rewrite(new URL("/inicio", req.url));
+        else
+            return new NextResponse("Not authorized.");
 }
+
+
 
 // See "Matching Paths" below to learn more
 export const config = {
     matcher: ['/:path', '/'],
 }
+
+
+// This function can be marked `async` if using `await` inside
+//export async function middleware(request: NextRequest) {
+    /*console.log(
+        `
+        hasAuthCookie: ${hasAuthCookie(request)}
+        isPathLogin: ${isPathLogin(request)}
+        checkLogout: ${checkLogout(request)}
+        isUserAllowed: ${await isUserAllowed(request)}
+        `
+    )
+    if (!hasAuthCookie(request))
+        if (isPathLogin(request))
+            return NextResponse.next();
+        else
+            return NextResponse.redirect(new URL("/login", request.url));
+
+
+
+
+    if (checkLogout(request)) {
+
+        const response = new NextResponse("Logged out");
+        response.cookies.delete('auth-token');
+        return response;
+        //deleteAuthCookie();
+    }
+    //return logOut();
+    
+    if (!await isUserAllowed(request))
+        return new NextResponse("Não autorizado.");
+    else
+        return NextResponse.rewrite(new URL("/test", request.url));
+*/
+
+
+
+
+
+    //if (isUserAllowed())
+
+    /*
+    if (!isPathLogin(request))
+        if (!isAuthenticated(request.cookies))
+            if (!isUserAllowed(currentUser, request.nextUrl.pathname))
+                return new NextResponse("Não autorizado.");
+            else
+                return NextResponse.rewrite(new URL("/test", request.url));
+        else
+            return NextResponse.redirect(new URL("/login", request.url));
+    else
+        if (isAuthenticated(request.cookies))
+            return NextResponse.redirect(new URL("/inicio", request.url));
+    
+}
+*/
+
+
+
