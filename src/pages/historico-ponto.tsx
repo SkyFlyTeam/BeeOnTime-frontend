@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { PointsHistoryTable } from "@/components/custom/histPonto/points-history-table";
+import { useState } from "react";
 
 // Tipagem dos dados
 interface PointEntry {
@@ -55,6 +56,9 @@ const mockEntries = [
 ];
 
 export default function PointsHistoryPage() {
+  //Simulando o diferente acesso
+  const[accessLevel, setAccessLevel] = useState<"USER" | "ADM">("ADM")
+
   const handleEdit = (entry: PointEntry) => {
     // Lógica para editar a entrada (ex.: abrir um modal)
     console.log("Editar entrada:", entry);
@@ -62,8 +66,13 @@ export default function PointsHistoryPage() {
 
   return (
     <div className="flex flex-col  p-6 md:p-9">
-      <h1 className="text-xl md:text-3xl font-semibold mb-4">Meus pontos</h1>
-      <PointsHistoryTable entries={mockEntries} onEdit={handleEdit} />
+      <h1 className="text-xl md:text-3xl font-semibold mb-4">
+        {accessLevel === "USER" ? "Meus Pontos" : "Pontos"}
+        </h1>
+      <PointsHistoryTable 
+      entries={mockEntries} 
+      onEdit={handleEdit}
+      accessLevel={accessLevel} />
     </div>
   );
 }
