@@ -33,15 +33,16 @@ async function isAuthorized(roleID: number, req: NextRequest) {
 
 // This function can be marked `async` if using `await` inside
 export async function middleware(req: NextRequest) {
+    // Get role ID if logged in. 'Undefined' = Not logged in
     const role = await isAuthenticated(req);
     if (role === undefined)
         if (isPath("/", req))
             return NextResponse.next();
         else
-            return NextResponse.redirect(new URL("/", req.url));
+            return NextResponse.redirect(new URL("/", req.url)); // Enforces Login page address
 
 
-
+    // Allows to Logout when authorized
     if (isPath("/logout", req)) {
         const res = new NextResponse("Logged out.");
         res.cookies.delete('auth-token');
@@ -49,6 +50,7 @@ export async function middleware(req: NextRequest) {
     }
 
 
+    // Access pass, controlled in "@/src/lib/permissions.ts"
     if (!(await isAuthorized(role, req)))
         if (isPath("/", req))
             return NextResponse.rewrite(new URL("/inicio", req.url));

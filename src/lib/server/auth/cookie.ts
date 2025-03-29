@@ -10,7 +10,6 @@ function getAuthTokenContent(req: NextRequest | Request): string {
     const res = (req as NextRequest).cookies.get('auth-token')?.value;
     if (res === undefined)
         return "";
-    console.log(res as string)
     return res as string;
 }
 
@@ -20,7 +19,6 @@ export function getContentFromAuthCookie(req: NextRequest | Request): String {
         return content;
     }
     catch (error) {
-        console.log("getEmailFromAuthCookie(): \n" + error)
         return "";
     }
 }
@@ -34,7 +32,6 @@ export function getEmailFromAuthCookie(req: NextRequest | Request): String {
         return email;
     }
     catch (error) {
-        console.log("getEmailFromAuthCookie(): \n" + error)
         return "";
     }
 }
@@ -54,12 +51,10 @@ export function getCredsFromAuthCookie(req: NextRequest | Request): AccessPass {
         return creds;
     }
     catch (error) {
-        console.log("getCredsFromAuthCookie(): \n" + error)
-        const credsFake: AccessPass = {
+        return  {
             usuarioEmail: "",
             usuario_senha: ""
-        }
-        return credsFake;
+        } as AccessPass;
     }
 }
 export function getTokenFromAuthCookie(req: NextRequest | Request): String {
@@ -71,7 +66,6 @@ export function getTokenFromAuthCookie(req: NextRequest | Request): String {
         return token;
     }
     catch (error) {
-        console.log("getTokenFromAuthCookie(): \n" + error)
         return "";
     }
 }

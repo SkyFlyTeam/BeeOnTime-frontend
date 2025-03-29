@@ -43,9 +43,7 @@ const accessRoutes = {
 
 
 function getRoleName(roleID: number): string | undefined {
-    //Object.keys(ROLES).find(name => console.log(name + " " + ROLES[name as keyof typeof ROLES] + " " + roleID + " " + (ROLES[name as keyof typeof ROLES] === roleID).toString()))
     const name = Object.keys(ROLES).find(name => ROLES[name as keyof typeof ROLES] == roleID)
-    //console.log(name)
     return name;
 }
 

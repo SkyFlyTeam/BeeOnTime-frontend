@@ -20,7 +20,6 @@ async function setAuthCookie(creds: AccessPass, token: String): Promise<NextResp
         "usuario_senha": "${creds.usuario_senha}"
     }`
 
-    //const cookieToken = NextResponse.json({ token: token });
     const cookieToken = new NextResponse();
     //
     cookieToken.cookies.set({
@@ -34,20 +33,16 @@ async function setAuthCookie(creds: AccessPass, token: String): Promise<NextResp
 
 export async function attemptLoginSession(creds: AccessPass): Promise<Response> {
     try {
-        console.log("attemptLoginSession START "+JSON.stringify(creds))
         const res = await axios.post(`${MS_USUARIO}/auth/login`, JSON.stringify(creds), {
             headers: { "Content-Type": "application/json" },
         });
-        console.log("attemptLoginSession AXIOS "+JSON.stringify(creds))
-        const tester = await res.data
-        console.log("attemptLoginSession DATA "+tester+" "+res.status) 
+        const token = await res.data
         if (res.status === 200)
-            return setAuthCookie(creds, tester);
+            return setAuthCookie(creds, token);
         return axiosToResponse(res);
     }
     catch (error) {
         const res = error as AxiosResponse;
-        console.log("error " + await res.data + res.status)
         return axiosToResponse(res);
     }
 }
@@ -59,25 +54,20 @@ export async function attemptLoginSession(creds: AccessPass): Promise<Response> 
 
 
 async function resetAuthCookie(req: NextRequest | Request){
-    console.log("Resetting 'auth-token' cookie.")
     const creds = getCredsFromAuthCookie(req);
     return await attemptLoginSession(creds);
 }
 
 async function getUserRoleID(email: String, req: NextRequest | Request): Promise<Response>{
     try {
-        console.log("getUserRoleID " +email)
         const res = await axios.get(`${MS_USUARIO}/auth/${email}`,{
             headers: { Authorization: "Bearer " + getTokenFromAuthCookie(req)}
         });
-        const tester = await res.data;
-        console.log("getUserRoleID " +tester)
-        return new Response(`{ "role": "${tester}"}`);
+        const roleID = await res.data;
+        return new Response(`{ "role": "${roleID}"}`);
     }
     catch (error) {
         const res = error as AxiosResponse;
-        const  tester = await res.data
-        console.log("getUserRoleID ERROR "+tester + " " +res.status)
         if (res.status === 403)
             return resetAuthCookie(req);
         return axiosToResponse(res);
@@ -86,10 +76,8 @@ async function getUserRoleID(email: String, req: NextRequest | Request): Promise
 
 export async function attemptGetLocalUserRoleID(req: Request | NextRequest): Promise<Response> {
     const email = getEmailFromAuthCookie(req);
-    console.log("attemptGetLocalUserRoleID "+email)
     if (email === "")
         return new Response(`{ "role": "Email not Found"}`, { status: HttpStatusCode.NotFound })
-    console.log("attemptGetLocalUserRoleID SUCC "+email)
     return await getUserRoleID(email, req);
 }
 

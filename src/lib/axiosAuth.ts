@@ -9,7 +9,7 @@ export function axiosToResponse(res: AxiosResponse): Response{
 
 /*axiosAuth.interceptors.request.use(
     async (config) => {
-        const token = await getTokenFromAuthCookie();
+        const token = await getTokenFromAuthCookie(); // Falta meio para adquirir automaticamente token, 'cookies()' não funciona no cliente
         config.headers["Authorization"] = "Bearer " + token
         return config
     },
