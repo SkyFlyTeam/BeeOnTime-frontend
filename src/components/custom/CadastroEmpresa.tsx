@@ -1,18 +1,58 @@
-// src/components/CadastroForm.tsx
 "use client";
 
 import { ChangeEvent, useEffect, useState } from "react";
-import { cadastrarEmpresa } from "@/services/empresaService";
-import { cadastrarSetor } from "@/services/setorService";
+import { cadastrarEmpresa } from "@/src/services/empresaService";
+import { cadastrarSetor } from "@/src/services/setorService";
 import { z } from "zod";
 import ModalEmpresa from "./ModalEmpresa";
-import CadastroSetores from "./CadastroSetores";
-import CadastroAdministradorForm from "./CadastroAdministrador";
+import router from "next/router";
 
-export default function CadastroEmpresaForm() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [modalAtual, setModalAtual] = useState(1)
-  const [formData, setFormData] = useState({
+// Interfaces e Schemas
+interface EmpresaFormData {
+  empNome: string;
+  empRazaoSocial: string;
+  empCnpj: string;
+  empCep: string;
+  empCidade: string;
+  empEstado: string;
+  empEndereco: string;
+}
+
+interface AdminFormData {
+  admin_nome: string;
+  admin_email: string;
+  admin_setor: string;
+  admin_tipoContrato: string;
+  admin_cargo: string;
+  admin_nvlAcesso: string;
+}
+
+const empresaSchema = z.object({
+  empNome: z.string().min(1, "Nome é obrigatório"),
+  empRazaoSocial: z.string().min(1, "Razão Social é obrigatória"),
+  empCnpj: z.string().min(14, "CNPJ deve ser válido"),
+  empCep: z.string().min(8, "CEP deve ser válido"),
+  empCidade: z.string().min(1, "Cidade é obrigatória"),
+  empEstado: z.string().min(1, "Estado é obrigatório"),
+  empEndereco: z.string().min(1, "Endereço é obrigatório"),
+});
+
+const adminSchema = z.object({
+  admin_nome: z.string().min(1, "Nome do administrador é obrigatório"),
+  admin_email: z.string().email("Email inválido").min(1, "Email é obrigatório"),
+  admin_setor: z.string().min(1, "Setor é obrigatório"),
+  admin_tipoContrato: z.string().min(1, "Tipo de contrato é obrigatório"),
+});
+
+interface CadastroEmpresaFormProps {
+  isMobile: boolean;
+}
+
+// Componente Principal
+export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormProps) {
+  const [isOpen, setIsOpen] = useState(true);
+  const [modalAtual, setModalAtual] = useState(1);
+  const [empresaData, setEmpresaData] = useState<EmpresaFormData>({
     empNome: "",
     empRazaoSocial: "",
     empCnpj: "",
@@ -21,457 +61,260 @@ export default function CadastroEmpresaForm() {
     empEstado: "",
     empEndereco: "",
   });
-  const [setoresData, setSetoresData] = useState<string[]>([]);
-  const [adminData, setAdminData] = useState({
+  const [setores, setSetores] = useState<string[]>([]);
+  const [adminData, setAdminData] = useState<AdminFormData>({
     admin_nome: "",
     admin_email: "",
     admin_setor: "",
-    admin_tipoContrato: "",
+    admin_tipoContrato: "CLT",
     admin_cargo: "Administrador",
-    admin_nvlAcesso: "Administrador"
+    admin_nvlAcesso: "Administrador",
   });
   const [setorInput, setSetorInput] = useState("");
-  const [formErrors, setFormErrors] = useState<any>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  //useEffect dedicado a, toda vez que o modal for fechado, voltamos para primeira página, tudo isso sem perder os dados
+  // Efeitos
   useEffect(() => {
-    if (!isOpen) {
-      setModalAtual(1);
-    }
+    if (!isOpen) setModalAtual(1);
   }, [isOpen]);
 
   useEffect(() => {
     const fetchAddress = async () => {
-      const cepNumerico = formData.empCep.replace("-", "");
-      
-      if (cepNumerico.length === 8) {
-        try {
-          const response = await fetch(`https://viacep.com.br/ws/${cepNumerico}/json/`);
-          const data = await response.json();
-          
-          if (!data.erro) {
-            setFormData(prevFormData => ({
-              ...prevFormData,
-              empCidade: data.localidade,
-              empEstado: data.uf,
-              empEndereco: `${data.logradouro}, ${data.bairro}`
-            }));
-          }
-        } catch (error) {
-          console.error("Erro ao buscar CEP:", error);
-        }
+      const cepNumerico = empresaData.empCep.replace(/\D/g, "");
+      if (cepNumerico.length !== 8) return;
+
+      try {
+        const response = await fetch(`https://viacep.com.br/ws/${cepNumerico}/json/`);
+        const data = await response.json();
+        if (data.erro) throw new Error("CEP não encontrado");
+        
+        setEmpresaData((prev) => ({
+          ...prev,
+          empCidade: data.localidade,
+          empEstado: data.uf,
+          empEndereco: `${data.logradouro}, ${data.bairro}`,
+        }));
+        setErrors((prev) => ({ ...prev, empCep: "" }));
+      } catch (error) {
+        setEmpresaData((prev) => ({ ...prev, empCidade: "", empEstado: "", empEndereco: "" }));
+        setErrors((prev) => ({ ...prev, empCep: "CEP inválido ou não encontrado" }));
       }
     };
-  
     fetchAddress();
-  }, [formData.empCep]);
-  
+  }, [empresaData.empCep]);
 
-
-  // handleChangers para fazer com que os inputs funcionem tranquilamente
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  // Handlers
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    if (name === "empCnpj") {
-      const formattedValue = formatCNPJ(value);
-      setFormData({ ...formData, [name]: formattedValue });
-    } else if (name === "empCep") {
-      const formattedValue = formatCEP(value);
-      setFormData({ ...formData, [name]: formattedValue });
-    } else {
-      setFormData({ ...formData, [name]: value });
-    }
+    const formatters: Record<string, (v: string) => string> = {
+      empCnpj: formatCNPJ,
+      empCep: formatCEP,
+    };
+    const formattedValue = formatters[name] ? formatters[name](value) : value;
+    setEmpresaData((prev) => ({ ...prev, [name]: formattedValue }));
   };
 
-  const handleChangeAdmin = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleAdminChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setAdminData({ ...adminData, [name]: value });
+    setAdminData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handles para Setor
-  const handleSetorInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleSetorChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSetorInput(e.target.value);
   };
 
   const handleAddSetor = () => {
-    if (setorInput.trim() === "") return;
-    const updatedSetores = [...setoresData, setorInput];
-    setSetoresData(updatedSetores);
-    setSetorInput("");
-  };
+    const trimmedInput = setorInput.trim();
+    if (!trimmedInput) return;
 
-  const handleRemoveSetor = (indexToRemove: number) => {
-    const updatedSetores = setoresData.filter((_, index) => index !== indexToRemove);
-    setSetoresData(updatedSetores);
-  };
-
-  //Funções de máscara para CNPJ e CEP
-  const formatCNPJ = (value: string) => {
-    const digits = value.replace(/\D/g, "");
-    if (digits.length <= 14) {
-      return digits
-        .replace(/(\d{2})(\d)/, "$1.$2")
-        .replace(/(\d{3})(\d)/, "$1.$2")
-        .replace(/(\d{3})(\d)/, "$1/$2")
-        .replace(/(\d{4})(\d)/, "$1-$2");
+    if (setores.some((setor) => setor.toLowerCase() === trimmedInput.toLowerCase())) {
+      setErrors((prev) => ({ ...prev, setorInput: "Este setor já foi cadastrado" }));
+      return;
     }
-    return digits.slice(0, 14).replace(/(\d{2})(\d)/, "$1.$2")
+
+    setSetores((prev) => [...prev, trimmedInput]);
+    setSetorInput("");
+    setErrors((prev) => ({ ...prev, setorInput: "" }));
+  };
+
+  const handleRemoveSetor = (index: number) => {
+    setSetores((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Formatters
+  const formatCNPJ = (value: string) =>
+    value
+      .replace(/\D/g, "")
+      .slice(0, 14)
+      .replace(/(\d{2})(\d)/, "$1.$2")
       .replace(/(\d{3})(\d)/, "$1.$2")
       .replace(/(\d{3})(\d)/, "$1/$2")
       .replace(/(\d{4})(\d)/, "$1-$2");
+
+  const formatCEP = (value: string) =>
+    value
+      .replace(/\D/g, "")
+      .slice(0, 8)
+      .replace(/(\d{5})(\d)/, "$1-$2");
+
+  // Validações
+  const validateStep = (step: number) => {
+    if (step === 1) {
+      const result = empresaSchema.safeParse({
+        ...empresaData,
+        empCnpj: empresaData.empCnpj.replace(/\D/g, ""),
+        empCep: empresaData.empCep.replace(/\D/g, ""),
+      });
+      if (!result.success) {
+        setErrors(result.error.errors.reduce((acc, err) => ({ ...acc, [err.path[0]]: err.message }), {}));
+        return false;
+      }
+    } else if (step === 3) {
+      const result = adminSchema.safeParse(adminData);
+      if (!result.success) {
+        setErrors(result.error.errors.reduce((acc, err) => ({ ...acc, [err.path[0]]: err.message }), {}));
+        return false;
+      }
+    }
+    setErrors({});
+    return true;
   };
 
-  const formatCEP = (value: string) => {
-    const digits = value.replace(/\D/g, "");
-    if (digits.length <= 8) {
-      return digits.replace(/(\d{5})(\d)/, "$1-$2");
-    }
-    return digits.slice(0, 8).replace(/(\d{5})(\d)/, "$1-$2");
+  const handleNextStep = (nextStep: number) => {
+    if ((modalAtual === 1 || modalAtual === 3) && !validateStep(modalAtual)) return;
+    setModalAtual(nextStep);
   };
 
-  // Função final, que envia os dados para cada endpoint
-  const handleSubmit = (formData: any, setoresData: any, adminData: any) => {
-    cadastrarEmpresa(formData)
-    cadastrarSetor(setoresData)
-    }
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateStep(3)) return;
+    cadastrarEmpresa(empresaData);
+    cadastrarSetor(setores);
+    console.log("Dados enviados:", { empresaData, setores, adminData });
+    setIsOpen(false);
+    router.push("/")
+  };
 
+  // Render
   return (
     <div>
-      <button onClick={() => setIsOpen(true)} className="bg-blue-500 text-white p-2 rounded-md">
-        Abrir Cadastro
-      </button>
-
-      {/* Primeiro Modal - Cadastro Empresa */}
+      {/* Modal 1 - Empresa */}
       {modalAtual === 1 && (
-        <ModalEmpresa isOpen={isOpen} onClose={() => setIsOpen(false)} title="Seja Bem Vindo!" etapaAtual={modalAtual}>
-          <div style={{ width: "85%", margin: "0 auto" }}>
+        <ModalEmpresa isOpen={isOpen} onClose={() => setIsOpen(false)} title="Seja Bem Vindo!" etapaAtual={1}>
+          <div className="w-[85%] mx-auto">
             <form className="flex flex-col gap-4">
-              <div>
-                <div className="flex-1" style={{ marginTop: "3%" }}>
-                  <label htmlFor="empNome" className="mb-2">Nome</label>
-                  <input
-                    id="empNome"
-                    type="text"
-                    name="empNome"
-                    value={formData.empNome}
-                    onChange={handleChange}
-                    
-                    className="border p-2 rounded-md w-full"
-                  />
-                  {formErrors.empNome && <p className="text-red-500">{formErrors.empNome._errors[0]}</p>}
-                </div>
-                <div className="flex-1" style={{ marginTop: "3%" }}>
-                  <label htmlFor="empRazaoSocial" className="mb-2">Razão Social</label>
-                  <input
-                    id="empRazaoSocial"
-                    type="text"
-                    name="empRazaoSocial"
-                    value={formData.empRazaoSocial}
-                    onChange={handleChange}
-                    
-                    className="border p-2 rounded-md w-full"
-                  />
-                  {formErrors.empRazaoSocial && <p className="text-red-500">{formErrors.empRazaoSocial._errors[0]}</p>}
-                </div>
+              <div className="flex-1 mt-3">
+                <label htmlFor="empNome" className="mb-2">Nome</label>
+                <input id="empNome" name="empNome" value={empresaData.empNome} onChange={handleInputChange} className="border p-2 rounded-md w-full" />
+                {errors.empNome && <p className="text-red-500">{errors.empNome}</p>}
               </div>
-              <div>
-                <div className="flex-1">
-                  <label htmlFor="empCnpj" className="mb-2">CNPJ</label>
-                  <input
-                    id="empCnpj"
-                    type="text"
-                    name="empCnpj"
-                    value={formData.empCnpj}
-                    onChange={handleChange}
-                    
-                    maxLength={18}
-                    className="border p-2 rounded-md w-full"
-                  />
-                  {formErrors.empCnpj && <p className="text-red-500">{formErrors.empCnpj._errors[0]}</p>}
-                </div>
-                <div className="flex-1" style={{ marginTop: "3%" }}>
-                  <label htmlFor="empCep" className="mb-2">CEP do Endereço</label>
-                  <input
-                    id="empCep"
-                    type="text"
-                    name="empCep"
-                    value={formData.empCep}
-                    onChange={handleChange}
-                    
-                    className="border p-2 rounded-md w-full"
-                  />
-                  {formErrors.empCep && <p className="text-red-500">{formErrors.empCep._errors[0]}</p>}
-                </div>
+              <div className="flex-1 mt-3">
+                <label htmlFor="empRazaoSocial" className="mb-2">Razão Social</label>
+                <input id="empRazaoSocial" name="empRazaoSocial" value={empresaData.empRazaoSocial} onChange={handleInputChange} className="border p-2 rounded-md w-full" />
+                {errors.empRazaoSocial && <p className="text-red-500">{errors.empRazaoSocial}</p>}
               </div>
-
-              {formData.empCidade && formData.empEstado && formData.empEndereco && (
-                <div className="endereco-label">
-                  {`${formData.empEndereco}, ${formData.empCidade} - ${formData.empEstado}`}
-                </div>
-              )}
-
-              <button
-                type="submit"
-                className="text-black p-2 rounded-md"
-                style={{ backgroundColor: "#FFB503" }}
-                onClick={() => setModalAtual(2)}
-              >
-                Próximo
-              </button>
+              <div className="flex-1">
+                <label htmlFor="empCnpj" className="mb-2">CNPJ</label>
+                <input id="empCnpj" name="empCnpj" value={empresaData.empCnpj} onChange={handleInputChange} maxLength={18} className="border p-2 rounded-md w-full" />
+                {errors.empCnpj && <p className="text-red-500">{errors.empCnpj}</p>}
+              </div>
+              <div className="flex-1 mt-3">
+                <label htmlFor="empCep" className="mb-2">CEP do Endereço</label>
+                <input id="empCep" name="empCep" value={empresaData.empCep} onChange={handleInputChange} className="border p-2 rounded-md w-full" />
+                {errors.empCep && <p className="text-red-500">{errors.empCep}</p>}
+              </div>
+              {empresaData.empCidade && <p className="endereco-label">{`${empresaData.empEndereco}, ${empresaData.empCidade} - ${empresaData.empEstado}`}</p>}
+              <button type="button" onClick={() => handleNextStep(2)} className="text-black p-2 rounded-md bg-[#FFB503]">Próximo</button>
             </form>
+            {isMobile && <span>Entra ai viado</span>}
           </div>
         </ModalEmpresa>
       )}
 
-      {/* Segundo Modal - Cadastro Setores */}
+      {/* Modal 2 - Setores */}
       {modalAtual === 2 && (
-        <ModalEmpresa
-          isOpen={isOpen}
-          onClose={() => setIsOpen(false)}
-          title="Seja Bem Vindo!"
-          etapaAtual={modalAtual}
-        >
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateRows: '1fr auto',
-              minHeight: '40vh',
-              gap: '1rem', // Adjusts the space between the content and the button
-            }}
-          >
-            {/* Conteúdo superior */}
+        <ModalEmpresa isOpen={isOpen} onClose={() => setIsOpen(false)} title="Seja Bem Vindo!" etapaAtual={2}>
+          <div className="grid grid-rows-[1fr_auto] min-h-[40vh] gap-4">
             <div>
               <div className="flex items-center gap-2">
                 <div className="flex-1">
-                  <label htmlFor="setorInput" className="mb-2">
-                    Nome do Setor:
-                  </label>
-                  <input
-                    id="setorInput"
-                    type="text"
-                    value={setorInput}
-                    onChange={handleSetorInputChange}
-                    placeholder="Digite o nome do setor"
-                    className="border p-2 rounded-md w-full"
-                  />
+                  <label htmlFor="setorInput" className="mb-2">Nome do Setor:</label>
+                  <input id="setorInput" value={setorInput} onChange={handleSetorChange} placeholder="Digite o nome do setor" className="border p-2 rounded-md w-full" />
+                  {errors.setorInput && <p className="text-red-500 mt-1">{errors.setorInput}</p>}
                 </div>
-                <button
-                  type="button"
-                  onClick={handleAddSetor}
-                  style={{
-                    backgroundColor: '#FFB503',
-                    color: 'black',
-                    width: '40px',
-                    height: '40px',
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginTop: '23px',
-                    border: 'none',
-                    cursor: 'pointer',
-                    fontSize: 'large',
-                  }}
-                >
-                  +
-                </button>
+                <button onClick={handleAddSetor} className="bg-[#FFB503] text-black w-10 h-10 rounded-full flex items-center justify-center mt-6 border-none cursor-pointer text-lg">+</button>
               </div>
-              <div>
-                {setoresData.length > 0 && (
-                  <div className="mt-2">
-                    <div className="flex flex-wrap gap-2">
-                      {setoresData.map((setor, index) => (
-                        <div
-                          key={index}
-                          style={{
-                            position: 'relative',
-                            display: 'inline-block',
-                          }}
-                        >
-                          <span
-                            style={{
-                              border: '1px solid #bbbbbb',
-                              borderRadius: '5px',
-                              padding: '5px 10px',
-                              display: 'inline-block',
-                            }}
-                          >
-                            {setor}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveSetor(index)}
-                            style={{
-                              position: 'absolute',
-                              top: '-8px',
-                              right: '-8px',
-                              backgroundColor: '#D61818',
-                              color: 'white',
-                              width: '20px',
-                              height: '20px',
-                              borderRadius: '50%',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              border: 'none',
-                              cursor: 'pointer',
-                              fontSize: '12px',
-                            }}
-                          >
-                            ×
-                          </button>
-                        </div>
-                      ))}
+              {setores.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {setores.map((setor, index) => (
+                    <div key={index} className="relative inline-block">
+                      <span className="border border-[#bbbbbb] rounded-md p-2">{setor}</span>
+                      <button onClick={() => handleRemoveSetor(index)} className="absolute -top-2 -right-2 bg-[#D61818] text-white w-5 h-5 rounded-full flex items-center justify-center border-none cursor-pointer text-xs">×</button>
                     </div>
-                  </div>
-                )}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
-
-            {/* Botão na parte inferior */}
-            <button
-              type="button"
-              className="text-black p-2 rounded-md"
-              onClick={() => setModalAtual(3)}
-              style={{
-                backgroundColor: '#FFB503',
-                width: '100%', // Ensures the button spans the full width of its container
-              }}
-            >
-              Próximo
-            </button>
+            <button type="button" onClick={() => handleNextStep(3)} className="text-black p-2 rounded-md bg-[#FFB503] w-full">Próximo</button>
           </div>
         </ModalEmpresa>
       )}
 
-
+      {/* Modal 3 - Administrador */}
       {modalAtual === 3 && (
-        <ModalEmpresa
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-        title="Seja Bem Vindo!"
-        etapaAtual={modalAtual}
-      >
-        <div style={{ width: "85%", margin: "0 auto" }}>
-          <form
-            onSubmit={() => handleSubmit(formData, setoresData, adminData)}
-            className="flex flex-col gap-4"
-          >
-            <div className="flex-1">
-              <label htmlFor="admin_nome" className="mb-2">Nome do Administrador</label>
-              <input
-                id="admin_nome"
-                type="text"
-                name="admin_nome"
-                value={adminData.admin_nome}
-                onChange={handleChangeAdmin}
-                className="border p-2 rounded-md w-full"
-              />
-              {/* {formErrors.admin_nome && <p className="text-red-500">{formErrors.admin_nome._errors[0]}</p>} */}
-            </div>
-      
-            <div className="flex-1">
-              <label htmlFor="admin_email" className="mb-2">Email</label>
-              <input
-                id="admin_email"
-                type="email"
-                name="admin_email"
-                value={adminData.admin_email}
-                onChange={handleChangeAdmin}
-                
-                className="border p-2 rounded-md w-full"
-              />
-              {/* {formErrors.admin_email && <p className="text-red-500">{formErrors.admin_email._errors[0]}</p>} */}
-            </div>
-      
-            <div className="flex-1">
-              <label htmlFor="admin_cargo" className="mb-2">Setor</label>
-              <input
-                id="admin_cargo"
-                type="text"
-                name="admin_cargo"
-                value="Administrador"
-                onChange={handleChangeAdmin}
-                
-                readOnly
-                className="border p-2 rounded-md w-full"
-                style={{ backgroundColor: "rgba(0, 0, 0, 0.05)" }}
-              />
-              {/* {formErrors.admin_setor && <p className="text-red-500">{formErrors.admin_setor._errors[0]}</p>} */}
-            </div>
-      
-            <div className="flex-1">
-              <label htmlFor="admin_setor" className="mb-2">Setor</label>
-              <select
-                id="admin_setor"
-                name="admin_setor"
-                value={adminData.admin_setor}
-                onChange={handleChangeAdmin}
-                className="border p-2 rounded-md w-full"
-              >
-                <option value="" disabled>Selecione um setor</option>
-                {setoresData.map((setor, index) => (
-                  <option key={index} value={setor}>
-                    {setor}
-                  </option>
-                ))}
-              </select>
-              {/* {formErrors.admin_setor && <p className="text-red-500">{formErrors.admin_setor._errors[0]}</p>} */}
-            </div>
-
-      
-            {/* Campos lado a lado */}
-            <div
-              style={{
-                display: "flex",
-                gap: "20px", // Espaçamento entre os campos
-              }}
-            >
-              <div style={{ flex: 1 }}>
-                <label htmlFor="admin_tipoContrato" className="mb-2">Tipo de Contrato</label>
+        <ModalEmpresa isOpen={isOpen} onClose={() => setIsOpen(false)} title="Seja Bem Vindo!" etapaAtual={3}>
+          <div className="w-[85%] mx-auto">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+              <div className="flex-1">
+                <label htmlFor="admin_nome" className="mb-2">Nome do Administrador</label>
+                <input id="admin_nome" name="admin_nome" value={adminData.admin_nome} onChange={handleAdminChange} className="border p-2 rounded-md w-full" />
+                {errors.admin_nome && <p className="text-red-500">{errors.admin_nome}</p>}
+              </div>
+              <div className="flex-1">
+                <label htmlFor="admin_email" className="mb-2">Email</label>
+                <input id="admin_email" name="admin_email" type="email" value={adminData.admin_email} onChange={handleAdminChange} className="border p-2 rounded-md w-full" />
+                {errors.admin_email && <p className="text-red-500">{errors.admin_email}</p>}
+              </div>
+              <div className="flex-1">
+                <label htmlFor="admin_cargo" className="mb-2">Cargo</label>
                 <select
-                  id="admin_tipoContrato"
-                  name="admin_tipoContrato"
-                  value={adminData.admin_tipoContrato}
-                  onChange={handleChangeAdmin}
+                  id="admin_cargo"
+                  name="admin_cargo"
+                  value={adminData.admin_cargo}
+                  onChange={handleAdminChange}
                   className="border p-2 rounded-md w-full"
                 >
-                  <option value="" disabled>Selecione</option>
-                  <option value="CLT">CLT</option>
-                  <option value="PJ">PJ</option>
+                  <option value="Administrador">Administrador</option>
+                  <option value="Gerente">Gerente</option>
+                  <option value="Funcionário">Funcionário</option>
                 </select>
-                {/* {formErrors.admin_tipoContrato && (
-                  <p className="text-red-500">{formErrors.admin_tipoContrato._errors[0]}</p>
-                )} */}
               </div>
-      
-              <div style={{ flex: 1 }}>
-                <label htmlFor="admin_nvlAcesso" className="mb-2">Nível de Acesso</label>
-                <input
-                  id="admin_nvlAcesso"
-                  type="text"
-                  name="admin_nvlAcesso"
-                  value="Administrador"
-                  onChange={handleChangeAdmin}
-                  
-                  readOnly
-                  className="border p-2 rounded-md w-full"
-                />
-                {/* {formErrors.admin_nvlAcesso && (
-                  <p className="text-red-500">{formErrors.admin_nvlAcesso._errors[0]}</p>
-                )} */}
+              <div className="flex-1">
+                <label htmlFor="admin_setor" className="mb-2">Setor</label>
+                <select id="admin_setor" name="admin_setor" value={adminData.admin_setor} onChange={handleAdminChange} className="border p-2 rounded-md w-full">
+                  <option value="" disabled>Selecione um setor</option>
+                  {setores.map((setor, index) => <option key={index} value={setor}>{setor}</option>)}
+                </select>
+                {errors.admin_setor && <p className="text-red-500">{errors.admin_setor}</p>}
               </div>
-            </div>
-      
-            <button
-              type="submit"
-              className="text-black p-2 rounded-md"
-              style={{ backgroundColor: "#FFB503" }}
-            >
-              Próximo
-            </button>
-          </form>
-        </div>
-      </ModalEmpresa>
+              <div className="flex gap-5">
+                <div className="flex-1">
+                  <label htmlFor="admin_tipoContrato" className="mb-2">Tipo de Contrato</label>
+                  <select id="admin_tipoContrato" name="admin_tipoContrato" value={adminData.admin_tipoContrato} onChange={handleAdminChange} className="border p-2 rounded-md w-full">
+                    <option value="CLT">CLT</option>
+                    <option value="Estagio">Estágio</option>
+                  </select>
+                  {errors.admin_tipoContrato && <p className="text-red-500">{errors.admin_tipoContrato}</p>}
+                </div>
+                <div className="flex-1">
+                  <label htmlFor="admin_nvlAcesso" className="mb-2">Nível de Acesso</label>
+                  <input id="admin_nvlAcesso" name="admin_nvlAcesso" value="Administrador" readOnly className="border p-2 rounded-md w-full" />
+                </div>
+              </div>
+              <button type="submit" className="text-black p-2 rounded-md bg-[#FFB503]">Finalizar</button>
+            </form>
+          </div>
+        </ModalEmpresa>
       )}
     </div>
   );
