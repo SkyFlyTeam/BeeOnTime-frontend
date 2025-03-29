@@ -95,6 +95,24 @@
   border-radius: 4px;
   border: 1px solid #ccc;
 }
+.cepInfo {
+  display: block;
+  font-size: 0.8rem;
+  color: rgb(98, 98, 98);
+  margin-top: 4px;
+}
+
+.setorInputWrapper {
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.errorText {
+  color: red;
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
+}
 
 @media (max-width: 768px) {
   .empresaInput {
