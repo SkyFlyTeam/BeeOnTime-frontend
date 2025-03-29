@@ -32,7 +32,6 @@ export default function AdminPage() {
     <form onSubmit={handleSubmit}>
       <input name="name" placeholder="Nome" required />
       <input name="email" type="email" placeholder="Email" required />
-      <input name="password" placeholder="Senha Inicial" required />
       <button type="submit" disabled={loading}>
         {loading ? 'Enviando...' : 'Cadastrar'}
       </button>
