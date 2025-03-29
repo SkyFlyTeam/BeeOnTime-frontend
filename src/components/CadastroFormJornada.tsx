@@ -4,7 +4,8 @@ import { cadastrarUsuarioComJornada } from "@/services/usuarioService";
 import { ChangeEvent, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 
-export default function CadastroFormJornada({ formData, onClose }: { formData: any, onClose: () => void }) {
+export default function CadastroFormJornada({ formData, onClose, onSave }: 
+  { formData: any, onClose: () => void,  onSave: (sucess: boolean) => void }) {
 
   const [jornadaData, setJornadaData] = useState({
     horarioFlexivel: false,
@@ -24,16 +25,10 @@ export default function CadastroFormJornada({ formData, onClose }: { formData: a
     try {
       // Envia os dados combinados (do primeiro e segundo modal)
       await cadastrarUsuarioComJornada(formData, jornadaData);
-
-      toast.success("Dados salvos com sucesso!", {
-        position: "top-center", // Exibe o toast no topo centralizado
-      });
-
       onClose(); // Fecha o modal após o envio
+      onSave(true);
     } catch (error) {
-      toast.error("Ocorreu um erro ao salvar os dados.", {
-        position: "top-center",
-      });
+      onSave(false);
     }
     finally {
       setIsSaving(false);
@@ -60,8 +55,6 @@ export default function CadastroFormJornada({ formData, onClose }: { formData: a
 
   return (
     <div>
-      <ToastContainer />
-
       <form className="flex flex-col gap-4">
         {/* Horário Flexível */}
         <div className="flex items-center gap-8 ml-4">

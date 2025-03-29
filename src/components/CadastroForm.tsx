@@ -23,7 +23,9 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-export default function CadastroForm({ onClose }: { onClose: () => void }) {
+export default function CadastroForm({ onClose, onSave }: { onClose: () => void;
+  onSave: (sucess: boolean) => void }) {
+
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     usuario_nome: "",
@@ -255,7 +257,7 @@ export default function CadastroForm({ onClose }: { onClose: () => void }) {
 
      {/* Segundo Modal */}
      <Modal isOpen={isSecondModalOpen} onClose={onClose} isSecondModal={true} title="Cadastrar Colaborador">
-        <CadastroFormJornada formData={formData} onClose={onClose} />
+        <CadastroFormJornada formData={formData} onClose={onClose} onSave={onSave}/>
       </Modal>
     </div>
   );

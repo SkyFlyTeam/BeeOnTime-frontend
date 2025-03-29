@@ -7,6 +7,7 @@ import { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableC
 import { getUsuarios } from "@/services/usuarioService"; // Certifique-se de que o caminho esteja correto
 import "../styles/style.module.css";
 import { toast, ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function CadastroPage() {
   const [usuarios, setUsuarios] = useState<any[]>([]);
@@ -14,8 +15,6 @@ export default function CadastroPage() {
   const [error, setError] = useState<string>("");
 
   const [isOpen, setIsOpen] = useState(false); // Controle do modal
-  const [isDataUpdated, setIsDataUpdated] = useState(false);
-
 
   useEffect(() => {
     const fetchUsuarios = async () => {
@@ -32,18 +31,27 @@ export default function CadastroPage() {
     fetchUsuarios();
   }, []);
 
-  useEffect(() => {
-    const showPopup = () => {
-      toast.success("Dados salvos com sucesso!", {
-        position: "top-center",
-      });
-    };
+  const showToast = (success: boolean) => {
+      success ? showSucessToast() : showErrorToast();
+  }
 
+  const showSucessToast = () => {
+    toast.success("Colaborador cadastrado com sucesso!", {
+      position: "top-center",
+    });
+  };
+
+  const showErrorToast = () => {
+    toast.error("Erro ao cadastrar colaborador.", {
+      position: "top-center",
+    });
+  };
+
+  useEffect(() => {
     const fetchUsuarios = async () => {
       try {
         const data = await getUsuarios() as any[];
         setUsuarios(data);
-        showPopup()
       } catch (err) {
         setError("Erro ao carregar os usuários.");
       } finally {
@@ -58,12 +66,6 @@ export default function CadastroPage() {
 
   const handleViewUser = (usuarioId: number) => {
     console.log(`Ver detalhes do usuário com ID: ${usuarioId}`);
-  };
-
-  const handleAdicionarUsuario = () => {
-    // Após o novo usuário ser adicionado, você pode fechar o modal e forçar a atualização dos dados
-    setIsDataUpdated(!isDataUpdated); // Força a recarga da lista de usuários
-    setIsOpen(false); // Fecha o modal
   };
 
   if (loading) {
@@ -101,9 +103,8 @@ export default function CadastroPage() {
       )} */}
 
       {isOpen && (
-        <CadastroForm onClose={() => setIsOpen(false)} />
+        <CadastroForm onClose={() => setIsOpen(false)} onSave={showToast}/>
       )}
-
 
 
       <div className="container mx-auto p-4 bg-white rounded-lg shadow-lg">
@@ -147,7 +148,8 @@ export default function CadastroPage() {
           </TableFooter>
         </Table>
       </div>
-      <ToastContainer position="top-center" autoClose={3000} /> {/* Add ToastContainer here */}
+      <ToastContainer position="top-center" autoClose={3000} /> 
+      
     </div>
   );
 }
