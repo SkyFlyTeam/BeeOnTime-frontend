@@ -16,6 +16,7 @@
     "@react-email/render": "^1.0.5",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "js-generate-password": "^1.0.0",
     "lucide-react": "^0.475.0",
     "next": "15.1.7",
     "nodemailer": "^6.10.0",
