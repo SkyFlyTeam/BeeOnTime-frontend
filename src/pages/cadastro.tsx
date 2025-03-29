@@ -7,6 +7,7 @@ import { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableC
 import { getUsuarios } from "@/services/usuarioService"; // Certifique-se de que o caminho esteja correto
 import "../styles/style.module.css";
 import { toast, ToastContainer } from "react-toastify";
+import { getSetores } from "@/services/setorService";
 
 export default function CadastroPage() {
   const [usuarios, setUsuarios] = useState<any[]>([]);
@@ -15,6 +16,8 @@ export default function CadastroPage() {
 
   const [isOpen, setIsOpen] = useState(false); // Controle do modal
   const [isDataUpdated, setIsDataUpdated] = useState(false);
+
+  const [setores, setSetores] = useState<any[]>([]);
 
 
   useEffect(() => {
@@ -56,6 +59,19 @@ export default function CadastroPage() {
     }
   }, [isOpen]);
 
+  // useEffect(() => {
+  //   const fetchSetores = async () => {
+  //     try {
+  //       const data = await getSetores() as any[];
+  //       setSetores(data);
+  //     } catch (error) {
+  //       console.error("Erro ao carregar setores:", error);
+  //     }
+  //   };
+  
+  //   fetchSetores();
+  // }, []);
+
   const handleViewUser = (usuarioId: number) => {
     console.log(`Ver detalhes do usuário com ID: ${usuarioId}`);
   };
@@ -73,6 +89,11 @@ export default function CadastroPage() {
   if (error) {
     return <div>{error}</div>;
   }
+
+  
+
+  
+  
 
   return (
     <div>
@@ -115,8 +136,9 @@ export default function CadastroPage() {
               <TableHead className="text-xl text-black border-r border-gray-300 font-bold">NOME</TableHead>
               <TableHead className="text-xl text-black border-r border-gray-300 font-semibold">CARGO</TableHead>
               <TableHead className="text-xl text-black border-r border-gray-300 font-bold">CARGA HORÁRIA DIÁRIA</TableHead>
+              <TableHead className="text-xl text-black border-r border-gray-300 font-bold">SETOR</TableHead>
               <TableHead className="text-xl text-black border-r border-gray-300 font-bold">CONTRATO</TableHead>
-              <TableHead className="text-xl text-left text-black border-r border-gray-300 font-bold">AÇÕES</TableHead>
+              {/* <TableHead className="text-xl text-left text-black border-r border-gray-300 font-bold">AÇÕES</TableHead> */}
             </TableRow>
           </TableHeader>
 
@@ -126,14 +148,15 @@ export default function CadastroPage() {
                 <TableCell className="border-r border-gray-300">{usuario.usuario_nome}</TableCell>
                 <TableCell className="border-r border-gray-300">{usuario.usuario_cargo}</TableCell>
                 <TableCell className="border-r border-gray-300">{usuario.usuario_cargaHoraria}</TableCell>
+                <TableCell className="border-r border-gray-300">{usuario.setor?.setorNome}</TableCell>
                 <TableCell className="border-r border-gray-300">{usuario.usuarioTipoContratacao}</TableCell>
-                <TableCell className="border-r border-gray-300 text-left">
+                {/* <TableCell className="border-r border-gray-300 text-left">
                   <button 
                     onClick={() => handleViewUser(usuario.usuario_cod)} 
                     className="bg-[#FFB503] rounded-md p-2 hover:bg-orange-600">
                     <FontAwesomeIcon icon={faEye} className="text-black-600" /> {/* Ícone de olho */}
-                  </button>
-                </TableCell>
+                  {/* </button> */}
+                {/* </TableCell> */}
               </TableRow>
             ))}
           </TableBody>

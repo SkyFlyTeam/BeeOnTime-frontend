@@ -1,10 +1,11 @@
 // src/components/CadastroForm.tsx
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 import CadastroFormJornada from "./CadastroFormJornada";
 import Modal from "@/components/ui/modal";
+import { getSetores } from "@/services/setorService";
 
 const formSchema = z.object({
   nome: z.string().min(2, "O nome deve ter pelo menos 2 caracteres.").max(50, "O nome não pode ter mais de 50 caracteres."),
@@ -29,12 +30,14 @@ export default function CadastroForm({ onClose }: { onClose: () => void }) {
     usuario_nome: "",
     usuario_cpf: "",
     usuario_nrRegistro: "",
-    usuario_email: "",
+    usuarioEmail: "",
+    usuario_senha: "123",
     usuarioTipoContratacao: "",
     usuario_dataContratacao: "",
     usuario_DataNascimento: "",
     usuario_cargo: "",
-    setor: "",
+    setorCod: "",
+    empCod: 1,
   });
   const [formErrors, setFormErrors] = useState<any>({});
 
@@ -45,7 +48,7 @@ export default function CadastroForm({ onClose }: { onClose: () => void }) {
       ? formatarCPF(value)
       : value;
   
-    setFormData({ ...formData, [name]: novoValor });
+    setFormData({ ...formData, [name]: name === "setorCod" ? parseInt(value) : value });
   };
   
 
@@ -67,6 +70,21 @@ export default function CadastroForm({ onClose }: { onClose: () => void }) {
       return `${apenasNumeros.slice(0, 3)}.${apenasNumeros.slice(3, 6)}.${apenasNumeros.slice(6, 9)}-${apenasNumeros.slice(9, 11)}`;
     }
   };
+  
+  const [setores, setSetores] = useState<any[]>([]);
+
+    useEffect(() => {
+      const fetchSetores = async () => {
+        try {
+          const data = await getSetores() as any[];
+          setSetores(data);
+        } catch (error) {
+          console.error("Erro ao carregar setores:", error);
+        }
+      };
+    
+      fetchSetores();
+    }, []);
   
 
   return (
@@ -105,12 +123,12 @@ export default function CadastroForm({ onClose }: { onClose: () => void }) {
           </div>
           <div className="flex gap-4"> {/* Usando flex para email e dataNasc na mesma linha */}
             <div className="flex-1">
-              <label htmlFor="usuario_email" className="mb-2">Email</label>
+              <label htmlFor="usuarioEmail" className="mb-2">Email</label>
               <input
-                id="usuario_email"
+                id="usuarioEmail"
                 type="email"
-                name="usuario_email"
-                value={formData.usuario_email}
+                name="usuarioEmail"
+                value={formData.usuarioEmail}
                 onChange={handleChange}
                 required
                 className="border p-2 rounded-md w-full"
@@ -227,16 +245,18 @@ export default function CadastroForm({ onClose }: { onClose: () => void }) {
               <label htmlFor="setor" className="mb-2">Setor</label>
               <select
                 id="setor"
-                name="setor"
-                value={formData.setor}
+                name="setorCod"
+                value={formData.setorCod}
                 onChange={handleChange}
                 required
                 className="border p-2 rounded-md w-full"
                 >
                   <option value="">Selecione um setor</option>
-                  <option value="setor1">Setor 1</option>
-                  <option value="setor2">Setor 2</option>
-                  <option value="setor3">Setor 3</option>
+                  {setores.map((setor) => (
+                    <option key={setor.setorCod} value={setor.setorCod}>
+                     {setor.setorNome}
+                    </option>
+                  ))}
                   {/* Adicione mais opções conforme necessário */}
                 </select>
               {formErrors.setor && <p className="text-red-500">{formErrors.setor._errors[0]}</p>}

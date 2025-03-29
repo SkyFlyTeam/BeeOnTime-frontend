@@ -23,6 +23,7 @@ export default function CadastroFormJornada({ formData, onClose }: { formData: a
 
     try {
       // Envia os dados combinados (do primeiro e segundo modal)
+      console.log("Dados enviados para o backend:", formData);
       await cadastrarUsuarioComJornada(formData, jornadaData);
 
       toast.success("Dados salvos com sucesso!", {
