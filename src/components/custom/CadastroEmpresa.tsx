@@ -257,8 +257,8 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
       await cadastrarUsuarioComJornada(usuarioData, {});
 
       toast({
-        title: "Cadastro concluído!",
-        description: "Empresa, setores e administrador foram cadastrados com sucesso.",
+        title: "Cadastro concluído com sucesso!",
+        description: "Realize login usando as credenciais enviadas para seu e-mail.",
         variant: "default",
       });
 
