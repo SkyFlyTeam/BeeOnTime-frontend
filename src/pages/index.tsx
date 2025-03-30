@@ -41,7 +41,9 @@ import { url } from 'inspector';
 import { useEffect, useState } from 'react';
 
 import { AccessPass } from '@/lib/auth';
-import { getRoleID, setLogIn } from '@/services/authService';
+import { getRoleID, getUsuario, setLogIn } from '@/services/authService';
+
+import { toast, ToastContainer} from "react-toastify"
 
 
 
@@ -59,6 +61,19 @@ export default function Home() {
     const changeIsShowingPassword = () => {
         setIsShowingPassword(!isShowingPassword);
     }
+
+  // Function to trigger the error toast
+  const showErrorToast = () => {
+    toast.error("Credênciais inválidas!", {
+      position: "bottom-center",  // Position where the toast will appear
+      autoClose: 5000,  // Auto-close after 5 seconds
+      hideProgressBar: true,  // Hide progress bar
+      closeOnClick: true,  // Allows closing toast on click
+      pauseOnHover: true,  // Pauses the toast on hover
+      draggable: true,  // Makes the toast draggable
+      progress: undefined,  // Can be used to specify progress of a toast
+    });
+  };
 
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -85,9 +100,13 @@ export default function Home() {
         const res = await setLogIn(creds);
 
         const id = await getRoleID();
-        alert("getRoleID: " + id.status + "\n\nRoleID: " + id.data.role);
+        
         if(res.status === 200)
             router.push("/inicio")
+
+        else{
+            showErrorToast()
+        }
 
         
 
@@ -144,7 +163,7 @@ export default function Home() {
             </div>
             <div className='pr-12 pl-5 pt-5'>
                 <Button className="mt-6 mb-12" style={{boxShadow: '0px 10px 25px 0px rgba(123, 104, 238, 50%)'}}
-                onClick={() => router.push("/about")}>
+                onClick={() => router.push("/cadastro")}>
                     Cadastro
                 </Button>
             </div>
@@ -243,7 +262,7 @@ export default function Home() {
 
                         {isMobile ? (
                             <div className='w-full text-center mb-2'>
-                            <a href='' className='text-sm' style={{textAlign: 'center'}}>
+                            <a className='text-sm' style={{textAlign: 'center'}} onClick={() => router.push("/cadastro")}>
                                 É novo aqui? Cadastre sua empresa!
                             </a>
                             </div>
@@ -254,7 +273,7 @@ export default function Home() {
             </Card>
         </div>
 
-
+        <ToastContainer />
         </div>
     )
 }

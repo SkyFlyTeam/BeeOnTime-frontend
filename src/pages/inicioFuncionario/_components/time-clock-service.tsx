@@ -205,63 +205,9 @@ export default function TimeClockService() {
         try {
             const response = Api.post('/mpontos/baterPonto', data);
             console.log('Ponto de saida criado com sucesso!', response)
+            return response
         } catch (error){
             console.log('Ocorreu um erro ao criar o ponto de entrada!', error)
-        }
-
-        type pontos = {
-            id: string,
-            usuarioCod: number,
-            horasCod: number,
-            data: string,
-            pontos: [
-                { horarioPonto: string, tipoPonto: string }
-            ]
-        }
-
-        let dataP: pontos
-
-        try {
-            const response = await Api.get(`/mpontos/porHorasCod/${relationalData.horasCod}`);
-            dataP = response.data
-        }  catch (error){
-            console.log(error)
-            throw error
-        }
-
-        let horaEntrada: number = 0, horaSaida: number = 0, horaIniIntervalo: number = 0, horaFimIntervalo: number = 0, almocoCount: number = 0
-
-        dataP.pontos.map(item => {
-            if (item.tipoPonto == "ENTRADA") {
-                horaEntrada = timeStringToHours(item.horarioPonto);
-            }
-            else if (item.tipoPonto == "ALMOCO" && almocoCount == 0){
-                horaIniIntervalo = timeStringToHours(item.horarioPonto);
-                almocoCount += 1;
-            }
-            else if (item.tipoPonto == "ALMOCO" && almocoCount == 1){
-                horaFimIntervalo = timeStringToHours(item.horarioPonto);
-                almocoCount += 1;
-            }
-            else {
-                horaSaida = timeStringToHours(item.horarioPonto);
-            }
-        })
-
-        const envio: horasDTOP = {
-            horasCod: relationalData.horasCod,
-            horasExtras: 0,
-            horasTrabalhadas: ((horaSaida - horaEntrada) - (horaFimIntervalo - horaIniIntervalo)),
-            horasNoturnas: 0,
-            horasFaltantes: 0,
-            horasData: diaHoje,
-            usuarioCod: usuarioCod
-        }
-
-        try{
-            const a = await Api.put('horas/atualizar', envio);
-            return a
-        } catch (error) {
             throw error
         }
 
@@ -286,7 +232,7 @@ export default function TimeClockService() {
             horasCod: number,
             data: string,
             pontos: [
-                { horarioPonto: string, tipoPonto: string }
+                { horarioPonto: string, tipoPonto: string | number }
             ]
         }
 
@@ -306,19 +252,22 @@ export default function TimeClockService() {
         let almocoCount = 0
         
         ponto.map(item => {
-            if (item.tipoPonto == "ENTRADA") {
+            if (item.tipoPonto == "ENTRADA" || item.tipoPonto == 0) {
                 estado = "entrada"
             }
-            else if (item.tipoPonto == "ALMOCO" && almocoCount == 0){
+            else if ((item.tipoPonto == "ALMOCO" || item.tipoPonto == 2) && almocoCount == 0){
                 estado = "inicioIntervalo"
                 almocoCount += 1;
             }
-            else if (item.tipoPonto == "ALMOCO" && almocoCount == 1){
+            else if ((item.tipoPonto == "ALMOCO" || item.tipoPonto == 2) && almocoCount == 1){
                 estado = "fimIntervalo"
                 almocoCount += 1;
             }
-            else {
+            else if (item.tipoPonto == "SAIDA" || item.tipoPonto == 1) {
                 estado = "saida"
+            }
+            else {
+                estado = 'initial'
             }
 
         })

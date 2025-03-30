@@ -22,7 +22,18 @@ export function getContentFromAuthCookie(req: NextRequest | Request): String {
         return "";
     }
 }
-
+export function getCodFromAuthCookie(req: NextRequest | Request): String {
+    try {
+        const prop = getAuthTokenContent(req);
+        if (prop == "")
+            return prop;
+        const cod = JSON.parse(prop).usuario_cod;
+        return cod;
+    }
+    catch (error) {
+        return "";
+    }
+}
 export function getEmailFromAuthCookie(req: NextRequest | Request): String {
     try {
         const prop = getAuthTokenContent(req);
