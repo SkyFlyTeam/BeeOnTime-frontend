@@ -29,17 +29,19 @@ import {
     CardFooter,
     CardHeader,
     CardTitle,
-} from "@/src/components/ui/card"
-import { Button } from '@/src/components/ui/button';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/src/components/ui/form';
+} from "@/components/ui/card"
+import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
-import { Input } from '@/src/components/ui/input';
+import { Input } from '@/components/ui/input';
 import { sources } from 'next/dist/compiled/webpack/webpack';
 import { url } from 'inspector';
 import { useEffect, useState } from 'react';
-//HERE// import { useState } from 'react';
+
+import { AccessPass } from '@/lib/auth';
+import { getRoleID, setLogIn } from '@/services/authService';
 
 export default function Home() {
 
@@ -62,11 +64,47 @@ export default function Home() {
     })
      
       // 2. Define um controle de submit.
-      function onSubmit(values: z.infer<typeof formSchema>) {
+      async function onSubmit(values: z.infer<typeof formSchema>) {
         // Faz algo com os valores do form.
         // ✅ Isso vai ser tipadamente seguro e validado.
-        console.log(values)
+        if(values.email === null || values.senha === null)
+            return null;
+        
+
+        const creds: AccessPass = {
+            usuarioEmail: values.email,
+            usuario_senha: values.senha
+        }
+
+        const res = await setLogIn(creds);
+
+        const id = await getRoleID();
+        alert("getRoleID: " + id.status + "\n\nRoleID: " + id.data.role);
+        if(res.status === 200)
+            router.push("/inicio")
       }
+
+
+    
+      const [isMobile, setIsMobile] = useState(false);
+
+  // Checa o tamanho da tela em pixels quando a janela é reajustada
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setIsMobile(true); // Tamanho da tela mobile
+      } else {
+        setIsMobile(false); // Desktop ou em telas maiores
+      }
+    };
+
+    handleResize(); // Checagem inicial do tamanho quando o componente é montado (onMount)
+    window.addEventListener('resize', handleResize); // Escuta mudança do tamanho de tela
+
+    return () => {
+      window.removeEventListener('resize', handleResize); // Limpa o componente quando ele é descarregado (unMount)
+    };
+  }, []);
     
       const [isMobile, setIsMobile] = useState(false);
 
@@ -153,6 +191,7 @@ export default function Home() {
                 <CardContent>
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
+                        {/* <form onSubmit={onSubmitTest} className="space-y-3"> */}
                             <FormField
                                 control={form.control}
                                 name="email"

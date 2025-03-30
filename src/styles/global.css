@@ -1,11 +1,13 @@
 /* styles/global.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+
 body {
-    font-family: Arial, sans-serif;
-    background-color: #e1ae65;
+    font-family: 'Inter', sans-serif;
+    background-color: #ffffff;
     margin: 0;
     padding: 0;
     width: 100vw;
@@ -15,7 +17,7 @@ body {
 
 @layer base {
   :root {
-        --background: 0 0% 100%;
+        --background: 210 25% 98%; /* Ajeitado para cor padrão */
         --foreground: 240 10% 3.9%;
         --card: 0 0% 100%;
         --card-foreground: 240 10% 3.9%;
@@ -40,7 +42,16 @@ body {
         --chart-4: 43 74% 66%;
         --chart-5: 27 87% 67%;
         --radius: 0.5rem;
-        /* Yellow tones */
+        --sidebar-background: 0 0% 100%;
+        --sidebar-foreground: 240 5.3% 26.1%;
+        --sidebar-primary: 240 5.9% 10%;
+        --sidebar-primary-foreground: 0 0% 98%;
+        --sidebar-accent: 240 4.8% 95.9%;
+        --sidebar-accent-foreground: 240 5.9% 10%;
+        --sidebar-border: 220 13% 91%;
+        --sidebar-ring: 217.2 91.2% 59.8%;
+
+            /* Yellow tones */
         --yellow: #FFB503;
         --light-opacity-yellow: #FFF4D9;
 
@@ -53,11 +64,13 @@ body {
 
         /* Gray */
         --gray: #A7A7A7;
+        --gray-light: #E0E0E0;
         --gray-dark: #7C7A7B;
 
         /* Bluegray */
         --blue-gray-light: #CBD5E1;
     }
+
   .dark {
         --background: 240 10% 3.9%;
         --foreground: 0 0% 98%;
@@ -83,6 +96,14 @@ body {
         --chart-3: 30 80% 55%;
         --chart-4: 280 65% 60%;
         --chart-5: 340 75% 55%;
+        --sidebar-background: 240 5.9% 10%;
+        --sidebar-foreground: 240 4.8% 95.9%;
+        --sidebar-primary: 224.3 76.3% 48%;
+        --sidebar-primary-foreground: 0 0% 100%;
+        --sidebar-accent: 240 3.7% 15.9%;
+        --sidebar-accent-foreground: 240 4.8% 95.9%;
+        --sidebar-border: 240 3.7% 15.9%;
+        --sidebar-ring: 217.2 91.2% 59.8%;
     }
 }
 
@@ -91,7 +112,24 @@ body {
     @apply border-border;
     }
   body {
-    @apply bg-background text-foreground;
+    /* @apply bg-background text-foreground; */
     }
 }
   
+
+[data-sidebar="trigger"] {
+  transition: all 0.3s ease-in-out;
+}
+
+[data-state="collapsed"] [data-sidebar="trigger"] {
+  position: fixed;
+  left: 4px;
+  top: 16px;
+  z-index: 50;
+}
+
+[data-state="expanded"] [data-sidebar="trigger"] {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+}
