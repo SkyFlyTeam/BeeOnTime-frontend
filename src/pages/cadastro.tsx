@@ -134,7 +134,8 @@ export default function CadastroPage() {
           <TableCaption>Lista de usuários cadastrados</TableCaption>
 
           <TableHeader className="border-l border-gray-300">
-            <TableRow className="border-t border-gray-300">
+            <TableRow
+            className="border-b border-r border-gray-300">
               <TableHead className="text-xl text-black border-r border-gray-300 font-bold">NOME</TableHead>
               <TableHead className="text-xl text-black border-r border-gray-300 font-semibold">CARGO</TableHead>
               <TableHead className="text-xl text-black border-r border-gray-300 font-bold">CARGA HORÁRIA DIÁRIA</TableHead>
@@ -145,8 +146,8 @@ export default function CadastroPage() {
           </TableHeader>
 
           <TableBody className="border-t border-gray-300">
-            {usuarios.map((usuario) => (
-              <TableRow key={usuario.usuario_cod} className="border-b border-r border-gray-300">
+            {usuarios.map((usuario, index) => (
+              <TableRow key={usuario.usuario_cod} className={`border-b border-r border-gray-300 ${index % 2 === 0 ? 'bg-[#FFF4D9]' : 'bg-white'}`}>
                 <TableCell className="border-r border-gray-300">{usuario.usuario_nome}</TableCell>
                 <TableCell className="border-r border-gray-300">{usuario.usuario_cargo}</TableCell>
                 <TableCell className="border-r border-gray-300">{usuario.usuario_cargaHoraria}</TableCell>

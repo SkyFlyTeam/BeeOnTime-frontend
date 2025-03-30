@@ -4,8 +4,7 @@ import { cadastrarUsuarioComJornada } from "@/services/usuarioService";
 import { ChangeEvent, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 
-export default function CadastroFormJornada({ formData, onClose, onSave }: 
-  { formData: any, onClose: () => void,  onSave: (sucess: boolean) => void }) {
+export default function CadastroFormJornada({ formData, onClose }: { formData: any, onClose: () => void }) {
 
   const [jornadaData, setJornadaData] = useState({
     horarioFlexivel: false,
@@ -26,10 +25,16 @@ export default function CadastroFormJornada({ formData, onClose, onSave }:
       // Envia os dados combinados (do primeiro e segundo modal)
       console.log("Dados enviados para o backend:", formData);
       await cadastrarUsuarioComJornada(formData, jornadaData);
+
+      toast.success("Dados salvos com sucesso!", {
+        position: "top-center", // Exibe o toast no topo centralizado
+      });
+
       onClose(); // Fecha o modal após o envio
-      onSave(true);
     } catch (error) {
-      onSave(false);
+      toast.error("Ocorreu um erro ao salvar os dados.", {
+        position: "top-center",
+      });
     }
     finally {
       setIsSaving(false);
@@ -56,6 +61,8 @@ export default function CadastroFormJornada({ formData, onClose, onSave }:
 
   return (
     <div>
+      <ToastContainer />
+
       <form className="flex flex-col gap-4">
         {/* Horário Flexível */}
         <div className="flex items-center gap-8 ml-4">
@@ -117,20 +124,9 @@ export default function CadastroFormJornada({ formData, onClose, onSave }:
               </div>
             </div>
 
+            {/* Carga Horária */}
             <div className="flex gap-4">
-              {/* Carga Horária */}
-              <div className="flex-1">
-                <label htmlFor="usuario_cargaHoraria">Carga Horária Diária</label>
-                <input
-                  id="usuario_cargaHoraria"
-                  name="usuario_cargaHoraria"
-                  type="number"
-                  value={jornadaData.usuario_cargaHoraria}
-                  onChange={handleJornadaChange}
-                  className="border p-2 rounded-md w-full"
-                  required
-                />
-              </div>
+            
 
               <div className="flex-1">
                 <label htmlFor="horarioAlmoco">Horário Almoço</label>
@@ -148,6 +144,21 @@ export default function CadastroFormJornada({ formData, onClose, onSave }:
           </>
         )}
 
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <label htmlFor="usuario_cargaHoraria">Carga Horária Diária</label>
+                <input
+                  id="usuario_cargaHoraria"
+                  name="usuario_cargaHoraria"
+                  type="number"
+                  value={jornadaData.usuario_cargaHoraria}
+                  onChange={handleJornadaChange}
+                  className="border p-2 rounded-md w-full"
+                  required
+                />
+              </div>
+            </div>
+
         {/* Dias da Semana (Divs clicáveis com hover e click) */}
         <div>
           <label className="mb-2">Dias da Semana</label>
@@ -156,7 +167,7 @@ export default function CadastroFormJornada({ formData, onClose, onSave }:
               <div
                 key={index}
                 className={`w-12 h-12 flex items-center justify-center cursor-pointer rounded-md transition-colors duration-200
-                  ${jornadaData.diasSemana[index] ? "bg-blue-500 text-white" : "bg-white text-black"}`}
+                  ${jornadaData.diasSemana[index] ? "#FFCB50 text-white" : "bg-white text-black"}`}
                 onClick={() => handleDayClick(index)}
                 onMouseEnter={(e) => e.currentTarget.classList.add('bg-gray-200')} // Muda a cor ao passar o mouse
                 onMouseLeave={(e) => e.currentTarget.classList.remove('bg-gray-200')} // Volta à cor original

@@ -8,7 +8,10 @@ import Modal from "@/components/ui/modal";
 import { getSetores } from "@/services/setorService";
 
 const formSchema = z.object({
-  nome: z.string().min(2, "O nome deve ter pelo menos 2 caracteres.").max(50, "O nome não pode ter mais de 50 caracteres."),
+  nome: z.string()
+  .min(2, "O nome deve ter pelo menos 2 caracteres.")
+  .max(50, "O nome não pode ter mais de 50 caracteres.")
+  .regex(/^[A-Za-zá-úÁ-Ú\s]+$/, "O nome não pode conter números ou caracteres especiais."),  // Validação para letras
   cpf: z.string().min(11, "O CPF deve ter 11 caracteres").max(14, "O CPF deve ter 14 caracteres."),
   email: z.string().email("O email deve ser válido."),
   dataNasc: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Data de nascimento deve estar no formato YYYY-MM-DD."),
@@ -17,7 +20,10 @@ const formSchema = z.object({
     message: "Por favor, selecione um tipo de contrato válido."
   }),
   dataContrat: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "A data do contrato deve estar no formato YYYY-MM-DD."),
-  cargo: z.string().min(2, "O cargo deve ter pelo menos 2 caracteres.").max(40, "O cargo não pode ter mais de 40 caracteres."),
+  cargo: z.string()
+  .min(2, "O cargo deve ter pelo menos 2 caracteres.")
+  .max(40, "O cargo não pode ter mais de 40 caracteres.")
+  .regex(/^[A-Za-zá-úÁ-Ú\s]+$/, "O cargo não pode conter números ou caracteres especiais."),  // Validação para letras
   nivelAcesso: z.string().min(2, "O nível de acesso deve ter pelo menos 2 caracteres.").max(40, "O nível de acesso não pode ter mais de 40 caracteres."),
   setor: z.string().max(40, "O setor deve ser válido."),
 });
@@ -43,22 +49,7 @@ export default function CadastroForm({ onClose, onSave }: { onClose: () => void;
   });
   const [formErrors, setFormErrors] = useState<any>({});
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-  
-    const novoValor = name === "usuario_cpf"
-      ? formatarCPF(value)
-      : value;
-  
-    setFormData({ ...formData, [name]: name === "setorCod" ? parseInt(value) : value });
-  };
-  
-
-  const handleNext = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSecondModalOpen(true);
-  };
-
+  // Função para formatar o CPF
   const formatarCPF = (cpf: string) => {
     const apenasNumeros = cpf.replace(/\D/g, '');
   
@@ -71,6 +62,34 @@ export default function CadastroForm({ onClose, onSave }: { onClose: () => void;
     } else {
       return `${apenasNumeros.slice(0, 3)}.${apenasNumeros.slice(3, 6)}.${apenasNumeros.slice(6, 9)}-${apenasNumeros.slice(9, 11)}`;
     }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+  
+    // Validar se é o campo "nome" ou "cargo"
+    if (name === "usuario_nome") {
+      // Remover números e caracteres especiais
+      const valueWithoutNumbers = value.replace(/[^A-Za-zá-úÁ-Ú\s]/g, '');
+      setFormData({ ...formData, [name]: valueWithoutNumbers });
+    } else if (name === "usuario_cpf") {
+      // Caso seja o campo CPF, formatar o valor
+      const novoValor = formatarCPF(value);
+      setFormData({ ...formData, [name]: novoValor });
+    } else {
+      const novoValor = name === "usuario_cpf"
+        ? formatarCPF(value)
+        : value;
+    
+      setFormData({ ...formData, [name]: name === "setorCod" ? parseInt(value) : value });
+    }
+  };
+  
+  
+
+  const handleNext = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSecondModalOpen(true);
   };
   
   const [setores, setSetores] = useState<any[]>([]);
@@ -188,7 +207,7 @@ export default function CadastroForm({ onClose, onSave }: { onClose: () => void;
             </div>
 
             <div className="flex-1">
-              <label htmlFor="usuario_dataContratacao" className="mb-2">Data do Contrato</label>
+              <label htmlFor="usuario_dataContratacao" className="mb-2">Data de Contratação</label>
               <input
                 id="usuario_dataContratacao"
                 type="date"
@@ -218,9 +237,8 @@ export default function CadastroForm({ onClose, onSave }: { onClose: () => void;
                 className="border p-2 rounded-md w-full"
                 >
                   <option value="">Selecione o cargo</option>
-                  <option value="cargo_1">Cargo 1</option>
-                  <option value="cargo_2">Cargo 2</option>
-                  <option value="cargo_3">Cargo 3</option>
+                  <option value="cargo_1">CLT</option>
+                  <option value="cargo_2">Estágio</option>
               </select>
               {formErrors.usuario_cargo && <p className="text-red-500">{formErrors.usuario_cargo._errors[0]}</p>}
             </div>
@@ -236,9 +254,9 @@ export default function CadastroForm({ onClose, onSave }: { onClose: () => void;
                 className="border p-2 rounded-md w-full"
               >
                 <option value="">Selecione o tipo de acesso</option>
-                <option value="acesso_1">Acesso 1</option>
-                <option value="acesso_2">Acesso 2</option>
-                <option value="acesso_3">Acesso 3</option>
+                <option value="acesso_1">Administrador</option>
+                <option value="acesso_2">Funcionário</option>
+                <option value="acesso_3">Gestor</option>
               </select>
               {formErrors.nivelAcesso && <p className="text-red-500">{formErrors.nivelAcesso._errors[0]}</p>}
             </div>
