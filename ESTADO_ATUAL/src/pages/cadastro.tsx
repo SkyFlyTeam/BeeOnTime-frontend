@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye } from "@fortawesome/free-solid-svg-icons";
-import CadastroForm from "@/components/CadastroForm"; // Atualize o caminho conforme necessário
+import CadastroForm from "@/components/CadastroUsuario"; // Atualize o caminho conforme necessário
 import { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell, TableCaption } from "@/components/listagem";
 import { getUsuarios } from "@/services/usuarioService"; // Certifique-se de que o caminho esteja correto
 import "../styles/style.module.css";

@@ -1,18 +1,23 @@
-// src/services/setorService.ts
-import axios from 'axios';
-
-// Define a URL base do backend
-const API_URL = 'http://localhost:8080';
+import { ApiException } from "@/config/apiExceptions";
+import { ApiUsuario } from "@/config/apiUsuario";
+import Setor from "@/interfaces/usuarioInfo";
 
 // Função para obter todos os sotores
-export const getSetores = async () => {
+const getAllSetores = async () => {
   try {
-    const response = await axios.get(`${API_URL}/setor`);
+    const response = await ApiUsuario.get(`/setor`);
     return response.data;
   } catch (error) {
-    console.error('Erro ao buscar setores:', error);
-    throw error;
+    if (error instanceof Error) {
+      return new ApiException(error.message || "Erro ao consultar a API.");
+    }
+  
+    return new ApiException("Erro desconhecido.");
   }
 };
+
+export const setorSevices = {
+  getAllSetores
+}
 
 

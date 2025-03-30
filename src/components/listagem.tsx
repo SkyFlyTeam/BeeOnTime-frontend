@@ -1,5 +1,4 @@
 import * as React from "react"
-import { getUsuarios } from "@/services/usuarioService"
 
 import { cn } from "@/lib/utils"
 
