@@ -104,7 +104,7 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
 
   // Efeitos
   useEffect(() => {
-    if (!isOpen) resetForm(); // Resetar ao fechar o modal também, se desejado
+    if (!isOpen) resetForm();
   }, [isOpen]);
 
   useEffect(() => {
@@ -224,22 +224,29 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
     if (!validateStep(3)) return;
 
     try {
+      // Cadastra a empresa e obtém o empCod
       const empCod = await cadastrarEmpresa(empresaData);
-      const setorResponse = await cadastrarSetor(setores);
-      const setorCodMap = setorResponse.reduce((acc: Record<string, number>, setor: any) => {
+
+      // Cadastra os setores e obtém o mapeamento de setorNome para setorCod
+      const setoresCriados = await cadastrarSetor(setores);
+      const setorCodMap = setoresCriados.reduce((acc: Record<string, number>, setor: any) => {
         acc[setor.setorNome] = setor.setorCod;
         return acc;
       }, {});
 
+      // Obtém o setorCod do setor selecionado pelo admin
+      const setorCod = setorCodMap[adminData.admin_setor];
+
+      // Monta os dados do usuário com os códigos reais
       const usuarioData = {
         usuario_nome: adminData.admin_nome,
         usuarioEmail: adminData.admin_email,
         usuario_cargo: adminData.admin_cargo,
         usuarioTipoContratacao: adminData.admin_tipoContrato,
-        usuario_senha: "admin123",
-        empCod: 1, // Usar o empCod real retornado
-        setorCod: 1,
-        nivelAcesso_cod: 1,
+        usuario_senha: "123456",
+        empCod: empCod,
+        setorCod: setorCod,
+        nivelAcesso_cod: 0,
         usuario_cpf: null,
         usuario_nrRegistro: null,
         usuario_cargaHoraria: null,
@@ -255,14 +262,8 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
         variant: "default",
       });
 
-      console.log("Dados enviados:", { empresaData, setores, adminData });
-      
-      // Resetar o formulário e voltar para a etapa 1
+      console.log("Dados enviados:", { empresaData, setores, usuarioData });
       resetForm();
-      
-      // Opcional: redirecionar ou fechar o modal após o sucesso
-      // setIsOpen(false);
-      // router.push("/");
     } catch (error) {
       console.error("Erro ao cadastrar:", error);
       setErrors((prev) => ({ ...prev, submit: "Erro ao finalizar cadastro" }));
@@ -377,7 +378,7 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
                 <input id="admin_email" name="admin_email" type="email" value={adminData.admin_email} onChange={handleAdminChange} className="border p-2 rounded-md w-full" />
                 {errors.admin_email && <p className="text-red-500">{errors.admin_email}</p>}
               </div>
-              <div className="flex-1">
+              <div className ="flex-1">
                 <label htmlFor="admin_cargo" className="mb-2">Cargo</label>
                 <input id="admin_cargo" name="admin_cargo" value={adminData.admin_cargo} onChange={handleAdminChange} className="border p-2 rounded-md w-full" />
                 {errors.admin_cargo && <p className="text-red-500">{errors.admin_cargo}</p>}
