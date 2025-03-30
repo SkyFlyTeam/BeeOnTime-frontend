@@ -25,7 +25,20 @@ export async function setLogIn(creds: AccessPass): Promise<AxiosResponse> {
 
 export async function getRoleID(): Promise<AxiosResponse> {
     try {
-        const res = await axios.get(`/auth/user`);
+        const res = await axios.get("/auth/user/role");
+        return res;
+    }
+    catch (error) {
+        const res = (error as AxiosResponse)
+        return res
+    }
+}
+
+
+
+export async function getUsuario(): Promise<AxiosResponse> {
+    try {
+        const res = await axios.get("/auth/user");
         return res;
     }
     catch (error) {

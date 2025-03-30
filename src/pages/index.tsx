@@ -41,7 +41,7 @@ import { url } from 'inspector';
 import { useEffect, useState } from 'react';
 
 import { AccessPass } from '@/lib/auth';
-import { getRoleID, setLogIn } from '@/services/authService';
+import { getRoleID, getUsuario, setLogIn } from '@/services/authService';
 
 import { toast, ToastContainer} from "react-toastify"
 
@@ -101,7 +101,6 @@ export default function Home() {
 
         const id = await getRoleID();
         
-
         if(res.status === 200)
             router.push("/inicio")
 
