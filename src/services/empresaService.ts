@@ -46,7 +46,7 @@ export const cadastrarEmpresa = async (formData: any) => {
 
     console.log("✅ Resposta do backend:", response.data);
 
-    return response.status;
+    return response.data.empCod;
   } catch (error: any) {
     if (error.response) {
       console.error("❌ Erro no backend:", error.response.data);

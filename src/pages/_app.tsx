@@ -8,7 +8,7 @@ import { useEffect } from 'react';
 
 function MyApp({ Component, pageProps }: AppProps) {
   const router = useRouter();
-  const isLoginPage = router.pathname === '/'; // Verifica se é a página de login
+  const isLoginPage = router.pathname === '/' || router.pathname === '/cadastro'; // Verifica se é a página de login
 
   useEffect (() => {
     console.log(router.pathname)
