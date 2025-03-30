@@ -41,7 +41,7 @@ const ModalDevolutiva: React.FC<ModalDevolutivaProps> = ({
             <Button
             variant='outline-danger'
             onClick={handleReject} 
-            size='sm'
+            size='lg'
             >
             Recusar
             </Button>

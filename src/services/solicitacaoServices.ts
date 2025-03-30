@@ -1,12 +1,12 @@
 import { ApiException } from "../config/apiExceptions";
-import { Api } from "../config/apiSolicitacaoConfig";
+import { ApiSolicitacao } from "../config/apiSolicitacaoConfig";
 // import SolicitacaoInterface, { EnviarSolciitacaoInterface } from "../interfaces/Solicitacao";
 import SolicitacaoInterface, { CriarSolicitacaoInterface } from "../interfaces/Solicitacao";
 
 
 const getAllSolicitacao = async (): Promise<SolicitacaoInterface[] | ApiException> => {
   try {
-    const { data } = await Api.get("/solicitacao");
+    const { data } = await ApiSolicitacao.get("/solicitacao");
     return data;
   } catch (error: unknown) {
     if (error instanceof Error) {
@@ -19,7 +19,7 @@ const getAllSolicitacao = async (): Promise<SolicitacaoInterface[] | ApiExceptio
 
 const getSolicitacaoById = async (id: number): Promise<SolicitacaoInterface | ApiException> => {
   try {
-    const { data } = await Api.get(`/solicitacao/${id}`);
+    const { data } = await ApiSolicitacao.get(`/solicitacao/${id}`);
     return data;
   } catch (error: unknown) {
     if (error instanceof Error) {
@@ -32,7 +32,7 @@ const getSolicitacaoById = async (id: number): Promise<SolicitacaoInterface | Ap
 
 const createSolicitacao = async (formData: FormData): Promise<SolicitacaoInterface | ApiException> => {
   try {
-    const { data } = await Api.post("/solicitacao/cadastrar", formData, {
+    const { data } = await ApiSolicitacao.post("/solicitacao/cadastrar", formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
     return data;
@@ -57,7 +57,7 @@ const updateSolicitacao = async (solicitacao: SolicitacaoInterface): Promise<Sol
       solicitacaoStatus: status[solicitacao.solicitacaoStatus] 
     }
 
-    const { data } = await Api.put("/solicitacao/editar", updatedSolicitacao, {
+    const { data } = await ApiSolicitacao.put("/solicitacao/editar", updatedSolicitacao, {
       headers: { 'Content-Type': 'application/json' }
     })
 
@@ -76,7 +76,7 @@ const updateSolicitacao = async (solicitacao: SolicitacaoInterface): Promise<Sol
 const deleteSolicitacao = async (solicitacaoCod: number): Promise<SolicitacaoInterface | ApiException> => {
   try {
     console.log(`ID PARA DELETAR: ${solicitacaoCod}`)
-    const { data } = await Api.delete('/solicitacao/deletar', {
+    const { data } = await ApiSolicitacao.delete('/solicitacao/deletar', {
       headers: { 'Content-Type': 'application/json' },
       data: { solicitacaoCod: solicitacaoCod }
     })

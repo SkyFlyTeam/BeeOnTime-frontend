@@ -42,7 +42,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, solicitacao, onClick, onSolicitac
       <div className={styles.modal_container} onClick={onClick}>
         <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
           <p className={styles.modal_title}>{solicitacaoTitle[solicitacao.tipoSolicitacaoCod.tipoSolicitacaoNome]}</p>
-          <p><span>Colaborador: </span>{solicitacao.usuarioNome}</p>
+          <p className={styles.colaborador_label}><span>Colaborador: </span>{solicitacao.usuarioNome}</p>
           <div>
             {SelectedModal && (
               <SelectedModal

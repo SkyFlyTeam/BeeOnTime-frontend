@@ -15,7 +15,7 @@
   background-color: var(--white-bg);
   border-radius: .5rem;
   height: fit-content;
-  width: 20rem;
+  width: 25rem;
   display: flex;
   flex-direction: column;
   row-gap: .5rem;
@@ -24,6 +24,15 @@
 
 .modal_title {
   font-weight: bold;
+  font-size: 1.5rem;
+}
+
+.colaborador_label{
+  font-size: 1.2rem;
+}
+
+.colaborador_label span{
+  color: var(--gray);
 }
 
 @media (max-width: 426px) {

@@ -16,6 +16,7 @@ interface AjusteProps {
   onSolicitacaoUpdate: (updatedSolicitacao: SolicitacaoInterface) => void
   onClose: () => void
   usuarioLogadoCod: number
+  usuarioCargo: string
 }
 
 const ModalAjustePonto: React.FC<AjusteProps> = ({
@@ -23,7 +24,8 @@ const ModalAjustePonto: React.FC<AjusteProps> = ({
   solicitacaoSelected,
   onSolicitacaoUpdate,
   onClose,
-  usuarioLogadoCod
+  usuarioLogadoCod,
+  usuarioCargo
 }) => {
   const [solicitacao, setSolicitacao] = useState<SolicitacaoInterface>(solicitacaoSelected)
   const [showDevolutivaModal, setShowDevolutivaModal] = useState(false) 
@@ -129,6 +131,7 @@ const ModalAjustePonto: React.FC<AjusteProps> = ({
                 className={styles.inputTime}
                 id='entrada'
                 value={entrada || ''}
+                disabled={usuarioCargo !== 'Funcionário'}
                 onChange={(e) => setEntrada(e.target.value)}
               />
           </span>
@@ -139,6 +142,7 @@ const ModalAjustePonto: React.FC<AjusteProps> = ({
                 className={styles.inputTime}
                 id='inicio_almoco'
                 value={inicioAlmoco || ''}
+                disabled={usuarioCargo !== 'Funcionário'}
                 onChange={(e) => setInicioAlmoco(e.target.value)}
               />
           </span>
@@ -151,6 +155,7 @@ const ModalAjustePonto: React.FC<AjusteProps> = ({
                 className={styles.inputTime}
                 id='fim_almoco'
                 value={fimAlmoco || ''}
+                disabled={usuarioCargo !== 'Funcionário'}
                 onChange={(e) => setFimAlmoco(e.target.value)}
               />
           </span>
@@ -161,6 +166,7 @@ const ModalAjustePonto: React.FC<AjusteProps> = ({
                 className={styles.inputTime}
                 id='saida'
                 value={saida || ''}
+                disabled={usuarioCargo !== 'Funcionário'}
                 onChange={(e) => setSaida(e.target.value)}
               />
           </span>
@@ -222,14 +228,14 @@ const ModalAjustePonto: React.FC<AjusteProps> = ({
             <Button
               variant='outline-danger'
               onClick={openDevolutivaModal} 
-              size='sm'
+              size='lg'
             >
               Recusar
             </Button>
             <Button
               variant='outline-success'
               onClick={() => handleSolicitacao("APROVADA")}
-              size='sm'
+              size='lg'
             >
               Aprovar
             </Button>

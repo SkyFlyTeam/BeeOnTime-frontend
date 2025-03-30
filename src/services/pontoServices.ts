@@ -1,11 +1,11 @@
 import axios from "axios";
 import { ApiException } from "../config/apiExceptions";
-import { Api } from "../config/apiPontoConfig";
+import { ApiPonto } from "../config/apiPontoConfig";
 import PontoProv, { AprovarPonto } from "../interfaces/pontoProv";
 
 const createSolicitacaoPonto = async (ponto: PontoProv) => {
     try {
-        const { data } = await Api.post('/mpontoprov/cadastrar', ponto, {
+        const { data } = await ApiPonto.post('/mpontoprov/cadastrar', ponto, {
             headers: { 'Content-Type': 'multipart/form-data' }
         })
         return data
@@ -20,7 +20,7 @@ const createSolicitacaoPonto = async (ponto: PontoProv) => {
 
 const getSolicitacaoPonto = async (solicitacao_cod: number) => {
     try {
-        const { data } = await Api.get(`/mpontoprov/solicitacao/${solicitacao_cod}`)
+        const { data } = await ApiPonto.get(`/mpontoprov/solicitacao/${solicitacao_cod}`)
 
         return data 
     } catch (error) {
@@ -34,8 +34,7 @@ const getSolicitacaoPonto = async (solicitacao_cod: number) => {
 
 const aproveSolicitacaoPonto = async (idPonto: AprovarPonto, solicitacaoCod: number) => {
     try {
-        const { data } = await Api.post(`/mpontoprov/decisao/${solicitacaoCod}`, idPonto,{
-            headers: { 'Content-Type': 'multipart/form-data' }
+        const { data } = await ApiPonto.post(`/mpontoprov/decisao/${solicitacaoCod}`, idPonto,{
         })
         return data
     } catch (error: unknown) {
