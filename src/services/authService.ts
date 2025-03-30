@@ -3,8 +3,7 @@ import { AccessPass } from '../lib/auth';
 
 import { attemptLoginSession } from '../lib/server/auth/login';
 import { TextDecoderStream } from 'stream/web';
-
-
+import { Api } from '@/config/apiConfig';
 
 
 //export async function setLogIn(creds: AccessPass): Promise<AxiosResponse> {
@@ -38,8 +37,9 @@ export async function getRoleID(): Promise<AxiosResponse> {
 
 export async function getUsuario(): Promise<AxiosResponse> {
     try {
-        const res = await axios.get("/auth/user");
-        return res;
+        const res = await axios.get("/auth/token");
+        const resData = await Api.get(`/usuario/${res.data.token}`)
+        return resData;
     }
     catch (error) {
         const res = (error as AxiosResponse)
