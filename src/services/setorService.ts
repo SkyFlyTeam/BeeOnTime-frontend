@@ -30,24 +30,17 @@ export const verificarSetores = async (): Promise<SetorAPI[]> => {
 export const cadastrarSetor = async (setoresData: string[]) => {
   try {
     console.log("📤 Dados sendo enviados:", JSON.stringify(setoresData, null, 2));
-
-    // Array para armazenar as promessas de cada requisição
     const requests = setoresData.map(async (setor) => {
       const response = await axios.post(
-        `${API_URL}/setor`, // Ajuste o endpoint conforme necessário
-        { setorNome: setor }, // Envia cada setor como um objeto JSON
-        {
-          headers: { "Content-Type": "application/json" },
-        }
+        `${API_URL}/setor`,
+        { setorNome: setor },
+        { headers: { "Content-Type": "application/json" } }
       );
       console.log(`✅ Resposta do backend para "${setor}":`, response.data);
-      return response.status;
+      return { setorCod: response.data.setorCod, setorNome: response.data.setorNome }; // Ajuste conforme o retorno
     });
-
-    // Aguarda todas as requisições serem concluídas
-    const statuses = await Promise.all(requests);
-    return statuses; // Retorna um array com os status de cada requisição
-
+    const setoresCriados = await Promise.all(requests);
+    return setoresCriados; // Retorna array de { setorCod, setorNome }
   } catch (error: any) {
     if (error.response) {
       console.error("❌ Erro no backend:", error.response.data);
