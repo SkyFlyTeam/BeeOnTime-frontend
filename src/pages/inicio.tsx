@@ -1,4 +1,4 @@
-import TimeClock from '@/pages/inicioFuncionario/components/time-clock';
+import TimeClock from '@/pages/inicioFuncionario/_components/time-clock';
 import {
   Breadcrumb,
   BreadcrumbItem,

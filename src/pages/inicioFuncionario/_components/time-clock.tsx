@@ -1,3 +1,4 @@
+import TimeClockService from "./time-clock-service";
 import { useEffect, useState } from "react";
 import { Button } from "../../../components/ui/button";
 import { Clock } from "lucide-react";
@@ -7,7 +8,7 @@ export default function TimeClock() {
   const [currentTime, setCurrentTime] = useState(new Date());
 
   // Estado para o fluxo de trabalho
-  const [workState, setWorkState] = useState<"initial" | "entrada" | "inicioIntervalo" | "fimIntervalo">("initial");
+  const [workState, setWorkState] = useState<"initial" | "entrada" | "inicioIntervalo" | "fimIntervalo" | "saida">("initial");
 
   // Estado para rastrear o horário de entrada
   const [entryTime, setEntryTime] = useState<Date | null>(null);
@@ -23,6 +24,50 @@ export default function TimeClock() {
     return () => clearInterval(timer);
   }, []);
 
+  const { createHoras, baterEntrada, baterInicioAlmoco, baterSaidaAlmoco, baterSaida, verificarHoras } = TimeClockService();
+
+  useEffect(() => {
+    const diaHoje = new Date().toISOString().slice(0, 10);
+
+    // You need to await the result of verificarHoras
+    const fetchState = async () => {
+          // Create hours (this doesn't seem to be affected by the state update)
+    await createHoras({
+      horasExtras: 0,
+      horasTrabalhadas: 0,
+      horasNoturnas: 0,
+      horasFaltantes: 0,
+      horasData: diaHoje,
+      usuarioCod: 1,  // Example user ID
+    }, diaHoje, 1);
+
+      const estado = await verificarHoras(diaHoje, 1); // Await the promise
+      if (estado == 'initial') {
+        setWorkState(estado)
+      }
+      else if (estado == 'entrada') {
+        setEntryTime(new Date()); // Registra o horário de entrada
+        setWorkState(estado); // Now set workState with the resolved value
+      }
+      else if (estado == "inicioIntervalo") {
+        setEntryTime(new Date()); // Registra o horário de entrada
+        setWorkState(estado); // Now set workState with the resolved value
+      }
+      else if (estado == "fimIntervalo") {
+        setEntryTime(new Date()); // Registra o horário de entrada
+        setWorkState(estado); // Now set workState with the resolved value
+      }
+      else {
+        setWorkState("initial");
+        setEntryTime(null); // Reseta o horário de entrada
+        setExitTime(new Date()); // Registra o horário de saída
+      }
+    };
+  
+    fetchState(); // Call the async function inside useEffect
+  
+  }, []); // Empty dependency array to run only once on component mount
+
   // Formata o horário como HH:MM
   const formattedTime = currentTime.toLocaleTimeString("pt-BR", {
     hour: "2-digit",
@@ -37,23 +82,30 @@ export default function TimeClock() {
 
   // Funções para lidar com os cliques nos botões
   const handleEntrada = () => {
+    const diaHoje = new Date().toISOString().slice(0, 10);
     if (!isRestrictedTime) {
       setWorkState("entrada");
       setEntryTime(new Date()); // Registra o horário de entrada
+      console.log(currentTime.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'}))
+      baterEntrada(diaHoje, currentTime.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'}), 1)
     }
   };
 
   const handleInicioIntervalo = () => {
     if (entryTime) {
+      const diaHoje = new Date().toISOString().slice(0, 10);
       const hoursWorked = (currentTime.getTime() - entryTime.getTime()) / (1000 * 60 * 60); // Horas trabalhadas
       if (hoursWorked >= 0) { // Ajustado para 0 para testar a qualquer hora
         setWorkState("inicioIntervalo");
       }
+      baterInicioAlmoco(diaHoje, currentTime.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'}), 1)
     }
   };
 
   const handleFimIntervalo = () => {
     setWorkState("fimIntervalo");
+    const diaHoje = new Date().toISOString().slice(0, 10);
+    baterSaidaAlmoco(diaHoje, currentTime.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'}), 1)
   };
 
   const handleSaida = () => {
@@ -63,6 +115,8 @@ export default function TimeClock() {
         setWorkState("initial");
         setEntryTime(null); // Reseta o horário de entrada
         setExitTime(new Date()); // Registra o horário de saída
+        const diaHoje = new Date().toISOString().slice(0, 10);
+        baterSaida(diaHoje, currentTime.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'}), 1)
       }
     }
   };
@@ -77,6 +131,7 @@ export default function TimeClock() {
             <Button
               className={`w-40 font-semibold ${!isRestrictedTime ? "bg-[#FFB503] hover:bg-[#FFCB50] text-[#42130F]" : "bg-[#F0F0F0] text-gray-600 border-gray-400 cursor-not-allowed"}`}
               onClick={handleEntrada}
+              variant="outline"
               disabled={isRestrictedTime}
             >
               ENTRADA
