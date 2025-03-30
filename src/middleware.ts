@@ -33,7 +33,7 @@ async function isAuthorized(roleID: number, req: NextRequest) {
 
 // This function can be marked `async` if using `await` inside
 export async function middleware(req: NextRequest) {
-    // Get role ID if logged in. 'Undefined' = Not logged in
+    // Get role ID if logged in; 'undefined' if not
     const role = await isAuthenticated(req);
     if (role === undefined)
         if (isPath("/", req))

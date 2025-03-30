@@ -41,7 +41,7 @@ import { url } from 'inspector';
 import { useEffect, useState } from 'react';
 
 import { AccessPass } from '@/lib/auth';
-import { setLogIn } from '@/services/authService';
+import { getRoleID, setLogIn } from '@/services/authService';
 
 
 
@@ -84,9 +84,12 @@ export default function Home() {
 
         const res = await setLogIn(creds);
 
+        const id = await getRoleID();
+        alert("getRoleID: " + id.status + "\n\nRoleID: " + id.data.role);
         if(res.status === 200)
             router.push("/inicio")
 
+        
 
       }
 
