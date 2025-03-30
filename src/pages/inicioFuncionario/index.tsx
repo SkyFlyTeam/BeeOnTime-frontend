@@ -1,4 +1,4 @@
-import TimeClock from '@/pages/inicioFuncionario/components/time-clock';
+import TimeClock from '@/pages/inicioFuncionario/_components/time-clock';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -8,11 +8,14 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
+import { useState } from 'react';
+import { string } from 'zod';
 
-//Página fictícia só para ver
-
-let nome = "José" // só de exemplo, depois pegará do back o nome
 export default function InicioFuncionario() {
+
+  //Página fictícia só para ver
+  const [nome, setNome] = useState("José");
+
   return (
     <>
     
