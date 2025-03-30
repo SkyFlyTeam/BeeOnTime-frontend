@@ -7,7 +7,7 @@ import { Separator } from '@/components/ui/separator';
 
 function MyApp({ Component, pageProps }: AppProps) {
   const router = useRouter();
-  const isLoginPage = router.pathname === '/'; // Verifica se é a página de login
+  const isLoginPage = router.pathname === '/' || router.pathname === '/cadastro'; // Verifica se é a página de login
 
   // Se for a página de login, renderiza apenas o componente sem sidebar
   if (isLoginPage) {

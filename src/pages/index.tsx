@@ -144,7 +144,7 @@ export default function Home() {
             </div>
             <div className='pr-12 pl-5 pt-5'>
                 <Button className="mt-6 mb-12" style={{boxShadow: '0px 10px 25px 0px rgba(123, 104, 238, 50%)'}}
-                onClick={() => router.push("/about")}>
+                onClick={() => router.push("/cadastro")}>
                     Cadastro
                 </Button>
             </div>
@@ -243,7 +243,7 @@ export default function Home() {
 
                         {isMobile ? (
                             <div className='w-full text-center mb-2'>
-                            <a href='' className='text-sm' style={{textAlign: 'center'}}>
+                            <a className='text-sm' style={{textAlign: 'center'}} onClick={() => router.push("/cadastro")}>
                                 É novo aqui? Cadastre sua empresa!
                             </a>
                             </div>
