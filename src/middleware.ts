@@ -7,6 +7,7 @@ import { checkAccess } from './lib/permissions';
 
 
 
+
 function isPath(targetName: String, req: NextRequest): boolean {
     return req.nextUrl.pathname === targetName;
 }

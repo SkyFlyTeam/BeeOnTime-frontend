@@ -13,12 +13,12 @@ export async function setLogIn(creds: AccessPass): Promise<AxiosResponse> {
         const res = await axios.post(`/auth/login`, JSON.stringify(creds), {
             headers: { "Content-Type": "application/json" },
         });
-        alert("setLogIn " + res.data + " " + res.status);
+        // alert("setLogIn " + res.data + " " + res.status);
         return res;
     }
     catch (error) {
         const res = (error as AxiosResponse)
-        alert("setLogIn " + res.data + " " + res.status);
+        // alert("setLogIn " + res.data + " " + res.status);
         return res
     }
 }

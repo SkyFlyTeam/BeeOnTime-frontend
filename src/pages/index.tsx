@@ -43,6 +43,8 @@ import { useEffect, useState } from 'react';
 import { AccessPass } from '@/lib/auth';
 import { getRoleID, setLogIn } from '@/services/authService';
 
+import { toast, ToastContainer} from "react-toastify"
+
 
 
 
@@ -59,6 +61,19 @@ export default function Home() {
     const changeIsShowingPassword = () => {
         setIsShowingPassword(!isShowingPassword);
     }
+
+  // Function to trigger the error toast
+  const showErrorToast = () => {
+    toast.error("Credênciais inválidas!", {
+      position: "bottom-center",  // Position where the toast will appear
+      autoClose: 5000,  // Auto-close after 5 seconds
+      hideProgressBar: true,  // Hide progress bar
+      closeOnClick: true,  // Allows closing toast on click
+      pauseOnHover: true,  // Pauses the toast on hover
+      draggable: true,  // Makes the toast draggable
+      progress: undefined,  // Can be used to specify progress of a toast
+    });
+  };
 
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -85,9 +100,14 @@ export default function Home() {
         const res = await setLogIn(creds);
 
         const id = await getRoleID();
-        alert("getRoleID: " + id.status + "\n\nRoleID: " + id.data.role);
+        
+
         if(res.status === 200)
             router.push("/inicio")
+
+        else{
+            showErrorToast()
+        }
 
         
 
@@ -254,7 +274,7 @@ export default function Home() {
             </Card>
         </div>
 
-
+        <ToastContainer />
         </div>
     )
 }
