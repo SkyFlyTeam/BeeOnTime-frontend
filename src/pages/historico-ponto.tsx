@@ -2,77 +2,86 @@
 
 import * as React from "react";
 import { PointsHistoryTable } from "@/components/custom/histPonto/points-history-table";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import HistPontos, { Ponto } from "@/interfaces/hisPonto";
+import { pontoServices } from "@/services/pontoServices";
+import { horasServices } from "@/services/horasServices";
+import RelatorioPonto from "@/interfaces/relatorioPonto";
+import { usuarioServices } from "@/services/usuarioServices";
+import { Usuario } from "@/interfaces/usuario";
 
-// Tipagem dos dados
-interface PointEntry {
-  date: string;
-  pointsMorning: string;
-  pointsAfternoon: string;
-  normalHours: string;
-  extraHours: string;
-  missingHours: string;
-  nightShift: string;
-}
-
-// Dados mockados
-const mockEntries = [
-  {
-    date: "14/03/2025",
-    pointsMorning: "08:00 - 12:00",
-    pointsAfternoon: "13:00 - 17:00",
-    normalHours: "8h",
-    extraHours: "0h",
-    missingHours: "0h",
-    nightShift: "0h",
-  },
-  {
-    date: "12/03/2025",
-    pointsMorning: "12:00 - 14:00",
-    pointsAfternoon: "15:00 - 23:00",
-    normalHours: "8h",
-    extraHours: "2h",
-    missingHours: "0h",
-    nightShift: "1h",
-  },
-  {
-    date: "13/03/2025",
-    pointsMorning: "08:00 - 12:00",
-    pointsAfternoon: "13:00 - 20:00",
-    normalHours: "8h",
-    extraHours: "3h",
-    missingHours: "0h",
-    nightShift: "0h",
-  },
-  {
-    date: "13/03/2025",
-    pointsMorning: "09:00 - 12:00",
-    pointsAfternoon: "13:00 - 17:00",
-    normalHours: "8h",
-    extraHours: "0h",
-    missingHours: "1h",
-    nightShift: "0h",
-  },
-];
 
 export default function PointsHistoryPage() {
   //Simulando o diferente acesso
-  const[accessLevel, setAccessLevel] = useState<"USER" | "ADM">("ADM")
+  const[accessLevel, setAccessLevel] = useState<"USER" | "ADM">("USER")
+  const[ histPontos, setHistPontos ] = useState<RelatorioPonto[] | null>(null)
+  const[ usuarioInfo, setUsuarioInfo ] = useState<Usuario | null>(null)
 
-  const handleEdit = (entry: PointEntry) => {
+  // const { usuarioCargo, usuarioCod } = useAuth(); 
+
+  const handleEdit = (entry: RelatorioPonto) => {
     // Lógica para editar a entrada (ex.: abrir um modal)
     console.log("Editar entrada:", entry);
   };
+
+  // Função para combinar as horas e os pontos
+  const fetchHistPontos = async (usuario_cod: number) => {
+    try {
+      // Buscar os pontos do usuário
+      const pontos = await pontoServices.getPontosByUsuario(usuario_cod);
+      // Buscar as horas do usuário
+      const horas = await horasServices.getHorasByUsuario(usuario_cod);
+
+      // Combinar as informações pelo 'horasCod'
+      const combinedData = pontos.map((ponto: any) => {
+        // Encontrar o item correspondente de horas baseado no 'horasCod'
+        const hora = horas.find((hora: any) => hora.horasCod === ponto.horasCod);
+
+        return {
+          ...ponto,
+          horasExtras: hora?.horasExtras || 0,
+          horasTrabalhadas: hora?.horasTrabalhadas || 0,
+          horasNoturnas: hora?.horasNoturnas || 0,
+          horasFaltantes: hora?.horasFaltantes || 0,
+          horasData: hora?.horasData || '',
+          usuarioCod: hora?.usuarioCod || 0,
+        };
+      });
+
+      // Atualizar o estado com os dados combinados
+      setHistPontos(combinedData);
+    } catch (error) {
+      console.log("Erro ao recuperar histórico de pontos do usuário de id " + usuario_cod);
+    }
+  };
+
+  const fetchUsuario = async (usuario_cod: number) => {
+    try {
+      const usuario_data = await usuarioServices.getUsuarioById(usuario_cod);
+      setUsuarioInfo(usuario_data)
+    } catch (error) {
+      console.log("Erro ao recuperar usuário de id " + usuario_cod);
+    }
+  };
+
+  // Utilize useEffect para chamar a função quando o componente for montado
+  useEffect(() => {
+    const usuario_cod = 1;
+    fetchHistPontos(usuario_cod);
+    fetchUsuario(usuario_cod)
+  }, []);
 
   return (
     <div className="flex flex-col  p-6 md:p-9">
       <h1 className="text-xl md:text-3xl font-semibold mb-4">
         {accessLevel === "USER" ? "Meus Pontos" : "Pontos"}
-        </h1>
+      </h1>
       <PointsHistoryTable 
-      entries={mockEntries} 
-      onEdit={handleEdit}
-      accessLevel={accessLevel} />
+        entries={histPontos} 
+        userInfo={usuarioInfo}
+        onEdit={handleEdit}
+        accessLevel={accessLevel} 
+      />
     </div>
   );
 }

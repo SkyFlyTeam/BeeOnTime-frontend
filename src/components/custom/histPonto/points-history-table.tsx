@@ -19,21 +19,15 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/custom/tooltip";
-import PontoService from "@/services/PontoService";
+import HistPontos, { Ponto } from "@/interfaces/hisPonto";
+import RelatorioPonto from "@/interfaces/relatorioPonto";
+import { Usuario } from "@/interfaces/usuario";
 
-interface PointEntry {
-  date: string;
-  pointsMorning: string;
-  pointsAfternoon: string;
-  normalHours: string;
-  extraHours: string;
-  missingHours: string;
-  nightShift: string;
-}
 
 interface PointsHistoryTableProps {
-  entries: PointEntry[];
-  onEdit: (entry: PointEntry) => void;
+  entries: RelatorioPonto[] | null ;
+  onEdit: (entry: RelatorioPonto) => void;
+  userInfo: Usuario | null;
   className?: string;
   accessLevel: "USER" | "ADM" //Recebe o AccessLevel para diferentes acessos
 }
@@ -41,30 +35,8 @@ interface PointsHistoryTableProps {
 const PointsHistoryTable = React.forwardRef<
   HTMLDivElement,
   PointsHistoryTableProps
->(({ entries, onEdit, className, accessLevel }, ref) => {
+>(({ entries, onEdit, userInfo, className, accessLevel }, ref) => {
 
-
-  /* Ativar quando for usar o backend */
-  // Estado para os dados da tabela
-  // const [loading, setLoading] = useState<boolean>(true);
-  // const [error, setError] = useState<string | null>(null);
-
-  // Carregar os dados do backend
-  // useEffect(() => {
-  //   const fetchPoints = async () => {
-  //     try {
-  //       setLoading(true);
-  //       const response = await PontoService.getPoints("user123", "05", "2025");
-  //       // setEntries(response.data); // Comentado para usar mockEntries
-  //     } catch (err) {
-  //       setError("Erro ao carregar os pontos. Tente novamente mais tarde.");
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchPoints();
-  // }, []);
 
   // Definir os cabeçalhos, removendo "AÇÕES" para ADM
   const headers = [
@@ -76,6 +48,31 @@ const PointsHistoryTable = React.forwardRef<
     "ADICIONAL NOTURNO",
     ...(accessLevel === "USER" ? ["AÇÕES"] : []),
   ];
+
+  // Função para calcular carga horária semanal e mensal
+const calculateCargaHoraria = (horasDiarias: number, diasTrabalhados: number) => {
+  const horasSemana = horasDiarias * diasTrabalhados; // Total de horas na semana
+  const horasMes = horasSemana * 4; // Aproximadamente 4 semanas por mês
+  return { horasSemana, horasMes };
+};
+
+// Organiza a jornada de trabalho com base nos dias que o usuário trabalha
+const jornadaFormatada = () => {
+  const diasDaSemanaSiglas = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
+  
+  // Filtra os dias da semana em que o usuário trabalha
+  const diasTrabalhados = userInfo?.jornadas.jornada_diasSemana
+    .map((trabalha, index) => trabalha ? diasDaSemanaSiglas[index] : null)
+    .filter((dia) => dia !== null);
+  
+  if (diasTrabalhados && diasTrabalhados.length > 0) {
+    return `${diasTrabalhados.join(", ")} das ${userInfo?.jornadas.jornada_horarioEntrada.toString().slice(0, 5)} até ${userInfo?.jornadas.jornada_horarioSaida.toString().slice(0, 5)}`;
+  } else {
+    return "Horário flexível"; // Caso o horário seja flexível
+  }
+};
+
+const { horasSemana, horasMes } = calculateCargaHoraria(userInfo?.usuario_cargaHoraria!, userInfo?.jornadas?.jornada_diasSemana?.filter(dia => dia).length ?? 0)
 
   return (
     <div
@@ -89,13 +86,13 @@ const PointsHistoryTable = React.forwardRef<
           <div className="flex flex-row items-start gap-2 md:gap-4">
             <h1 className="text-base md:text-lg font-bold">Jornada de Trabalho:</h1>
             <p className="text-base md:text-lg text-black">
-              Segunda-feira a sexta-feira, das 8h15 até 17h50
+              {jornadaFormatada()}
             </p>
           </div>
           <div className="flex flex-row items-start gap-2 md:gap-4">
             <h1 className="text-base md:text-lg font-bold">Carga horária:</h1>
             <p className="text-base md:text-lg text-black">
-              20h/semana - 450h/mês
+              {horasSemana}h/semana - {horasMes}h/mês
             </p>
           </div>
         </div>
@@ -122,31 +119,30 @@ const PointsHistoryTable = React.forwardRef<
             </TableRow>
           </TableHeader>
           <TableBody>
-            {entries.map((entry, index) => (
+            {entries && entries.map((entry, index) => (
               <TableRow
                 key={index}
                 className={index % 2 === 0 ? "bg-[#FFF8E1]" : "bg-[#FFFFFF]"}
               >
                 <TableCell className="border border-gray-200 text-center text-black text-base p-3">
-                  {entry.date}
+                  {new Date(entry.data).toLocaleDateString('pt-BR')}
                 </TableCell>
                 <TableCell className="border border-gray-200 text-center text-black text-base p-3">
                   <div className="flex flex-col">
-                    <div>{entry.pointsMorning}</div>
-                    <div>{entry.pointsAfternoon}</div>
+                  <div>{entry.pontos.map((ponto: Ponto) => `${ponto.horarioPonto.toString().substring(0, 5)}`).join(" - ")}</div>
                   </div>
                 </TableCell>
                 <TableCell className="border border-gray-200 text-center text-black text-base p-3">
-                  {entry.normalHours}
+                  {entry.horasTrabalhadas}
                 </TableCell>
                 <TableCell className="border border-gray-200 text-center text-black text-base p-3">
-                  {entry.extraHours}
+                  {entry.horasExtras}
                 </TableCell>
                 <TableCell className="border border-gray-200 text-center text-black text-base p-3">
-                  {entry.missingHours}
+                  {entry.horasFaltantes}
                 </TableCell>
                 <TableCell className="border border-gray-200 text-center text-black text-base p-3">
-                  {entry.nightShift}
+                  {entry.horasNoturnas}
                 </TableCell>
                 {accessLevel === "USER" && ( // Mostrar a coluna "AÇÕES" apenas para USER
                   <TableCell className="border border-gray-200 text-center text-black text-base p-3">
@@ -183,10 +179,9 @@ const PointsHistoryTable = React.forwardRef<
               { label: "DATA", key: "date" },
               {
                 label: "PONTOS",
-                render: (e: PointEntry) => (
+                render: (e: RelatorioPonto) => (
                   <div className="flex flex-col text-center">
-                    <div>{e.pointsMorning}</div>
-                    <div>{e.pointsAfternoon}</div>
+                    <div>{e.pontos.map((ponto: any) => `${ponto.tipoPonto} - ${ponto.horarioPonto}`).join(", ")}</div>
                   </div>
                 ),
               },
@@ -198,7 +193,7 @@ const PointsHistoryTable = React.forwardRef<
                 ? [
                   {
                     label: "AÇÕES",
-                    render: (e: PointEntry) => (
+                    render: (e: RelatorioPonto) => (
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
@@ -223,7 +218,7 @@ const PointsHistoryTable = React.forwardRef<
             ].map((row, idx) => (
               <tr key={idx}>
                 <td className="border border-gray-200 p-3 font-semibold">{row.label}</td>
-                {entries.map((entry, i) => (
+                {entries && entries.map((entry, i) => (
                   <td
                     key={i}
                     className={`border border-gray-200 p-3 text-center text-base ${i % 2 === 0 ? "bg-[#FFF8E1]" : "bg-[#FFFFFF]"
