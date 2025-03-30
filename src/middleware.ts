@@ -3,6 +3,7 @@ import { hasAuthCookie } from './lib/server/auth/cookie';
 import { attemptGetLocalUserRoleID } from './lib/server/auth/login';
 import { checkAccess } from './lib/permissions';
 
+
 function isPath(targetName: String, req: NextRequest): boolean {
     return req.nextUrl.pathname === targetName;
 }
@@ -35,11 +36,10 @@ export async function middleware(req: NextRequest) {
 
     // Allows to Logout when authorized
     if (isPath("/logout", req)) {
-        const res = new NextResponse("Logged out.");
+        const res = NextResponse.redirect(new URL("/", req.url));
         res.cookies.delete('auth-token');
         return res;
     }
-
 
     // Access pass, controlled in "@/src/lib/permissions.ts"
     if (!(await isAuthorized(role, req)))

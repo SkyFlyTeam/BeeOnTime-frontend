@@ -4,10 +4,19 @@ import { useRouter } from 'next/router';
 import { AppSidebar } from '@/components/custom/app-sidebar';
 import { SidebarProvider, SidebarInset, SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import { Separator } from '@/components/ui/separator';
+import { useEffect } from 'react';
 
 function MyApp({ Component, pageProps }: AppProps) {
   const router = useRouter();
   const isLoginPage = router.pathname === '/' || router.pathname === '/cadastro'; // Verifica se é a página de login
+
+  useEffect (() => {
+    console.log(router.pathname)
+    if (router.pathname === '/logout'){
+      router.push('/')
+    }
+  }, [router.pathname])
+
 
   // Se for a página de login, renderiza apenas o componente sem sidebar
   if (isLoginPage) {
