@@ -1,9 +1,11 @@
 import axios from "axios";
 
-export const Api = () =>{
-    return axios.create({
-        baseURL: 'http://localhost:8080'
-    })
-}
+// Retorna uma instância do Axios
+export const Api = axios.create({
+    baseURL: 'http://localhost:8081',
+    headers: {
+      'Content-Type': 'application/json',
+      // Add any other common headers you need here
+    },
+  });
 
-export const hostname = 'http://localhost:8080/'
