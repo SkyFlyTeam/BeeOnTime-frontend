@@ -45,12 +45,6 @@ import { getRoleID, getUsuario, setLogIn } from '@/services/authService';
 
 import { toast, ToastContainer} from "react-toastify"
 
-
-
-
-
-
-
 export default function Home() {
 
     const router = useRouter();
@@ -113,6 +107,25 @@ export default function Home() {
       }
 
 
+    
+
+  // Checa o tamanho da tela em pixels quando a janela é reajustada
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setIsMobile(true); // Tamanho da tela mobile
+      } else {
+        setIsMobile(false); // Desktop ou em telas maiores
+      }
+    };
+
+    handleResize(); // Checagem inicial do tamanho quando o componente é montado (onMount)
+    window.addEventListener('resize', handleResize); // Escuta mudança do tamanho de tela
+
+    return () => {
+      window.removeEventListener('resize', handleResize); // Limpa o componente quando ele é descarregado (unMount)
+    };
+  }, []);
     
       const [isMobile, setIsMobile] = useState(false);
 

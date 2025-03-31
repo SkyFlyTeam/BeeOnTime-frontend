@@ -1,5 +1,7 @@
 import '../styles/global.css';
 import type { AppProps } from 'next/app';
+// import 'bootstrap/dist/css/bootstrap.min.css';
+import { AuthProvider } from '../context/AuthContext'; 
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
 import { useRouter } from 'next/router';

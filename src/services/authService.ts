@@ -33,8 +33,6 @@ export async function getRoleID(): Promise<AxiosResponse> {
     }
 }
 
-
-
 export async function getUsuario(): Promise<AxiosResponse> {
     try {
         const res = await axios.get("/auth/token");

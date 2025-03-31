@@ -1,0 +1,45 @@
+.badge {
+    padding: .3rem .4rem;
+    border-radius: .5rem;
+}
+
+.ferias {
+    background-color: #95e1d8;
+    color: #5e9091;
+}
+
+.folga {
+    background-color: #d1a0f5;
+    color: #7c559a;
+}
+
+.ponto {
+    background-color: #ffbde3;
+    color: #bd6b96;
+}
+
+.extra {
+    background-color: #a7fbcf;
+    color: #66b98a;
+}
+
+.ausencia {
+    background-color: #b4c8fb;
+    color: #6d7ca7;
+}
+
+@media (max-width: 426px) {
+    .badge {
+        padding: .3rem .4rem;
+        border-radius: .5rem;
+        font-size: .85rem;
+    }
+}
+
+@media (max-width: 320px) {
+    .badge {
+        padding: .3rem .4rem;
+        border-radius: .5rem;
+        font-size: .75rem;
+    }
+}
