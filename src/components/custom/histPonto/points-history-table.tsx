@@ -45,7 +45,7 @@ const PointsHistoryTable = React.forwardRef<
     "HORAS NORMAIS",
     "HORAS EXTRAS",
     "HORAS FALTANTES",
-    "ADICIONAL NOTURNO",
+    // "ADICIONAL NOTURNO",
     ...(accessLevel === "USER" ? ["AÇÕES"] : []),
   ];
 
@@ -141,9 +141,9 @@ const { horasSemana, horasMes } = calculateCargaHoraria(userInfo?.usuario_cargaH
                 <TableCell className="border border-gray-200 text-center text-black text-base p-3">
                   {entry.horasFaltantes}
                 </TableCell>
-                <TableCell className="border border-gray-200 text-center text-black text-base p-3">
+                {/* <TableCell className="border border-gray-200 text-center text-black text-base p-3">
                   {entry.horasNoturnas}
-                </TableCell>
+                </TableCell> */}
                 {accessLevel === "USER" && ( // Mostrar a coluna "AÇÕES" apenas para USER
                   <TableCell className="border border-gray-200 text-center text-black text-base p-3">
                     <TooltipProvider>
@@ -188,7 +188,7 @@ const { horasSemana, horasMes } = calculateCargaHoraria(userInfo?.usuario_cargaH
               { label: "HORAS NORMAIS", key: "normalHours" },
               { label: "HORAS EXTRAS", key: "extraHours" },
               { label: "HORAS FALTANTES", key: "missingHours" },
-              { label: "ADICIONAL NOTURNO", key: "nightShift" },
+              // { label: "ADICIONAL NOTURNO", key: "nightShift" },
               ...(accessLevel === "USER" // Adicionar "AÇÕES" apenas para USER
                 ? [
                   {

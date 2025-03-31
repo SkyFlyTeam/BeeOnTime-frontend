@@ -9,6 +9,7 @@ import { horasServices } from "@/services/horasServices";
 import RelatorioPonto from "@/interfaces/relatorioPonto";
 import { usuarioServices } from "@/services/usuarioServices";
 import { Usuario } from "@/interfaces/usuario";
+import { getUsuario } from "@/services/authService";
 
 
 export default function PointsHistoryPage() {
@@ -63,12 +64,30 @@ export default function PointsHistoryPage() {
       console.log("Erro ao recuperar usuário de id " + usuario_cod);
     }
   };
+  
+    const getUser = async() => {
+      const user = await getUsuario();
+      console.log (user);
+      return user.data;
+    }
 
   // Utilize useEffect para chamar a função quando o componente for montado
   useEffect(() => {
-    const usuario_cod = 1;
-    fetchHistPontos(usuario_cod);
-    fetchUsuario(usuario_cod)
+
+    const onMount = async() => {
+      const usuario = await getUser();
+
+      if (usuario.nivelAcesso.nivelAcesso_cod !== 0) {
+      fetchHistPontos(usuario.usuario_cod);
+      fetchUsuario(usuario.usuario_cod);
+      }
+      else {
+        setAccessLevel('ADM')
+      }
+    }
+
+    onMount()
+
   }, []);
 
   return (
