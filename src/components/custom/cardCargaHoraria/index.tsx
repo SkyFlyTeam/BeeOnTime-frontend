@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import styles from './styles.module.css';
 import { horasServices } from '../../../services/horaServices';
-import UsuarioInfo from '@/src/interfaces/usuarioInfo';
-import { Horas } from '@/src/interfaces/horasInterface';
-import HistPontos from '@/src/interfaces/histPontosInterface';
+import UsuarioInfo from '@/../src/interfaces/usuarioInfo';
+import { Horas } from '@/../src/interfaces/horasInterface';
+import HistPontos from '@/../src/interfaces/histPontosInterface';
 
 interface CardCargaHorariaProps {
     usuarioInfo: UsuarioInfo;

@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 // Define a URL base do backend
-const API_URL = 'http://localhost:8080';
+const API_URL = 'http://localhost:8081';
 
 interface Empresa {
   emp_nome: string;
