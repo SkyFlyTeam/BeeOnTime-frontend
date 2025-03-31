@@ -258,7 +258,7 @@ export default function Home() {
                                     </FormItem>
                                 )}
                             />
-                            <FormField
+                            {/* <FormField
                                 control={form.control}
                                 name="rememberMe"
                                 render={({ field }: { field: import("react-hook-form").ControllerRenderProps<z.infer<typeof formSchema>, "rememberMe"> }) => (
@@ -271,7 +271,7 @@ export default function Home() {
                                         </FormControl>
                                     </FormItem>
                                 )}
-                            />
+                            /> */}
                         <div className='pb-2'>
                           <Button type="submit" className="w-full mt-6 mb-2">
                             Entrar

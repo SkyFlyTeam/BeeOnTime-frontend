@@ -4,10 +4,11 @@ import { Horas } from "../interfaces/horasInterface";
 
 const getHora = async (usuarioCod: number, date: string | Date): Promise<Horas> => {
     try {
-        const formData = new FormData();
-        formData.append("data", date.toString());
-        const { data } = await Api.post(`/horas/usuario/${usuarioCod}/dia`, formData, {
-        });
+        // Transformar a data para string
+        const dataFormatada = date instanceof Date ? date.toISOString().split('T')[0] : date;
+
+        // Enviar a requisição com a data na URL
+        const { data } = await Api.post(`/horas/usuario/${usuarioCod}/dia?data=${dataFormatada}`);
 
         return data
     } catch (error: any) {

@@ -1,4 +1,4 @@
-import axios from "axios";
+
 import { ApiException } from "../config/apiExceptions";
 import { ApiPonto } from "../config/apiPontoConfig";
 import PontoProv, { AprovarPonto } from "../interfaces/pontoProv";
@@ -18,9 +18,9 @@ const createSolicitacaoPonto = async (ponto: PontoProv) => {
     }
 }
 
-const getSolicitacaoPonto = async (solicitacao_cod: number) => {
-    try {
-        const { data } = await ApiPonto.get(`/mpontoprov/solicitacao/${solicitacao_cod}`)
+// const getSolicitacaoPonto = async (solicitacao_cod: number) => {
+//     try {
+//         const { data } = await ApiPonto.get(`/mpontoprov/solicitacao/${solicitacao_cod}`)
 const getPontosByUsuario = async (usuario_cod: number) => {
     try {
         const { data } = await ApiPonto.get(`/mpontos/usuario/${usuario_cod}`)
@@ -52,11 +52,9 @@ const aproveSolicitacaoPonto = async (idPonto: AprovarPonto, solicitacaoCod: num
 
 export const pontoServices = {
     createSolicitacaoPonto,
-    getSolicitacaoPonto,
+    // getSolicitacaoPonto,
+    getPontosByUsuario,
     aproveSolicitacaoPonto
   };
-export const pontoServices = {
-  getPontosByUsuario
-};
 
   
