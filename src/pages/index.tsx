@@ -258,10 +258,24 @@ export default function Home() {
                                     </FormItem>
                                 )}
                             />
+                            <FormField
+                                control={form.control}
+                                name="rememberMe"
+                                render={({ field }: { field: import("react-hook-form").ControllerRenderProps<z.infer<typeof formSchema>, "rememberMe"> }) => (
+                                    <FormItem>
+                                        <FormControl>
+                                            <label className="inline-flex items-center">
+                                                <input type="checkbox" checked={field.value} onChange={field.onChange} onBlur={field.onBlur} name={field.name} ref={field.ref} className="form-checkbox h-4 w-4 text-blue-600" />
+                                                <span className="ml-2 text-sm text-gray-700">Remember me</span>
+                                            </label>
+                                        </FormControl>
+                                    </FormItem>
+                                )}
+                            />
                         <div className='pb-2'>
-                        <Button type="submit" className="w-full mt-6 mb-2">
+                          <Button type="submit" className="w-full mt-6 mb-2">
                             Entrar
-                        </Button>
+                          </Button>
                         </div>
                         </form>
                         

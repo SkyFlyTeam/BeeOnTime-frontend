@@ -21,6 +21,10 @@ const createSolicitacaoPonto = async (ponto: PontoProv) => {
 const getSolicitacaoPonto = async (solicitacao_cod: number) => {
     try {
         const { data } = await ApiPonto.get(`/mpontoprov/solicitacao/${solicitacao_cod}`)
+const getPontosByUsuario = async (usuario_cod: number) => {
+    try {
+        const { data } = await ApiPonto.get(`/mpontos/usuario/${usuario_cod}`)
+
 
         return data 
     } catch (error) {
@@ -51,4 +55,8 @@ export const pontoServices = {
     getSolicitacaoPonto,
     aproveSolicitacaoPonto
   };
+export const pontoServices = {
+  getPontosByUsuario
+};
+
   
