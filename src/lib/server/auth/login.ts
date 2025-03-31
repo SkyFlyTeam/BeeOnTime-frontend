@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 // Lib
 import { AccessPass } from "../../auth";
 import { axiosToResponse } from "../../axiosAuth";
-import { getCredsFromAuthCookie, getEmailFromAuthCookie, getTokenFromAuthCookie } from "./cookie";
+import { getCodFromAuthCookie, getCredsFromAuthCookie, getEmailFromAuthCookie, getTokenFromAuthCookie } from "./cookie";
 // Constants
 import { MS_USUARIO } from "../../constants";
 
@@ -37,37 +37,31 @@ function setAuthCookie(creds: AccessPass, token: String, jsonPassthrough?: strin
 
     return cookieToken;
 }
-
-export async function attemptLoginSession(creds: AccessPass, msg?: string): Promise<Response> {
+async function setLoginSession(creds: AccessPass, msg?: string): Promise<Response> {
     try {
         const res = await axios.post(`${MS_USUARIO}/auth/login`, JSON.stringify(creds), {
             headers: { "Content-Type": "application/json" },
         });
-        const token = await res.data
-        if (res.status === 200)
-            return setAuthCookie(creds, token, msg);
-        return axiosToResponse(res);
+        const json = (await res.data);
+        console.log("json : " + JSON.stringify(json))
+        return new Response(JSON.stringify(json));
     }
     catch (error) {
-        const res = error as AxiosResponse;
-        return axiosToResponse(res);
+        return axiosToResponse(error as AxiosResponse);
     }
 }
-
-
-
-
-
+export async function attemptLoginSession(creds: AccessPass): Promise<Response> {
+    const res = await setLoginSession(creds);
+    if (res.status != 200)
+        return res;
+    const resJson = await res.json()
+    return setAuthCookie(creds, resJson.id, resJson.token);
+}
 
 async function resetAuthCookie(req: NextRequest | Request, msg?: string) {
     const creds = getCredsFromAuthCookie(req);
-    return await attemptLoginSession(creds, msg);
+    return await setLoginSession(creds, msg);
 }
-
-
-
-
-
 
 async function getUserRoleID(email: String, req: NextRequest | Request, token?: String) {
     try {
@@ -93,12 +87,13 @@ async function attemptUserRoleID(email: String, req: NextRequest | Request): Pro
     if (reset.status != 200)
         return reset;
 
-    const cookie = JSON.parse((await reset.json()));
+    const cookie = await reset.json();
     const lastTry = await getUserRoleID(email, req, cookie.token);
     console.log("attemptUserRoleID  >  lastTry: " + reset.status)
-    if(lastTry.status != 200)
+    console.log("cookie : " + JSON.stringify(cookie))
+    if (lastTry.status != 200)
         return lastTry;
-    return setAuthCookie( { usuarioEmail: cookie.usuarioEmail, usuario_senha: cookie.usuario_senha} as AccessPass, cookie.token, (await lastTry.json()))
+    return setAuthCookie({ usuarioEmail: cookie.usuarioEmail, usuario_senha: cookie.usuario_senha } as AccessPass, cookie.usuario_cod, cookie.token, (await lastTry.json()))
 }
 
 export async function attemptGetLocalUserRoleID(req: Request | NextRequest): Promise<Response> {
@@ -110,4 +105,47 @@ export async function attemptGetLocalUserRoleID(req: Request | NextRequest): Pro
 
 export async function attemptGetUserRoleID(email: String, req: Request | NextRequest): Promise<Response> {
     return await attemptUserRoleID(email, req);
+}
+
+
+
+
+
+
+
+
+
+//
+//
+//
+//
+async function getUserData(id: String, req: NextRequest | Request, token?: String) {
+    try {
+        const res = await axios.get(`${MS_USUARIO}/usuario/${id}`, {
+            headers: { Authorization: "Bearer " + (token != undefined ? token : getTokenFromAuthCookie(req)) }
+        });
+        const usuario = await res.data;
+        return new Response(JSON.stringify(usuario));
+    }
+    catch (error) { return axiosToResponse(error as AxiosResponse) }
+}
+
+export async function attemptLocalUsuarioData(req: Request | NextRequest) {
+    const res = await getUserData(getCodFromAuthCookie(req), req, getTokenFromAuthCookie(req))
+    console.log("attemptUsuarioData  >  res: " + res.status)
+    if (res.status == 200)
+        return res;
+
+    const reset = await resetAuthCookie(req, "token");
+    console.log("attemptUserRoleID  >  reset: " + reset.status)
+    if (reset.status != 200)
+        return reset;
+
+    const cookie = await reset.json();
+    const lastTry = await getUserData(cookie.usuario_cod, req, cookie.token);
+    console.log("attemptUserRoleID  >  lastTry: " + reset.status)
+    console.log("cookie : " + JSON.stringify(cookie))
+    if (lastTry.status != 200)
+        return lastTry;
+    return setAuthCookie({ usuarioEmail: cookie.usuarioEmail, usuario_senha: cookie.usuario_senha } as AccessPass, cookie.usuario_cod, cookie.token, (await lastTry.json()))
 }

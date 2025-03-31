@@ -41,13 +41,9 @@ import { url } from 'inspector';
 import { useEffect, useState } from 'react';
 
 import { AccessPass } from '@/lib/auth';
-import { getRoleID, setLogIn } from '@/services/authService';
+import { getRoleID, getUsuario, setLogIn } from '@/services/authService';
 
-
-
-
-
-
+import { toast, ToastContainer} from "react-toastify"
 
 export default function Home() {
 
@@ -59,6 +55,19 @@ export default function Home() {
     const changeIsShowingPassword = () => {
         setIsShowingPassword(!isShowingPassword);
     }
+
+  // Function to trigger the error toast
+  const showErrorToast = () => {
+    toast.error("Credênciais inválidas!", {
+      position: "bottom-center",  // Position where the toast will appear
+      autoClose: 5000,  // Auto-close after 5 seconds
+      hideProgressBar: true,  // Hide progress bar
+      closeOnClick: true,  // Allows closing toast on click
+      pauseOnHover: true,  // Pauses the toast on hover
+      draggable: true,  // Makes the toast draggable
+      progress: undefined,  // Can be used to specify progress of a toast
+    });
+  };
 
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -85,15 +94,38 @@ export default function Home() {
         const res = await setLogIn(creds);
 
         const id = await getRoleID();
-        alert("getRoleID: " + id.status + "\n\nRoleID: " + id.data.role);
+        
         if(res.status === 200)
             router.push("/inicio")
+
+        else{
+            showErrorToast()
+        }
 
         
 
       }
 
 
+    
+
+  // Checa o tamanho da tela em pixels quando a janela é reajustada
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setIsMobile(true); // Tamanho da tela mobile
+      } else {
+        setIsMobile(false); // Desktop ou em telas maiores
+      }
+    };
+
+    handleResize(); // Checagem inicial do tamanho quando o componente é montado (onMount)
+    window.addEventListener('resize', handleResize); // Escuta mudança do tamanho de tela
+
+    return () => {
+      window.removeEventListener('resize', handleResize); // Limpa o componente quando ele é descarregado (unMount)
+    };
+  }, []);
     
       const [isMobile, setIsMobile] = useState(false);
 
@@ -144,7 +176,7 @@ export default function Home() {
             </div>
             <div className='pr-12 pl-5 pt-5'>
                 <Button className="mt-6 mb-12" style={{boxShadow: '0px 10px 25px 0px rgba(123, 104, 238, 50%)'}}
-                onClick={() => router.push("/about")}>
+                onClick={() => router.push("/cadastro")}>
                     Cadastro
                 </Button>
             </div>
@@ -226,10 +258,24 @@ export default function Home() {
                                     </FormItem>
                                 )}
                             />
+                            <FormField
+                                control={form.control}
+                                name="rememberMe"
+                                render={({ field }: { field: import("react-hook-form").ControllerRenderProps<z.infer<typeof formSchema>, "rememberMe"> }) => (
+                                    <FormItem>
+                                        <FormControl>
+                                            <label className="inline-flex items-center">
+                                                <input type="checkbox" checked={field.value} onChange={field.onChange} onBlur={field.onBlur} name={field.name} ref={field.ref} className="form-checkbox h-4 w-4 text-blue-600" />
+                                                <span className="ml-2 text-sm text-gray-700">Remember me</span>
+                                            </label>
+                                        </FormControl>
+                                    </FormItem>
+                                )}
+                            />
                         <div className='pb-2'>
-                        <Button type="submit" className="w-full mt-6 mb-2">
+                          <Button type="submit" className="w-full mt-6 mb-2">
                             Entrar
-                        </Button>
+                          </Button>
                         </div>
                         </form>
                         
@@ -243,7 +289,7 @@ export default function Home() {
 
                         {isMobile ? (
                             <div className='w-full text-center mb-2'>
-                            <a href='' className='text-sm' style={{textAlign: 'center'}}>
+                            <a className='text-sm' style={{textAlign: 'center'}} onClick={() => router.push("/cadastro")}>
                                 É novo aqui? Cadastre sua empresa!
                             </a>
                             </div>
@@ -254,7 +300,7 @@ export default function Home() {
             </Card>
         </div>
 
-
+        <ToastContainer />
         </div>
     )
 }

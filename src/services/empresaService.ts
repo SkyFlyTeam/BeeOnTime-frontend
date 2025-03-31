@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 // Define a URL base do backend
-const API_URL = 'http://localhost:8080';
+const API_URL = 'http://localhost:8081';
 
 interface Empresa {
   emp_nome: string;
@@ -46,7 +46,7 @@ export const cadastrarEmpresa = async (formData: any) => {
 
     console.log("✅ Resposta do backend:", response.data);
 
-    return response.status;
+    return response.data.empCod;
   } catch (error: any) {
     if (error.response) {
       console.error("❌ Erro no backend:", error.response.data);

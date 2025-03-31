@@ -13,11 +13,13 @@ const accessRoutes = {
         "/ausencias",
         "/falhas",
         "/colaboradores",
-        "/solicitacoes",
+        "/solicitacao",
         "/pendencias",
         "/calendario",
         "/empresa",
-        "/perfil"
+        "/perfil",
+        "/historico-ponto",
+        "/Colaboradores",
     ],
     GESTOR: [
         "/gestor",
@@ -26,18 +28,23 @@ const accessRoutes = {
         "/ausencias",
         "/falhas",
         "/colaboradores",
-        "/solicitacoes",
+        "/solicitacao",
         "/pendencias",
         "/calendario",
-        "/perfil"
+        "/perfil",
+        "/inicioFuncionario",
+        "/historico-ponto",
+        "/Colaboradores",
     ],
     FUNCIONARIO: [
         "/funcionario",
         "/inicio",
-        "/solicitacoes",
+        "/solicitacao",
         "/marcacoes",
         "/horas",
-        "/pendencias"
+        "/pendencias",
+        "/inicioFuncionario",
+        "/historico-ponto",
     ]
 }
 

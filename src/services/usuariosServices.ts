@@ -1,5 +1,9 @@
-import { Api } from "../config/apiConfig"
-import { ApiException } from "../config/apiException"
+import axios from "axios"
+import { Api } from "@/config/apiConfig"
+import { ApiException } from "../config/apiExceptions"
+
+// Define a URL base do backend
+const API_URL = 'http://localhost:8081/usuario';
 
 export interface Usuario {
   Usuario_id: number
@@ -14,7 +18,7 @@ export interface Usuario {
 
 const checkLogin = async (credenciais: any): Promise<any | ApiException> => {
     try{
-        const { data } = await Api().post<any>('/auth', credenciais, {
+        const { data } = await Api.post<any>('/auth', credenciais, {
             headers: { 'Content-Type': 'application/json' }
         });
         return data
@@ -26,7 +30,7 @@ const checkLogin = async (credenciais: any): Promise<any | ApiException> => {
 
 const createUsuario = async (usuario: any): Promise<any | ApiException> => {
   try{
-      const { data } = await Api().post<any>('/usuario', usuario, {
+      const { data } = await Api.post<any>('/usuario', usuario, {
           headers: { 'Content-Type': 'application/json' }
       });
       const usuario_criado: Usuario = data
@@ -36,7 +40,40 @@ const createUsuario = async (usuario: any): Promise<any | ApiException> => {
       return new ApiException(error.message || 'Erro ao criar o registro.')
     }
 }
+
+export const cadastrarUsuarioComJornada = async (usuario: any, jornada: any) => {
+    try {
+      // Combina os dados do usuário com os dados da jornada
+      const dadosCombinados = { ...usuario, ...jornada };
   
+      console.log("📤 Dados sendo enviados:", JSON.stringify(dadosCombinados, null, 2));
+  
+      // Faz a requisição para o backend
+      const response = await axios.post(`${API_URL}/cadastrar`, dadosCombinados, {
+        headers: { "Content-Type": "application/json" },
+        timeout: 5000, // 5 segundos de timeout para evitar requisições longas
+      });
+  
+      console.log("✅ Resposta do backend:", response.data);
+  
+      return response.data; // Retorna os dados da resposta
+    } catch (error: any) {
+      if (error.response) {
+        // Erro vindo do backend
+        console.error("❌ Erro no backend:", error.response.data);
+        alert(`Erro no servidor: ${error.response.data.message || 'Tente novamente mais tarde.'}`);
+      } else if (error.request) {
+        // O pedido foi feito, mas não houve resposta
+        console.error("❌ Sem resposta do servidor:", error.request);
+        alert('Erro de rede. Não foi possível se conectar ao servidor.');
+      } else {
+        // Outro tipo de erro, como um erro de configuração
+        console.error("❌ Erro na requisição:", error.message);
+        alert('Erro desconhecido, tente novamente.');
+      }
+      throw error;
+    }
+};
 
 export const usuarioServices = {
     checkLogin,

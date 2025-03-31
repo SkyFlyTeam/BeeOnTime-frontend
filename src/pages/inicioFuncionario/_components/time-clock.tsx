@@ -2,6 +2,8 @@ import TimeClockService from "./time-clock-service";
 import { useEffect, useState } from "react";
 import { Button } from "../../../components/ui/button";
 import { Clock } from "lucide-react";
+import { getUsuario } from "@/services/authService";
+import { set } from "react-hook-form";
 
 export default function TimeClock() {
   // Estado para o horário atual
@@ -24,6 +26,10 @@ export default function TimeClock() {
     return () => clearInterval(timer);
   }, []);
 
+    const getUser = async() => {
+      const data = await getUsuario();
+      return data.data
+    }
   const { createHoras, baterEntrada, baterInicioAlmoco, baterSaidaAlmoco, baterSaida, verificarHoras } = TimeClockService();
 
   useEffect(() => {
@@ -32,16 +38,19 @@ export default function TimeClock() {
     // You need to await the result of verificarHoras
     const fetchState = async () => {
           // Create hours (this doesn't seem to be affected by the state update)
+
+      const user = await getUser()
+
     await createHoras({
       horasExtras: 0,
       horasTrabalhadas: 0,
       horasNoturnas: 0,
       horasFaltantes: 0,
       horasData: diaHoje,
-      usuarioCod: 1,  // Example user ID
-    }, diaHoje, 1);
+      usuarioCod: user.usuario_cod,  // Example user ID
+    }, diaHoje, user.usuario_cod);
 
-      const estado = await verificarHoras(diaHoje, 1); // Await the promise
+      const estado = await verificarHoras(diaHoje, user.usuario_cod); // Await the promise
       if (estado == 'initial') {
         setWorkState(estado)
       }
@@ -81,42 +90,46 @@ export default function TimeClock() {
   const isRestrictedTime = isTimeRestricted || isSameDayAsExit;
 
   // Funções para lidar com os cliques nos botões
-  const handleEntrada = () => {
+  const handleEntrada = async() => {
     const diaHoje = new Date().toISOString().slice(0, 10);
+    const user = await getUser()
     if (!isRestrictedTime) {
       setWorkState("entrada");
       setEntryTime(new Date()); // Registra o horário de entrada
       console.log(currentTime.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'}))
-      baterEntrada(diaHoje, currentTime.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'}), 1)
+      baterEntrada(diaHoje, currentTime.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'}), user.usuario_cod)
     }
   };
 
-  const handleInicioIntervalo = () => {
+  const handleInicioIntervalo = async() => {
     if (entryTime) {
+      const user = await getUser()
       const diaHoje = new Date().toISOString().slice(0, 10);
       const hoursWorked = (currentTime.getTime() - entryTime.getTime()) / (1000 * 60 * 60); // Horas trabalhadas
       if (hoursWorked >= 0) { // Ajustado para 0 para testar a qualquer hora
         setWorkState("inicioIntervalo");
       }
-      baterInicioAlmoco(diaHoje, currentTime.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'}), 1)
+      baterInicioAlmoco(diaHoje, currentTime.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'}), user.usuario_cod)
     }
   };
 
-  const handleFimIntervalo = () => {
+  const handleFimIntervalo = async() => {
     setWorkState("fimIntervalo");
+    const user = await getUser()
     const diaHoje = new Date().toISOString().slice(0, 10);
-    baterSaidaAlmoco(diaHoje, currentTime.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'}), 1)
+    baterSaidaAlmoco(diaHoje, currentTime.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'}), user.usuario_cod)
   };
 
-  const handleSaida = () => {
+  const handleSaida = async() => {
     if (entryTime) {
       const hoursWorked = (currentTime.getTime() - entryTime.getTime()) / (1000 * 60 * 60); // Horas trabalhadas
+      const user = await getUser()
       if (hoursWorked >= 0) { // Ajustado para 0 para testar a qualquer hora
         setWorkState("initial");
         setEntryTime(null); // Reseta o horário de entrada
         setExitTime(new Date()); // Registra o horário de saída
         const diaHoje = new Date().toISOString().slice(0, 10);
-        baterSaida(diaHoje, currentTime.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'}), 1)
+        baterSaida(diaHoje, currentTime.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'}), user.usuario_cod)
       }
     }
   };

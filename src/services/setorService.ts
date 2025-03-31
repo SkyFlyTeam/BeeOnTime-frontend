@@ -1,8 +1,31 @@
+
+import { ApiException } from "@/config/apiExceptions";
+import { ApiUsuario } from "@/config/apiUsuario";
+import Setor from "@/interfaces/usuarioInfo";
+
+// Função para obter todos os sotores
+const getAllSetores = async () => {
+  try {
+    const response = await ApiUsuario.get(`/setor`);
+    return response.data;
+  } catch (error) {
+    if (error instanceof Error) {
+      return new ApiException(error.message || "Erro ao consultar a API.");
+    }
+  
+    return new ApiException("Erro desconhecido.");
+  }
+};
+
+export const setorSevices = {
+  getAllSetores
+}
+
 // src/services/usuarioService.ts
 import axios from 'axios';
 
 // Define a URL base do backend
-const API_URL = 'http://localhost:8080';
+const API_URL = 'http://localhost:8081';
 
 interface Setor {
   setor_cod: number;
@@ -30,24 +53,17 @@ export const verificarSetores = async (): Promise<SetorAPI[]> => {
 export const cadastrarSetor = async (setoresData: string[]) => {
   try {
     console.log("📤 Dados sendo enviados:", JSON.stringify(setoresData, null, 2));
-
-    // Array para armazenar as promessas de cada requisição
     const requests = setoresData.map(async (setor) => {
       const response = await axios.post(
-        `${API_URL}/setor`, // Ajuste o endpoint conforme necessário
-        { setorNome: setor }, // Envia cada setor como um objeto JSON
-        {
-          headers: { "Content-Type": "application/json" },
-        }
+        `${API_URL}/setor`,
+        { setorNome: setor },
+        { headers: { "Content-Type": "application/json" } }
       );
       console.log(`✅ Resposta do backend para "${setor}":`, response.data);
-      return response.status;
+      return { setorCod: response.data.setorCod, setorNome: response.data.setorNome }; // Ajuste conforme o retorno
     });
-
-    // Aguarda todas as requisições serem concluídas
-    const statuses = await Promise.all(requests);
-    return statuses; // Retorna um array com os status de cada requisição
-
+    const setoresCriados = await Promise.all(requests);
+    return setoresCriados; // Retorna array de { setorCod, setorNome }
   } catch (error: any) {
     if (error.response) {
       console.error("❌ Erro no backend:", error.response.data);
