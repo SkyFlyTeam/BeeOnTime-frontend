@@ -1,9 +1,9 @@
 import axios from "axios"
-import { Api } from "../config/apiConfig"
+import { Api } from "@/config/apiConfig"
 import { ApiException } from "../config/apiExceptions"
 
 // Define a URL base do backend
-const API_URL = 'http://localhost:8080/usuario';
+const API_URL = 'http://localhost:8081/usuario';
 
 export interface Usuario {
   Usuario_id: number
@@ -18,7 +18,7 @@ export interface Usuario {
 
 const checkLogin = async (credenciais: any): Promise<any | ApiException> => {
     try{
-        const { data } = await Api().post<any>('/auth', credenciais, {
+        const { data } = await Api.post<any>('/auth', credenciais, {
             headers: { 'Content-Type': 'application/json' }
         });
         return data
@@ -30,7 +30,7 @@ const checkLogin = async (credenciais: any): Promise<any | ApiException> => {
 
 const createUsuario = async (usuario: any): Promise<any | ApiException> => {
   try{
-      const { data } = await Api().post<any>('/usuario', usuario, {
+      const { data } = await Api.post<any>('/usuario', usuario, {
           headers: { 'Content-Type': 'application/json' }
       });
       const usuario_criado: Usuario = data

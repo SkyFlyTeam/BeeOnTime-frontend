@@ -18,6 +18,8 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { NavSecondary } from "./nav-secondary";
+import { getUsuario } from "@/services/authService";
+import { useEffect } from "react";
 
 // Definir um tipo que aceita apenas os cargos válidos
 type RoleKey = "Administrador" | "Gestor" | "Funcionário";
@@ -41,7 +43,6 @@ const rolesData: Record<RoleKey, { navMain: NavItem[]; navSecondary: SubNavItem[
       {
         title: "ATIVIDADES",
         items: [
-          { title: "Colaboradores", url: "/colaboradores", icon: Users },
           { title: "Solicitações", url: "/solicitacoes", icon: MessageSquare },
           
         ],
@@ -50,11 +51,12 @@ const rolesData: Record<RoleKey, { navMain: NavItem[]; navSecondary: SubNavItem[
         title: "GESTÃO DA EMPRESA",
         items: [
           { title: "Empresa", url: "/empresa", icon: Building },
+          { title: "Colaboradores", url: "/", icon: Users },
         ],
       },
     ],
     navSecondary: [
-      { title: "Administrador", url: "/administrador", icon: UserRound },
+      // { title: "Administrador", url: "/administrador", icon: UserRound },
       { title: "Sair", url: "/logout", icon: LogOut },
     ],
   },
@@ -76,12 +78,12 @@ const rolesData: Record<RoleKey, { navMain: NavItem[]; navSecondary: SubNavItem[
       {
         title: "GESTÃO DA EMPRESA",
         items: [
-          { title: "Empresa", url: "/empresa", icon: Building },
+          { title: "Colaboradores", url: "/empresa", icon: Building },
         ],
       },
     ],
     navSecondary: [
-      { title: "Gestor", url: "/gestor", icon: UserRound },
+      // { title: "Gestor", url: "/gestor", icon: UserRound },
       { title: "Sair", url: "/logout", icon: LogOut },
     ],
   },
@@ -102,7 +104,7 @@ const rolesData: Record<RoleKey, { navMain: NavItem[]; navSecondary: SubNavItem[
       }
     ],
     navSecondary: [
-      { title: "Funcionário", url: "/funcionario", icon: UserRound },
+      // { title: "Funcionário", url: "/funcionario", icon: UserRound },
       { title: "Sair", url: "/logout", icon: LogOut },
     ],
   },
@@ -115,6 +117,24 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname(); //consegue a url q ta
   const [selectedRole, setSelectedRole] = React.useState<RoleKey>("Administrador");  //Entrar como cargo padrão
   const [ enterpriseName , setEnterpriseName ] =  React.useState<String>("NectoSystems");
+
+    useEffect(() => {
+      getUser()
+    }, [])
+  
+    const getUser = async() => {
+      const user = await getUsuario();
+      console.log (user);
+      const usuario = user.data.nivelAcesso.nivelAcesso_cod;
+
+      if (usuario === 0) {
+        setSelectedRole("Administrador")
+      } else if (usuario === 1) {
+        setSelectedRole("Gestor")
+      } else if (usuario === 2) {
+        setSelectedRole("Funcionário")
+      }
+    }
 
   return (
     <Sidebar {...props}>

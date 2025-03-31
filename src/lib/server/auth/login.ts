@@ -58,18 +58,10 @@ export async function attemptLoginSession(creds: AccessPass): Promise<Response> 
     return setAuthCookie(creds, resJson.id, resJson.token);
 }
 
-
-
-
-
-
 async function resetAuthCookie(req: NextRequest | Request, msg?: string) {
     const creds = getCredsFromAuthCookie(req);
     return await setLoginSession(creds, msg);
 }
-
-
-
 
 async function getUserRoleID(email: String, req: NextRequest | Request, token?: String) {
     try {
