@@ -38,15 +38,14 @@ export default function Page() {
 
   return (
     <>
-    
-      <h1 className='text-4xl font-semibold'>Olá, {usuarioNome}!</h1>
-      <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-        <div className=" rounded-xl p-4 flex items-center justify-center ">
-          { acessoCod == 0 ? (null) : (<InicioFuncionario />)}
-        </div>
-        <div className=" rounded-xl p-4 flex items-center justify-center ">
-          { acessoCod == 0 ? (null) : (null)}
-        </div>
+      <div className='flex flex-col gap-7'>
+        <h1 className='text-4xl font-semibold'>Olá, {usuarioNome}!</h1>
+          <div>
+            { acessoCod == 0 ? (null) : (<InicioFuncionario />)}
+          </div>
+          <div>
+            { acessoCod == 0 ? (null) : (null)}
+          </div>
       </div>
     </>
   );
