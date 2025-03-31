@@ -32,6 +32,17 @@ interface PointsHistoryTableProps {
   accessLevel: "USER" | "ADM" //Recebe o AccessLevel para diferentes acessos
 }
 
+// Function to format the date to Brazilian format (DD/MM/YYYY)
+const formatDate = (date: string): string => {
+  const parsedDate = new Date(date); // Parse the string date into a Date object
+  const day = String(parsedDate.getDate()).padStart(2, "0"); // Get day and pad with leading zero if needed
+  const month = String(parsedDate.getMonth() + 1).padStart(2, "0"); // Get month and pad with leading zero if needed
+  const year = parsedDate.getFullYear(); // Get year
+
+  return `${day}/${month}/${year}`; // Return date in Brazilian format
+};
+
+
 const PointsHistoryTable = React.forwardRef<
   HTMLDivElement,
   PointsHistoryTableProps
@@ -45,7 +56,7 @@ const PointsHistoryTable = React.forwardRef<
     "HORAS NORMAIS",
     "HORAS EXTRAS",
     "HORAS FALTANTES",
-    "ADICIONAL NOTURNO",
+    // "ADICIONAL NOTURNO",
     ...(accessLevel === "USER" ? ["AÇÕES"] : []),
   ];
 
@@ -141,9 +152,9 @@ const { horasSemana, horasMes } = calculateCargaHoraria(userInfo?.usuario_cargaH
                 <TableCell className="border border-gray-200 text-center text-black text-base p-3">
                   {entry.horasFaltantes}
                 </TableCell>
-                <TableCell className="border border-gray-200 text-center text-black text-base p-3">
+                {/* <TableCell className="border border-gray-200 text-center text-black text-base p-3">
                   {entry.horasNoturnas}
-                </TableCell>
+                </TableCell> */}
                 {accessLevel === "USER" && ( // Mostrar a coluna "AÇÕES" apenas para USER
                   <TableCell className="border border-gray-200 text-center text-black text-base p-3">
                     <TooltipProvider>
@@ -176,19 +187,19 @@ const { horasSemana, horasMes } = calculateCargaHoraria(userInfo?.usuario_cargaH
         <table className="min-w-[900px] w-full border-collapse text-sm text-black">
           <tbody>
             {[
-              { label: "DATA", key: "date" },
+              { label: "DATA", key: "data", render: (e: RelatorioPonto) => formatDate(e.data) },
               {
                 label: "PONTOS",
                 render: (e: RelatorioPonto) => (
                   <div className="flex flex-col text-center">
-                    <div>{e.pontos.map((ponto: any) => `${ponto.tipoPonto} - ${ponto.horarioPonto}`).join(", ")}</div>
+                    <div>{e.pontos.map((ponto: any) => `${ponto.horarioPonto}`).join(" - ")}</div>
                   </div>
                 ),
               },
-              { label: "HORAS NORMAIS", key: "normalHours" },
-              { label: "HORAS EXTRAS", key: "extraHours" },
-              { label: "HORAS FALTANTES", key: "missingHours" },
-              { label: "ADICIONAL NOTURNO", key: "nightShift" },
+              { label: "HORAS NORMAIS", key: "horasTrabalhadas" },
+              { label: "HORAS EXTRAS", key: "horasExtras" },
+              { label: "HORAS FALTANTES", key: "horasFaltantes" },
+              // { label: "ADICIONAL NOTURNO", key: "nightShift" },
               ...(accessLevel === "USER" // Adicionar "AÇÕES" apenas para USER
                 ? [
                   {

@@ -72,7 +72,7 @@ const rolesData: Record<RoleKey, { navMain: NavItem[]; navSecondary: SubNavItem[
       {
         title: "MARCAÇÕES",
         items: [
-          {title: "Meus Pontos", url: "/meusPontos", icon: AlarmClockCheck}
+          {title: "Meus Pontos", url: "/historico-ponto", icon: AlarmClockCheck}
         ]
       },
       {
@@ -99,7 +99,7 @@ const rolesData: Record<RoleKey, { navMain: NavItem[]; navSecondary: SubNavItem[
       {
         title: "MARCAÇÕES",
         items: [
-          {title: "Meus Pontos", url: "/meusPontos", icon: AlarmClockCheck}
+          {title: "Meus Pontos", url: "/historico-ponto", icon: AlarmClockCheck}
         ]
       }
     ],
