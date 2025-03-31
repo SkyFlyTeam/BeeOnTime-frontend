@@ -283,11 +283,13 @@ export default function CadastroUsuario({ onClose, onSave }: { onClose: () => vo
                   className="border p-2 rounded-md w-full"
                   >
                     <option value="">Selecione um setor</option>
-                    {setores.map((setor) => (
-                      <option key={setor.setorCod} value={setor.setorCod}>
-                      {setor.setorNome}
-                      </option>
-                    ))}
+                    {setores.length > 0 ? (
+                      setores.map((setor) => (
+                        <option key={setor.setorCod} value={setor.setorCod}>
+                        {setor.setorNome}
+                        </option>
+                      ))
+                    ): (null)}
                     {/* Adicione mais opções conforme necessário */}
                   </select>
                 {formErrors.setorCod && <p className="text-red-500">{formErrors.setorCod._errors[0]}</p>}
