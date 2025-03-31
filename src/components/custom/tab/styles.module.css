@@ -1,0 +1,57 @@
+.pendente_badge {
+    background-color: var(--yellow);
+    padding: .2rem .6rem;
+    border-radius: .5rem;
+    margin-left: .5rem;
+}
+
+.toogle {
+    background-color: var(--white-pure);
+    padding: .5rem .8rem;
+    border-radius: .255rem;
+    font-weight: bold;
+}
+
+.button_container {
+    display: flex;
+    column-gap: 1rem;
+    width: fit-content;
+    margin: 1rem auto;
+    justify-content: center;
+    background-color: #F1F5F9;
+    padding: .4rem .5rem;
+    border-radius: .5rem;
+}
+
+@media (max-width: 760px) {
+    .button_container {
+        margin-left: 0;
+        font-size: .8rem;
+    }
+}
+
+@media (max-width: 595px) {
+    .button_container {
+        font-size: .8rem;
+        display: flex;
+        column-gap: .5rem;
+        justify-content: start;
+        padding: .3rem ;
+        border-radius: .3rem;
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 320px) {
+    .button_container {
+        font-size: .6rem;
+        display: flex;
+        justify-content: start;
+        border-radius: .3rem;
+        margin-left: 0;
+    }
+
+    .toogle {
+        padding: .5rem;
+    }
+}

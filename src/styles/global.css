@@ -12,6 +12,7 @@ body {
     padding: 0;
     width: 100vw;
     height: 100%;
+    overflow-x: hidden;
   }
 
 @layer base {
@@ -41,7 +42,6 @@ body {
         --chart-4: 43 74% 66%;
         --chart-5: 27 87% 67%;
         --radius: 0.5rem;
-
         --sidebar-background: 0 0% 100%;
         --sidebar-foreground: 240 5.3% 26.1%;
         --sidebar-primary: 240 5.9% 10%;
@@ -69,7 +69,7 @@ body {
 
         /* Bluegray */
         --blue-gray-light: #CBD5E1;
-    } 
+    }
 
   .dark {
         --background: 240 10% 3.9%;

@@ -3,7 +3,7 @@ import { Api } from "../config/apiConfig"
 import { ApiException } from "../config/apiExceptions"
 
 // Define a URL base do backend
-const API_URL = 'http://localhost:8080/usuario';
+const API_URL = 'http://localhost:8081/usuario';
 
 export interface Usuario {
   Usuario_id: number

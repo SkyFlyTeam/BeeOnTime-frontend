@@ -13,7 +13,7 @@ const accessRoutes = {
         "/ausencias",
         "/falhas",
         "/colaboradores",
-        "/solicitacoes",
+        "/solicitacao",
         "/pendencias",
         "/calendario",
         "/empresa",
@@ -27,7 +27,7 @@ const accessRoutes = {
         "/ausencias",
         "/falhas",
         "/colaboradores",
-        "/solicitacoes",
+        "/solicitacao",
         "/pendencias",
         "/calendario",
         "/perfil"
@@ -35,7 +35,7 @@ const accessRoutes = {
     FUNCIONARIO: [
         "/funcionario",
         "/inicio",
-        "/solicitacoes",
+        "/solicitacao",
         "/marcacoes",
         "/horas",
         "/pendencias",
