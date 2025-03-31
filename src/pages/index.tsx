@@ -35,11 +35,21 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
-import { Input } from '@/src/components/ui/input';
-
+import { Input } from '@/components/ui/input';
 import { sources } from 'next/dist/compiled/webpack/webpack';
 import { url } from 'inspector';
 import { useEffect, useState } from 'react';
+
+import { AccessPass } from '@/lib/auth';
+import { getRoleID, getUsuario, setLogIn } from '@/services/authService';
+
+import { toast, ToastContainer} from "react-toastify"
+
+
+
+
+
+
 
 export default function Home() {
 
@@ -52,6 +62,19 @@ export default function Home() {
         setIsShowingPassword(!isShowingPassword);
     }
 
+  // Function to trigger the error toast
+  const showErrorToast = () => {
+    toast.error("Credênciais inválidas!", {
+      position: "bottom-center",  // Position where the toast will appear
+      autoClose: 5000,  // Auto-close after 5 seconds
+      hideProgressBar: true,  // Hide progress bar
+      closeOnClick: true,  // Allows closing toast on click
+      pauseOnHover: true,  // Pauses the toast on hover
+      draggable: true,  // Makes the toast draggable
+      progress: undefined,  // Can be used to specify progress of a toast
+    });
+  };
+
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -62,11 +85,34 @@ export default function Home() {
     })
      
       // 2. Define um controle de submit.
-      function onSubmit(values: z.infer<typeof formSchema>) {
+      async function onSubmit(values: z.infer<typeof formSchema>) {
         // Faz algo com os valores do form.
         // ✅ Isso vai ser tipadamente seguro e validado.
-        console.log(values)
+        if(values.email === null || values.senha === null)
+            return null;
+        
+
+        const creds: AccessPass = {
+            usuarioEmail: values.email,
+            usuario_senha: values.senha
+        }
+
+        const res = await setLogIn(creds);
+
+        const id = await getRoleID();
+        
+        if(res.status === 200)
+            router.push("/inicio")
+
+        else{
+            showErrorToast()
+        }
+
+        
+
       }
+
+
     
       const [isMobile, setIsMobile] = useState(false);
 
@@ -117,7 +163,7 @@ export default function Home() {
             </div>
             <div className='pr-12 pl-5 pt-5'>
                 <Button className="mt-6 mb-12" style={{boxShadow: '0px 10px 25px 0px rgba(123, 104, 238, 50%)'}}
-                onClick={() => router.push("/about")}>
+                onClick={() => router.push("/cadastro")}>
                     Cadastro
                 </Button>
             </div>
@@ -153,6 +199,7 @@ export default function Home() {
                 <CardContent>
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
+                        {/* <form onSubmit={onSubmitTest} className="space-y-3"> */}
                             <FormField
                                 control={form.control}
                                 name="email"
@@ -229,7 +276,7 @@ export default function Home() {
 
                         {isMobile ? (
                             <div className='w-full text-center mb-2'>
-                            <a href='' className='text-sm' style={{textAlign: 'center'}}>
+                            <a className='text-sm' style={{textAlign: 'center'}} onClick={() => router.push("/cadastro")}>
                                 É novo aqui? Cadastre sua empresa!
                             </a>
                             </div>
@@ -240,7 +287,7 @@ export default function Home() {
             </Card>
         </div>
 
-
+        <ToastContainer />
         </div>
     )
 }

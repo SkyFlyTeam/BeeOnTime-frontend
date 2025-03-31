@@ -1,0 +1,113 @@
+/* CadastroEmpresa.module.css */
+@import url('https://fonts.googleapis.com/css?family=Inter&display=swap');
+
+.mainContainer {
+  padding: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: 'Inter', sans-serif;
+}
+
+.title {
+  font-size: 5vh;
+  font-weight: 600;
+  margin-bottom: 3vh;
+}
+
+.subtitle {
+  font-size: 4vh;
+  font-weight: 600;
+  margin-bottom: 3vh;
+}
+
+.setoresTitle {
+  margin-top: 3vh;
+}
+
+.empresaContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  position: relative; /* Para posicionamento relativo dos filhos */
+}
+
+.empresaInput {
+  flex: 0 0 calc(33.33% - 16px);
+  min-width: 200px;
+  max-width: calc(33.33% - 16px);
+}
+
+.inputLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.inputLabel input {
+  width: 100%;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+.setoresContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.addButton {
+  margin-top: 16px;
+  padding: 8px 16px;
+  background-color: #FFB503;
+  color: #000000;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+.buttonWrapper {
+  display: flex;
+  justify-content: flex-end; /* Alinha o botão à direita */
+  margin-top: 16px; /* Espaço entre os inputs e o botão */
+  width: 100%; /* Garante que o wrapper ocupe a largura total */
+}
+
+.saveButton {
+  padding: 8px 16px;
+  background-color: #FFB503;
+  color: #000000;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* CadastroEmpresa.module.css */
+.hoverInputContainer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hoverInput {
+  padding: 4px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+@media (max-width: 768px) {
+  .empresaInput {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  .buttonWrapper {
+    justify-content: flex-end; /* Mantém o botão à direita */
+  }
+
+  .saveButton {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+}
