@@ -13,9 +13,10 @@ import { MS_USUARIO } from "../../constants";
 
 
 
-function setAuthCookie(creds: AccessPass, token: String, jsonPassthrough?: string): NextResponse {
+function setAuthCookie(creds: AccessPass, id: String, token: String, jsonPassthrough?: string): NextResponse {
     const cookiePackage = `{
         "token": "${token}",
+        "usuario_cod": "${id}",
         "usuarioEmail": "${creds.usuarioEmail}",
         "usuario_senha": "${creds.usuario_senha}"
     }`
