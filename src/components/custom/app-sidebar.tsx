@@ -51,7 +51,7 @@ const rolesData: Record<RoleKey, { navMain: NavItem[]; navSecondary: SubNavItem[
         title: "GESTÃO DA EMPRESA",
         items: [
           { title: "Empresa", url: "/empresa", icon: Building },
-          { title: "Colaboradores", url: "/", icon: Users },
+          { title: "Colaboradores", url: "/Colaboradores", icon: Users },
         ],
       },
     ],
@@ -78,7 +78,7 @@ const rolesData: Record<RoleKey, { navMain: NavItem[]; navSecondary: SubNavItem[
       {
         title: "GESTÃO DA EMPRESA",
         items: [
-          { title: "Colaboradores", url: "/empresa", icon: Building },
+          { title: "Colaboradores", url: "/Colaboradores", icon: Building },
         ],
       },
     ],

@@ -19,6 +19,7 @@ const accessRoutes = {
         "/empresa",
         "/perfil",
         "/historico-ponto",
+        "/Colaboradores",
     ],
     GESTOR: [
         "/gestor",
@@ -33,6 +34,7 @@ const accessRoutes = {
         "/perfil",
         "/inicioFuncionario",
         "/historico-ponto",
+        "/Colaboradores",
     ],
     FUNCIONARIO: [
         "/funcionario",
