@@ -10,13 +10,14 @@ import RelatorioPonto from "@/interfaces/relatorioPonto";
 import { usuarioServices } from "@/services/usuarioServices";
 import { Usuario } from "@/interfaces/usuario";
 import { getUsuario } from "@/services/authService";
+import { EditarColaborador } from "@/components/custom/EditarColaborador/editarColaborador";
 
 
 export default function PointsHistoryPage() {
   //Simulando o diferente acesso
-  const[accessLevel, setAccessLevel] = useState<"USER" | "ADM">("USER")
-  const[ histPontos, setHistPontos ] = useState<RelatorioPonto[] | null>(null)
-  const[ usuarioInfo, setUsuarioInfo ] = useState<Usuario | null>(null)
+  const [accessLevel, setAccessLevel] = useState<"USER" | "ADM">("USER")
+  const [histPontos, setHistPontos] = useState<RelatorioPonto[] | null>(null)
+  const [usuarioInfo, setUsuarioInfo] = useState<Usuario | null>(null)
 
   // const { usuarioCargo, usuarioCod } = useAuth(); 
 
@@ -64,22 +65,22 @@ export default function PointsHistoryPage() {
       console.log("Erro ao recuperar usuário de id " + usuario_cod);
     }
   };
-  
-    const getUser = async() => {
-      const user = await getUsuario();
-      console.log (user);
-      return user.data;
-    }
+
+  const getUser = async () => {
+    const user = await getUsuario();
+    console.log(user);
+    return user.data;
+  }
 
   // Utilize useEffect para chamar a função quando o componente for montado
   useEffect(() => {
 
-    const onMount = async() => {
+    const onMount = async () => {
       const usuario = await getUser();
 
       if (usuario.nivelAcesso.nivelAcesso_cod !== 0) {
-      fetchHistPontos(usuario.usuario_cod);
-      fetchUsuario(usuario.usuario_cod);
+        fetchHistPontos(usuario.usuario_cod);
+        fetchUsuario(usuario.usuario_cod);
       }
       else {
         setAccessLevel('ADM')
@@ -92,14 +93,20 @@ export default function PointsHistoryPage() {
 
   return (
     <div className="flex flex-col  p-6 md:p-9">
+      <div>
+        <h1>
+          <EditarColaborador />
+        </h1>
+
+      </div>
       <h1 className="text-xl md:text-3xl font-semibold mb-4">
         {accessLevel === "USER" ? "Meus Pontos" : "Pontos"}
       </h1>
-      <PointsHistoryTable 
-        entries={histPontos} 
+      <PointsHistoryTable
+        entries={histPontos}
         userInfo={usuarioInfo}
         onEdit={handleEdit}
-        accessLevel={accessLevel} 
+        accessLevel={accessLevel}
       />
     </div>
   );
