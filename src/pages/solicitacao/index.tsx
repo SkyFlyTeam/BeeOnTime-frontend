@@ -40,7 +40,7 @@ const Solicitacao = () => {
 
   const fetchSolicitacoes = async (usuarioCargo: string, usuarioCod: number) => {
     const result = await solicitacaoServices.getAllSolicitacao()
-
+  
     if (result instanceof ApiException) {
       setSolicitacoesData({
         all: [],
@@ -50,31 +50,33 @@ const Solicitacao = () => {
       setTotalItems(0)
     } else {
       let filteredSolicitacoes = result
-
+  
+      // Aplica o filtro com base no cargo do usuário
       if (usuarioCargo === 'Funcionário') {
         filteredSolicitacoes = result.filter((s) => s.usuarioCod === usuarioCod)
-      } else if (usuarioCargo === 'Gestor') {
+      } else if (usuarioCargo === 'Gestor' || usuarioCargo === 'Admin') {
         filteredSolicitacoes = result.filter(
           (s) => s.usuarioCod === usuarioCod || s.usuarioCargo === 'Funcionário'
         )
       }
-
+  
       setSolicitacoesData({
         all: filteredSolicitacoes.filter((s) => s.solicitacaoStatus !== 'PENDENTE'),
         pendentes: filteredSolicitacoes.filter((s) => s.solicitacaoStatus === 'PENDENTE'),
         historico: filteredSolicitacoes.filter((s) => s.solicitacaoStatus !== 'PENDENTE'),
       })
-
+  
       setTotalItems(filteredSolicitacoes.length)
     }
   }
+  
 
   const paginateData = () => {
     const dataToDisplay = toogle ? solicitacoesData.pendentes : solicitacoesData.historico
     const startIndex = (currentPage - 1) * itemsPerPage
     const endIndex = startIndex + itemsPerPage
     setDisplayedSolicitacoes(dataToDisplay.slice(startIndex, endIndex))
-  }
+  }  
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
@@ -106,29 +108,32 @@ const Solicitacao = () => {
   }
 
   const handleSolicitacaoUpdate = async (updatedSolicitacao: SolicitacaoInterface) => {
-    // Atualize as listas de pendentes e historico diretamente no estado.
     setSolicitacoesData((prevData) => {
+      // Refiltra as solicitações após a atualização.
       const updatedPendentes = prevData.pendentes.filter(
         (solicitacao) => solicitacao.solicitacaoCod !== updatedSolicitacao.solicitacaoCod
       )
       const updatedHistorico = prevData.historico.filter(
         (solicitacao) => solicitacao.solicitacaoCod !== updatedSolicitacao.solicitacaoCod
       )
+  
       if (updatedSolicitacao.solicitacaoStatus === 'PENDENTE') {
         updatedPendentes.push(updatedSolicitacao)
       } else {
         updatedHistorico.push(updatedSolicitacao)
       }
-
+  
+      // Aplique o filtro novamente para garantir que o cargo do usuário seja levado em consideração
       return {
         ...prevData,
         pendentes: updatedPendentes,
         historico: updatedHistorico,
       }
     })
-    // Atualize a lista de solicitacoes exibidas
+    
     paginateData()
   }
+  
 
   const handleDeleteSolicitacao = (idToDelete: number) => {
     setSolicitacoesData((prevData) => {
@@ -162,23 +167,25 @@ const Solicitacao = () => {
           console.error('Usuário não encontrado.')
           return
         }
-
-        const { usuario_cod, usuarioCargo } = response.data
+  
+        const { usuario_cod, usuario_cargo } = response.data
         setUsuarioCod(usuario_cod)
-        setUsuarioCargo(usuarioCargo)
-
-        await fetchSolicitacoes(usuarioCargo, usuarioCod)
+        setUsuarioCargo(usuario_cargo)
+        
+        // Chama fetchSolicitacoes sempre que o cargo ou código do usuário for alterado
+        await fetchSolicitacoes(usuario_cargo, usuario_cod)
       } catch (error) {
         console.error('Erro ao obter usuário:', error)
       }
     }
-
+  
     initialize()
-  }, [])
-
-  useEffect(() => {
-    paginateData()
-  }, [currentPage, solicitacoesData, toogle])
+    }, [usuarioCod, usuarioCargo])  // Reexecutar quando o cargo ou código do usuário mudar
+    
+    useEffect(() => {
+      paginateData()  // Reaplica a paginação após a mudança de solicitações
+    }, [currentPage, solicitacoesData, toogle])
+  
 
   const totalPages = Math.ceil(
     (toogle ? solicitacoesData.pendentes.length : solicitacoesData.historico.length) / itemsPerPage
