@@ -9,6 +9,7 @@ import ModalEmpresa from "./ModalEmpresa";
 import router from "next/router";
 import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
+import { generatePassword } from "@/utils/emails/generatePassword";
 
 // Interfaces e Schemas
 interface EmpresaFormData {
@@ -224,29 +225,22 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
     if (!validateStep(3)) return;
 
     try {
-      // Cadastra a empresa e obtém o empCod
       const empCod = await cadastrarEmpresa(empresaData);
-
-      // Cadastra os setores e obtém o mapeamento de setorNome para setorCod
       const setoresCriados = await cadastrarSetor(setores);
       const setorCodMap = setoresCriados.reduce((acc: Record<string, number>, setor: any) => {
         acc[setor.setorNome] = setor.setorCod;
         return acc;
       }, {});
 
-      // Obtém o setorCod do setor selecionado pelo admin
       const setorCod = setorCodMap[adminData.admin_setor];
-      
-      console.log(setoresCriados)
-      console.log(setorCodMap)
+      const generated_password = generatePassword(10);
 
-      // Monta os dados do usuário com os códigos reais
       const usuarioData = {
         usuario_nome: adminData.admin_nome,
         usuarioEmail: adminData.admin_email,
         usuario_cargo: adminData.admin_cargo,
         usuarioTipoContratacao: adminData.admin_tipoContrato,
-        usuario_senha: "123456",
+        usuario_senha: generated_password,
         empCod: empCod,
         setorCod: setorCod,
         nivelAcesso_cod: 0,
@@ -258,6 +252,16 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
       };
 
       await cadastrarUsuarioComJornada(usuarioData, {});
+
+      const res = await fetch('/api/email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nome: adminData.admin_nome,
+          email: adminData.admin_email,
+          password: generated_password,
+        }),
+      });
 
       toast({
         title: "Cadastro concluído com sucesso!",

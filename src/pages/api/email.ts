@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { render } from '@react-email/render';
-import { FirstAccessEmail } from '@/src/utils/emails/PrimeiroAcesso';
-import { sendEmail } from '@/src/lib/mailer';
+import { FirstAccessEmail } from '@/utils/emails/PrimeiroAcesso';
+import { sendEmail } from '@/lib/mailer';
 import { generatePassword } from '../../utils/emails/generatePassword';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -10,11 +10,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const { name, email } = req.body;
-    console.log(" Dados recebidos:", { name, email });
-
-    const password = generatePassword(10);
-
+    const { name, email, password } = req.body;
+    console.log(" Dados recebidos:", { name, email, password });
 
     const emailHtml = await render(FirstAccessEmail({ name, email, password }));
     console.log(" HTML do e-mail gerado");

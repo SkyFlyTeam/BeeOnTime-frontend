@@ -1,4 +1,3 @@
-// src/services/usuarioService.ts
 import axios from 'axios';
 
 // Define a URL base do backend
@@ -24,10 +23,10 @@ interface EmpresaAPI {
 
 export const verificarEmpresa = async (): Promise<EmpresaAPI[]> => {
   try {
-    const response = await axios.get(`${API_URL}/empresa`, {
+    const response = await axios.get<EmpresaAPI[]>(`${API_URL}/empresa`, {
       headers: { "Content-Type": "application/json" },
     });
-    return response.data; // Return the data (assumed to be of type Empresa)
+    return response.data; // Agora tipado como EmpresaAPI[]
   } catch (error) {
     console.log("Erro: ", error);
     throw error; // Re-throw the error for the caller to handle
@@ -37,15 +36,11 @@ export const verificarEmpresa = async (): Promise<EmpresaAPI[]> => {
 // Função para cadastrar empresas
 export const cadastrarEmpresa = async (formData: any) => {
   try {
-
     console.log("📤 Dados sendo enviados:", JSON.stringify(formData, null, 2));
-
     const response = await axios.post(`${API_URL}/empresa`, formData, {
       headers: { "Content-Type": "application/json" },
     });
-
     console.log("✅ Resposta do backend:", response.data);
-
     return response.data.empCod;
   } catch (error: any) {
     if (error.response) {
@@ -57,11 +52,12 @@ export const cadastrarEmpresa = async (formData: any) => {
   }
 };
 
+// Função para atualizar empresas
 export const atualizarEmpresa = async (empresaData: EmpresaAPI) => {
   try {
     console.log("📤 Dados sendo enviados:", JSON.stringify(empresaData, null, 2));
     const response = await axios.put(
-      `${API_URL}/empresa/${empresaData.empCod}`, // Assuming endpoint uses empCod
+      `${API_URL}/empresa/${empresaData.empCod}`,
       empresaData,
       {
         headers: { "Content-Type": "application/json" },
