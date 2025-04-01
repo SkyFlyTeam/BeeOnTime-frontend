@@ -18,9 +18,20 @@ const createSolicitacaoPonto = async (ponto: PontoProv) => {
     }
 }
 
-// const getSolicitacaoPonto = async (solicitacao_cod: number) => {
-//     try {
-//         const { data } = await ApiPonto.get(`/mpontoprov/solicitacao/${solicitacao_cod}`)
+const getSolicitacaoPonto = async (solicitacao_cod: number) => {
+    try {
+        const { data } = await ApiPonto.get(`/mpontoprov/solicitacao/${solicitacao_cod}`)
+
+        return data 
+    } catch (error) {
+        if (error instanceof Error) {
+        return new ApiException(error.message || "Erro ao consultar a API.");
+        }
+    
+        return new ApiException("Erro desconhecido.");
+    }
+}
+
 const getPontosByUsuario = async (usuario_cod: number) => {
     try {
         const { data } = await ApiPonto.get(`/mpontos/usuario/${usuario_cod}`)
@@ -52,7 +63,7 @@ const aproveSolicitacaoPonto = async (idPonto: AprovarPonto, solicitacaoCod: num
 
 export const pontoServices = {
     createSolicitacaoPonto,
-    // getSolicitacaoPonto,
+    getSolicitacaoPonto,
     getPontosByUsuario,
     aproveSolicitacaoPonto
   };

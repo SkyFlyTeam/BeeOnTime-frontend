@@ -31,7 +31,7 @@ const ModalAjustePonto: React.FC<AjusteProps> = ({
   const [solicitacao, setSolicitacao] = useState<SolicitacaoInterface>(solicitacaoSelected)
   const [showDevolutivaModal, setShowDevolutivaModal] = useState(false)
   const [devolutivaMessage, setDevolutivaMessage] = useState('')
-  const [ponto, setPonto] = useState<PontoProv>()
+  const [ponto, setPonto] = useState<PontoProv | undefined>(undefined)
   const [idApproved, setIdToApproved] = useState<string>('')
 
   const [entrada, setEntrada] = useState<string | null>(null)
@@ -41,28 +41,39 @@ const ModalAjustePonto: React.FC<AjusteProps> = ({
 
   const fetchPonto = async (solicitacaoCod: number) => {
     try {
-      const ponto = await pontoServices.getSolicitacaoPonto(solicitacaoCod)
-      setPonto(ponto)
-      setIdToApproved(ponto.id)
-      const tipoEntrada = ponto.pontos.find((p: Ponto) => p.tipoPonto === 0)
-      const tipoAlmoco = ponto.pontos.filter((p: Ponto) => p.tipoPonto === 2)
-      const tipoSaida = ponto.pontos.find((p: Ponto) => p.tipoPonto === 1)
+      const ponto = await pontoServices.getSolicitacaoPonto(solicitacaoCod) as PontoProv;
+      
+      if (ponto && ponto.pontos) {
+        setPonto(ponto);  
+        setIdToApproved(ponto.id || "default-id");
+    
+        const tipoEntrada = ponto.pontos.find((p) => p.tipoPonto === 0);
+        const tipoSaida = ponto.pontos.find((p) => p.tipoPonto === 1);
+    
+        if (tipoEntrada) setEntrada(tipoEntrada.horarioPonto as string);
+        const tipoAlmoco = ponto.pontos.filter((p) => p.tipoPonto === 2);
 
-      if (tipoEntrada) setEntrada(tipoEntrada.horarioPonto as string)
-      if (tipoAlmoco.length > 1) {
-        const [almoco1, almoco2] = tipoAlmoco
-        const [almocoInicio, almocoFim] =
-          almoco1.horarioPonto < almoco2.horarioPonto
-            ? [almoco1.horarioPonto, almoco2.horarioPonto]
-            : [almoco2.horarioPonto, almoco1.horarioPonto]
+        if (tipoAlmoco.length > 1) {
+          const [almoco1, almoco2] = tipoAlmoco;
 
-        setInicioAlmoco(almocoInicio as string)
-        setFimAlmoco(almocoFim as string)
-      }
+          if (almoco1 && almoco2 && almoco1.horarioPonto && almoco2.horarioPonto) {
+            const [almocoInicio, almocoFim] =
+              almoco1.horarioPonto < almoco2.horarioPonto
+                ? [almoco1.horarioPonto, almoco2.horarioPonto]
+                : [almoco2.horarioPonto, almoco1.horarioPonto];
 
-      if (tipoSaida) setSaida(tipoSaida.horarioPonto as string)
+            setInicioAlmoco(almocoInicio as string);
+            setFimAlmoco(almocoFim as string);
+          }
+        }
+        
+    
+        if (tipoSaida) setSaida(tipoSaida.horarioPonto as string);
+    }
+    
+      
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
   }
 
