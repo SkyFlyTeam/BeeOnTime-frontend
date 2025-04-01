@@ -259,7 +259,10 @@ export default function Home() {
                                 )}
                             />
                         <div className='pb-2'>
-                        <Button type="submit" className="w-full mt-6 mb-2">
+                        <Button 
+                            isSubmitButton={true}  // Passando isSubmitButton como true para que seja do tipo submit
+                            className="w-full mt-6 mb-2"
+                        > 
                             Entrar
                         </Button>
                         </div>
