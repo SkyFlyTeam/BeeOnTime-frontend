@@ -1,57 +1,76 @@
-import React from 'react';
+import React from 'react'
 import styles from './styles.module.css'
-import { CircleCheck, Pencil, Trash, Trash2, XCircle } from 'lucide-react';
-import clsx from 'clsx';
-import Flag from '../../../components/custom/flag';
-import SolicitacaoInterface from '../../../interfaces/Solicitacao';
-import { solicitacaoServices } from '../../../services/solicitacaoServices';
-import { ApiException } from '../../../config/apiExceptions';
+import { CircleCheck, XCircle } from 'lucide-react'
+import clsx from 'clsx'
+import Flag from '../../../components/custom/flag'
+import SolicitacaoInterface from '../../../interfaces/Solicitacao'
+import { solicitacaoServices } from '../../../services/solicitacaoServices'
+import { ApiException } from '../../../config/apiExceptions'
+import { AiFillDelete } from 'react-icons/ai'
 import { BiSolidEditAlt } from "react-icons/bi";
-import { AiFillDelete } from "react-icons/ai";
 
 interface SolicitacaoCard {
-  solicitacao: SolicitacaoInterface;
-  onSolicitacaoUpdate: (updatedSolicitacao: SolicitacaoInterface) => void;
+  solicitacao: SolicitacaoInterface
+  onSolicitacaoUpdate: (updatedSolicitacao: SolicitacaoInterface) => void
   onClick: () => void
-  usuarioCargo: string,
+  usuarioCargo: string
   usuarioCod: number
+  usuarioLogadoCargo: string
+  usuarioLogadoCod: number
+  onDelete: (id: number) => void  
 }
 
-const SolicitacaoCard = ({ solicitacao, onClick, onSolicitacaoUpdate, usuarioCargo, usuarioCod }: SolicitacaoCard) => {
+const SolicitacaoCard = ({
+  solicitacao,
+  onClick,
+  onSolicitacaoUpdate,
+  usuarioCargo,
+  usuarioCod,
+  usuarioLogadoCargo,
+  usuarioLogadoCod,
+  onDelete, // Adicionando função onDelete
+}: SolicitacaoCard) => {
+  const dataFormatada =
+    solicitacao && solicitacao.solicitacaoDataPeriodo
+      ? (() => {
+          const [ano, mes, dia] = solicitacao.solicitacaoDataPeriodo.split('-')
+          return `${String(dia).padStart(2, '0')}/${String(mes).padStart(2, '0')}/${ano}`
+        })()
+      : ''
 
-  const dataFormatada = solicitacao && solicitacao.solicitacaoDataPeriodo
-    ? (() => {
-        const [ano, mes, dia] = solicitacao.solicitacaoDataPeriodo.split('-');
-        return `${String(dia).padStart(2, '0')}/${String(mes).padStart(2, '0')}/${ano}`;
-      })()
-    : ''; 
-
-  const isOwnSolicitacao = solicitacao && solicitacao.usuarioCod === usuarioCod;
+  const isOwnSolicitacao = solicitacao && solicitacao.usuarioCod === usuarioLogadoCod
 
   const handleDelete = async (idToDelete: number) => {
-    const deleted = await solicitacaoServices.deleteSolicitacao(idToDelete);
+    try {
+      const deleted = await solicitacaoServices.deleteSolicitacao(idToDelete)
 
-    if (!(deleted instanceof ApiException)) {
-      onSolicitacaoUpdate(deleted);
+      if (!(deleted instanceof ApiException)) {
+        // Chama a função passada como prop para atualizar o estado na página principal
+        onDelete(idToDelete)
+      }
+    } catch (error) {
+      console.error('Erro ao excluir a solicitação:', error)
     }
-  };
+  }
 
   const showName = usuarioCargo !== 'Funcionário' && solicitacao?.usuarioCod !== usuarioCod
 
   return (
     <div className={styles.card} onClick={() => onClick()}>
-      <div className={clsx({
-        [styles.card_content]: !(showName),
-        [styles.card_content_name]: showName
-      })}>
-        <div className={clsx({
-          [styles.column_one]: !showName,
-          [styles.column_one_name]: showName
-        })}>
+      <div
+        className={clsx({
+          [styles.card_content]: !showName,
+          [styles.card_content_name]: showName,
+        })}
+      >
+        <div
+          className={clsx({
+            [styles.column_one]: !showName,
+            [styles.column_one_name]: showName,
+          })}
+        >
           <Flag status={solicitacao?.tipoSolicitacaoCod?.tipoSolicitacaoNome || 'Desconhecido'} />
-          {showName && (
-            <span>{solicitacao?.usuarioNome}</span>
-          )}
+          {showName && <span>{solicitacao?.usuarioNome}</span>}
         </div>
 
         <div
@@ -59,13 +78,15 @@ const SolicitacaoCard = ({ solicitacao, onClick, onSolicitacaoUpdate, usuarioCar
             [styles.column_two_pendente]: !showName && solicitacao?.solicitacaoStatus === 'PENDENTE',
             [styles.column_two]: !showName && solicitacao?.solicitacaoStatus !== 'PENDENTE',
             [styles.column_two_pendente_name]: showName && solicitacao?.solicitacaoStatus === 'PENDENTE',
-            [styles.column_two_name]: showName && solicitacao?.solicitacaoStatus !== 'PENDENTE'
+            [styles.column_two_name]: showName && solicitacao?.solicitacaoStatus !== 'PENDENTE',
           })}
         >
-          <div className={clsx({
-            [styles.data_span]: !showName,
-            [styles.data_span_name]: showName
-          })}>
+          <div
+            className={clsx({
+              [styles.data_span]: !showName,
+              [styles.data_span_name]: showName,
+            })}
+          >
             <div>
               <span>Data solicitação:</span> <span>{dataFormatada}</span>
             </div>
@@ -74,12 +95,12 @@ const SolicitacaoCard = ({ solicitacao, onClick, onSolicitacaoUpdate, usuarioCar
                 <BiSolidEditAlt size={22} color='#4179C9' className={styles.icon_button}/>
                 <div
                   onClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    handleDelete(solicitacao?.solicitacaoCod);
+                    e.stopPropagation()
+                    e.preventDefault()
+                    handleDelete(solicitacao?.solicitacaoCod) 
                   }}
                 >
-                  <AiFillDelete size={22} color='#E83838' className={styles.icon_button}/>
+                  <AiFillDelete size={22} color="#E83838" className={styles.icon_button} />
                 </div>
               </div>
             )}
@@ -103,8 +124,7 @@ const SolicitacaoCard = ({ solicitacao, onClick, onSolicitacaoUpdate, usuarioCar
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-
-export default SolicitacaoCard;
+export default SolicitacaoCard

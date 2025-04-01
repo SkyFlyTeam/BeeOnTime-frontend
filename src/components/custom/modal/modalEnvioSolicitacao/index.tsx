@@ -1,10 +1,10 @@
 import styles from './styles.module.css'
 import { Paperclip } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
-import Button from 'react-bootstrap/Button'
 import { solicitacaoServices } from '../../../../services/solicitacaoServices'
 import { pontoServices } from '../../../../services/pontoServices'
 import PontoProv from '../../../../interfaces/pontoProv'
+import { Button } from '@/components/ui/button'
 
 interface Ponto {
   id: string;

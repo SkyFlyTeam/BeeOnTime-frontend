@@ -43,8 +43,8 @@ const rolesData: Record<RoleKey, { navMain: NavItem[]; navSecondary: SubNavItem[
       {
         title: "ATIVIDADES",
         items: [
-          { title: "Solicitações", url: "/solicitacoes", icon: MessageSquare },
-          
+          { title: "Colaboradores", url: "/colaboradores", icon: Users },
+          { title: "Solicitações", url: "/solicitacao", icon: MessageSquare },
         ],
       },
       {
@@ -66,7 +66,7 @@ const rolesData: Record<RoleKey, { navMain: NavItem[]; navSecondary: SubNavItem[
         title: "ATIVIDADES",
         items: [
           { title: "Início", url: "/inicio", icon: Home },
-          { title: "Solicitações", url: "/solicitacoes", icon: MessageSquare },
+          { title: "Solicitações", url: "/solicitacao", icon: MessageSquare },
         ],
       },
       {
@@ -93,7 +93,7 @@ const rolesData: Record<RoleKey, { navMain: NavItem[]; navSecondary: SubNavItem[
         title: "ATIVIDADES",
         items: [
           { title: "Início", url: "/inicio", icon: Home },
-          { title: "Solicitações", url: "/solicitacoes", icon: MessageSquare },
+          { title: "Solicitações", url: "/solicitacao", icon: MessageSquare },
         ],
       },
       {
