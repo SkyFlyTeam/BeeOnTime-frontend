@@ -156,7 +156,7 @@ const CardCargaHoraria = ({ usuarioInfo, histPontos }: CardCargaHorariaProps) =>
                 <div className={styles.progress_bar} style={{ width: `${barraProgresso}%` }} />
             </div>
             <div className={styles.saida_prevista}>
-                <span>Saída prevista: {entrada ? (saidaPrevista) : ("Sem ponto de entrada.")}</span>
+                {entrada &&  <span>Saída prevista: </span>}
             </div> 
                 <div className={styles.jornada}>
                 {!usuarioInfo.jornadas.jornada_horarioFlexivel &&
