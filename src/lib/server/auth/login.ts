@@ -1,7 +1,17 @@
+export enum HttpStatusCode {
+    OK = 200,
+    Created = 201,
+    BadRequest = 400,
+    Unauthorized = 401,
+    Forbidden = 403,
+    NotFound = 404,
+    InternalServerError = 500,
+  }
+
 // login.ts
 
 // npm packages
-import axios, { AxiosResponse, HttpStatusCode } from "axios";
+import axios from "axios";
 import { NextRequest, NextResponse } from "next/server";
 // Lib
 import { AccessPass } from "../../auth";
@@ -13,7 +23,7 @@ import { MS_USUARIO } from "../../constants";
 
 
 
-function setAuthCookie(creds: AccessPass, token: String, jsonPassthrough?: string): NextResponse {
+function setAuthCookie(creds: AccessPass, token: String, jsonPassthrough?: string, p0?: any): NextResponse {
     const cookiePackage = `{
         "token": "${token}",
         "usuarioEmail": "${creds.usuarioEmail}",
@@ -47,7 +57,7 @@ async function setLoginSession(creds: AccessPass, msg?: string): Promise<Respons
         return new Response(JSON.stringify(json));
     }
     catch (error) {
-        return axiosToResponse(error as AxiosResponse);
+        return axiosToResponse(error as any);
     }
 }
 export async function attemptLoginSession(creds: AccessPass): Promise<Response> {
@@ -71,7 +81,7 @@ async function getUserRoleID(email: String, req: NextRequest | Request, token?: 
         const roleID = await res.data;
         return new Response(`{ "role": "${roleID}"}`);
     }
-    catch (error) { return axiosToResponse(error as AxiosResponse) }
+    catch (error) { return axiosToResponse(error as any) }
 }
 
 
@@ -127,7 +137,7 @@ async function getUserData(id: String, req: NextRequest | Request, token?: Strin
         const usuario = await res.data;
         return new Response(JSON.stringify(usuario));
     }
-    catch (error) { return axiosToResponse(error as AxiosResponse) }
+    catch (error) { return axiosToResponse(error as any) }
 }
 
 export async function attemptLocalUsuarioData(req: Request | NextRequest) {

@@ -1,46 +1,44 @@
-import axios, { AxiosResponse } from 'axios';
+import axios from 'axios';
 import { AccessPass } from '../lib/auth';
-
 import { attemptLoginSession } from '../lib/server/auth/login';
 import { TextDecoderStream } from 'stream/web';
 import { Api } from '@/config/apiConfig';
 
-
-//export async function setLogIn(creds: AccessPass): Promise<AxiosResponse> {
-export async function setLogIn(creds: AccessPass): Promise<AxiosResponse> {
-    try {
-        const res = await axios.post(`/auth/login`, JSON.stringify(creds), {
-            headers: { "Content-Type": "application/json" },
-        });
-        // alert("setLogIn " + res.data + " " + res.status);
-        return res;
-    }
-    catch (error) {
-        const res = (error as AxiosResponse)
-        // alert("setLogIn " + res.data + " " + res.status);
-        return res
-    }
+// Função para login
+export async function setLogIn(creds: AccessPass): Promise<any> {
+  try {
+    const res = await axios.post(`/auth/login`, JSON.stringify(creds), {
+      headers: { "Content-Type": "application/json" },
+    });
+    // alert("setLogIn " + res.data + " " + res.status);
+    return res;
+  } catch (error) {
+    // Aqui, o erro pode ser tipado como um AxiosError para melhor manipulação
+    const res = (error as any).response as any; // ou use AxiosError
+    // alert("setLogIn " + res.data + " " + res.status);
+    return res;
+  }
 }
 
-export async function getRoleID(): Promise<AxiosResponse> {
-    try {
-        const res = await axios.get("/auth/user/role");
-        return res;
-    }
-    catch (error) {
-        const res = (error as AxiosResponse)
-        return res
-    }
+// Função para obter o ID do papel (role)
+export async function getRoleID(): Promise<any> {
+  try {
+    const res = await axios.get("/auth/user/role");
+    return res;
+  } catch (error) {
+    const res = (error as any).response as any;
+    return res;
+  }
 }
 
-export async function getUsuario(): Promise<AxiosResponse> {
-    try {
-        const res = await axios.get("/auth/token");
-        const resData = await Api.get(`/usuario/${res.data.token}`)
-        return resData;
-    }
-    catch (error) {
-        const res = (error as AxiosResponse)
-        return res
-    }
+// Função para obter dados do usuário
+export async function getUsuario(): Promise<any> {
+  try {
+    const res = await axios.get<any>("/auth/token");
+    const resData = await Api.get(`/usuario/${res.data.token}`);
+    return resData;
+  } catch (error) {
+    const res = (error as any).response as any;
+    return res;
+  }
 }
