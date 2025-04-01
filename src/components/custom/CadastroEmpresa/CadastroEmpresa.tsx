@@ -415,7 +415,7 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
                 </div>
                 <div className="flex-1">
                   <label htmlFor="admin_nvlAcesso" className="mb-2">Nível de Acesso</label>
-                  <input id="admin_nvlAcesso" name="admin_nvlAcesso" value="Administrador" readOnly className="border p-2 rounded-md w-full" />
+                  <input id="admin_nvlAcesso" name="admin_nvlAcesso" value="Administrador" readOnly style={{color: "rgba(0, 0, 0, 0.65)"}} className="border p-2 rounded-md w-full" />
                 </div>
               </div>
               <button type="submit" className="text-black p-2 rounded-md bg-[#FFB503]">Finalizar</button>
