@@ -7,6 +7,7 @@ import CadastroJornada from "./CadastroJornada";
 import Modal from "@/components/ui/modal";
 import { setorSevices } from "@/services/setorService";
 import { Setor } from "@/interfaces/usuarioInfo";
+import { generatePassword } from "@/utils/emails/generatePassword";
 
 const formSchema = z.object({
   usuario_nome: z.string()
@@ -35,12 +36,15 @@ export default function CadastroUsuario({ onClose, onSave }: { onClose: () => vo
   onSave: (sucess: boolean) => void }) {
 
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
+
+  const generated_password = generatePassword(10);
+
   const [formData, setFormData] = useState({
     usuario_nome: "",
     usuario_cpf: "",
     usuario_nrRegistro: "",
     usuarioEmail: "",
-    usuario_senha: "123",
+    usuario_senha: generated_password,
     usuarioTipoContratacao: "",
     usuario_dataContratacao: "",
     usuario_DataNascimento: "",
