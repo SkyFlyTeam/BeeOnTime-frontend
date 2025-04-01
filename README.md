@@ -9,6 +9,12 @@ https://github.com/SkyFlyTeam/BeeOnTime-frontendit
 ```
 npm install
 ```
+- Criar um arquivo com o nome .env e colocar o seguinte conteúdo:
+```
+Env do Bee on Time frontend:
+GMAIL_USER=skyfly.organization@gmail.com
+GMAIL_APP_PASSWORD=hnng pags tqaa powm
+```
 - Depois disso:
 ```
 npm run dev
