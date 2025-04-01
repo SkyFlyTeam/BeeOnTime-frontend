@@ -43,7 +43,6 @@ const rolesData: Record<RoleKey, { navMain: NavItem[]; navSecondary: SubNavItem[
       {
         title: "ATIVIDADES",
         items: [
-          { title: "Colaboradores", url: "/colaboradores", icon: Users },
           { title: "Solicitações", url: "/solicitacao", icon: MessageSquare },
         ],
       },
