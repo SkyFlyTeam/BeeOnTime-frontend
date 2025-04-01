@@ -2,6 +2,8 @@ import '../styles/global.css';
 import type { AppProps } from 'next/app';
 // import 'bootstrap/dist/css/bootstrap.min.css';
 import { AuthProvider } from '../context/AuthContext'; 
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer } from "react-toastify";
 import { useRouter } from 'next/router';
 import { AppSidebar } from '@/components/custom/app-sidebar';
 import { SidebarProvider, SidebarInset, SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
@@ -31,8 +33,9 @@ function MyApp({ Component, pageProps }: AppProps) {
       <AppSidebar />
       <SidebarInset>
         <Header />
-        <main className="flex flex-1 flex-col gap-4 px-0 md:px-9 py-0">
+        <main className="flex flex-1 flex-col gap-4 px-0 md:px-12 py-0">
           <Component {...pageProps} />
+          <ToastContainer />
         </main>
       </SidebarInset>
     </SidebarProvider>

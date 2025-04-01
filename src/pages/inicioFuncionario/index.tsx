@@ -1,42 +1,46 @@
 import TimeClock from '@/pages/inicioFuncionario/_components/time-clock';
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
-import { string } from 'zod';
 import { getUsuario } from '@/services/authService';
+import CardCargaHoraria from '@/components/custom/cardCargaHoraria';
+import { pontoServices } from '@/services/pontoServices';
+import UsuarioInfo from '@/interfaces/usuarioInfo';
+import HistPontos from '@/interfaces/hisPonto';
 
 export default function InicioFuncionario() {
+    const [nome, setNome] = useState("José");
+    const [usuarioInfo, setUsuarioInfo] = useState<UsuarioInfo | null>(null);
+    const [histPontos, setHistPontos] = useState<HistPontos[] | null>(null);
+    const [loading, setLoading] = useState(true); // Estado para controle de carregamento
 
     useEffect(() => {
-      getUser()
-    }, [])
-  
-    const getUser = async() => {
-      const user = await getUsuario();
-      console.log (user);
-      const usuario = user.data;
-      setNome(usuario.usuario_nome);
+        getUser();
+    }, []);
+
+    const getUser = async () => {
+        try {
+            const user = await getUsuario();
+            const usuario: UsuarioInfo = user.data;
+            setNome(usuario.usuario_nome);
+            setUsuarioInfo(usuario);
+
+            const histPontosData = await pontoServices.getPontosByUsuario(usuario.usuario_cod) as HistPontos[];
+            setHistPontos(histPontosData);
+        } catch (error) {
+            console.error("Erro ao carregar informações:", error);
+        } finally {
+            setLoading(false); // Finaliza o carregamento após obter os dados
+        }
+    };
+
+    if (loading) {
+        return <div>Carregando...</div>; // Renderiza uma mensagem ou spinner enquanto carrega
     }
 
-  //Página fictícia só para ver
-  const [nome, setNome] = useState("José");
-
-  return (
-    <>
-    
-      <h1 className='text-4xl px-6 md:px-6 font-semibold  text-center md:text-left'>Olá, {nome}!</h1>
-      <div >
-        <div className=" rounded-xl p-5 md:px-7 flex items-center ">
-          <TimeClock />
+    return (
+        <div className='flex flex-wrap flex-row justify-between'>
+            <TimeClock />
+            <CardCargaHoraria usuarioInfo={usuarioInfo!} histPontos={histPontos!} />
         </div>
-      </div>
-    </>
-  );
+    );
 }

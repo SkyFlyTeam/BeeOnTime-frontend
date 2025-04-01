@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import styles from './styles.module.css';
 import { horasServices } from '../../../services/horaServices';
-import UsuarioInfo from '@/src/interfaces/usuarioInfo';
-import { Horas } from '@/src/interfaces/horasInterface';
-import HistPontos from '@/src/interfaces/histPontosInterface';
+import UsuarioInfo from '@/../src/interfaces/usuarioInfo';
+import { Horas } from '@/../src/interfaces/horasInterface';
+import HistPontos from '@/../src/interfaces/histPontosInterface';
 
 interface CardCargaHorariaProps {
     usuarioInfo: UsuarioInfo;
@@ -16,6 +16,7 @@ const CardCargaHoraria = ({ usuarioInfo, histPontos }: CardCargaHorariaProps) =>
 
     const formatTime = (time: string | Date): string => {
         if (typeof time === 'string') {
+            time = time.slice(0, 5)
             return time;
         }
 
@@ -28,9 +29,11 @@ const CardCargaHoraria = ({ usuarioInfo, histPontos }: CardCargaHorariaProps) =>
         return '';
     };
 
-    const jornadaHorarioEntrada = formatTime(usuarioInfo.jornadas[0].jornadaHorarioEntrada);
-    const jornadaHorarioSaida = formatTime(usuarioInfo.jornadas[0].jornadaHorarioSaida);
+
+    const jornadaHorarioEntrada = formatTime(usuarioInfo.jornadas.jornada_horarioEntrada);
+    const jornadaHorarioSaida = formatTime(usuarioInfo.jornadas.jornada_horarioSaida);
   
+    console.log('horessss', pontoDia)
     const entrada = horas
         ? pontoDia?.pontos.filter((ponto) => ponto.tipoPonto === 0).map((ponto) => ponto.horarioPonto)[0]
         : null;
@@ -56,6 +59,8 @@ const CardCargaHoraria = ({ usuarioInfo, histPontos }: CardCargaHorariaProps) =>
     const barraProgresso = Math.min((horasTrabalhadas / jornadaTotal) * 100, 100);
 
     const calcularSaidaPrevista = () => {
+        console.log('entrada', entrada)
+        console.log('horas', horas)
         if (!entrada || !horas) return '00:00';  
     
         let horaEntrada = 0;
@@ -71,7 +76,7 @@ const CardCargaHoraria = ({ usuarioInfo, histPontos }: CardCargaHorariaProps) =>
         const entradaDate = new Date();
         entradaDate.setHours(horaEntrada, minutoEntrada, 0, 0);
     
-        const horasAdicionais = usuarioInfo.usuarioCargaHoraria;
+        const horasAdicionais = usuarioInfo.usuario_cargaHoraria;
         entradaDate.setHours(entradaDate.getHours() + horasAdicionais);
     
         const saidaHora = entradaDate.getHours().toString().padStart(2, '0');
@@ -90,7 +95,9 @@ const CardCargaHoraria = ({ usuarioInfo, histPontos }: CardCargaHorariaProps) =>
             const day = today.getDate().toString().padStart(2, '0');
             const data = `${year}-${month}-${day}`;
 
-            const horas = await horasServices.getHora(usuarioInfo.usuarioCod, data);
+            const horas = await horasServices.getHora(usuarioInfo.usuario_cod, data);
+
+            console.log('HORASSSS', horas)
 
             if (!horas) {
                 setHoras({
@@ -119,6 +126,7 @@ const CardCargaHoraria = ({ usuarioInfo, histPontos }: CardCargaHorariaProps) =>
     };
 
     const fetchDia = (data: string) => {
+        console.log('hist pontos do carddddd', histPontos)
         const pontoAtual = histPontos.filter((ponto) => ponto.data === data);
         setPontoDia(pontoAtual[0]);
     };
