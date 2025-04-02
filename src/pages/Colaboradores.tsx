@@ -8,19 +8,25 @@ import 'react-toastify/dist/ReactToastify.css';
 import UsuarioInfo from "@/interfaces/usuarioInfo";
 import { usuarioServices } from "@/services/usuarioService";
 
-import styles from './Colaboradores.module.css'
+import styles from '@/styles/Colaboradores.module.css'
 import CadastroUsuario from "@/components/CadastroUsuario";
+import { useRouter } from 'next/router';
+import { getUsuario } from "@/services/authService";
 
 export default function Colaboradores() {
   const [usuarios, setUsuarios] = useState<UsuarioInfo[]>([]); // Garante que seja um array vazio inicialmente
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
+  const [thisUser, setThisUser] = useState<UsuarioInfo>();
 
   const [isOpen, setIsOpen] = useState(false); 
+
+  const router = useRouter();
 
   const fetchUsuarios = async () => {
     try {
       const data = await usuarioServices.getAllUsuarios();
+      setThisUser(await getUser())
       setUsuarios(Array.isArray(data) ? data : []);  // Garantindo que o valor seja um array
     } catch (err) {
       setError("Erro ao carregar os usuários.");
@@ -28,6 +34,12 @@ export default function Colaboradores() {
       setLoading(false);
     }
   };
+
+      const getUser = async() => {
+        const user = await getUsuario();
+        console.log (user);
+        return user.data;
+      }
 
   useEffect(() => {
     fetchUsuarios();
@@ -57,6 +69,7 @@ export default function Colaboradores() {
 
   const handleViewUser = (usuarioId: number) => {
     console.log(`Ver detalhes do usuário com ID: ${usuarioId}`);
+    router.push(`/historico-ponto/${usuarioId}`)
   };
 
   if (loading) {
@@ -102,7 +115,7 @@ export default function Colaboradores() {
               </TableHeader>
               <TableBody>
                 {usuarios.length > 0 ? (
-                  usuarios.map((usuario, index) => (
+                  usuarios.map((usuario, index) => ( (usuario.usuario_cod !== thisUser?.usuario_cod && usuario.nivelAcesso.nivelAcesso_cod !== 0) ? (
                     <TableRow
                       key={index}
                       className={index % 2 === 0 ? "bg-[#FFF8E1]" : "bg-[#FFFFFF]"}
@@ -122,7 +135,7 @@ export default function Colaboradores() {
                       </TableCell>
                     
                     </TableRow>
-                  ))
+                  ): null))
                 ) : (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center">Nenhum colaborador encontrado</TableCell>
@@ -143,11 +156,15 @@ export default function Colaboradores() {
                   { label: "CARGA HORÁRIA DIÁRIA", render: (usuario: UsuarioInfo) => usuario.usuario_cargaHoraria },
                   { label: "CONTRATO", render: (usuario: UsuarioInfo) => usuario.usuarioTipoContratacao },
                   { label: "NÍVEL ACESSO", render: (usuario: UsuarioInfo) => usuario.nivelAcesso?.nivelAcesso_nome },
+                  { label: "AÇÕES", render: (usuario: UsuarioInfo) => ( <button onClick={() => handleViewUser(usuario.usuario_cod)} 
+                  className="bg-[#FFB503] rounded-md p-2 hover:bg-orange-600">
+                  <FontAwesomeIcon icon={faEye} className="text-black-600"/>
+                </button>) }
                 ].map((row, idx) => (
                   <tr key={idx}>
                     <td className="border border-gray-200 p-3 font-semibold">{row.label}</td>
                     {usuarios.length > 0 ? (
-                      usuarios.map((usuario, i) => (
+                      usuarios.map((usuario, i) => ( (usuario.usuario_cod !== thisUser?.usuario_cod && usuario.nivelAcesso.nivelAcesso_cod !== 0) ? (
                         <td
                           key={i}
                           className={`border border-gray-200 p-3 text-center text-base ${i % 2 === 0 ? "bg-[#FFF8E1]" : "bg-[#FFFFFF]"}
@@ -155,7 +172,7 @@ export default function Colaboradores() {
                         >
                           {row.render(usuario)}
                         </td>
-                      ))
+                      ): null))
                     ) : (
                       <td colSpan={6} className="text-center">Nenhum colaborador encontrado</td>
                     )}

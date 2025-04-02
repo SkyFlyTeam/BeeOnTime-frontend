@@ -194,7 +194,7 @@ const Solicitacao = () => {
   return (
     <div className={styles.solicitacao_container}>
       <div className={styles.card_container}>
-        <h1>Solicitações</h1>
+        <h1 className='font-bold text-4xl'>Solicitações</h1>
 
         <Tab
           toogle={toogle}
