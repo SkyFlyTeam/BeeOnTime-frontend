@@ -81,7 +81,7 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
 
     return (
       <div ref={ref} className={cn("p-6 shadow-xl rounded-xl", className)} style={{ boxShadow: "0px 0px 12px 4px rgba(0, 0, 0, 0.04)" }}>
-        {accessLevel === "USER" ? (
+        {/* {accessLevel === "USER" ? ( */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 pb-3 md:py-2">
             <div className="flex flex-row items-start gap-2 md:gap-4">
               <h1 className="text-base md:text-lg font-bold">Jornada de Trabalho:</h1>
@@ -92,11 +92,11 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
               <p className="text-base md:text-lg text-black">{horasSemana}h/semana - {horasMes}h/mês</p>
             </div>
           </div>
-        ) : (
+        {/* ) : (
           <div className="mb-6">
             <h1 className="text-base md:text-lg font-bold">Histórico de Pontos</h1>
           </div>
-        )}
+        )} */}
 
         {/* Desktop - Tabela horizontal */}
         <div className="overflow-x-auto hidden md:block">
