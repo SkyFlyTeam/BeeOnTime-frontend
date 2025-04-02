@@ -270,6 +270,7 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
       });
 
       console.log("Dados enviados:", { empresaData, setores, usuarioData });
+      await router.push("/");
       resetForm();
     } catch (error) {
       console.error("Erro ao cadastrar:", error);
