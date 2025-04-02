@@ -146,6 +146,7 @@ export default function TimeClock() {
               onClick={handleEntrada}
               variant="outline"
               disabled={isRestrictedTime}
+              isSubmitButton={true}
             >
               ENTRADA
             </Button>
@@ -153,6 +154,7 @@ export default function TimeClock() {
               variant="outline"
               className="w-40 bg-[#F0F0F0] text-gray-600 border-gray-400 cursor-not-allowed"
               disabled
+              isSubmitButton={true}
             >
               INÍCIO INTERVALO
             </Button>
@@ -166,6 +168,7 @@ export default function TimeClock() {
               variant="outline"
               className="w-40 bg-[#F0F0F0] text-gray-600 border-gray-400 cursor-not-allowed"
               disabled
+              isSubmitButton={true}
             >
               SAÍDA
             </Button>
@@ -173,6 +176,7 @@ export default function TimeClock() {
               className={`w-40 font-semibold ${entryTime && (currentTime.getTime() - entryTime.getTime()) / (1000 * 60 * 60) >= 0 ? "bg-[#FFB503] hover:bg-[#FFCB50] text-[#42130F]" : "bg-gray-200 text-gray-600 cursor-not-allowed"}`}
               onClick={handleInicioIntervalo}
               disabled={!(entryTime && (currentTime.getTime() - entryTime.getTime()) / (1000 * 60 * 60) >= 0)}
+              isSubmitButton={true}
             >
               INÍCIO INTERVALO
             </Button>
@@ -186,12 +190,14 @@ export default function TimeClock() {
               variant="outline"
               className="w-40 bg-[#F0F0F0] text-gray-600 border-gray-400 cursor-not-allowed"
               disabled
+              isSubmitButton={true}
             >
               SAÍDA
             </Button>
             <Button
               className="w-40 font-semibold bg-[#FFB503] hover:bg-[#FFCB50] text-[#42130F]"
               onClick={handleFimIntervalo}
+              isSubmitButton={true}
             >
               FIM INTERVALO
             </Button>
@@ -205,6 +211,7 @@ export default function TimeClock() {
               className={`w-40 font-semibold ${entryTime && (currentTime.getTime() - entryTime.getTime()) / (1000 * 60 * 60) >= 0 ? "bg-[#FFB503] hover:bg-[#FFCB50] text-[#42130F]" : "bg-gray-200 text-gray-600 cursor-not-allowed"}`}
               onClick={handleSaida}
               disabled={!(entryTime && (currentTime.getTime() - entryTime.getTime()) / (1000 * 60 * 60) >= 0)}
+              isSubmitButton={true}
             >
               SAÍDA
             </Button>
@@ -212,6 +219,7 @@ export default function TimeClock() {
               variant="outline"
               className="w-40 bg-[#F0F0F0] text-gray-600 border-gray-400 cursor-not-allowed"
               disabled
+              isSubmitButton={true}
             >
               INÍCIO INTERVALO
             </Button>

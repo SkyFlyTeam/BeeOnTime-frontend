@@ -69,6 +69,7 @@ const ModalCriarSolicitacao = ({ isOpen, onClose, ponto }: ModalCriarSolicitacao
         ]
       }
       const resultPonto = await pontoServices.createSolicitacaoPonto(solicitacaoPonto)
+      // console.log(`SOLICITAÇÃO CRIADA: ${resultPonto}`)
       onClose();
     } catch (error: any) {
       console.error("Erro ao enviar solicitação:", error.message);

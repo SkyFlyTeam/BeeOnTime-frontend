@@ -8,6 +8,7 @@ const getAllSolicitacao = async (): Promise<SolicitacaoInterface[] | ApiExceptio
   try {
     const { data } = await ApiSolicitacao.get("/solicitacao");
     return data;
+
   } catch (error: unknown) {
     if (error instanceof Error) {
       return new ApiException(error.message || "Erro ao consultar a API.");
@@ -21,6 +22,7 @@ const getSolicitacaoById = async (id: number): Promise<SolicitacaoInterface | Ap
   try {
     const { data } = await ApiSolicitacao.get(`/solicitacao/${id}`);
     return data;
+
   } catch (error: unknown) {
     if (error instanceof Error) {
       return new ApiException(error.message || "Erro ao consultar a API.");
@@ -36,6 +38,7 @@ const createSolicitacao = async (formData: FormData): Promise<SolicitacaoInterfa
       headers: { 'Content-Type': 'multipart/form-data' }
     });
     return data;
+
   } catch (error: any) {
     console.error("Erro na API:", error.response?.data || error.message);
     throw new ApiException(error?.message || "Erro ao cadastrar solicitação.");
@@ -82,6 +85,7 @@ const deleteSolicitacao = async (solicitacaoCod: number): Promise<SolicitacaoInt
     })
 
     const solicitacaoDeletada: SolicitacaoInterface = data;
+    
     return solicitacaoDeletada;
 
   } catch (error) {

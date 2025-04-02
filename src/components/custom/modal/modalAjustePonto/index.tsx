@@ -42,7 +42,6 @@ const ModalAjustePonto: React.FC<AjusteProps> = ({
   const fetchPonto = async (solicitacaoCod: number) => {
     try {
       const ponto = await pontoServices.getSolicitacaoPonto(solicitacaoCod) as PontoProv;
-      
       if (ponto && ponto.pontos) {
         setPonto(ponto);  
         setIdToApproved(ponto.id || "default-id");
