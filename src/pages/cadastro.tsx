@@ -11,7 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Input } from '@/components/ui/input';
 import { useEffect, useState } from 'react';
-import CadastroEmpresaForm from '../components/custom/CadastroEmpresa/CadastroEmpresa';
+import CadastroEmpresaForm from '@/components/custom/CadastroEmpresa/CadastroEmpresa';
 
 const formSchema = z.object({
     email: z.string().min(1, { message: "Campo obrigatório." }).email({ message: "Por favor, insira um e-mail válido." }),
