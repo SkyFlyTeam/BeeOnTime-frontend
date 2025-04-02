@@ -38,7 +38,7 @@ export default function InicioFuncionario() {
     }
 
     return (
-        <div className='flex flex-wrap flex-row justify-between'>
+        <div className='flex flex-wrap flex-col justify-center items-center gap-8'>
             <TimeClock />
             <CardCargaHoraria usuarioInfo={usuarioInfo!} histPontos={histPontos!} />
         </div>

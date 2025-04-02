@@ -231,7 +231,7 @@ export default function TimeClock() {
   };
 
   return (
-    <div className="bg-white shadow-xl flex flex-col items-center justify-center gap-4 rounded-xl p-6" style={{ boxShadow: "0px 0px 12px 4px rgba(0, 0, 0, 0.04);" }}>
+    <div className="bg-white shadow-[4px_4px_19px_0px_rgba(0,0,0,0.05)] flex flex-col items-center justify-center gap-4 rounded-xl p-6" style={{ boxShadow: "0px 0px 12px 4px rgba(0, 0, 0, 0.04);" }}>
       {/* Título */}
       <h1 className="text-xl font-semibold">Bater Ponto</h1>
 

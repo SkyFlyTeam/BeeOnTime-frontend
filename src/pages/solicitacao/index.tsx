@@ -196,11 +196,13 @@ const Solicitacao = () => {
       <div className={styles.card_container}>
         <h1 className='font-bold text-4xl'>Solicitações</h1>
 
-        <Tab
-          toogle={toogle}
-          onClick={handleClick}
-          pendentes_length={solicitacoesData.pendentes.length}
-        />
+        <div className='w-[100%] flex flex-row justify-center'>
+          <Tab
+            toogle={toogle}
+            onClick={handleClick}
+            pendentes_length={solicitacoesData.pendentes.length}
+          />
+        </div>
 
         <div className={styles.container}>
           {displayedSolicitacoes.length > 0 ? (

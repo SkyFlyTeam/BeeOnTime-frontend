@@ -50,7 +50,12 @@ const CardCargaHoraria = ({ usuarioInfo, histPontos }: CardCargaHorariaProps) =>
 
     const [horaSaida, minutoSaida] = jornadaHorarioSaida.split(":").map(Number);
 
-    const jornadaTotal = (horaSaida - horaEntrada) + (minutoSaida - minutoEntrada) / 60;
+    let jornadaTotal;
+     if(jornadaHorarioEntrada){
+         jornadaTotal = (horaSaida - horaEntrada) + (minutoSaida - minutoEntrada) / 60;
+     }else{
+         jornadaTotal = usuarioInfo.usuario_cargaHoraria;
+    }
 
     const horasTrabalhadas = horas ? horas.horasTrabalhadas : 0;
     const horasFaltantes = horas ? horas.horasFaltantes : 0;
@@ -139,17 +144,19 @@ const CardCargaHoraria = ({ usuarioInfo, histPontos }: CardCargaHorariaProps) =>
         <div className={styles.card_container}>
             <p className={styles.card_title}>Carga diária</p>
             <div className={styles.carga_horaria}>
-                <span>Horas Trabalhadas: {horasTrabalhadas}h</span>
-                <span>Horas Faltantes: {horasFaltantes}h</span>
+                <span>Horas Trabalhadas: {horasTrabalhadas.toFixed(2)}h</span>
+                <span>Horas Faltantes: {horasFaltantes.toFixed(2)}h</span>
             </div>
             <div className={styles.progress_bar_container}>
                 <div className={styles.progress_bar} style={{ width: `${barraProgresso}%` }} />
             </div>
             <div className={styles.saida_prevista}>
-                <span>Saída prevista: {saidaPrevista}</span>
-            </div>
-            <div className={styles.jornada}>
-                <span>Jornada de trabalho: {jornadaHorarioEntrada} às {jornadaHorarioSaida}</span>
+                {entrada && <span>Saída prevista: {saidaPrevista}</span>}
+            </div> 
+                <div className={styles.jornada}>
+                {!usuarioInfo.jornadas.jornada_horarioFlexivel &&
+                    <span>Jornada de trabalho: {jornadaHorarioEntrada} às {jornadaHorarioSaida}</span>
+                }
                 { horasExtras > 0 && (
                     <span>Horas extras: {horasExtras}h</span>
                 )}
