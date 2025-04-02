@@ -1,0 +1,97 @@
+.headder1{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: start;
+    height: 15vh;
+    width: 50rem;
+}
+
+.headder2{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: end;
+    height: 15vh;
+    width: 50rem;
+}
+
+.headderTittle{
+    font-family: 'Inter';
+    font-size: x-large;
+    color: var(--Brown);
+    font-weight: 700;
+}
+
+.container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 85vh;
+}
+
+.card{
+    display: flex;
+    flex-direction: column;
+    width: 30rem;
+    box-shadow: 0px 24px 64px 0px rgba(38, 33, 74, 10%); 
+}
+
+.cardTitle{
+    margin-top: 6px;
+    margin-bottom: 6px;
+    font-size: 35px;
+    text-align: center;
+}
+
+body{
+    background-image: url("../../public/images/Paralax.svg");
+    font-family: 'Inter';
+    font-weight: 500;
+    background-color: var(--white-bg);
+}
+
+@media (max-width: 768px){
+    .headder1 {
+        justify-content: center;
+        width: 100rem;
+    }
+
+    .card {
+        width: 90%;
+    }
+    .responsiveTable thead {
+        display: none;
+      }
+    
+      .responsiveTable,
+      .responsiveTable tbody,
+      .responsiveTable tr,
+      .responsiveTable td {
+        display: block;
+        width: 100%;
+      }
+    
+      .responsiveTable tr {
+        margin-bottom: 1rem;
+        border: 1px solid #e5e7eb; /* Tailwind: gray-200 */
+        border-radius: 0.5rem;
+        background-color: #fff8e1;
+        padding: 1rem;
+      }
+    
+      .responsiveTable td {
+        text-align: left;
+        padding: 0.75rem 1rem;
+        position: relative;
+      }
+    
+      .responsiveTable td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        display: block;
+        color: #000;
+        margin-bottom: 0.25rem;
+      }
+}
