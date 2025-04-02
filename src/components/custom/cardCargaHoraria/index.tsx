@@ -33,7 +33,6 @@ const CardCargaHoraria = ({ usuarioInfo, histPontos }: CardCargaHorariaProps) =>
     const jornadaHorarioEntrada = formatTime(usuarioInfo.jornadas.jornada_horarioEntrada);
     const jornadaHorarioSaida = formatTime(usuarioInfo.jornadas.jornada_horarioSaida);
   
-    console.log('horessss', pontoDia)
     const entrada = horas
         ? pontoDia?.pontos.filter((ponto) => ponto.tipoPonto === 0).map((ponto) => ponto.horarioPonto)[0]
         : null;
@@ -65,8 +64,6 @@ const CardCargaHoraria = ({ usuarioInfo, histPontos }: CardCargaHorariaProps) =>
     const barraProgresso = Math.min((horasTrabalhadas / jornadaTotal) * 100, 100);
 
     const calcularSaidaPrevista = () => {
-        console.log('entrada', entrada)
-        console.log('horas', horas)
         if (!entrada || !horas) return '00:00';  
     
         let horaEntrada = 0;
@@ -103,8 +100,6 @@ const CardCargaHoraria = ({ usuarioInfo, histPontos }: CardCargaHorariaProps) =>
 
             const horas = await horasServices.getHora(usuarioInfo.usuario_cod, data);
 
-            console.log('HORASSSS', horas)
-
             if (!horas) {
                 setHoras({
                     horasCod: 0,
@@ -132,7 +127,6 @@ const CardCargaHoraria = ({ usuarioInfo, histPontos }: CardCargaHorariaProps) =>
     };
 
     const fetchDia = (data: string) => {
-        console.log('hist pontos do carddddd', histPontos)
         const pontoAtual = histPontos.filter((ponto) => ponto.data === data);
         setPontoDia(pontoAtual[0]);
     };
@@ -140,10 +134,6 @@ const CardCargaHoraria = ({ usuarioInfo, histPontos }: CardCargaHorariaProps) =>
     useEffect(() => {
         fetchHoras();
     }, []);
-
-    useEffect(() => {
-        console.log('usuario', usuarioInfo)
-    })
 
     return (
         <div className={styles.card_container}>

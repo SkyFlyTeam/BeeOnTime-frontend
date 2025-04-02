@@ -4,10 +4,21 @@ import { Button } from "../../../components/ui/button";
 import { Clock } from "lucide-react";
 import { getUsuario } from "@/services/authService";
 import { set } from "react-hook-form";
+import Horas from "@/interfaces/horas";
+import { Usuario } from "@/interfaces/usuario";
+import { horasServices } from "@/services/horasServices";
+import HistPontos, { Ponto } from "@/interfaces/hisPonto";
+import { pontoServices } from "@/services/pontoServices";
+import { TipoPonto } from "@/enums/tipoPonto";
 
 export default function TimeClock() {
+  const [ usuario, setUsuario ] = useState<Usuario | null>(null);
+
   // Estado para o horário atual
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [ horasDia, setHorasDia ] = useState<Horas | null>(null);
+  const [ diaAtual, setDiaAtual ] = useState<string | null>(null);
+  const [ pontosDia, setPontosDia ] = useState<HistPontos | null | undefined>(undefined);
 
   // Estado para o fluxo de trabalho
   const [workState, setWorkState] = useState<"initial" | "entrada" | "inicioIntervalo" | "fimIntervalo" | "saida">("initial");
@@ -28,54 +39,130 @@ export default function TimeClock() {
 
     const getUser = async() => {
       const data = await getUsuario();
-      return data.data
+      return data.data as Usuario
     }
-  const { createHoras, baterEntrada, baterInicioAlmoco, baterSaidaAlmoco, baterSaida, verificarHoras } = TimeClockService();
 
-  useEffect(() => {
-    const diaHoje = new Date().toISOString().slice(0, 10);
-
-    // You need to await the result of verificarHoras
-    const fetchState = async () => {
-          // Create hours (this doesn't seem to be affected by the state update)
-
-      const user = await getUser()
-
-    await createHoras({
-      horasExtras: 0,
-      horasTrabalhadas: 0,
-      horasNoturnas: 0,
-      horasFaltantes: 0,
-      horasData: diaHoje,
-      usuarioCod: user.usuario_cod,  // Example user ID
-    }, diaHoje, user.usuario_cod);
-
-      const estado = await verificarHoras(diaHoje, user.usuario_cod); // Await the promise
-      if (estado == 'initial') {
-        setWorkState(estado)
+    const fetchUsuario = async() => {
+      try{
+        let { data } = await getUsuario();
+        setUsuario(data as Usuario);
+      }catch(error){
+        console.error('erro ao pegar usuario')
       }
-      else if (estado == 'entrada') {
-        setEntryTime(new Date()); // Registra o horário de entrada
-        setWorkState(estado); // Now set workState with the resolved value
+    }
+
+    const fetchHorasDia = async() => {
+      try{
+        const diaHojeLocal = new Date().toLocaleDateString("pt-BR", {
+          timeZone: "America/Sao_Paulo", 
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        });
+        
+        // Converte para o formato YYYY-MM-DD
+        const [day, month, year] = diaHojeLocal.split("/"); 
+        const diaHoje = `${year}-${month}-${day}`;
+
+        let horas  = await horasServices.getHorasByUsuarioAndDate(usuario?.usuario_cod!, diaHoje);
+        setHorasDia(horas as Horas)
+  
+      }catch(error){
+        console.error('erro ao pegar usuario')
       }
-      else if (estado == "inicioIntervalo") {
-        setEntryTime(new Date()); // Registra o horário de entrada
-        setWorkState(estado); // Now set workState with the resolved value
+    }
+
+    const fetchPontosDia = async(horas_cod: number) => {
+      try{
+        let data  = await pontoServices.getPontosByHorasCod(horas_cod);
+        if ('pontos' in data) {
+          setPontosDia(data as HistPontos);
+        }else{
+          setPontosDia(null)
+        }
+      }catch(error){
+        console.error('erro ao pegar usuario')
       }
-      else if (estado == "fimIntervalo") {
-        setEntryTime(new Date()); // Registra o horário de entrada
-        setWorkState(estado); // Now set workState with the resolved value
-      }
-      else {
+    }
+
+    useEffect(() => {
+      const carregarDados = async () => {
+        await fetchUsuario(); 
+        if (usuario) {
+          const diaHojeLocal = new Date().toLocaleDateString("pt-BR", {
+            timeZone: "America/Sao_Paulo", 
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+          });
+          
+          // Converte para o formato YYYY-MM-DD
+          const [day, month, year] = diaHojeLocal.split("/"); 
+          const diaHoje = `${year}-${month}-${day}`;
+
+          setDiaAtual(diaHoje);
+
+          await fetchHorasDia(); 
+        }
+      };
+    
+      carregarDados(); 
+    }, [usuario?.usuario_cod]); 
+
+    useEffect(() => {
+      if (horasDia) {
+        console.log('temos horas dias')
+
+        const carregarDados = async () => {
+          await fetchPontosDia(horasDia.horasCod); 
+        }
+
+        if(horasDia.horasCod){
+          carregarDados();
+        }
+
+      } else {
+        console.log('nao temos horas dias')
         setWorkState("initial");
-        setEntryTime(null); // Reseta o horário de entrada
-        setExitTime(new Date()); // Registra o horário de saída
       }
-    };
-  
-    fetchState(); // Call the async function inside useEffect
-  
-  }, []); // Empty dependency array to run only once on component mount
+    }, [horasDia])
+
+    useEffect(() => {
+      console.log('effect do ponto', pontosDia)
+      if(pontosDia){
+        console.log('indo p atualizador')
+        atualizarBotao(pontosDia)
+      }else if(pontosDia == null){
+        console.log('setando workspace')
+        setWorkState("initial");
+      }
+    }, [pontosDia])
+
+  const { verificarPontos } = TimeClockService();
+
+  const atualizarBotao = (mpontos: HistPontos) => {
+    let estado = verificarPontos(mpontos); // Await the promise
+    if (estado == 'initial') {
+      setWorkState(estado)
+    }
+    else if (estado == 'entrada') {
+      setEntryTime(new Date()); // Registra o horário de entrada
+      setWorkState(estado); // Now set workState with the resolved value
+    }
+    else if (estado == "inicioIntervalo") {
+      setEntryTime(new Date()); // Registra o horário de entrada
+      setWorkState(estado); // Now set workState with the resolved value
+    }
+    else if (estado == "fimIntervalo") {
+      setEntryTime(new Date()); // Registra o horário de entrada
+      setWorkState(estado); // Now set workState with the resolved value
+    }
+    else {
+      setWorkState("initial");
+      setEntryTime(null); // Reseta o horário de entrada
+      setExitTime(new Date()); // Registra o horário de saída
+    }
+  };
 
   // Formata o horário como HH:MM
   const formattedTime = currentTime.toLocaleTimeString("pt-BR", {
@@ -83,53 +170,77 @@ export default function TimeClock() {
     minute: "2-digit",
   });
 
+  const baterPonto = async(ponto: Ponto) => {
+    try{
+      let horas  = await pontoServices.baterPonto(usuario!.usuario_cod, horasDia?.horasCod!, ponto);
+      if(horas){
+        setHorasDia(horas as Horas)
+      }
+    }catch(error){
+      console.error('erro ao bater ponto')
+    }
+  }
+
   // Verifica se está no horário restrito (23h às 4h) ou se é o mesmo dia da última saída
   const currentHour = currentTime.getHours();
   const isTimeRestricted = currentHour >= 23 || currentHour < 4;
   const isSameDayAsExit = exitTime ? currentTime.getDate() === exitTime.getDate() : false;
-  const isRestrictedTime = isTimeRestricted || isSameDayAsExit;
+  // const isRestrictedTime = isTimeRestricted || isSameDayAsExit;
+  const isRestrictedTime = isSameDayAsExit;
 
   // Funções para lidar com os cliques nos botões
   const handleEntrada = async() => {
-    const diaHoje = new Date().toISOString().slice(0, 10);
-    const user = await getUser()
     if (!isRestrictedTime) {
       setWorkState("entrada");
       setEntryTime(new Date()); // Registra o horário de entrada
-      console.log(currentTime.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'}))
-      baterEntrada(diaHoje, currentTime.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'}), user.usuario_cod)
+      let pontoHoras = currentTime.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'})
+      let ponto_entrada: Ponto = {
+        "tipoPonto": TipoPonto.ENTRADA,
+        "horarioPonto": pontoHoras
+      }
+      baterPonto(ponto_entrada)
     }
   };
 
   const handleInicioIntervalo = async() => {
     if (entryTime) {
-      const user = await getUser()
-      const diaHoje = new Date().toISOString().slice(0, 10);
       const hoursWorked = (currentTime.getTime() - entryTime.getTime()) / (1000 * 60 * 60); // Horas trabalhadas
       if (hoursWorked >= 0) { // Ajustado para 0 para testar a qualquer hora
         setWorkState("inicioIntervalo");
       }
-      baterInicioAlmoco(diaHoje, currentTime.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'}), user.usuario_cod)
+      let pontoHoras = currentTime.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'})
+      let ponto_intervalo: Ponto = {
+        "tipoPonto": TipoPonto.ALMOCO,
+        "horarioPonto": pontoHoras
+      }
+      baterPonto(ponto_intervalo)
     }
   };
 
   const handleFimIntervalo = async() => {
     setWorkState("fimIntervalo");
-    const user = await getUser()
-    const diaHoje = new Date().toISOString().slice(0, 10);
-    baterSaidaAlmoco(diaHoje, currentTime.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'}), user.usuario_cod)
-  };
+    let pontoHoras = currentTime.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'})
+    let ponto_intervalo: Ponto = {
+      "tipoPonto": TipoPonto.ALMOCO,
+      "horarioPonto": pontoHoras
+    }
+    baterPonto(ponto_intervalo)
+  }
+  
 
   const handleSaida = async() => {
     if (entryTime) {
-      const hoursWorked = (currentTime.getTime() - entryTime.getTime()) / (1000 * 60 * 60); // Horas trabalhadas
-      const user = await getUser()
+      const hoursWorked = (currentTime.getTime() - entryTime.getTime()) / (1000 * 60 * 60); 
       if (hoursWorked >= 0) { // Ajustado para 0 para testar a qualquer hora
         setWorkState("initial");
         setEntryTime(null); // Reseta o horário de entrada
         setExitTime(new Date()); // Registra o horário de saída
-        const diaHoje = new Date().toISOString().slice(0, 10);
-        baterSaida(diaHoje, currentTime.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'}), user.usuario_cod)
+        let pontoHoras = currentTime.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'})
+        let ponto_intervalo: Ponto = {
+          "tipoPonto": TipoPonto.SAIDA,
+          "horarioPonto": pontoHoras
+        }
+        baterPonto(ponto_intervalo)
       }
     }
   };
