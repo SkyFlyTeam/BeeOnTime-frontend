@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import styles from './styles.module.css';
-import { horasServices } from '../../../services/horaServices';
 import UsuarioInfo from '@/../src/interfaces/usuarioInfo';
 import { Horas } from '@/../src/interfaces/horasInterface';
 import HistPontos from '@/../src/interfaces/histPontosInterface';
+import { horasServices } from '@/services/horasServices';
 
 interface CardCargaHorariaProps {
     usuarioInfo: UsuarioInfo;
@@ -13,6 +13,7 @@ interface CardCargaHorariaProps {
 const CardCargaHoraria = ({ usuarioInfo, histPontos }: CardCargaHorariaProps) => {
     const [pontoDia, setPontoDia] = useState<HistPontos | undefined>(undefined);
     const [horas, setHoras] = useState<Horas | undefined>(undefined);
+    const [saidaPrevista, setSaidaPrevista] = useState<String | undefined>(undefined);
 
     const formatTime = (time: string | Date): string => {
         if (typeof time === 'string') {
@@ -56,7 +57,6 @@ const CardCargaHoraria = ({ usuarioInfo, histPontos }: CardCargaHorariaProps) =>
         jornadaTotal = usuarioInfo.usuario_cargaHoraria;
     }
 
-
     const horasTrabalhadas = horas ? horas.horasTrabalhadas : 0;
     const horasFaltantes = horas ? horas.horasFaltantes : 0;
     const horasExtras = horas ? horas.horasExtras : 0;
@@ -64,7 +64,7 @@ const CardCargaHoraria = ({ usuarioInfo, histPontos }: CardCargaHorariaProps) =>
     const barraProgresso = Math.min((horasTrabalhadas / jornadaTotal) * 100, 100);
 
     const calcularSaidaPrevista = () => {
-        if (!entrada || !horas) return '00:00';  
+        if (!entrada || !horas) return ;  
     
         let horaEntrada = 0;
         let minutoEntrada = 0;
@@ -88,8 +88,6 @@ const CardCargaHoraria = ({ usuarioInfo, histPontos }: CardCargaHorariaProps) =>
         return `${saidaHora}:${saidaMinuto}`;
     };
 
-    const saidaPrevista = calcularSaidaPrevista();
-
     const fetchHoras = async () => {
         try {
             const today = new Date();
@@ -98,7 +96,7 @@ const CardCargaHoraria = ({ usuarioInfo, histPontos }: CardCargaHorariaProps) =>
             const day = today.getDate().toString().padStart(2, '0');
             const data = `${year}-${month}-${day}`;
 
-            const horas = await horasServices.getHora(usuarioInfo.usuario_cod, data);
+            const horas = await horasServices.getHorasByUsuarioAndDate(usuarioInfo.usuario_cod, data) as Horas;
 
             if (!horas) {
                 setHoras({
@@ -133,7 +131,13 @@ const CardCargaHoraria = ({ usuarioInfo, histPontos }: CardCargaHorariaProps) =>
 
     useEffect(() => {
         fetchHoras();
+       
     }, []);
+
+    useEffect(() => {
+        let saidaPrevista = calcularSaidaPrevista();
+        setSaidaPrevista(saidaPrevista)
+    }, [histPontos, horas])
 
     return (
         <div className={styles.card_container}>
@@ -146,7 +150,7 @@ const CardCargaHoraria = ({ usuarioInfo, histPontos }: CardCargaHorariaProps) =>
                 <div className={styles.progress_bar} style={{ width: `${barraProgresso}%` }} />
             </div>
             <div className={styles.saida_prevista}>
-                {entrada &&  <span>Saída prevista: </span>}
+                {(entrada && saidaPrevista) &&  <span>Saída prevista: {saidaPrevista}</span>}
             </div> 
                 <div className={styles.jornada}>
                 {!usuarioInfo.jornadas.jornada_horarioFlexivel &&

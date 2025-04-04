@@ -1,6 +1,6 @@
 import TimeClockService from "./time-clock-service";
 import { useEffect, useState } from "react";
-import { Button } from "../../../components/ui/button";
+import { Button } from "../../../../components/ui/button";
 import { Clock } from "lucide-react";
 import { getUsuario } from "@/services/authService";
 import { set } from "react-hook-form";
@@ -19,6 +19,7 @@ export default function TimeClock() {
   const [ horasDia, setHorasDia ] = useState<Horas | null>(null);
   const [ diaAtual, setDiaAtual ] = useState<string | null>(null);
   const [ pontosDia, setPontosDia ] = useState<HistPontos | null | undefined>(undefined);
+  const [ isWorkDay, setIsWorkDay ] = useState<boolean>(false)
 
   // Estado para o fluxo de trabalho
   const [workState, setWorkState] = useState<"initial" | "entrada" | "inicioIntervalo" | "fimIntervalo" | "saida">("initial");
@@ -81,7 +82,7 @@ export default function TimeClock() {
           setPontosDia(null)
         }
       }catch(error){
-        console.error('erro ao pegar usuario')
+        console.error('erro ao pegar pontos')
       }
     }
 
@@ -112,6 +113,7 @@ export default function TimeClock() {
     useEffect(() => {
       if (horasDia) {
         console.log('temos horas dias')
+        setIsWorkDay(true);
 
         const carregarDados = async () => {
           await fetchPontosDia(horasDia.horasCod); 
@@ -123,6 +125,7 @@ export default function TimeClock() {
 
       } else {
         console.log('nao temos horas dias')
+        setIsWorkDay(false);
         setWorkState("initial");
       }
     }, [horasDia])
@@ -172,10 +175,7 @@ export default function TimeClock() {
 
   const baterPonto = async(ponto: Ponto) => {
     try{
-      let horas  = await pontoServices.baterPonto(usuario!.usuario_cod, horasDia?.horasCod!, ponto);
-      if(horas){
-        setHorasDia(horas as Horas)
-      }
+      await pontoServices.baterPonto(usuario!.usuario_cod, horasDia?.horasCod!, ponto);
     }catch(error){
       console.error('erro ao bater ponto')
     }
@@ -253,16 +253,16 @@ export default function TimeClock() {
         return (
           <>
             <Button
-              className={`w-40 font-semibold ${!isRestrictedTime ? "bg-[#FFB503] hover:bg-[#FFCB50] text-[#42130F]" : "bg-[#F0F0F0] text-gray-600 border-gray-400 cursor-not-allowed"}`}
+              className={`w-44 py-5 text-md font-semibold ${!isRestrictedTime && isWorkDay  ? "bg-[#FFB503] hover:bg-[#FFCB50] text-[#42130F]" : "bg-[#F0F0F0] text-gray-600 border-gray-400 cursor-not-allowed"}`}
               onClick={handleEntrada}
               variant="outline"
-              disabled={isRestrictedTime}
+              disabled={isRestrictedTime || !isWorkDay}
             >
               ENTRADA
             </Button>
             <Button
               variant="outline"
-              className="w-40 bg-[#F0F0F0] text-gray-600 border-gray-400 cursor-not-allowed"
+              className="w-44 py-5 text-md font-semibold bg-[#F0F0F0] text-gray-600 border-gray-400 cursor-not-allowed"
               disabled
             >
               INÍCIO INTERVALO
@@ -275,13 +275,13 @@ export default function TimeClock() {
           <>
             <Button
               variant="outline"
-              className="w-40 bg-[#F0F0F0] text-gray-600 border-gray-400 cursor-not-allowed"
+              className="w-44 py-5 text-md font-semibold bg-[#F0F0F0] text-gray-600 border-gray-400 cursor-not-allowed"
               disabled
             >
               SAÍDA
             </Button>
             <Button
-              className={`w-40 font-semibold ${entryTime && (currentTime.getTime() - entryTime.getTime()) / (1000 * 60 * 60) >= 0 ? "bg-[#FFB503] hover:bg-[#FFCB50] text-[#42130F]" : "bg-gray-200 text-gray-600 cursor-not-allowed"}`}
+              className={`w-44 py-5 text-md font-semibold ${entryTime && (currentTime.getTime() - entryTime.getTime()) / (1000 * 60 * 60) >= 0 ? "bg-[#FFB503] hover:bg-[#FFCB50] text-[#42130F]" : "bg-gray-200 text-gray-600 cursor-not-allowed"}`}
               onClick={handleInicioIntervalo}
               disabled={!(entryTime && (currentTime.getTime() - entryTime.getTime()) / (1000 * 60 * 60) >= 0)}
             >
@@ -295,13 +295,13 @@ export default function TimeClock() {
           <>
             <Button
               variant="outline"
-              className="w-40 bg-[#F0F0F0] text-gray-600 border-gray-400 cursor-not-allowed"
+              className="w-44 py-5 text-md font-semibold bg-[#F0F0F0] text-gray-600 border-gray-400 cursor-not-allowed"
               disabled
             >
               SAÍDA
             </Button>
             <Button
-              className="w-40 font-semibold bg-[#FFB503] hover:bg-[#FFCB50] text-[#42130F]"
+              className="w-44 py-5 text-md font-semibold bg-[#FFB503] hover:bg-[#FFCB50] text-[#42130F]"
               onClick={handleFimIntervalo}
             >
               FIM INTERVALO
@@ -313,7 +313,7 @@ export default function TimeClock() {
         return (
           <>
             <Button
-              className={`w-40 font-semibold ${entryTime && (currentTime.getTime() - entryTime.getTime()) / (1000 * 60 * 60) >= 0 ? "bg-[#FFB503] hover:bg-[#FFCB50] text-[#42130F]" : "bg-gray-200 text-gray-600 cursor-not-allowed"}`}
+              className={`w-44 py-5 text-md font-semibold ${entryTime && (currentTime.getTime() - entryTime.getTime()) / (1000 * 60 * 60) >= 0 ? "bg-[#FFB503] hover:bg-[#FFCB50] text-[#42130F]" : "bg-gray-200 text-gray-600 cursor-not-allowed"}`}
               onClick={handleSaida}
               disabled={!(entryTime && (currentTime.getTime() - entryTime.getTime()) / (1000 * 60 * 60) >= 0)}
             >
@@ -321,7 +321,7 @@ export default function TimeClock() {
             </Button>
             <Button
               variant="outline"
-              className="w-40 bg-[#F0F0F0] text-gray-600 border-gray-400 cursor-not-allowed"
+              className="w-44 py-5 text-md font-semibold bg-[#F0F0F0] text-gray-600 border-gray-400 cursor-not-allowed"
               disabled
             >
               INÍCIO INTERVALO
@@ -334,12 +334,12 @@ export default function TimeClock() {
   };
 
   return (
-    <div className="bg-white shadow-[4px_4px_19px_0px_rgba(0,0,0,0.05)] flex flex-col items-center justify-center gap-4 rounded-xl p-6" style={{ boxShadow: "0px 0px 12px 4px rgba(0, 0, 0, 0.04);" }}>
+    <div className="flex-[2] min-w-fit bg-white shadow-[4px_4px_19px_0px_rgba(0,0,0,0.05)] flex flex-col items-center justify-center gap-4 rounded-xl p-6">
       {/* Título */}
       <h1 className="text-xl font-semibold">Bater Ponto</h1>
 
       {/* Container dos botões */}
-      <div className="flex gap-6 py-5">{renderButtons()}</div>
+      <div className="flex gap-12 py-5">{renderButtons()}</div>
 
       {/* Relógio */}
       <div className="flex items-center gap-2">

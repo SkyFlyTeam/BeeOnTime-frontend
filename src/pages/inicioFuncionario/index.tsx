@@ -1,11 +1,12 @@
-import TimeClock from '@/pages/inicioFuncionario/_components/time-clock';
+import TimeClock from '@/pages/inicioFuncionario/_components/timeClock/time-clock';
 import { Button } from '@/components/ui/button';
 import { useEffect, useState } from 'react';
 import { getUsuario } from '@/services/authService';
-import CardCargaHoraria from '@/components/custom/cardCargaHoraria';
+
 import { pontoServices } from '@/services/pontoServices';
 import UsuarioInfo from '@/interfaces/usuarioInfo';
 import HistPontos from '@/interfaces/hisPonto';
+import CardCargaHoraria from './_components/cardCargaHoraria';
 
 export default function InicioFuncionario() {
     const [nome, setNome] = useState("José");
@@ -38,7 +39,7 @@ export default function InicioFuncionario() {
     }
 
     return (
-        <div className='flex flex-wrap flex-row justify-between'>
+        <div className='flex flex-wrap flex-row gap-8'>
             <TimeClock />
             <CardCargaHoraria usuarioInfo={usuarioInfo!} histPontos={histPontos!} />
         </div>

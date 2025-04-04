@@ -1,4 +1,4 @@
-import TimeClock from '@/pages/inicioFuncionario/_components/time-clock';
+import TimeClock from '@/pages/inicioFuncionario/_components/timeClock/time-clock';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -12,7 +12,6 @@ import { useEffect, useState } from 'react';
 import { getUsuario } from '@/services/authService';
 import { set } from 'react-hook-form';
 import InicioFuncionario from './inicioFuncionario';
-import CardCargaHoraria from '@/components/custom/cardCargaHoraria';
 import UsuarioInfo from '@/interfaces/usuarioInfo';
 
 

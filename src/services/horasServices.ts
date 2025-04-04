@@ -28,8 +28,21 @@ const getHorasByUsuarioAndDate = async (usuario_cod: number, date: string) => {
     }
 }
 
+const generateHours = async () => {
+    try {
+        const { data } = await ApiPonto.get(`/horas/gerarRegistros`)
+    } catch (error) {
+        if (error instanceof Error) {
+        return new ApiException(error.message || "Erro ao consultar a API.");
+        }
+    
+        return new ApiException("Erro desconhecido.");
+    }
+}
+
 export const horasServices = {
     getHorasByUsuario,
-    getHorasByUsuarioAndDate
+    getHorasByUsuarioAndDate,
+    generateHours
 };
   
