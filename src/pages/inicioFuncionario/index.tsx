@@ -1,15 +1,21 @@
-import TimeClock from '@/pages/inicioFuncionario/_components/time-clock';
-import { Button } from '@/components/ui/button';
+// General
 import { useEffect, useState } from 'react';
+
+// Services
 import { getUsuario } from '@/services/authService';
-import CardCargaHoraria from '@/components/custom/cardCargaHoraria';
 import { pontoServices } from '@/services/pontoServices';
-import UsuarioInfo from '@/interfaces/usuarioInfo';
-import HistPontos from '@/interfaces/hisPonto';
+
+// Components
+import TimeClock from '@/pages/inicioFuncionario/_components/time-clock';
+import CardCargaHoraria from '@/components/custom/cardCargaHoraria';
+
+// Interfaces
+import { Usuario } from '@/interfaces/usuario';
+import HistPontos from '@/interfaces/marcacaoPonto';
 
 export default function InicioFuncionario() {
     const [nome, setNome] = useState("José");
-    const [usuarioInfo, setUsuarioInfo] = useState<UsuarioInfo | null>(null);
+    const [usuarioInfo, setUsuarioInfo] = useState<Usuario | null>(null);
     const [histPontos, setHistPontos] = useState<HistPontos[] | null>(null);
     const [loading, setLoading] = useState(true); // Estado para controle de carregamento
 
@@ -20,7 +26,7 @@ export default function InicioFuncionario() {
     const getUser = async () => {
         try {
             const user = await getUsuario();
-            const usuario: UsuarioInfo = user.data;
+            const usuario: Usuario = user.data;
             setNome(usuario.usuario_nome);
             setUsuarioInfo(usuario);
 

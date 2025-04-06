@@ -1,6 +1,11 @@
-import { Button } from '@/components/ui/button'
-import styles from './styles.module.css'
+// General  
 import { useState } from 'react'
+
+// Components
+import { Button } from '@/components/ui/button'
+
+// Styles
+import styles from './styles.module.css'
 
 interface ModalDevolutivaProps {
   isOpen: boolean

@@ -1,12 +1,19 @@
+// General  
 import { useEffect, useState } from 'react';
+
+// Services
+import { horasServices } from '../../../services/horasService';
+
+// Interfaces
+import { Usuario } from '@/../src/interfaces/usuario';
+import  Horas  from '@/../src/interfaces/horas';
+import  HistPontos  from '@/../src/interfaces/histPonto';
+
+// Styles
 import styles from './styles.module.css';
-import { horasServices } from '../../../services/horaServices';
-import UsuarioInfo from '@/../src/interfaces/usuarioInfo';
-import { Horas } from '@/../src/interfaces/horasInterface';
-import HistPontos from '@/../src/interfaces/histPontosInterface';
 
 interface CardCargaHorariaProps {
-    usuarioInfo: UsuarioInfo;
+    usuarioInfo: Usuario;
     histPontos: HistPontos[];
 }
 
@@ -95,7 +102,7 @@ const CardCargaHoraria = ({ usuarioInfo, histPontos }: CardCargaHorariaProps) =>
             const day = today.getDate().toString().padStart(2, '0');
             const data = `${year}-${month}-${day}`;
 
-            const horas = await horasServices.getHora(usuarioInfo.usuario_cod, data);
+            const horas = await horasServices.getHorasByUsuarioAndDate(usuarioInfo.usuario_cod, data);
 
             console.log('HORASSSS', horas)
 
@@ -107,11 +114,12 @@ const CardCargaHoraria = ({ usuarioInfo, histPontos }: CardCargaHorariaProps) =>
                     horasExtras: 0,
                     horasFaltantes: 0,
                     horasData: data,
+                    usuarioCod: usuarioInfo.usuario_cod,
                 });
                 return;
             }
 
-            setHoras(horas);
+            setHoras(horas as Horas);
             fetchDia(data);
         } catch (error) {
             setHoras({
@@ -121,6 +129,7 @@ const CardCargaHoraria = ({ usuarioInfo, histPontos }: CardCargaHorariaProps) =>
                 horasExtras: 0,
                 horasFaltantes: 0,
                 horasData: new Date(),
+                usuarioCod: usuarioInfo.usuario_cod
             });
         }
     };

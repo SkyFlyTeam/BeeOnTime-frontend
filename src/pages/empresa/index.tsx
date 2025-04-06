@@ -1,41 +1,26 @@
+// General
 import { useEffect, useState } from 'react';
-import styles from '../styles/GerenciarEmpresa.module.css';
-import { RiPencilFill } from 'react-icons/ri';
-import HoverInput from '../components/custom/HoverInput/HoverInput';
-import { verificarEmpresa, atualizarEmpresa } from '../services/empresaService';
-import { verificarSetores, atualizarSetor, cadastrarSetor } from '../services/setorService';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css'; // Importe o CSS do react-toastify
 
 // Interfaces
-interface EmpresaAPI {
-  empCod: number;
-  empNome: string;
-  empCnpj: string;
-  empRazaoSocial: string;
-  empCep: string;
-  empCidade: string;
-  empEstado: string;
-  empEndereco: string;
-}
+import { Empresa, EmpresaAPI } from '@/interfaces/empresa';
+import { Setor } from '@/interfaces/setor';
+import { ApiException } from '@/config/apiExceptions';
 
-interface Empresa {
-  emp_nome: string;
-  emp_razaoSocial: string;
-  emp_CNPJ: string;
-  emp_CEP: string;
-}
+// Services
+import { empresaServices } from '@/services/empresaService';
+import { setorServices } from '@/services/setorService';
 
-interface SetorAPI {
-  setorCod: number;
-  setorNome: string;
-}
+// Components
+import HoverInput from '../../components/custom/HoverInput/HoverInput';
+import { ToastContainer, toast } from 'react-toastify';
 
-interface Setor {
-  setor_cod: number;
-  setor_nome: string;
-  isNew?: boolean;
-}
+// Styles
+import styles from './GerenciarEmpresa.module.css';
+import 'react-toastify/dist/ReactToastify.css'; 
+
+// Icons
+import { RiPencilFill } from 'react-icons/ri';
+
 
 // Constantes
 const initialEmpresa: Empresa = {
@@ -74,13 +59,17 @@ const maskCNPJ = (value: string): string => {
 
 const normalizeString = (str: string) => str.trim().toLowerCase();
 
+interface SetorWithNew extends Setor {
+  isNew?: boolean;
+}
+
 function GerenciarEmpresa() {
   // Estados
   const [empresa, setEmpresa] = useState<Empresa>(initialEmpresa);
   const [backupEmpresa, setBackupEmpresa] = useState<Empresa>(initialEmpresa);
   const [originalEmpresaAPI, setOriginalEmpresaAPI] = useState<EmpresaAPI | null>(null);
-  const [setores, setSetores] = useState<Setor[]>([]);
-  const [backupSetores, setBackupSetores] = useState<Setor[]>([]);
+  const [setores, setSetores] = useState<SetorWithNew[]>([]);
+  const [backupSetores, setBackupSetores] = useState<SetorWithNew[]>([]);
   const [setorErrors, setSetorErrors] = useState<Record<number, string>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [cepInfo, setCepInfo] = useState<string>('');
@@ -125,7 +114,11 @@ function GerenciarEmpresa() {
   // Funções auxiliares
   const loadEmpresaData = async () => {
     try {
-      const [empresaData] = await verificarEmpresa();
+      const result = await empresaServices.verificarEmpresa();
+      if (result instanceof ApiException) {
+        throw new Error(result.message);
+      }
+      const [empresaData] = result;
       const mappedEmpresa = {
         emp_nome: empresaData.empNome,
         emp_razaoSocial: empresaData.empRazaoSocial,
@@ -143,10 +136,13 @@ function GerenciarEmpresa() {
 
   const loadSetorData = async () => {
     try {
-      const data = await verificarSetores();
-      const mappedSetores = data.map((setor) => ({
-        setor_cod: setor.setorCod,
-        setor_nome: setor.setorNome,
+      const result = await setorServices.getAllSetores();
+      if (result instanceof ApiException) {
+        throw new Error(result.message);
+      }
+      const mappedSetores = result.map((setor: Setor) => ({
+        setorCod: setor.setorCod,
+        setorNome: setor.setorNome,
       }));
       setSetores(mappedSetores);
       setBackupSetores(mappedSetores);
@@ -159,8 +155,8 @@ function GerenciarEmpresa() {
 
   const isDuplicateSetor = (nome: string, currentCod: number) => {
     return setores.some(
-      (setor) => normalizeString(setor.setor_nome) === normalizeString(nome) && 
-      setor.setor_cod !== currentCod
+      (setor) => normalizeString(setor.setorNome) === normalizeString(nome) && 
+      setor.setorCod !== currentCod
     );
   };
 
@@ -179,7 +175,7 @@ function GerenciarEmpresa() {
   const handleSetorChange = (setorCod: number, newName: string) => {
     setSetores((prev) =>
       prev.map((setor) =>
-        setor.setor_cod === setorCod ? { ...setor, setor_nome: newName } : setor
+        setor.setorCod === setorCod ? { ...setor, setorNome: newName } : setor
       )
     );
 
@@ -198,9 +194,9 @@ function GerenciarEmpresa() {
   };
 
   const handleAddSetor = () => {
-    const newSetor: Setor = {
-      setor_cod: Date.now(),
-      setor_nome: '',
+    const newSetor: SetorWithNew = {
+      setorCod: Date.now(),
+      setorNome: '',
       isNew: true,
     };
     setSetores((prev) => [...prev, newSetor]);
@@ -217,8 +213,8 @@ function GerenciarEmpresa() {
   const hasSetoresChanges = () => {
     if (setores.length !== backupSetores.length) return true;
     return setores.some((setor, index) => 
-      setor.isNew ? setor.setor_nome.trim() !== '' : 
-      normalizeString(setor.setor_nome) !== normalizeString(backupSetores[index].setor_nome)
+      setor.isNew ? setor.setorNome.trim() !== '' : 
+      normalizeString(setor.setorNome) !== normalizeString(backupSetores[index].setorNome)
     );
   };
 
@@ -232,8 +228,11 @@ function GerenciarEmpresa() {
     }
 
     try {
-      const empresasExistentes = await verificarEmpresa();
-      if (empresasExistentes.some(emp => 
+      const result = await empresaServices.verificarEmpresa();
+      if (result instanceof ApiException) {
+        throw new Error(result.message);
+      }
+      if (result.some((emp: EmpresaAPI) => 
         emp.empCnpj === empresa.emp_CNPJ && emp.empCod !== originalEmpresaAPI.empCod
       )) {
         setCnpjError('Este CNPJ já está cadastrado para outra empresa');
@@ -248,7 +247,7 @@ function GerenciarEmpresa() {
         empCep: empresa.emp_CEP,
       };
 
-      await atualizarEmpresa(updatedEmpresa);
+      await empresaServices.atualizarEmpresa(updatedEmpresa);
       setBackupEmpresa({ ...empresa });
       setCnpjError('');
       toast.success('Informações da empresa atualizadas com sucesso!', {
@@ -269,17 +268,20 @@ function GerenciarEmpresa() {
     try {
       if (Object.keys(setorErrors).length > 0) return;
 
-      const newSetores = setores.filter(s => s.isNew && s.setor_nome.trim() !== '');
+      const newSetores = setores.filter(s => s.isNew && s.setorNome.trim() !== '');
       const changedSetores = setores.filter((s, i) => 
-        !s.isNew && normalizeString(s.setor_nome) !== normalizeString(backupSetores[i].setor_nome)
+        !s.isNew && normalizeString(s.setorNome) !== normalizeString(backupSetores[i].setorNome)
       );
 
       if (newSetores.length > 0) {
-        await cadastrarSetor(newSetores.map(s => s.setor_nome));
-        const updatedSetores = await verificarSetores();
-        const mappedSetores = updatedSetores.map(s => ({
-          setor_cod: s.setorCod,
-          setor_nome: s.setorNome,
+        await setorServices.cadastrarSetor(newSetores.map(s => s.setorNome));
+        const result = await setorServices.getAllSetores();
+        if (result instanceof ApiException) {
+          throw new Error(result.message);
+        }
+        const mappedSetores = result.map((s: Setor) => ({
+          setorCod: s.setorCod,
+          setorNome: s.setorNome,
         }));
         setSetores(mappedSetores);
         setBackupSetores(mappedSetores);
@@ -291,7 +293,7 @@ function GerenciarEmpresa() {
 
       if (changedSetores.length > 0) {
         await Promise.all(
-          changedSetores.map(s => atualizarSetor({ setor_cod: s.setor_cod, setor_nome: s.setor_nome }))
+          changedSetores.map(s => setorServices.atualizarSetor({ setorCod: s.setorCod, setorNome: s.setorNome }))
         );
         setBackupSetores([...setores.filter(s => !s.isNew)]);
         toast.success('Setor(es) atualizado(s) com sucesso!', {
@@ -355,14 +357,14 @@ function GerenciarEmpresa() {
       <div className={styles.setoresContainer}>
         {setores.length > 0 ? (
           setores.map((setor) => (
-            <div key={setor.setor_cod} className={styles.setorInputWrapper}>
+            <div key={setor.setorCod} className={styles.setorInputWrapper}>
               <HoverInput
-                value={setor.setor_nome}
+                value={setor.setorNome}
                 Icon={RiPencilFill}
-                onChange={(newValue) => handleSetorChange(setor.setor_cod, newValue)}
+                onChange={(newValue) => handleSetorChange(setor.setorCod, newValue)}
               />
-              {setorErrors[setor.setor_cod] && (
-                <span className={styles.errorText}>{setorErrors[setor.setor_cod]}</span>
+              {setorErrors[setor.setorCod] && (
+                <span className={styles.errorText}>{setorErrors[setor.setorCod]}</span>
               )}
             </div>
           ))

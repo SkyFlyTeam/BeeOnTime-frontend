@@ -1,12 +1,19 @@
 // src/components/CadastroForm.tsx
 "use client";
 
+// General
 import { useEffect, useState } from "react";
 import { z } from "zod";
+
+// Services
+import { setorServices } from "@/services/setorService";
+
+// Components
 import CadastroJornada from "./CadastroJornada";
 import Modal from "@/components/ui/modal";
-import { setorSevices } from "@/services/setorService";
-import { Setor } from "@/interfaces/usuarioInfo";
+
+// Interfaces
+import { Setor } from "@/interfaces/setor";
 import { generatePassword } from "@/utils/emails/generatePassword";
 
 const formSchema = z.object({
@@ -63,7 +70,7 @@ export default function CadastroUsuario({ onClose, onSave }: { onClose: () => vo
 
   const fetchSetores = async () => {
     try {
-      const data = await setorSevices.getAllSetores() as Setor[];
+      const data = await setorServices.getAllSetores() as Setor[];
       setSetores(data);
     } catch (error) {
       console.error("Erro ao carregar setores:", error);

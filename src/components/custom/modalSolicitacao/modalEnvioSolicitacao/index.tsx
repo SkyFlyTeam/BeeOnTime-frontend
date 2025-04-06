@@ -1,10 +1,21 @@
-import styles from './styles.module.css'
-import { Paperclip } from 'lucide-react'
+// General
 import { useState, useRef, useEffect } from 'react'
+
+// Services
 import { solicitacaoServices } from '../../../../services/solicitacaoServices'
 import { pontoServices } from '../../../../services/pontoServices'
+
+// Interfaces
 import PontoProv from '../../../../interfaces/pontoProv'
+
+// Components
 import { Button } from '@/components/ui/button'
+
+// Styles
+import styles from './styles.module.css'
+
+// Icons
+import { Paperclip } from 'lucide-react'
 
 interface Ponto {
   id: string;
@@ -62,10 +73,10 @@ const ModalCriarSolicitacao = ({ isOpen, onClose, ponto }: ModalCriarSolicitacao
         horasCod: ponto.horasCod,
         data: ponto.data,
         pontos: [
-          { horarioPonto: entrada, tipoPonto: 0 },
-          { horarioPonto: inicioAlmoco, tipoPonto: 2 },
-          { horarioPonto: fimAlmoco, tipoPonto: 2 },
-          { horarioPonto: saida, tipoPonto: 1 }
+          { horarioPonto: entrada as string, tipoPonto: 0 },
+          { horarioPonto: inicioAlmoco as string, tipoPonto: 2 },
+          { horarioPonto: fimAlmoco as string, tipoPonto: 2 },
+          { horarioPonto: saida as string, tipoPonto: 1 }
         ]
       }
       const resultPonto = await pontoServices.createSolicitacaoPonto(solicitacaoPonto)

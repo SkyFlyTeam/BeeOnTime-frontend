@@ -3,10 +3,15 @@ export interface Ponto {
     tipoPonto: number;
 }
 
-export default interface HistPontos {
+export default interface HistPonto {
     id: string;
     usuarioCod: number;
     horasCod: number;
     data: string | Date;
     pontos: Ponto[];
+    horasExtras: number,
+    horasTrabalhadas: number,
+    horasNoturnas:number,
+    horasFaltantes: number,
+    horasData: string | Date,
 }

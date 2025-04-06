@@ -1,6 +1,6 @@
 
 import { ApiException } from "../config/apiExceptions";
-import { ApiPonto } from "../config/apiPontoConfig";
+import { ApiPonto } from "../config/apiPonto";
 import PontoProv, { AprovarPonto } from "../interfaces/pontoProv";
 
 const createSolicitacaoPonto = async (ponto: PontoProv) => {

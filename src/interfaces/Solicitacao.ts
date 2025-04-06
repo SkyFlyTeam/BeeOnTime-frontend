@@ -1,4 +1,4 @@
-export default interface SolicitacaoInterface {
+export default interface Solicitacao {
   solicitacaoCod: number;
   solicitacaoAnexo: number[] | null
   solicitacaoAnexoNome?: string
@@ -15,7 +15,7 @@ export default interface SolicitacaoInterface {
   usuarioCargo: string;
 }
 
-export interface CriarSolicitacaoInterface {
+export interface CriarSolicitacao {
   solicitacaoMensagem: string,
   solicitacaoAnexo: File | null,
   tipoSolicitacaoCod: {

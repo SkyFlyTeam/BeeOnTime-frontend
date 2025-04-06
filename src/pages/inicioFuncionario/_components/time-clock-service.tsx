@@ -1,23 +1,7 @@
-import { Api } from "@/config/apiHorasConfig";
+import { ApiPonto } from "@/config/apiPonto";
+import Horas from "@/interfaces/horas";
 
-interface horasDTO {
-    horasExtras: number;
-    horasTrabalhadas: number;
-    horasNoturnas: number;
-    horasFaltantes: number;
-    horasData: string;
-    usuarioCod: number;
-}
 
-interface horasDTOP {
-    horasExtras: number;
-    horasTrabalhadas: number;
-    horasNoturnas: number;
-    horasFaltantes: number;
-    horasData: string;
-    usuarioCod: number;
-    horasCod: number;
-}
 
 function timeStringToHours(time: string): number {
     // Split the time string into hours, minutes, and seconds
@@ -30,12 +14,12 @@ function timeStringToHours(time: string): number {
 
 export default function TimeClockService() {
     // Essa função verífica se há uma entrada no banco relacional hoje, caso não haja ele cria
-    const createHoras = async (data: horasDTO, diaHoje: string, usuarioCod: number) => {
-        let relationalData: horasDTO | null;
+    const createHoras = async (data: Horas, diaHoje: string, usuarioCod: number) => {
+        let relationalData: Horas | null;
 
         try {
-            const response = await Api.post(`/horas/usuario/${usuarioCod}/dia?data=${diaHoje}`);
-            relationalData = response.data as horasDTO;  // Type Assertion
+            const response = await ApiPonto.post(`/horas/usuario/${usuarioCod}/dia?data=${diaHoje}`);
+            relationalData = response.data as Horas;
         } catch (error) {
             relationalData = null;
             console.log(error);
@@ -43,7 +27,7 @@ export default function TimeClockService() {
 
         if (!relationalData) {
             try {
-                const response = await Api.post('/horas/cadastrar', data);
+                const response = await ApiPonto.post('/horas/cadastrar', data);
                 console.log('dataRelacional criada com sucesso!');
                 return response;
             } catch (error) {
@@ -56,11 +40,11 @@ export default function TimeClockService() {
     }
 
     const baterEntrada = async (diaHoje: string, horario: string, usuarioCod: number) => {
-        let relationalData: horasDTOP;
+        let relationalData: Horas;
 
         try {
-            const response = await Api.post(`/horas/usuario/${usuarioCod}/dia?data=${diaHoje}`);
-            relationalData = response.data as horasDTOP;  // Type Assertion
+            const response = await ApiPonto.post(`/horas/usuario/${usuarioCod}/dia?data=${diaHoje}`);
+            relationalData = response.data as Horas;
         } catch (error) {
             console.log(error);
             throw error;
@@ -79,7 +63,7 @@ export default function TimeClockService() {
         console.log(data);
 
         try {
-            const response = Api.post('/mpontos/baterPonto', data);
+            const response = ApiPonto.post('/mpontos/baterPonto', data);
             console.log('Ponto de entrada criado com sucesso!');
             return response;
         } catch (error) {
@@ -89,11 +73,11 @@ export default function TimeClockService() {
     }
 
     const baterInicioAlmoco = async (diaHoje: string, horario: string, usuarioCod: number) => {
-        let relationalData: horasDTOP;
+        let relationalData: Horas;
 
         try {
-            const response = await Api.post(`/horas/usuario/${usuarioCod}/dia?data=${diaHoje}`);
-            relationalData = response.data as horasDTOP;  // Type Assertion
+            const response = await ApiPonto.post(`/horas/usuario/${usuarioCod}/dia?data=${diaHoje}`);
+            relationalData = response.data as Horas;
         } catch (error) {
             console.log(error);
             throw error;
@@ -112,7 +96,7 @@ export default function TimeClockService() {
         console.log(data);
 
         try {
-            const response = Api.post('/mpontos/baterPonto', data);
+            const response = ApiPonto.post('/mpontos/baterPonto', data);
             console.log('Ponto de almoço (entrada) criado com sucesso!');
             return response;
         } catch (error) {
@@ -122,11 +106,11 @@ export default function TimeClockService() {
     }
 
     const baterSaidaAlmoco = async (diaHoje: string, horario: string, usuarioCod: number) => {
-        let relationalData: horasDTOP;
+        let relationalData: Horas;
 
         try {
-            const response = await Api.post(`/horas/usuario/${usuarioCod}/dia?data=${diaHoje}`);
-            relationalData = response.data as horasDTOP;  // Type Assertion
+            const response = await ApiPonto.post(`/horas/usuario/${usuarioCod}/dia?data=${diaHoje}`);
+            relationalData = response.data as Horas;
         } catch (error) {
             console.log(error);
             throw error;
@@ -145,7 +129,7 @@ export default function TimeClockService() {
         console.log(data);
 
         try {
-            const response = Api.post('/mpontos/baterPonto', data);
+            const response = ApiPonto.post('/mpontos/baterPonto', data);
             console.log('Ponto de almoço (Saída) criado com sucesso!');
             return response;
         } catch (error) {
@@ -155,11 +139,11 @@ export default function TimeClockService() {
     }
 
     const baterSaida = async (diaHoje: string, horario: string, usuarioCod: number) => {
-        let relationalData: horasDTOP;
+        let relationalData: Horas;
 
         try {
-            const response = await Api.post(`/horas/usuario/${usuarioCod}/dia?data=${diaHoje}`);
-            relationalData = response.data as horasDTOP;  // Type Assertion
+            const response = await ApiPonto.post(`/horas/usuario/${usuarioCod}/dia?data=${diaHoje}`);
+            relationalData = response.data as Horas;
         } catch (error) {
             console.log(error);
             throw error;
@@ -178,7 +162,7 @@ export default function TimeClockService() {
         console.log(data);
 
         try {
-            const response = Api.post('/mpontos/baterPonto', data);
+            const response = ApiPonto.post('/mpontos/baterPonto', data);
             console.log('Ponto de saida criado com sucesso!', response);
             return response;
         } catch (error) {
@@ -188,11 +172,11 @@ export default function TimeClockService() {
     }
 
     const verificarHoras = async (diaHoje: string, usuarioCod: number) => {
-        let relationalData: horasDTOP;
+        let relationalData: Horas;
     
         try {
-            const response = await Api.post(`/horas/usuario/${usuarioCod}/dia?data=${diaHoje}`);
-            relationalData = response.data as horasDTOP;  // Type Assertion
+            const response = await ApiPonto.post(`/horas/usuario/${usuarioCod}/dia?data=${diaHoje}`);
+            relationalData = response.data as Horas;
         } catch (error) {
             console.log(error);
             throw error;
@@ -213,7 +197,7 @@ export default function TimeClockService() {
         let data: pontos;
     
         try {
-            const response = await Api.get(`/mpontos/porHorasCod/${relationalData.horasCod}`);
+            const response = await ApiPonto.get(`/mpontos/porHorasCod/${relationalData.horasCod}`);
             data = response.data as pontos;  // Type Assertion to ensure the correct type
         } catch (error) {
             console.log(error);

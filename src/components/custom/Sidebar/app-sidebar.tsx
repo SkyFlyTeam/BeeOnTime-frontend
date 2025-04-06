@@ -1,8 +1,8 @@
 import * as React from "react";
 import { usePathname } from "next/navigation";
-import { LayoutGrid, Users, FileText, Settings, Database, LifeBuoy, LucideIcon, AlertCircle, Bell, UserRound, Building, Calendar, Clock, Home, LogOut, MessageSquare, AlarmClockCheck } from "lucide-react";
+import { LucideIcon, Building, Users, Home, LogOut, MessageSquare, AlarmClockCheck } from "lucide-react";
 
-import { RoleSwitcher} from "@/components/custom/role-switcher";
+// Components
 import {
   Sidebar,
   SidebarContent,
@@ -50,7 +50,7 @@ const rolesData: Record<RoleKey, { navMain: NavItem[]; navSecondary: SubNavItem[
         title: "GESTÃO DA EMPRESA",
         items: [
           { title: "Empresa", url: "/empresa", icon: Building },
-          { title: "Colaboradores", url: "/Colaboradores", icon: Users },
+          { title: "Colaboradores", url: "/colaboradores", icon: Users },
         ],
       },
     ],
@@ -77,7 +77,7 @@ const rolesData: Record<RoleKey, { navMain: NavItem[]; navSecondary: SubNavItem[
       {
         title: "GESTÃO DA EMPRESA",
         items: [
-          { title: "Colaboradores", url: "/Colaboradores", icon: Building },
+          { title: "Colaboradores", url: "/colaboradores", icon: Building },
         ],
       },
     ],
