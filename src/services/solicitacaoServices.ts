@@ -18,6 +18,34 @@ const getAllSolicitacao = async (): Promise<SolicitacaoInterface[] | ApiExceptio
   }
 };
 
+const getAllSolicitacaoByUsuario = async (id: number) => {
+  try {
+    const { data } = await ApiSolicitacao.get(`/solicitacao/usuario/${id}`);
+    return data;
+
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return new ApiException(error.message || "Erro ao consultar a API.");
+    }
+
+    return new ApiException("Erro desconhecido.");
+  }
+}
+
+const getAllSolicitacaoBySetor = async (id: number) => {
+  try {
+    const { data } = await ApiSolicitacao.get(`/solicitacao/setor/${id}`);
+    return data;
+
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return new ApiException(error.message || "Erro ao consultar a API.");
+    }
+
+    return new ApiException("Erro desconhecido.");
+  }
+}
+
 const getSolicitacaoById = async (id: number): Promise<SolicitacaoInterface | ApiException> => {
   try {
     const { data } = await ApiSolicitacao.get(`/solicitacao/${id}`);
@@ -102,5 +130,7 @@ export const solicitacaoServices = {
   getSolicitacaoById,
   updateSolicitacao,
   deleteSolicitacao,
-  createSolicitacao
+  createSolicitacao,
+  getAllSolicitacaoByUsuario,
+  getAllSolicitacaoBySetor
 };
