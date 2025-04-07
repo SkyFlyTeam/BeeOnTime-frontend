@@ -9,6 +9,8 @@ import { pontoServices } from '../../../../services/pontoServices'
 import { Ponto } from '../../../../interfaces/hisPonto'
 import PontoProv, { AprovarPonto } from '../../../../interfaces/pontoProv'
 import { Button } from '@/components/ui/button'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css'; 
 
 
 interface AjusteProps {
@@ -101,6 +103,18 @@ const ModalAjustePonto: React.FC<AjusteProps> = ({
     // Chama a função de atualização após a solicitação ser aprovada ou recusada
     onSolicitacaoUpdate(updatedSolicitacao)
     onClose()
+
+    if (status === 'APROVADA') {
+      toast.success('Solicitação aprovada com sucesso!', {
+        position: "top-right",
+        autoClose: 3000,
+      })
+    } else {
+      toast.success('Solicitação reprovada com sucesso!', {
+        position: "top-right",
+        autoClose: 3000,
+      })
+    }
   }
 
   const handleDownload = () => {
@@ -184,42 +198,43 @@ const ModalAjustePonto: React.FC<AjusteProps> = ({
           </span>
         </div>
 
-        <div className={clsx(styles.FormGroup, styles.justificativa)}>
-          <div>
-            <label>Justificativa</label>
-            <div className={styles.justificativa_content}>
-              <input
-                type="text"
-                value={solicitacao?.solicitacaoMensagem}
-                readOnly={
-                  usuarioLogadoCod !== solicitacao.usuarioCod ||
-                  solicitacao.solicitacaoStatus !== 'PENDENTE'
+        <div className={clsx(styles.FormGroup, {
+          [styles.justificativa]: !solicitacao?.solicitacaoAnexo,
+          [styles.justificativa_noFile]: solicitacao?.solicitacaoAnexo
+        })}>
+          <label>Justificativa</label>
+          <div className={styles.justificativa_content}>
+            <input
+              type="text"
+              value={solicitacao?.solicitacaoMensagem}
+              readOnly={
+                usuarioLogadoCod !== solicitacao.usuarioCod ||
+                solicitacao.solicitacaoStatus !== 'PENDENTE'
+              }
+              onChange={(e) => {
+                if (usuarioLogadoCod === solicitacao.usuarioCod) {
+                  setSolicitacao((prev) => ({
+                    ...prev,
+                    solicitacaoMensagem: e.target.value,
+                  }))
                 }
-                onChange={(e) => {
-                  if (usuarioLogadoCod === solicitacao.usuarioCod) {
-                    setSolicitacao((prev) => ({
-                      ...prev,
-                      solicitacaoMensagem: e.target.value,
-                    }))
-                  }
+              }}
+            />
+            {solicitacao?.solicitacaoAnexo && (
+              <button
+                type="button"
+                onClick={handleDownload}
+                title="Baixar anexo"
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  padding: 0,
+                  cursor: 'pointer',
                 }}
-              />
-              {solicitacao?.solicitacaoAnexo && (
-                <button
-                  type="button"
-                  onClick={handleDownload}
-                  title="Baixar anexo"
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    padding: 0,
-                    cursor: 'pointer',
-                  }}
-                >
-                  <FileText strokeWidth={1} />
-                </button>
-              )}
-            </div>
+              >
+                <FileText strokeWidth={1} />
+              </button>
+            )}
           </div>
         </div>
 
