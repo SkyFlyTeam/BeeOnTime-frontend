@@ -82,7 +82,7 @@ export default function Colaboradores() {
 
   return (
     <div>
-      <div className="container mx-auto px-4 flex justify-between">
+      <div className="container mx-auto px-4 flex justify-between mb-4">
         <h1 className="text-3xl font-bold text-left">Colaboradores</h1>
         <button 
           onClick={() => setIsOpen(true)}
@@ -183,7 +183,13 @@ export default function Colaboradores() {
           </div>
         </div>
       </div>
+
+      {isOpen && (
+        <CadastroUsuario onClose={() => setIsOpen(false)} onSave={showToast} />
+      )}
+
       <ToastContainer position="top-center" autoClose={3000} />
     </div>
+
   );
 }
