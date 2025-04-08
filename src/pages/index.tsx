@@ -10,7 +10,8 @@ import { FaRegEyeSlash } from "react-icons/fa";
 
 import Image from 'next/image'
 
-
+import EmpresaAPI from '@/interfaces/empresa';
+import Empresa from '@/interfaces/empresa';
  
 import { z } from "zod"
  
@@ -44,6 +45,7 @@ import { AccessPass } from '@/lib/auth';
 import { getRoleID, getUsuario, setLogIn } from '@/services/authService';
 
 import { toast, ToastContainer} from "react-toastify"
+import CadastroEmpresaForm from '@/components/custom/CadastroEmpresa/CadastroEmpresa';
 
 export default function Home() {
 
@@ -51,6 +53,7 @@ export default function Home() {
 
       // State que registra o togle da senha
     const [isShowingPassword, setIsShowingPassword] = useState(true);
+    const [isCadastro, setIsCadastro] = useState(false)
 
     const changeIsShowingPassword = () => {
         setIsShowingPassword(!isShowingPassword);
@@ -169,18 +172,32 @@ export default function Home() {
                 <p className='text-xs'>O ritmo perfeito da sua equipe, como em uma colmeia!</p>
             </div>
         </div>
-
-        <div className={styles.headder2}>
-            <div>
-                <p className='text-sm'>É novo aqui? Cadastre sua empresa!</p>
+        {!isCadastro ? (
+            <div className={styles.headder2}>
+                <div>
+                    <p className='text-sm'>É novo aqui? Cadastre sua empresa!</p>
+                </div>
+                <div className='pr-12 pl-5 pt-5'>
+                    <Button className="mt-6 mb-12" style={{boxShadow: '0px 10px 25px 0px rgba(123, 104, 238, 50%)'}}
+                    onClick={() => setIsCadastro(!isCadastro)}>
+                        Cadastro
+                    </Button>
+                </div>
             </div>
-            <div className='pr-12 pl-5 pt-5'>
-                <Button className="mt-6 mb-12" style={{boxShadow: '0px 10px 25px 0px rgba(123, 104, 238, 50%)'}}
-                onClick={() => router.push("/cadastro")}>
-                    Cadastro
-                </Button>
+        )
+        :
+        (
+            <div className={styles.headder2}>
+                <div><p className='text-sm'>Já tem conta? Faça seu login!</p></div>
+                <div className='pr-12 pl-5 pt-5'>
+                    <Button className="mt-6 mb-12" style={{ boxShadow: '0px 10px 25px 0px rgba(123, 104, 238, 50%)' }} 
+                    onClick={() => setIsCadastro(!isCadastro)}>
+                        Login
+                    </Button>
+                </div>
             </div>
-        </div>
+        )}
+        
 
         </div>
         ): (
@@ -203,105 +220,111 @@ export default function Home() {
         </div>
         )}
 
-
-        <div className={styles.container}>
-            <Card className={styles.card}>
-                <CardHeader className={styles.cardTitle}>
-                    <CardTitle className='text-3xl'>Bem vindo de volta!</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
-                        {/* <form onSubmit={onSubmitTest} className="space-y-3"> */}
-                            <FormField
-                                control={form.control}
-                                name="email"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>E-mail</FormLabel>
-                                        <FormControl>
-                                        <div className="relative">
-                                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                                                <i><FaRegEnvelope /></i>
-                                            </span>
-                                            <Input className='w-full pl-12' placeholder='SkyFly'  {...field} />
-                                        </div>
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="senha"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Senha</FormLabel>
-                                        <FormControl>
-                                        <div className="relative">
-                                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                                                <i><HiOutlineLockClosed /></i>
-                                            </span>
-                                            <button className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
-                                                type='button'
-                                                onClick={() => changeIsShowingPassword()}>
-                                                {!isShowingPassword ? (<FaRegEye />) : (<FaRegEyeSlash />)}
-                                            </button>
-                                            {isShowingPassword ? (
-                                                <Input className='w-full pl-12 pr-12' placeholder='Educação e Tecnologia' type={'password'} {...field} />
-                                            ) : 
-                                            (<Input className='w-full pl-12 pr-12' placeholder='Educação e Tecnologia' {...field} />)}
-                                            
-                                        </div>
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            {/* <FormField
-                                control={form.control}
-                                name="rememberMe"
-                                render={({ field }: { field: import("react-hook-form").ControllerRenderProps<z.infer<typeof formSchema>, "rememberMe"> }) => (
-                                    <FormItem>
-                                        <FormControl>
-                                            <label className="inline-flex items-center">
-                                                <input type="checkbox" checked={field.value} onChange={field.onChange} onBlur={field.onBlur} name={field.name} ref={field.ref} className="form-checkbox h-4 w-4 text-blue-600" />
-                                                <span className="ml-2 text-sm text-gray-700">Remember me</span>
-                                            </label>
-                                        </FormControl>
-                                    </FormItem>
-                                )}
-                            /> */}
-                        <div className='pb-2'>
-                        <Button 
-                            isSubmitButton={true}  // Passando isSubmitButton como true para que seja do tipo submit
-                            className="w-full mt-6 mb-2"
-                        > 
-                            Entrar
-                          </Button>
-                        </div>
-                        </form>
-                        
-                        {/* <div className='w-full text-center mt-2'>
-                        <a href="" className='text-sm' style={{textAlign: 'center'}}>
-                            Esqueceu sua senha? Redefina aqui!
-                        </a>
-                        </div> */}
-
-
-
-                        {isMobile ? (
-                            <div className='w-full text-center mb-2'>
-                            <a className='text-sm' style={{textAlign: 'center'}} onClick={() => router.push("/cadastro")}>
-                                É novo aqui? Cadastre sua empresa!
-                            </a>
+        {!isCadastro ? (
+            <div className={styles.container}>
+                <Card className={styles.card}>
+                    <CardHeader className={styles.cardTitle}>
+                        <CardTitle className='text-3xl'>Bem vindo de volta!</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <Form {...form}>
+                            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
+                            {/* <form onSubmit={onSubmitTest} className="space-y-3"> */}
+                                <FormField
+                                    control={form.control}
+                                    name="email"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>E-mail</FormLabel>
+                                            <FormControl>
+                                            <div className="relative">
+                                                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                                                    <i><FaRegEnvelope /></i>
+                                                </span>
+                                                <Input className='w-full pl-12' placeholder='SkyFly'  {...field} />
+                                            </div>
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="senha"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Senha</FormLabel>
+                                            <FormControl>
+                                            <div className="relative">
+                                                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                                                    <i><HiOutlineLockClosed /></i>
+                                                </span>
+                                                <button className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                                                    type='button'
+                                                    onClick={() => changeIsShowingPassword()}>
+                                                    {!isShowingPassword ? (<FaRegEye />) : (<FaRegEyeSlash />)}
+                                                </button>
+                                                {isShowingPassword ? (
+                                                    <Input className='w-full pl-12 pr-12' placeholder='Educação e Tecnologia' type={'password'} {...field} />
+                                                ) : 
+                                                (<Input className='w-full pl-12 pr-12' placeholder='Educação e Tecnologia' {...field} />)}
+                                                
+                                            </div>
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                {/* <FormField
+                                    control={form.control}
+                                    name="rememberMe"
+                                    render={({ field }: { field: import("react-hook-form").ControllerRenderProps<z.infer<typeof formSchema>, "rememberMe"> }) => (
+                                        <FormItem>
+                                            <FormControl>
+                                                <label className="inline-flex items-center">
+                                                    <input type="checkbox" checked={field.value} onChange={field.onChange} onBlur={field.onBlur} name={field.name} ref={field.ref} className="form-checkbox h-4 w-4 text-blue-600" />
+                                                    <span className="ml-2 text-sm text-gray-700">Remember me</span>
+                                                </label>
+                                            </FormControl>
+                                        </FormItem>
+                                    )}
+                                /> */}
+                            <div className='pb-2'>
+                            <Button 
+                                isSubmitButton={true}  // Passando isSubmitButton como true para que seja do tipo submit
+                                className="w-full mt-6 mb-2"
+                            > 
+                                Entrar
+                            </Button>
                             </div>
-                        ) : (null)}
+                            </form>
+                            
+                            {/* <div className='w-full text-center mt-2'>
+                            <a href="" className='text-sm' style={{textAlign: 'center'}}>
+                                Esqueceu sua senha? Redefina aqui!
+                            </a>
+                            </div> */}
 
-                    </Form>
-                </CardContent>
-            </Card>
-        </div>
+
+
+                            {isMobile ? (
+                                <div className='w-full text-center mb-2'>
+                                <a className='text-sm' style={{textAlign: 'center'}} onClick={() => router.push("/cadastro")}>
+                                    É novo aqui? Cadastre sua empresa!
+                                </a>
+                                </div>
+                            ) : (null)}
+
+                        </Form>
+                    </CardContent>
+                </Card>
+            </div>
+        )
+        :
+        (
+            <CadastroEmpresaForm isMobile = {isMobile}/>
+        )}
+        
 
         <ToastContainer />
         </div>

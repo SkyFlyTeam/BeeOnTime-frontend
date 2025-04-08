@@ -208,7 +208,7 @@ function GerenciarEmpresa() {
 
   const hasChanges = (current: any, backup: any) => {
     return Object.keys(current).some((key) => 
-      normalizeString(current[key]) !== normalizeString(backup[key])
+      current[key] !== backup[key]
     );
   };
 
@@ -224,13 +224,13 @@ function GerenciarEmpresa() {
 
   const handleSaveEmpresa = async () => {
     if (!originalEmpresaAPI) return;
-
+  
     const cnpjNumerico = empresa.emp_CNPJ.replace(/\D/g, '');
     if (cnpjNumerico.length !== 14) {
       setCnpjError('Digite um CNPJ válido com 14 dígitos');
       return;
     }
-
+  
     try {
       const empresasExistentes = await verificarEmpresa();
       if (empresasExistentes.some(emp => 
@@ -239,15 +239,32 @@ function GerenciarEmpresa() {
         setCnpjError('Este CNPJ já está cadastrado para outra empresa');
         return;
       }
-
+  
+      // Buscar dados do CEP na API ViaCEP
+      const cepNumerico = empresa.emp_CEP.replace(/\D/g, '');
+      const response = await fetch(`https://viacep.com.br/ws/${cepNumerico}/json/`);
+      const cepData = await response.json();
+  
+      if (cepData.erro) {
+        setCepInfo('CEP não encontrado');
+        toast.error('CEP não encontrado. Endereço não atualizado.', {
+          position: "top-right",
+          autoClose: 3000,
+        });
+        return;
+      }
+  
       const updatedEmpresa: EmpresaAPI = {
         ...originalEmpresaAPI,
         empNome: empresa.emp_nome,
         empRazaoSocial: empresa.emp_razaoSocial,
         empCnpj: empresa.emp_CNPJ,
         empCep: empresa.emp_CEP,
+        empEndereco: cepData.logradouro || '',
+        empCidade: cepData.localidade || '',
+        empEstado: cepData.uf || '',
       };
-
+  
       await atualizarEmpresa(updatedEmpresa);
       setBackupEmpresa({ ...empresa });
       setCnpjError('');
@@ -264,6 +281,7 @@ function GerenciarEmpresa() {
       });
     }
   };
+  
 
   const handleSaveSetores = async () => {
     try {
