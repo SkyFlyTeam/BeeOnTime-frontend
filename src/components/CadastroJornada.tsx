@@ -12,7 +12,15 @@ const jornadaSchema = z.object({
   diasSemana: z.array(z.boolean()).refine(dias => dias.some(dia => dia), {
     message: "Pelo menos um dia da semana deve ser selecionado",
   }),
-  usuario_cargaHoraria: z.string().min(1, "Campo obrigatório").optional(),
+  // usuario_cargaHoraria: z.string()
+  // .min(1, "Campo obrigatório")
+  // .regex(/^\d+$/, "Carga horária deve ser um número válido"),
+  // horarioEntrada: z
+  //   .string()
+  //   .min(1, "Campo obrigatório"),
+  // horarioSaida: z
+  //   .string()
+  //   .min(1, "Campo obrigatório")
 });
 
 export default function CadastroJornada({ formData, onClose, onSave }: { formData: any, onClose: () => void,  onSave: (sucess: boolean) => void }) {
@@ -143,6 +151,7 @@ export default function CadastroJornada({ formData, onClose, onSave }: { formDat
                   value={jornadaData.horarioSaida}
                   onChange={handleJornadaChange}
                   className="border p-2 rounded-md w-full"
+                  required
                 />
                 {formErrors.horarioSaida && <p className="text-red-500">{formErrors.horarioSaida._errors[0]}</p>}
               </div>
@@ -159,6 +168,7 @@ export default function CadastroJornada({ formData, onClose, onSave }: { formDat
                   value={jornadaData.horarioAlmoco}
                   onChange={handleJornadaChange}
                   className="border p-2 rounded-md w-full"
+                  required
                 />
                 {formErrors.horarioAlmoco && <p className="text-red-500">{formErrors.horarioAlmoco._errors[0]}</p>}
               </div>
@@ -177,6 +187,7 @@ export default function CadastroJornada({ formData, onClose, onSave }: { formDat
               value={jornadaData.usuario_cargaHoraria}
               onChange={handleJornadaChange}
               className="border p-2 rounded-md w-full"
+              required
             />
             {formErrors.usuario_cargaHoraria && <p className="text-red-500">{formErrors.usuario_cargaHoraria._errors[0]}</p>}
           </div>
