@@ -4,6 +4,12 @@ import { toast, ToastContainer } from "react-toastify";
 import { usuarioServices } from "@/services/usuarioService";
 import UsuarioInfo, { Jornada } from "@/interfaces/usuarioInfo";
 
+// Helper function to convert time string to minutes
+function convertTimeToMinutes(timeString: string): number {
+  const [hours, minutes] = timeString.split(':').map(Number);
+  return hours * 60 + minutes;
+}
+
 // Definindo o schema de validação para o formulário
 const jornadaSchema = z.object({
   horarioFlexivel: z.boolean().refine(val => val !== undefined, {
@@ -12,7 +18,94 @@ const jornadaSchema = z.object({
   diasSemana: z.array(z.boolean()).refine(dias => dias.some(dia => dia), {
     message: "Pelo menos um dia da semana deve ser selecionado",
   }),
-  usuario_cargaHoraria: z.string().min(1, "Campo obrigatório").optional(),
+  usuario_cargaHoraria: z.string().min(1, "Campo obrigatório"),
+  horarioEntrada: z.string().optional(),
+  horarioSaida: z.string().optional(),
+  horarioAlmoco: z.string().optional(),
+})
+.refine((data) => {
+  if (!data.horarioFlexivel) {
+    return data.horarioEntrada !== undefined && data.horarioEntrada !== "";
+  }
+  return true;
+}, {
+  message: "Campo obrigatório",
+  path: ["horarioEntrada"]
+})
+.refine((data) => {
+  if (!data.horarioFlexivel) {
+    return data.horarioSaida !== undefined && data.horarioSaida !== "";
+  }
+  return true;
+}, {
+  message: "Campo obrigatório",
+  path: ["horarioSaida"]
+})
+.refine((data) => {
+  if (!data.horarioFlexivel) {
+    return data.horarioAlmoco !== undefined && data.horarioAlmoco !== "";
+  }
+  return true;
+}, {
+  message: "Campo obrigatório",
+  path: ["horarioAlmoco"]
+})
+.refine((data) => {
+  if (!data.horarioFlexivel && data.horarioEntrada && data.horarioSaida) {
+    const entrada = convertTimeToMinutes(data.horarioEntrada);
+    const saida = convertTimeToMinutes(data.horarioSaida);
+    return saida > entrada;
+  }
+  return true;
+}, {
+  message: "O horário de saída deve ser maior que o horário de entrada",
+  path: ["horarioSaida"]
+})
+.refine((data) => {
+  if (!data.horarioFlexivel && data.horarioEntrada && data.horarioAlmoco) {
+    const entrada = convertTimeToMinutes(data.horarioEntrada);
+    const almoco = convertTimeToMinutes(data.horarioAlmoco);
+    return almoco > entrada;
+  }
+  return true;
+}, {
+  message: "O horário de almoço deve ser maior que o horário de entrada",
+  path: ["horarioAlmoco"]
+})
+.refine((data) => {
+  if (!data.horarioFlexivel && data.horarioSaida && data.horarioAlmoco) {
+    const saida = convertTimeToMinutes(data.horarioSaida);
+    const almoco = convertTimeToMinutes(data.horarioAlmoco);
+    return almoco < saida;
+  }
+  return true;
+}, {
+  message: "O horário de almoço deve ser menor que o horário de saída",
+  path: ["horarioAlmoco"]
+})
+.refine((data) => {
+  if (!data.horarioFlexivel && data.horarioEntrada && data.horarioAlmoco) {
+    const entrada = convertTimeToMinutes(data.horarioEntrada);
+    const almoco = convertTimeToMinutes(data.horarioAlmoco);
+    const diferenca = almoco - entrada;
+    return diferenca >= 60; // Pelo menos 1 hora de trabalho antes do almoço
+  }
+  return true;
+}, {
+  message: "Deve haver pelo menos 1 hora de trabalho antes do horário de almoço",
+  path: ["horarioAlmoco"]
+})
+.refine((data) => {
+  if (!data.horarioFlexivel && data.horarioAlmoco && data.horarioSaida) {
+    const almoco = convertTimeToMinutes(data.horarioAlmoco);
+    const saida = convertTimeToMinutes(data.horarioSaida);
+    const diferenca = saida - almoco;
+    return diferenca >= 60; // Pelo menos 1 hora de trabalho após o almoço
+  }
+  return true;
+}, {
+  message: "Deve haver pelo menos 1 hora de trabalho após o horário de almoço",
+  path: ["horarioAlmoco"]
 });
 
 export default function CadastroJornada({ formData, onClose, onSave }: { formData: any, onClose: () => void,  onSave: (sucess: boolean) => void }) {
@@ -70,6 +163,13 @@ export default function CadastroJornada({ formData, onClose, onSave }: { formDat
   const handleJornadaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setJornadaData({ ...jornadaData, [name]: value });
+    if (formErrors[name]) {
+      setFormErrors((prev: Record<string, any>) => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
   };
 
   const handleDayClick = (index: number) => {

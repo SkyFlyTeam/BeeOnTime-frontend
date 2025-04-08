@@ -28,6 +28,12 @@ const formSchema = z.object({
   .regex(/^[A-Za-zá-úÁ-Ú\s]+$/, "O cargo não pode conter números ou caracteres especiais."),  // Validação para letras
   nivelAcesso_cod: z.string().min(1, "Campo obrigatório"),
   setorCod: z.string().min(1, "Campo obrigatório"),
+})
+.refine((data) => {
+    return data.usuario_dataContratacao < data.usuario_DataNascimento;
+}, {
+  message: "Data de contratação não pode ser menor que a data de nascimento",
+  path: ["usuario_dataContratacao"]
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -38,6 +44,8 @@ export default function CadastroUsuario({ onClose, onSave }: { onClose: () => vo
   const [isSecondModalOpen, setIsSecondModalOpen] = useState(false);
 
   const generated_password = generatePassword(10);
+
+  const current_date = new Date();
 
   const [formData, setFormData] = useState({
     usuario_nome: "",
@@ -102,6 +110,31 @@ export default function CadastroUsuario({ onClose, onSave }: { onClose: () => vo
         // Formatar CPF
         updatedValue = formatarCPF(value);
         break;
+
+      case "usuario_dataContratacao" :
+        let dateParts = value.split('-');
+        if (dateParts.length === 3) {
+          const year = parseInt(dateParts[0]);
+          if (year > 9999) {
+            updatedValue = value.substring(0, 7);  
+          }
+        }
+        break;
+      
+      case "usuario_dataNascimento" :
+        dateParts = value.split('-');
+        if (dateParts.length === 3) {
+          const year = parseInt(dateParts[0]);
+          if (year > 9999) {
+            updatedValue = value.substring(0, 7);  
+          }
+        }
+        break;
+
+      case "nivelAcesso_cod":
+        if(value != '2'){
+          setFormData((prev: typeof formData) => ({ ...prev, ["usuarioTipoContratacao"]: "CLT" }));
+        }
   
 
       default:
@@ -109,7 +142,16 @@ export default function CadastroUsuario({ onClose, onSave }: { onClose: () => vo
     }
   
     // Atualizar o estado do formulário com o novo valor
-    setFormData({ ...formData, [name]: updatedValue });
+    setFormData((prev: typeof formData) => ({ ...prev, [name]: updatedValue }));
+    
+    // Limpar o erro específico quando o campo é alterado
+    if (formErrors[name]) {
+      setFormErrors((prev: Record<string, any>) => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
   };
   
   const handleNext = (e: React.FormEvent) => {
@@ -125,6 +167,7 @@ export default function CadastroUsuario({ onClose, onSave }: { onClose: () => vo
       return; // Não avançar para o próximo modal
     }
 
+    // Se a validação passar, continue
     setIsSecondModalOpen(true);
   };
   
@@ -187,6 +230,7 @@ export default function CadastroUsuario({ onClose, onSave }: { onClose: () => vo
                   value={formData.usuario_DataNascimento}
                   onChange={handleChange}
                   required
+                  max={current_date.toLocaleDateString('en-CA')}
                   className="border p-2 rounded-md w-full"
                 />
                 {formErrors.usuario_DataNascimento && <p className="text-red-500">{formErrors.usuario_DataNascimento._errors[0]}</p>}
@@ -210,20 +254,21 @@ export default function CadastroUsuario({ onClose, onSave }: { onClose: () => vo
 
             
               <div className="flex-1 min-w-40">
-                <label htmlFor="usuarioTipoContratacao" className="mb-2">Tipo de Contrato <span className="text-red-500">*</span></label>
+                <label htmlFor="nivelAcesso_cod" className="mb-2">Nível de Acesso <span className="text-red-500">*</span></label>
                 <select
-                  id="usuarioTipoContratacao"
-                  name="usuarioTipoContratacao"
-                  value={formData.usuarioTipoContratacao}
+                  id="nivelAcesso_cod"
+                  name="nivelAcesso_cod"
+                  value={formData.nivelAcesso_cod}
                   onChange={handleChange}
                   required
                   className="border p-2 rounded-md w-full"
                 >
-                  <option value="">Selecione o tipo de contrato</option>
-                  <option value="CLT">CLT</option>
-                  <option value="Estágio">Estágio</option>
+                  <option value="">Selecione o tipo de acesso</option>
+                  <option value={0}>Administrador</option>
+                  <option value={1}>Gestor</option>
+                  <option value={2}>Funcionário</option>
                 </select>
-                {formErrors.usuariotipoContratacao && <p className="text-red-500">{formErrors.usuariotipoContratacao._errors[0]}</p>}
+                {formErrors.nivelAcesso_cod && <p className="text-red-500">{formErrors.nivelAcesso_cod._errors[0]}</p>}
               </div>
 
               <div className="flex-1 min-w-40">
@@ -234,6 +279,7 @@ export default function CadastroUsuario({ onClose, onSave }: { onClose: () => vo
                   name="usuario_dataContratacao"
                   value={formData.usuario_dataContratacao}
                   onChange={handleChange}
+                  max={current_date.toLocaleDateString('en-CA')}
                   required
                   className="border p-2 rounded-md w-full"
                 />
@@ -259,21 +305,21 @@ export default function CadastroUsuario({ onClose, onSave }: { onClose: () => vo
               </div>
 
               <div className="flex-1 min-w-40">
-                <label htmlFor="nivelAcesso_cod" className="mb-2">Nível de Acesso <span className="text-red-500">*</span></label>
+                <label htmlFor="usuarioTipoContratacao" className="mb-2">Tipo de Contrato <span className="text-red-500">*</span></label>
                 <select
-                  id="nivelAcesso_cod"
-                  name="nivelAcesso_cod"
-                  value={formData.nivelAcesso_cod}
+                  id="usuarioTipoContratacao"
+                  name="usuarioTipoContratacao"
+                  value={formData.usuarioTipoContratacao}
                   onChange={handleChange}
                   required
+                  disabled={formData.nivelAcesso_cod ? formData.nivelAcesso_cod != '2' : false}
                   className="border p-2 rounded-md w-full"
                 >
-                  <option value="">Selecione o tipo de acesso</option>
-                  <option value={0}>Administrador</option>
-                  <option value={1}>Gestor</option>
-                  <option value={2}>Funcionário</option>
+                  <option value="">Selecione o tipo de contrato</option>
+                  <option value="CLT">CLT</option>
+                  <option value="Estágio">Estágio</option>
                 </select>
-                {formErrors.nivelAcesso_cod && <p className="text-red-500">{formErrors.nivelAcesso_cod._errors[0]}</p>}
+                {formErrors.usuarioTipoContratacao && <p className="text-red-500">{formErrors.usuarioTipoContratacao._errors[0]}</p>}
               </div>
 
               <div className="flex-1 min-w-40">
