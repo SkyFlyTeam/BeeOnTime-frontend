@@ -126,7 +126,7 @@ export default function Colaboradores() {
                       <TableCell className="border border-gray-200 text-center text-black text-base p-3">{usuario.usuario_cargaHoraria}</TableCell>
                       <TableCell className="border border-gray-200 text-center text-black text-base p-3">{usuario.usuarioTipoContratacao}</TableCell>
                       <TableCell className="border border-gray-200 text-center text-black text-base p-3">{usuario.nivelAcesso?.nivelAcesso_nome}</TableCell>
-                      <TableCell className="border-r border-gray-300 text-left justify-center flex">
+                      <TableCell className="border-r border-b border-gray-200 text-center justify-center flex">
                         <button 
                           onClick={() => handleViewUser(usuario.usuario_cod)} 
                           className="bg-[#FFB503] rounded-md p-2 hover:bg-orange-600">
