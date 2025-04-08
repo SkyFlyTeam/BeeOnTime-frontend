@@ -71,10 +71,12 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
         .map((trabalha, index) => trabalha ? diasDaSemanaSiglas[index] : null)
         .filter((dia) => dia !== null);
       if (diasTrabalhados && diasTrabalhados.length > 0) {
-        return `${diasTrabalhados.join(", ")} das ${userInfo?.jornadas.jornada_horarioEntrada.toString().slice(0, 5)} até ${userInfo?.jornadas.jornada_horarioSaida.toString().slice(0, 5)}`;
-      } else {
-        return "Horário flexível";
-      }
+        if(userInfo?.jornadas.jornada_horarioFlexivel){
+          return `${diasTrabalhados.join(", ")}`;
+        }else{
+          return `${diasTrabalhados.join(", ")} das ${userInfo?.jornadas.jornada_horarioEntrada.toString().slice(0, 5)} até ${userInfo?.jornadas.jornada_horarioSaida.toString().slice(0, 5)}`;
+        }
+      } 
     };
 
     const { horasSemana, horasMes } = calculateCargaHoraria(userInfo?.usuario_cargaHoraria!, userInfo?.jornadas?.jornada_diasSemana?.filter(dia => dia).length ?? 0);
