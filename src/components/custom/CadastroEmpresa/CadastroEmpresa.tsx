@@ -45,6 +45,7 @@ const adminSchema = z.object({
   admin_nome: z.string().min(1, "Nome do administrador é obrigatório"),
   admin_email: z.string().email("Email inválido").min(1, "Email é obrigatório"),
   admin_setor: z.string().min(1, "Setor é obrigatório"),
+  admin_cargo: z.string().min(1, "Cargo é obrigatório"),
   admin_tipoContrato: z.string().min(1, "Tipo de contrato é obrigatório"),
 });
 
@@ -428,7 +429,7 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
                 {errors.admin_email && <p className="text-red-500">{errors.admin_email}</p>}
               </div>
               <div className="flex-1">
-                <label htmlFor="admin_cargo" className="mb-2">Cargo</label>
+                <label htmlFor="admin_cargo" className="mb-2">Cargo <span className="text-red-500">*</span></label>
                 <input id="admin_cargo" name="admin_cargo" value={adminData.admin_cargo} onChange={handleAdminChange} className="border p-2 rounded-md w-full" />
                 {errors.admin_cargo && <p className="text-red-500">{errors.admin_cargo}</p>}
               </div>
