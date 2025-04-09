@@ -3,6 +3,7 @@ import { ChangeEvent, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import { usuarioServices } from "@/services/usuarioService";
 import UsuarioInfo, { Jornada } from "@/interfaces/usuarioInfo";
+import { horasServices } from "@/services/horasServices";
 
 // Definindo o schema de validação para o formulário
 const jornadaSchema = z.object({
@@ -64,6 +65,7 @@ export default function CadastroJornada({ formData, onClose, onSave }: { formDat
       onSave(false)
     } finally {
       setIsSaving(false);
+      horasServices.generateHours()
     }
   };
 

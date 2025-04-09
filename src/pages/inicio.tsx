@@ -1,4 +1,4 @@
-import TimeClock from '@/pages/inicioFuncionario/_components/time-clock';
+import TimeClock from '@/pages/inicioFuncionario/_components/timeClock/time-clock';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -12,7 +12,6 @@ import { useEffect, useState } from 'react';
 import { getUsuario } from '@/services/authService';
 import { set } from 'react-hook-form';
 import InicioFuncionario from './inicioFuncionario';
-import CardCargaHoraria from '@/components/custom/cardCargaHoraria';
 import UsuarioInfo from '@/interfaces/usuarioInfo';
 import EditarFuncionarioForm from '@/components/custom/CardEditarFuncionario/editarFuncionarioForm';
 
@@ -49,13 +48,10 @@ export default function Page() {
 
   return (
     <>
-      <div className='flex flex-col gap-7'>
+      <div className='flex flex-col gap-10'>
         <h1 className='text-4xl font-semibold'>Olá, {usuarioNome}!</h1>
         <div>
           {acessoCod === 0 ? null : <InicioFuncionario />}
-        </div>
-        <div>
-          {acessoCod === 0 ? null : <CardCargaHoraria usuarioInfo={usuarioInfo!} />}
         </div>
       </div>
     </>
