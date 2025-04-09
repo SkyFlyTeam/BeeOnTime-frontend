@@ -47,6 +47,16 @@ export default function CadastroJornada({ formData, onClose, onSave }: { formDat
       // Envia os dados combinados (do primeiro e segundo modal)
       console.log("Dados enviados para o backend:", formData, jornadaData);
       await usuarioServices.cadastrarUsuarioComJornada(formData, jornadaData);
+      console.log("Dados: ", formData)
+      const res = await fetch('/api/email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nome: formData.usuario_nome,
+          email: formData.usuarioEmail,
+          password: formData.usuario_senha,
+        }),
+      });
 
       onSave(true);
 

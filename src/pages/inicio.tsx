@@ -13,38 +13,46 @@ import { getUsuario } from '@/services/authService';
 import { set } from 'react-hook-form';
 import InicioFuncionario from './inicioFuncionario';
 import UsuarioInfo from '@/interfaces/usuarioInfo';
-
+import EditarFuncionarioForm from '@/components/custom/CardEditarFuncionario/editarFuncionarioForm';
 
 //Pagina sem nada, ajeitar para a integração de tudo
 export default function Page() {
 
-  const [usuarioNome, setUsuarioNome] = useState<string>();
+  const [usuarioNome, setUsuarioNome] = useState<string | undefined>();
   const [acessoCod, setAcessoCod] = useState<any>();
-  const [usuarioInfo, setUsuarioInfo] = useState<any>()
+  const [usuarioInfo, setUsuarioInfo] = useState<any>();
+  const [isLoading, setIsLoading] = useState(true); // Loading state
 
   useEffect(() => {
-    getUser()
-  }, [])
+    getUser();
+  }, []);
 
-  const getUser = async() => {
-    const user = await getUsuario();
-    console.log (user);
-    const usuario = user.data;
-    setUsuarioNome(usuario.usuario_nome);
-    setAcessoCod(user.data.nivelAcesso.nivelAcesso_cod)
-    setUsuarioInfo(user.data)
+  const getUser = async () => {
+    try {
+      const user = await getUsuario();
+      const usuario = user.data;
+      setUsuarioNome(usuario.usuario_nome);
+      setAcessoCod(usuario.nivelAcesso.nivelAcesso_cod);
+      setUsuarioInfo(usuario);
+    } catch (error) {
+      console.error("Error fetching user data", error);
+    } finally {
+      setIsLoading(false); // Set loading to false after data is fetched
+    }
+  };
+
+  // Show loading message while fetching data
+  if (isLoading) {
+    return <div>Carregando...</div>;
   }
 
   return (
     <>
       <div className='flex flex-col gap-10'>
         <h1 className='text-4xl font-semibold'>Olá, {usuarioNome}!</h1>
-          <div>
-            { acessoCod == 0 ? (null) : (<InicioFuncionario />)}
-          </div>
-          <div>
-            { acessoCod == 0 ? (null) : (null)}
-          </div>
+        <div>
+          {acessoCod === 0 ? null : <InicioFuncionario />}
+        </div>
       </div>
     </>
   );

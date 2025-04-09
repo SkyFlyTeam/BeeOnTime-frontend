@@ -45,8 +45,10 @@ export async function middleware(req: NextRequest) {
     if (!(await isAuthorized(role, req)))
         if (isPath("/", req))
             return NextResponse.rewrite(new URL("/inicio", req.url));
-        else
-            return new NextResponse("Not authorized.");
+        else {
+            const res = NextResponse.redirect(new URL("/notFound", req.url));
+            return res;
+        }
 }
 
 

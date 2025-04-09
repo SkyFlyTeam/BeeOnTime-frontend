@@ -40,7 +40,9 @@ const getPontosByHorasCod = async (horasCod: number) => {
 const createSolicitacaoPonto = async (ponto: PontoProv) => {
     try {
         const { data } = await ApiPonto.post('/mpontoprov/cadastrar', ponto, {
-            headers: { 'Content-Type': 'multipart/form-data' }
+            headers: {
+                'Content-Type': 'application/json',
+            }
         })
         return data
     } catch (error: unknown) {
@@ -52,9 +54,20 @@ const createSolicitacaoPonto = async (ponto: PontoProv) => {
     }
 }
 
-// const getSolicitacaoPonto = async (solicitacao_cod: number) => {
-//     try {
-//         const { data } = await ApiPonto.get(`/mpontoprov/solicitacao/${solicitacao_cod}`)
+const getSolicitacaoPonto = async (solicitacao_cod: number) => {
+    try {
+        const { data } = await ApiPonto.get(`/mpontoprov/solicitacao/${solicitacao_cod}`)
+        // console.log(`PONTOOOOO: ${data}`)
+        return data 
+    } catch (error) {
+        if (error instanceof Error) {
+        return new ApiException(error.message || "Erro ao consultar a API.");
+        }
+    
+        return new ApiException("Erro desconhecido.");
+    }
+}
+
 const getPontosByUsuario = async (usuario_cod: number) => {
     try {
         const { data } = await ApiPonto.get(`/mpontos/usuario/${usuario_cod}`)
@@ -72,8 +85,12 @@ const getPontosByUsuario = async (usuario_cod: number) => {
 
 const aproveSolicitacaoPonto = async (idPonto: AprovarPonto, solicitacaoCod: number) => {
     try {
-        const { data } = await ApiPonto.post(`/mpontoprov/decisao/${solicitacaoCod}`, idPonto,{
+        const { data } = await ApiPonto.post(`/mpontoprov/decisao/0`, idPonto,{
+            headers: {
+                'Content-Type': 'application/json',
+            }
         })
+        console.log(data)
         return data
     } catch (error: unknown) {
         if (error instanceof Error) {
@@ -88,7 +105,7 @@ export const pontoServices = {
     createSolicitacaoPonto,
     baterPonto,
     getPontosByHorasCod,
-    // getSolicitacaoPonto,
+    getSolicitacaoPonto,
     getPontosByUsuario,
     aproveSolicitacaoPonto
   };

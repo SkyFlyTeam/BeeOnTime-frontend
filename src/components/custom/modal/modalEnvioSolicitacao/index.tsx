@@ -1,10 +1,10 @@
 import styles from './styles.module.css'
 import { Paperclip } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
-import Button from 'react-bootstrap/Button'
 import { solicitacaoServices } from '../../../../services/solicitacaoServices'
 import { pontoServices } from '../../../../services/pontoServices'
 import PontoProv from '../../../../interfaces/pontoProv'
+import { Button } from '@/components/ui/button'
 
 interface Ponto {
   id: string;
@@ -69,6 +69,7 @@ const ModalCriarSolicitacao = ({ isOpen, onClose, ponto }: ModalCriarSolicitacao
         ]
       }
       const resultPonto = await pontoServices.createSolicitacaoPonto(solicitacaoPonto)
+      // console.log(`SOLICITAÇÃO CRIADA: ${resultPonto}`)
       onClose();
     } catch (error: any) {
       console.error("Erro ao enviar solicitação:", error.message);

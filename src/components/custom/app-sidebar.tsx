@@ -66,7 +66,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {
           title: "ATIVIDADES",
           items: [
-            { title: "Solicitações", url: "/solicitacoes", icon: MessageSquare },
+            { title: "Solicitações", url: "/solicitacao", icon: MessageSquare },
           ],
         },
         {
@@ -88,7 +88,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           title: "ATIVIDADES",
           items: [
             { title: "Início", url: "/inicio", icon: Home },
-            { title: "Solicitações", url: "/solicitacoes", icon: MessageSquare },
+            { title: "Solicitações", url: "/solicitacao", icon: MessageSquare },
           ],
         },
         {
@@ -115,7 +115,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           title: "ATIVIDADES",
           items: [
             { title: "Início", url: "/inicio", icon: Home },
-            { title: "Solicitações", url: "/solicitacoes", icon: MessageSquare },
+            { title: "Solicitações", url: "/solicitacao", icon: MessageSquare },
           ],
         },
         {
