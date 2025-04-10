@@ -97,7 +97,7 @@ export default function PointsHistoryPage() {
     };
 
     onMount();
-  }, []); // Empty dependency array ensures the effect runs once after mount
+  }, [id]); // Empty dependency array ensures the effect runs once after mount
 
   if (isLoading) {
     return <div>Carregando...</div>; // Show loading state while data is being fetched

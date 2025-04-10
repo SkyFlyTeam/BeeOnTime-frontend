@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 
 // Services
-import { horasServices } from '../../../services/horasService';
+import { horasServices } from '@/../src/services/horasServices';
 
 // Interfaces
 import { Usuario } from '@/../src/interfaces/usuario';
@@ -20,6 +20,7 @@ interface CardCargaHorariaProps {
 const CardCargaHoraria = ({ usuarioInfo, histPontos }: CardCargaHorariaProps) => {
     const [pontoDia, setPontoDia] = useState<HistPontos | undefined>(undefined);
     const [horas, setHoras] = useState<Horas | undefined>(undefined);
+    const [saidaPrevista, setSaidaPrevista] = useState<String | undefined>(undefined);
 
     const formatTime = (time: string | Date): string => {
         if (typeof time === 'string') {
@@ -40,7 +41,6 @@ const CardCargaHoraria = ({ usuarioInfo, histPontos }: CardCargaHorariaProps) =>
     const jornadaHorarioEntrada = formatTime(usuarioInfo.jornadas.jornada_horarioEntrada);
     const jornadaHorarioSaida = formatTime(usuarioInfo.jornadas.jornada_horarioSaida);
   
-    console.log('horessss', pontoDia)
     const entrada = horas
         ? pontoDia?.pontos.filter((ponto) => ponto.tipoPonto === 0).map((ponto) => ponto.horarioPonto)[0]
         : null;
@@ -57,7 +57,12 @@ const CardCargaHoraria = ({ usuarioInfo, histPontos }: CardCargaHorariaProps) =>
 
     const [horaSaida, minutoSaida] = jornadaHorarioSaida.split(":").map(Number);
 
-    const jornadaTotal = (horaSaida - horaEntrada) + (minutoSaida - minutoEntrada) / 60;
+    let jornadaTotal;
+    if(jornadaHorarioEntrada){
+        jornadaTotal = (horaSaida - horaEntrada) + (minutoSaida - minutoEntrada) / 60;
+    }else{
+        jornadaTotal = usuarioInfo.usuario_cargaHoraria;
+    }
 
     const horasTrabalhadas = horas ? horas.horasTrabalhadas : 0;
     const horasFaltantes = horas ? horas.horasFaltantes : 0;
@@ -66,9 +71,7 @@ const CardCargaHoraria = ({ usuarioInfo, histPontos }: CardCargaHorariaProps) =>
     const barraProgresso = Math.min((horasTrabalhadas / jornadaTotal) * 100, 100);
 
     const calcularSaidaPrevista = () => {
-        console.log('entrada', entrada)
-        console.log('horas', horas)
-        if (!entrada || !horas) return '00:00';  
+        if (!entrada || !horas) return ;  
     
         let horaEntrada = 0;
         let minutoEntrada = 0;
@@ -92,8 +95,6 @@ const CardCargaHoraria = ({ usuarioInfo, histPontos }: CardCargaHorariaProps) =>
         return `${saidaHora}:${saidaMinuto}`;
     };
 
-    const saidaPrevista = calcularSaidaPrevista();
-
     const fetchHoras = async () => {
         try {
             const today = new Date();
@@ -102,9 +103,7 @@ const CardCargaHoraria = ({ usuarioInfo, histPontos }: CardCargaHorariaProps) =>
             const day = today.getDate().toString().padStart(2, '0');
             const data = `${year}-${month}-${day}`;
 
-            const horas = await horasServices.getHorasByUsuarioAndDate(usuarioInfo.usuario_cod, data);
-
-            console.log('HORASSSS', horas)
+            const horas = await horasServices.getHorasByUsuarioAndDate(usuarioInfo.usuario_cod, data) as Horas;
 
             if (!horas) {
                 setHoras({
@@ -135,14 +134,19 @@ const CardCargaHoraria = ({ usuarioInfo, histPontos }: CardCargaHorariaProps) =>
     };
 
     const fetchDia = (data: string) => {
-        console.log('hist pontos do carddddd', histPontos)
         const pontoAtual = histPontos.filter((ponto) => ponto.data === data);
         setPontoDia(pontoAtual[0]);
     };
 
     useEffect(() => {
         fetchHoras();
+       
     }, []);
+
+    useEffect(() => {
+        let saidaPrevista = calcularSaidaPrevista();
+        setSaidaPrevista(saidaPrevista)
+    }, [histPontos, horas])
 
     return (
         <div className={styles.card_container}>
@@ -155,14 +159,17 @@ const CardCargaHoraria = ({ usuarioInfo, histPontos }: CardCargaHorariaProps) =>
                 <div className={styles.progress_bar} style={{ width: `${barraProgresso}%` }} />
             </div>
             <div className={styles.saida_prevista}>
-                <span>Saída prevista: {saidaPrevista}</span>
-            </div>
-            <div className={styles.jornada}>
-                <span>Jornada de trabalho: {jornadaHorarioEntrada} às {jornadaHorarioSaida}</span>
-                { horasExtras > 0 && (
-                    <span>Horas extras: {horasExtras}h</span>
-                )}
-            </div>
+                {(entrada && saidaPrevista) &&  <span>Saída prevista: {saidaPrevista}</span>}
+            </div> 
+                <div className={styles.jornada}>
+                {!usuarioInfo.jornadas.jornada_horarioFlexivel &&
+                    <span>Jornada de trabalho: {jornadaHorarioEntrada} às {jornadaHorarioSaida}</span>
+                }
+                    { horasExtras > 0 && (
+                        <span>Horas extras: {horasExtras}h</span>
+                    )}
+                </div>
+
         </div>
     );
 };

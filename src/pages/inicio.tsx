@@ -7,7 +7,6 @@ import { getUsuario } from '@/services/authService';
 // Components
 import InicioFuncionario from './inicioFuncionario';
 
-
 //Pagina sem nada, ajeitar para a integração de tudo
 export default function Home() {
 
@@ -41,7 +40,7 @@ export default function Home() {
 
   return (
     <>
-      <div className='flex flex-col gap-7'>
+      <div className='flex flex-col gap-10'>
         <h1 className='text-4xl font-semibold'>Olá, {usuarioNome}!</h1>
         <div>
           {acessoCod === 0 ? null : <InicioFuncionario />}

@@ -4,6 +4,7 @@ import { useState } from "react";
 
 // Services
 import { usuarioServices } from "@/services/usuarioServices";
+import { horasServices } from "@/services/horasServices";
 
 // Definindo o schema de validação para o formulário
 const jornadaSchema = z.object({
@@ -65,6 +66,7 @@ export default function CadastroJornada({ formData, onClose, onSave }: { formDat
       onSave(false)
     } finally {
       setIsSaving(false);
+      horasServices.generateHours()
     }
   };
 

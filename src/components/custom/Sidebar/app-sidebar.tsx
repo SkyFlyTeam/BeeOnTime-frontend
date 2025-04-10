@@ -1,6 +1,6 @@
 import * as React from "react";
 import { usePathname } from "next/navigation";
-import { LucideIcon, Building, Users, Home, LogOut, MessageSquare, AlarmClockCheck } from "lucide-react";
+import { Users, Building, Home, LogOut, MessageSquare, AlarmClockCheck, UserRound, LucideIcon } from "lucide-react";
 
 // Components
 import {
@@ -19,151 +19,147 @@ import {
 } from "@/components/ui/sidebar";
 import { NavSecondary } from "./nav-secondary";
 import { getUsuario } from "@/services/authService";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Usuario } from "@/interfaces/usuario";
 
-// Definir um tipo que aceita apenas os cargos válidos
+// Tipos
 type RoleKey = "Administrador" | "Gestor" | "Funcionário";
 
-// Definição do tipo correto para os itens do menu
 type SubNavItem = {
   title: string;
   url: string;
-  icon: LucideIcon
+  icon: LucideIcon;
 };
 
 type NavItem = {
-  title: string; // Título da seção
-  items: SubNavItem[]; // Itens dentro da seção
+  title: string;
+  items: SubNavItem[];
 };
-
-// Dados do menu com títulos de seções e páginas
-const rolesData: Record<RoleKey, { navMain: NavItem[]; navSecondary: SubNavItem[] }> = {
-  Administrador: {
-    navMain: [
-      {
-        title: "ATIVIDADES",
-        items: [
-          { title: "Solicitações", url: "/solicitacao", icon: MessageSquare },
-        ],
-      },
-      {
-        title: "GESTÃO DA EMPRESA",
-        items: [
-          { title: "Empresa", url: "/empresa", icon: Building },
-          { title: "Colaboradores", url: "/colaboradores", icon: Users },
-        ],
-      },
-    ],
-    navSecondary: [
-      // { title: "Administrador", url: "/administrador", icon: UserRound },
-      { title: "Sair", url: "/logout", icon: LogOut },
-    ],
-  },
-  Gestor: {
-    navMain: [
-      {
-        title: "ATIVIDADES",
-        items: [
-          { title: "Início", url: "/inicio", icon: Home },
-          { title: "Solicitações", url: "/solicitacao", icon: MessageSquare },
-        ],
-      },
-      {
-        title: "MARCAÇÕES",
-        items: [
-          {title: "Meus Pontos", url: "/historico-ponto", icon: AlarmClockCheck}
-        ]
-      },
-      {
-        title: "GESTÃO DA EMPRESA",
-        items: [
-          { title: "Colaboradores", url: "/colaboradores", icon: Building },
-        ],
-      },
-    ],
-    navSecondary: [
-      // { title: "Gestor", url: "/gestor", icon: UserRound },
-      { title: "Sair", url: "/logout", icon: LogOut },
-    ],
-  },
-  Funcionário: {
-    navMain: [
-      {
-        title: "ATIVIDADES",
-        items: [
-          { title: "Início", url: "/inicio", icon: Home },
-          { title: "Solicitações", url: "/solicitacao", icon: MessageSquare },
-        ],
-      },
-      {
-        title: "MARCAÇÕES",
-        items: [
-          {title: "Meus Pontos", url: "/historico-ponto", icon: AlarmClockCheck}
-        ]
-      }
-    ],
-    navSecondary: [
-      // { title: "Funcionário", url: "/funcionario", icon: UserRound },
-      { title: "Sair", url: "/logout", icon: LogOut },
-    ],
-  },
-};
-
-const roles: RoleKey[] = Object.keys(rolesData) as RoleKey[];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const {state, isMobile, openMobile} = useSidebar();
-  const pathname = usePathname(); //consegue a url q ta
-  const [selectedRole, setSelectedRole] = React.useState<RoleKey>("Administrador");  //Entrar como cargo padrão
-  const [ enterpriseName , setEnterpriseName ] =  React.useState<String>("NectoSystems");
+  const { state, isMobile, openMobile } = useSidebar();
+  const pathname = usePathname();
+  const [selectedRole, setSelectedRole] = React.useState<RoleKey>("Administrador");
+  const [enterpriseName, setEnterpriseName] = React.useState<String>("NectoSystems");
+  const [usuario, setUsuario] = useState<undefined | Usuario>(undefined);
 
-    useEffect(() => {
-      getUser()
-    }, [])
-  
-    const getUser = async() => {
-      const user = await getUsuario();
-      console.log (user);
-      const usuario = user.data.nivelAcesso.nivelAcesso_cod;
+  useEffect(() => {
+    getUser();
+  }, []);
 
-      if (usuario === 0) {
-        setSelectedRole("Administrador")
-      } else if (usuario === 1) {
-        setSelectedRole("Gestor")
-      } else if (usuario === 2) {
-        setSelectedRole("Funcionário")
-      }
-    }
+  const getUser = async () => {
+    const user = await getUsuario();
+    const data = user.data;
+    setUsuario(data);
+
+    const nivel = data.nivelAcesso.nivelAcesso_cod;
+    if (nivel === 0) setSelectedRole("Administrador");
+    else if (nivel === 1) setSelectedRole("Gestor");
+    else if (nivel === 2) setSelectedRole("Funcionário");
+  };
+
+  const rolesData: Record<RoleKey, { navMain: NavItem[]; navSecondary: SubNavItem[] }> = {
+    Administrador: {
+      navMain: [
+        {
+          title: "ATIVIDADES",
+          items: [
+            { title: "Solicitações", url: "/solicitacao", icon: MessageSquare },
+          ],
+        },
+        {
+          title: "GESTÃO DA EMPRESA",
+          items: [
+            { title: "Empresa", url: "/empresa", icon: Building },
+            { title: "Colaboradores", url: "/colaboradores", icon: Users },
+          ],
+        },
+      ],
+      navSecondary: [
+        { title: usuario?.usuario_nome || "Usuário", url: "/administrador", icon: UserRound },
+        { title: "Sair", url: "/logout", icon: LogOut },
+      ],
+    },
+    Gestor: {
+      navMain: [
+        {
+          title: "ATIVIDADES",
+          items: [
+            { title: "Início", url: "/inicio", icon: Home },
+            { title: "Solicitações", url: "/solicitacao", icon: MessageSquare },
+          ],
+        },
+        {
+          title: "MARCAÇÕES",
+          items: [
+            { title: "Meus Pontos", url: "/historico-ponto", icon: AlarmClockCheck }
+          ]
+        },
+        {
+          title: "GESTÃO DA EMPRESA",
+          items: [
+            { title: "Colaboradores", url: "/colaboradores", icon: Building },
+          ],
+        },
+      ],
+      navSecondary: [
+        { title: usuario?.usuario_nome || "Usuário", url: "/gestor", icon: UserRound },
+        { title: "Sair", url: "/logout", icon: LogOut },
+      ],
+    },
+    Funcionário: {
+      navMain: [
+        {
+          title: "ATIVIDADES",
+          items: [
+            { title: "Início", url: "/inicio", icon: Home },
+            { title: "Solicitações", url: "/solicitacao", icon: MessageSquare },
+          ],
+        },
+        {
+          title: "MARCAÇÕES",
+          items: [
+            { title: "Meus Pontos", url: "/historico-ponto", icon: AlarmClockCheck }
+          ]
+        }
+      ],
+      navSecondary: [
+        { title: usuario?.usuario_nome || "Usuário", url: "/funcionario", icon: UserRound },
+        { title: "Sair", url: "/logout", icon: LogOut },
+      ],
+    },
+  };
 
   return (
     <Sidebar {...props}>
       <SidebarHeader>
         <div className="p-3">
-          <h1 > {enterpriseName} </h1>
-          {((!isMobile && state === "expanded") || (isMobile && openMobile)) && <SidebarTrigger />} {/* Exibe o botão dentro da sidebar quando expandida */}
+          <h1 style={{ fontSize: '20px' }}>{enterpriseName}</h1>
+          {((!isMobile && state === "expanded") || (isMobile && openMobile)) && <SidebarTrigger />}
         </div>
       </SidebarHeader>
       <SidebarContent>
-        {/* Renderiza cada seção da sidebar com base no seu cargo */}
-        {/* Renderiza a sidebar com base no cargo selecionado */}
         {rolesData[selectedRole].navMain.map((section: NavItem) => (
           <SidebarGroup key={section.title}>
-            <SidebarGroupLabel>{section.title}</SidebarGroupLabel>
+            <SidebarGroupLabel style={{ fontSize: '14px' }}>{section.title}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {section.items.map((item: SubNavItem) => {
                   const Icon = item.icon;
                   const isActive = pathname === item.url;
-
                   return (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild isActive={isActive}>
                         <a
                           href={item.url}
-                          className="flex items-center gap-2 px-4 py-2 rounded-lg transition"
-                          style={isActive ? { backgroundColor: "#FFF4D9", color: "#FFB503" } : { color: "black" }}
+                          className="flex items-center gap-2 px-4 py-5 rounded-lg transition"
+                          style={{
+                            backgroundColor: isActive ? "#FFF4D9" : undefined,
+                            color: isActive ? "#FFB503" : "black",
+                            fontSize: "18px"
+                          }}
                         >
-                          {Icon && <Icon className="w-5 h-5" style={{ color: isActive ? "#FFB503" : "#6b7280" }} />}
+                          <Icon className="!w-[1.5rem] !h-[1.5rem]" style={{ color: isActive ? "#FFB503" : "#6b7280" }} />
                           {item.title}
                         </a>
                       </SidebarMenuButton>
@@ -174,7 +170,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarGroupContent>
           </SidebarGroup>
         ))}
-        {/* Mantendo o botão de Sair sempre visível e adaptando o nome do cargo */}
         <div className="mt-auto">
           <NavSecondary items={rolesData[selectedRole].navSecondary} />
         </div>
@@ -183,4 +178,3 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     </Sidebar>
   );
 }
-

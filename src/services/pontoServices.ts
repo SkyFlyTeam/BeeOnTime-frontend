@@ -1,7 +1,41 @@
 
+import HistPontos, { Ponto } from "@/interfaces/hisPonto";
 import { ApiException } from "../config/apiExceptions";
 import { ApiPonto } from "../config/apiPonto";
 import PontoProv, { AprovarPonto } from "../interfaces/pontoProv";
+
+const baterPonto = async (usuario_cod: number, horasCod: number, ponto: Ponto) => {
+    try {
+        const estrutura_ponto = {
+            "usuarioCod": usuario_cod,
+            "horasCod": horasCod,
+            "pontos": [ponto]
+        }
+
+        const { data } = await ApiPonto.post('/mpontos/baterPonto', estrutura_ponto)
+        return data
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+          return new ApiException(error.message || "Erro ao consultar a API.");
+        }
+    
+        return new ApiException("Erro desconhecido.");
+    }
+}
+
+const getPontosByHorasCod = async (horasCod: number) => {
+    try {
+
+        const { data } = await ApiPonto.get(`/mpontos/porHorasCod/${horasCod}`)
+        return data as HistPontos
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+          return new ApiException(error.message || "Erro ao consultar a API.");
+        }
+    
+        return new ApiException("Erro desconhecido.");
+    }
+}
 
 const createSolicitacaoPonto = async (ponto: PontoProv) => {
     try {
@@ -69,6 +103,8 @@ const aproveSolicitacaoPonto = async (idPonto: AprovarPonto, solicitacaoCod: num
 
 export const pontoServices = {
     createSolicitacaoPonto,
+    baterPonto,
+    getPontosByHorasCod,
     getSolicitacaoPonto,
     getPontosByUsuario,
     aproveSolicitacaoPonto

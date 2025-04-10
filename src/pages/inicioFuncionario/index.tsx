@@ -6,12 +6,12 @@ import { getUsuario } from '@/services/authService';
 import { pontoServices } from '@/services/pontoServices';
 
 // Components
-import TimeClock from '@/pages/inicioFuncionario/_components/time-clock';
-import CardCargaHoraria from '@/components/custom/cardCargaHoraria';
+import TimeClock from './_components/timeClock/time-clock';
+import CardCargaHoraria from './_components/cardCargaHoraria';
 
 // Interfaces
 import { Usuario } from '@/interfaces/usuario';
-import HistPontos from '@/interfaces/marcacaoPonto';
+import HistPontos from '@/interfaces/histPonto';
 
 export default function InicioFuncionario() {
     const [nome, setNome] = useState("José");
@@ -44,7 +44,7 @@ export default function InicioFuncionario() {
     }
 
     return (
-        <div className='flex flex-wrap flex-row justify-between'>
+        <div className='flex flex-wrap flex-row gap-8'>
             <TimeClock />
             <CardCargaHoraria usuarioInfo={usuarioInfo!} histPontos={histPontos!} />
         </div>
