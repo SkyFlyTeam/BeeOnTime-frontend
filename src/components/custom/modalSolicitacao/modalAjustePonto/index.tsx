@@ -1,14 +1,22 @@
+// G eneral
 import clsx from 'clsx'
-import styles from './style.module.css'
 import { FileText } from 'lucide-react'
-import SolicitacaoInterface from '../../../../interfaces/Solicitacao'
 import { useEffect, useState } from 'react'
+
+// Services
 import { solicitacaoServices } from '../../../../services/solicitacaoServices'
-import ModalDevolutiva from '../modalDevolutiva'
 import { pontoServices } from '../../../../services/pontoServices'
-import { Ponto } from '../../../../interfaces/hisPonto'
+import SolicitacaoInterface from '../../../../interfaces/solicitacao'
+
+// Interfaces
 import PontoProv, { AprovarPonto } from '../../../../interfaces/pontoProv'
+
+// Components
 import { Button } from '@/components/ui/button'
+import ModalDevolutiva from '../modalDevolutiva'
+
+// Styles
+import styles from './style.module.css'
 
 
 interface AjusteProps {

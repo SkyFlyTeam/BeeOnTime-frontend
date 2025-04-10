@@ -1,26 +1,34 @@
 "use client";
 
+// General
 import * as React from "react";
-import { PointsHistoryTable } from "@/components/custom/histPonto/points-history-table";
 import { useState, useEffect } from "react";
-import HistPontos, { Ponto } from "@/interfaces/hisPonto";
-import { pontoServices } from "@/services/pontoServices";
-import { horasServices } from "@/services/horasServices";
-import RelatorioPonto from "@/interfaces/relatorioPonto";
+
+// Services
+import { pontoServices } from "@/services/pontoServices"
+import { horasServices } from "@/services/horasService";
 import { usuarioServices } from "@/services/usuarioServices";
-import { Usuario } from "@/interfaces/usuario";
 import { getUsuario } from "@/services/authService";
+
+// Interfaces;
+import { Usuario } from "@/interfaces/usuario";
+import HistPontos from "@/interfaces/histPonto";
+import Horas from "@/interfaces/horas";
+import MarcacaoPonto from "@/interfaces/marcacaoPonto";
+
+// Components
+import { PointsHistoryTable } from "@/components/custom/histPonto/points-history-table";
 
 
 export default function PointsHistoryPage() {
   //Simulando o diferente acesso
   const[accessLevel, setAccessLevel] = useState<"USER" | "ADM">("USER")
-  const[ histPontos, setHistPontos ] = useState<RelatorioPonto[] | null>(null)
+  const[ histPontos, setHistPontos ] = useState<HistPontos[] | null>(null)
   const[ usuarioInfo, setUsuarioInfo ] = useState<Usuario | null>(null)
 
   // const { usuarioCargo, usuarioCod } = useAuth(); 
 
-  const handleEdit = (entry: RelatorioPonto) => {
+  const handleEdit = (entry: HistPontos) => {
     // Lógica para editar a entrada (ex.: abrir um modal)
     console.log("Editar entrada:", entry);
   };
@@ -29,9 +37,9 @@ export default function PointsHistoryPage() {
   const fetchHistPontos = async (usuario_cod: number) => {
     try {
       // Buscar os pontos do usuário
-      const pontos = await pontoServices.getPontosByUsuario(usuario_cod);
+      const pontos = await pontoServices.getPontosByUsuario(usuario_cod) as MarcacaoPonto[];
       // Buscar as horas do usuário
-      const horas = await horasServices.getHorasByUsuario(usuario_cod);
+      const horas = await horasServices.getHorasByUsuario(usuario_cod) as Horas[];
 
       // Combinar as informações pelo 'horasCod'
       const combinedData = pontos.map((ponto: any) => {
@@ -58,7 +66,7 @@ export default function PointsHistoryPage() {
 
   const fetchUsuario = async (usuario_cod: number) => {
     try {
-      const usuario_data = await usuarioServices.getUsuarioById(usuario_cod);
+      const usuario_data = await usuarioServices.getUsuarioById(usuario_cod) as Usuario;
       setUsuarioInfo(usuario_data)
     } catch (error) {
       console.log("Erro ao recuperar usuário de id " + usuario_cod);

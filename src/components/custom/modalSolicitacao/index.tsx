@@ -1,7 +1,11 @@
+// General  
 import ModalAjustePonto from './modalAjustePonto'
+
+// Interfaces
+import SolicitacaoInterface from '../../../interfaces/solicitacao'
+
+// Styles
 import styles from './style.module.css'
-import SolicitacaoInterface from '../../../interfaces/Solicitacao'
-import { useAuth } from '../../../context/AuthContext'
 
 interface ModalProps {
   isOpen: boolean;

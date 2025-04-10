@@ -1,7 +1,7 @@
 
 import HistPontos, { Ponto } from "@/interfaces/hisPonto";
 import { ApiException } from "../config/apiExceptions";
-import { ApiPonto } from "../config/apiPontoConfig";
+import { ApiPonto } from "../config/apiPonto";
 import PontoProv, { AprovarPonto } from "../interfaces/pontoProv";
 
 const baterPonto = async (usuario_cod: number, horasCod: number, ponto: Ponto) => {

@@ -1,23 +1,32 @@
+// General
 import React, { useEffect, useState } from "react";
+import { useRouter } from 'next/router';
+
+// Interfaces
+import { Usuario } from "@/interfaces/usuario";
+
+// Services
+import { getUsuario } from "@/services/authService";
+import { usuarioServices } from "@/services/usuarioServices";
+
+// Components
+import { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell, TableCaption } from "@/components/listagem";
+import { toast, ToastContainer } from "react-toastify";
+import CadastroUsuario from "@/components/custom/ModalCadastroUsuario/CadastroUsuario";
+
+// Icons
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye } from "@fortawesome/free-solid-svg-icons";
 
-import { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell, TableCaption } from "@/components/listagem";
-import { toast, ToastContainer } from "react-toastify";
+// Styles
 import 'react-toastify/dist/ReactToastify.css';
-import UsuarioInfo from "@/interfaces/usuarioInfo";
-import { usuarioServices } from "@/services/usuarioService";
-
-import styles from '@/styles/Colaboradores.module.css'
-import CadastroUsuario from "@/components/CadastroUsuario";
-import { useRouter } from 'next/router';
-import { getUsuario } from "@/services/authService";
+import styles from './Colaboradores.module.css';
 
 export default function Colaboradores() {
-  const [usuarios, setUsuarios] = useState<UsuarioInfo[]>([]); // Garante que seja um array vazio inicialmente
+  const [usuarios, setUsuarios] = useState<Usuario[]>([]); // Garante que seja um array vazio inicialmente
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
-  const [thisUser, setThisUser] = useState<UsuarioInfo>();
+  const [thisUser, setThisUser] = useState<Usuario>();
 
   const [isOpen, setIsOpen] = useState(false); 
 
@@ -150,13 +159,13 @@ export default function Colaboradores() {
             <table className="min-w-[900px] w-full border-collapse text-sm text-black">
               <tbody>
                 {[
-                  { label: "NOME", render: (usuario: UsuarioInfo) => usuario.usuario_nome },
-                  { label: "CARGO", render: (usuario: UsuarioInfo) => usuario.usuario_cargo },
-                  { label: "SETOR", render: (usuario: UsuarioInfo) => usuario.setor?.setorNome },
-                  { label: "CARGA HORÁRIA DIÁRIA", render: (usuario: UsuarioInfo) => usuario.usuario_cargaHoraria },
-                  { label: "CONTRATO", render: (usuario: UsuarioInfo) => usuario.usuarioTipoContratacao },
-                  { label: "NÍVEL ACESSO", render: (usuario: UsuarioInfo) => usuario.nivelAcesso?.nivelAcesso_nome },
-                  { label: "AÇÕES", render: (usuario: UsuarioInfo) => ( <button onClick={() => handleViewUser(usuario.usuario_cod)} 
+                  { label: "NOME", render: (usuario: Usuario) => usuario.usuario_nome },
+                  { label: "CARGO", render: (usuario: Usuario) => usuario.usuario_cargo },
+                  { label: "SETOR", render: (usuario: Usuario) => usuario.setor?.setorNome },
+                  { label: "CARGA HORÁRIA DIÁRIA", render: (usuario: Usuario) => usuario.usuario_cargaHoraria },
+                  { label: "CONTRATO", render: (usuario: Usuario) => usuario.usuarioTipoContratacao },
+                  { label: "NÍVEL ACESSO", render: (usuario: Usuario) => usuario.nivelAcesso?.nivelAcesso_nome },
+                  { label: "AÇÕES", render: (usuario: Usuario) => ( <button onClick={() => handleViewUser(usuario.usuario_cod)} 
                   className="bg-[#FFB503] rounded-md p-2 hover:bg-orange-600">
                   <FontAwesomeIcon icon={faEye} className="text-black-600"/>
                 </button>) }

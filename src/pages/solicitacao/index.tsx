@@ -1,21 +1,33 @@
+// General
 import { useEffect, useState } from 'react'
+
+// Config
 import { ApiException } from '../../config/apiExceptions'
+
+// Interfaces
+import Solicitacao from '../../interfaces/solicitacao'
+
+// Services
 import { solicitacaoServices } from '../../services/solicitacaoServices'
-import SolicitationCard from './SolicitacaoCard'
-import styles from './Solicitacao.module.css'
-import Tab from '../../components/custom/tab'
-import Modal from '../../components/custom/modal'
-import SolicitacaoInterface from '../../interfaces/Solicitacao'
-import ModalDevolutiva from '../../components/custom/modal/modalDevolutiva'
 import { getUsuario } from '../../services/authService'
 
+// Components
+import SolicitationCard from './SolicitacaoCard'
+import Tab from '../../components/custom/tab'
+import Modal from '../../components/custom/modalSolicitacao'
+import ModalDevolutiva from '../../components/custom/modalSolicitacao/modalDevolutiva'
+
+// Styles
+import styles from './Solicitacao.module.css'
+
+
 interface SolicitacoesState {
-  all: SolicitacaoInterface[]
-  pendentes: SolicitacaoInterface[]
-  historico: SolicitacaoInterface[]
+  all: Solicitacao[]
+  pendentes: Solicitacao[]
+  historico: Solicitacao[]
 }
 
-const Solicitacao = () => {
+const SolicitacaoPage = () => {
   const [openDevolutivaModal, setOpenDevolutivaModal] = useState<boolean>(false)
   const [usuarioCod, setUsuarioCod] = useState<number>(0)
   const [usuarioCargo, setUsuarioCargo] = useState<string>('')
@@ -28,7 +40,7 @@ const Solicitacao = () => {
     historico: [],
   })
 
-  const [displayedSolicitacoes, setDisplayedSolicitacoes] = useState<SolicitacaoInterface[]>([])
+  const [displayedSolicitacoes, setDisplayedSolicitacoes] = useState<Solicitacao[]>([])
 
   const [openModal, setOpenModal] = useState<{
     [key: string]: boolean
@@ -107,7 +119,7 @@ const Solicitacao = () => {
     setToogle(status === 'pendentes')
   }
 
-  const handleSolicitacaoUpdate = async (updatedSolicitacao: SolicitacaoInterface) => {
+  const handleSolicitacaoUpdate = async (updatedSolicitacao: Solicitacao) => {
     setSolicitacoesData((prevData) => {
       // Refiltra as solicitações após a atualização.
       const updatedPendentes = prevData.pendentes.filter(
@@ -280,4 +292,4 @@ const Solicitacao = () => {
   )
 }
 
-export default Solicitacao
+export default SolicitacaoPage

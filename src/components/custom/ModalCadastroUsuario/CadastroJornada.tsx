@@ -1,8 +1,9 @@
+// General 
 import { z } from "zod";
-import { ChangeEvent, useState } from "react";
-import { toast, ToastContainer } from "react-toastify";
-import { usuarioServices } from "@/services/usuarioService";
-import UsuarioInfo, { Jornada } from "@/interfaces/usuarioInfo";
+import { useState } from "react";
+
+// Services
+import { usuarioServices } from "@/services/usuarioServices";
 import { horasServices } from "@/services/horasServices";
 
 // Definindo o schema de validação para o formulário

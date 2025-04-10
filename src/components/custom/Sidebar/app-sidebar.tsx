@@ -1,10 +1,8 @@
 import * as React from "react";
 import { usePathname } from "next/navigation";
-import {
-  Users, Building, Home, LogOut, MessageSquare, AlarmClockCheck, UserRound,
-  LucideIcon
-} from "lucide-react";
+import { Users, Building, Home, LogOut, MessageSquare, AlarmClockCheck, UserRound, LucideIcon } from "lucide-react";
 
+// Components
 import {
   Sidebar,
   SidebarContent,
@@ -73,7 +71,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           title: "GESTÃO DA EMPRESA",
           items: [
             { title: "Empresa", url: "/empresa", icon: Building },
-            { title: "Colaboradores", url: "/Colaboradores", icon: Users },
+            { title: "Colaboradores", url: "/colaboradores", icon: Users },
           ],
         },
       ],
@@ -100,7 +98,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {
           title: "GESTÃO DA EMPRESA",
           items: [
-            { title: "Colaboradores", url: "/Colaboradores", icon: Building },
+            { title: "Colaboradores", url: "/colaboradores", icon: Building },
           ],
         },
       ],

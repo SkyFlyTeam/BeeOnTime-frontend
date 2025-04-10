@@ -1,12 +1,19 @@
+// General  
 import { useEffect, useState } from 'react';
+
+// Services
+import { horasServices } from '@/../src/services/horasServices';
+
+// Interfaces
+import { Usuario } from '@/../src/interfaces/usuario';
+import  Horas  from '@/../src/interfaces/horas';
+import  HistPontos  from '@/../src/interfaces/histPonto';
+
+// Styles
 import styles from './styles.module.css';
-import UsuarioInfo from '@/../src/interfaces/usuarioInfo';
-import { Horas } from '@/../src/interfaces/horasInterface';
-import HistPontos from '@/../src/interfaces/histPontosInterface';
-import { horasServices } from '@/services/horasServices';
 
 interface CardCargaHorariaProps {
-    usuarioInfo: UsuarioInfo;
+    usuarioInfo: Usuario;
     histPontos: HistPontos[];
 }
 
@@ -106,11 +113,12 @@ const CardCargaHoraria = ({ usuarioInfo, histPontos }: CardCargaHorariaProps) =>
                     horasExtras: 0,
                     horasFaltantes: 0,
                     horasData: data,
+                    usuarioCod: usuarioInfo.usuario_cod,
                 });
                 return;
             }
 
-            setHoras(horas);
+            setHoras(horas as Horas);
             fetchDia(data);
         } catch (error) {
             setHoras({
@@ -120,6 +128,7 @@ const CardCargaHoraria = ({ usuarioInfo, histPontos }: CardCargaHorariaProps) =>
                 horasExtras: 0,
                 horasFaltantes: 0,
                 horasData: new Date(),
+                usuarioCod: usuarioInfo.usuario_cod
             });
         }
     };
