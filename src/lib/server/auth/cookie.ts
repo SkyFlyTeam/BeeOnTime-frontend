@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 //
-import { AccessPass } from "../../auth";
+import { AccessPass } from "../auth";
 
 
 
