@@ -31,6 +31,7 @@ const SolicitacaoPage = () => {
   const [openDevolutivaModal, setOpenDevolutivaModal] = useState<boolean>(false)
   const [usuarioCod, setUsuarioCod] = useState<number>(0)
   const [usuarioCargo, setUsuarioCargo] = useState<string>('')
+  const [nivelAcessoCod, setNivelAcessoCod] = useState<number>()
 
   const [toogle, setToogle] = useState(false)
 
@@ -49,11 +50,19 @@ const SolicitacaoPage = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(5)
   const [totalItems, setTotalItems] = useState(0)
+  const [setorCod, setSetorCod] = useState()
 
-  const fetchSolicitacoes = async (usuarioCargo: string, usuarioCod: number) => {
-    const result = await solicitacaoServices.getAllSolicitacao()
-  
-    if (result instanceof ApiException) {
+  const fetchSolicitacoes = async (usuarioCargo: string, usuarioCod: number, nivelAcessoCod: number, setorCod: number) => {
+    let result: SolicitacaoInterface[] | ApiException | null = null
+    if (nivelAcessoCod === 2) {
+      result = await solicitacaoServices.getAllSolicitacaoByUsuario(usuarioCod) as SolicitacaoInterface[] | ApiException
+    } else if (nivelAcessoCod === 1) {
+      result = await solicitacaoServices.getAllSolicitacaoBySetor(setorCod) as SolicitacaoInterface[] | ApiException
+    } else {
+      result = await solicitacaoServices.getAllSolicitacao()
+    }
+
+    if (result instanceof ApiException || result === null) {
       setSolicitacoesData({
         all: [],
         pendentes: [],
@@ -61,24 +70,14 @@ const SolicitacaoPage = () => {
       })
       setTotalItems(0)
     } else {
-      let filteredSolicitacoes = result
-  
-      // Aplica o filtro com base no cargo do usuário
-      if (usuarioCargo === 'Funcionário') {
-        filteredSolicitacoes = result.filter((s) => s.usuarioCod === usuarioCod)
-      } else if (usuarioCargo === 'Gestor' || usuarioCargo === 'Admin') {
-        filteredSolicitacoes = result.filter(
-          (s) => s.usuarioCod === usuarioCod || s.usuarioCargo === 'Funcionário'
-        )
-      }
   
       setSolicitacoesData({
-        all: filteredSolicitacoes.filter((s) => s.solicitacaoStatus !== 'PENDENTE'),
-        pendentes: filteredSolicitacoes.filter((s) => s.solicitacaoStatus === 'PENDENTE'),
-        historico: filteredSolicitacoes.filter((s) => s.solicitacaoStatus !== 'PENDENTE'),
+        all: result.filter((s: SolicitacaoInterface) => s.solicitacaoStatus !== 'PENDENTE'),
+        pendentes: result.filter((s: SolicitacaoInterface) => s.solicitacaoStatus === 'PENDENTE'),
+        historico: result.filter((s: SolicitacaoInterface) => s.solicitacaoStatus !== 'PENDENTE'),
       })
   
-      setTotalItems(filteredSolicitacoes.length)
+      setTotalItems(result.length)
     }
   }
   
@@ -180,22 +179,23 @@ const SolicitacaoPage = () => {
           return
         }
   
-        const { usuario_cod, usuario_cargo } = response.data
+        const { usuario_cod, usuario_cargo, nivelAcesso_cod, setorCod } = response.data
         setUsuarioCod(usuario_cod)
         setUsuarioCargo(usuario_cargo)
-        
-        // Chama fetchSolicitacoes sempre que o cargo ou código do usuário for alterado
-        await fetchSolicitacoes(usuario_cargo, usuario_cod)
+        setNivelAcessoCod(nivelAcesso_cod)
+        setSetorCod(setorCod)
+
+        await fetchSolicitacoes(usuario_cargo, usuario_cod, nivelAcesso_cod, setorCod)
       } catch (error) {
         console.error('Erro ao obter usuário:', error)
       }
     }
   
     initialize()
-    }, [usuarioCod, usuarioCargo])  // Reexecutar quando o cargo ou código do usuário mudar
+    }, [usuarioCod, usuarioCargo, nivelAcessoCod, setorCod])  
     
     useEffect(() => {
-      paginateData()  // Reaplica a paginação após a mudança de solicitações
+      paginateData()  
     }, [currentPage, solicitacoesData, toogle])
   
 
