@@ -119,7 +119,7 @@ export default function Page() {
 
     function handleChangePerfil(e: ChangeEvent<HTMLInputElement>) {
         const { name, value } = e.target;
-
+        let val = value;
 
         switch (name) {
             case "usuarioEmail":
@@ -127,6 +127,7 @@ export default function Page() {
                     delete errors[name];
                     break;
                 }
+
 
                 const email = perfilSchema.partial().safeParse({ [name]: value, })
                 if (!email.success) {
@@ -148,11 +149,18 @@ export default function Page() {
                 break;
             // Adicionar outros filtros aqui
             case "usuario_nome":
+                /*
+                if (value.replace(/\s/g, "") == "" || value.replace(/\s+/g, " ").trim() != value) {
+                    if(value == "")
+                        delete errors[name];
+                    else
+                        setErrors((prev) => ({ ...prev, [name]: "Nome inválido, há espaços extras." }))
+                    break;
+                }*/
                 if (value == "") {
                     delete errors[name];
                     break;
                 }
-
                 const nome = perfilSchema.partial().safeParse({ [name]: value, })
                 if (!nome.success) {
                     setErrors(nome.error.errors.reduce((acc, err) => ({ ...acc, [err.path[0]]: err.message }), {}));
@@ -160,7 +168,7 @@ export default function Page() {
                 }
 
                 if (usuarioInfo.usuario_nome == value) {
-                    setErrors((prev) => ({ ...prev, [name]: "Nome igual." }))
+                    setErrors((prev) => ({ ...prev, [name]: "Nome igual ao anterior." }))
                     break;
                 }
                 delete errors[name];
@@ -168,7 +176,7 @@ export default function Page() {
             default:
         }
 
-        setFormsData((prev) => ({ ...prev, [name]: value === null ? "" : value }));
+        setFormsData((prev) => ({ ...prev, [name]: value === null ? "" : value.replace(/\s+/g, " ").trim() }));
     }
 
     function handleChangeSenha(e: ChangeEvent<HTMLInputElement>) {
@@ -221,7 +229,7 @@ export default function Page() {
             } catch (error) { return; }
 
             toast({
-                title: "Perfil atualizado com sucesso!",
+                title: "Perfil atualizado!",
                 className: "whitespace-pre",
                 description: toastDesc(),
                 variant: "default",
@@ -270,8 +278,8 @@ export default function Page() {
             }
 
             toast({
-                title: "Perfil atualizado com sucesso!",
-                description: "Senha atualizada com sucesso!",
+                title: "Perfil atualizado!",
+                description: "Senha alterada com sucesso!",
                 variant: "default",
             });
 
@@ -397,29 +405,27 @@ export default function Page() {
                                 />
                                 {errors.usuario_senha && <p className="text-red-500 absolute top-15">{errors.usuario_senha}</p>}
                             </div>
-                            <div className="mt-[30px] relative">
-                                <div className="">
-                                    <label htmlFor="usuario_senhaNova1" className="mb-2">Senha Nova</label>
-                                    <input
-                                        id="usuario_senhaNova1"
-                                        type="password"
-                                        name="usuario_senhaNova1"
-                                        value={formsData.usuario_senhaNova1}
-                                        onChange={handleChangeSenha}
-                                        className="border p-2 rounded-md w-full"
-                                    />
-                                </div>
-                                <div className="">
-                                    <label htmlFor="usuario_senhaNova2" className="mb-2">Repita Senha</label>
-                                    <input
-                                        id="usuario_senhaNova2"
-                                        type="password"
-                                        name="usuario_senhaNova2"
-                                        value={formsData.usuario_senhaNova2}
-                                        onChange={handleChangeSenha}
-                                        className="border p-2 rounded-md w-full"
-                                    />
-                                </div>
+                            <div className="">
+                                <label htmlFor="usuario_senhaNova1" className="mb-2">Senha Nova</label>
+                                <input
+                                    id="usuario_senhaNova1"
+                                    type="password"
+                                    name="usuario_senhaNova1"
+                                    value={formsData.usuario_senhaNova1}
+                                    onChange={handleChangeSenha}
+                                    className="border p-2 rounded-md w-full"
+                                />
+                            </div>
+                            <div className="relative">
+                                <label htmlFor="usuario_senhaNova2" className="mb-2">Repita Senha</label>
+                                <input
+                                    id="usuario_senhaNova2"
+                                    type="password"
+                                    name="usuario_senhaNova2"
+                                    value={formsData.usuario_senhaNova2}
+                                    onChange={handleChangeSenha}
+                                    className="border p-2 rounded-md w-full"
+                                />
                                 {errors.usuario_senhaNova && <p className="text-red-500 absolute top-30">{errors.usuario_senhaNova}</p>}
                             </div>
 
