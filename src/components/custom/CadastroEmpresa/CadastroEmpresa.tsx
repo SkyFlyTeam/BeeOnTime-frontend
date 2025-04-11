@@ -226,7 +226,7 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
 
     try {
       const empCod = await cadastrarEmpresa(empresaData);
-      const setoresCriados = await cadastrarSetor(setores);
+      const setoresCriados = await cadastrarSetor(setores, empCod);
       const setorCodMap = setoresCriados.reduce((acc: Record<string, number>, setor: any) => {
         acc[setor.setorNome] = setor.setorCod;
         return acc;

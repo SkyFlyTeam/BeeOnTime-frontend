@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
+import axios from "axios";
 import styles from '../styles/GerenciarEmpresa.module.css';
 import { RiPencilFill } from 'react-icons/ri';
 import HoverInput from '../components/custom/HoverInput/HoverInput';
 import { verificarEmpresa, atualizarEmpresa } from '../services/empresaService';
-import { verificarSetores, atualizarSetor, cadastrarSetor } from '../services/setorService';
+import { verificarSetores, atualizarSetor, cadastrarSetor, verificarSetoresPorEmpresa } from '../services/setorService';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; // Importe o CSS do react-toastify
+import { Api } from '@/config/apiConfig';
 
 // Interfaces
 interface EmpresaAPI {
@@ -85,19 +87,52 @@ function GerenciarEmpresa() {
   const [isLoading, setIsLoading] = useState(true);
   const [cepInfo, setCepInfo] = useState<string>('');
   const [cnpjError, setCnpjError] = useState<string>('');
+  const [userEmpCod, setUserEmpCod] = useState<number | null>(null)
 
-  // Carregamento inicial
   useEffect(() => {
-    const fetchInitialData = async () => {
-      setIsLoading(true);
-      try {
-        await Promise.all([loadEmpresaData(), loadSetorData()]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchInitialData();
+    async function fetchEmpCod() {
+      const empCod = await getUsuarioEmp_cod();
+      setUserEmpCod(empCod);
+    }
+  
+    fetchEmpCod();
   }, []);
+
+  async function getUsuarioEmp_cod(): Promise<number | null> {
+    try {
+      console.log("→ [getUsuarioEmp_cod] Iniciando chamada ao /auth/token...");
+      const res = await axios.get<any>("/auth/token");
+      console.log("✔ [getUsuarioEmp_cod] Token recebido:", res.data.token);
+  
+      const resData = await Api.get<any>(`/usuario/${res.data.token}`);
+      console.log("✔ [getUsuarioEmp_cod] Dados do usuário:", resData.data);
+  
+      const empCod = resData.data.empCod;
+      console.log("✔ [getUsuarioEmp_cod] empCod extraído:", empCod);
+  
+      return Number(empCod);
+    } catch (error) {
+      console.error("✖ [getUsuarioEmp_cod] Erro ao obter empCod:", error);
+      return null;
+    }
+  }
+  
+
+  useEffect(() => {
+    if (userEmpCod) {
+      const fetchInitialData = async () => {
+        setIsLoading(true);
+        try {
+          await Promise.all([loadEmpresaData(), loadSetorData()]);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      console.log("Empcod: ", userEmpCod);
+      fetchInitialData();
+    }
+  }, [userEmpCod]);
+  
 
   // Consulta de CEP
   useEffect(() => {
@@ -125,16 +160,18 @@ function GerenciarEmpresa() {
   // Funções auxiliares
   const loadEmpresaData = async () => {
     try {
-      const [empresaData] = await verificarEmpresa();
-      const mappedEmpresa = {
-        emp_nome: empresaData.empNome,
-        emp_razaoSocial: empresaData.empRazaoSocial,
-        emp_CNPJ: empresaData.empCnpj,
-        emp_CEP: empresaData.empCep,
-      };
-      setEmpresa(mappedEmpresa);
-      setBackupEmpresa(mappedEmpresa);
-      setOriginalEmpresaAPI(empresaData);
+      if (userEmpCod){
+        const empresaData = await verificarEmpresa(userEmpCod);
+        const mappedEmpresa = {
+          emp_nome: empresaData.empNome,
+          emp_razaoSocial: empresaData.empRazaoSocial,
+          emp_CNPJ: empresaData.empCnpj,
+          emp_CEP: empresaData.empCep,
+        };
+        setEmpresa(mappedEmpresa);
+        setBackupEmpresa(mappedEmpresa);
+        setOriginalEmpresaAPI(empresaData);
+      }
     } catch (error) {
       console.error('Error fetching empresa data:', error);
       setEmpresa(initialEmpresa);
@@ -143,13 +180,15 @@ function GerenciarEmpresa() {
 
   const loadSetorData = async () => {
     try {
-      const data = await verificarSetores();
-      const mappedSetores = data.map((setor) => ({
-        setor_cod: setor.setorCod,
-        setor_nome: setor.setorNome,
-      }));
-      setSetores(mappedSetores);
-      setBackupSetores(mappedSetores);
+      if (userEmpCod){
+        const data = await verificarSetoresPorEmpresa(userEmpCod);
+        const mappedSetores = data.map((setor) => ({
+          setor_cod: setor.setorCod,
+          setor_nome: setor.setorNome,
+        }));
+        setSetores(mappedSetores);
+        setBackupSetores(mappedSetores);
+      }
     } catch (error) {
       console.error('Error fetching setores:', error);
       setSetores([]);
@@ -232,10 +271,12 @@ function GerenciarEmpresa() {
     }
   
     try {
-      const empresasExistentes = await verificarEmpresa();
-      if (empresasExistentes.some(emp => 
-        emp.empCnpj === empresa.emp_CNPJ && emp.empCod !== originalEmpresaAPI.empCod
-      )) {
+      if (userEmpCod) {
+        const empresaExistente = await verificarEmpresa(userEmpCod);
+      if (
+        empresaExistente.empCnpj === empresa.emp_CNPJ &&
+        empresaExistente.empCod !== originalEmpresaAPI.empCod
+      ) {
         setCnpjError('Este CNPJ já está cadastrado para outra empresa');
         return;
       }
@@ -272,6 +313,7 @@ function GerenciarEmpresa() {
         position: "top-right",
         autoClose: 3000,
       });
+      }
     } catch (error) {
       console.error('Erro ao salvar empresa:', error);
       setCnpjError('Erro ao salvar a empresa');
@@ -292,8 +334,8 @@ function GerenciarEmpresa() {
         !s.isNew && normalizeString(s.setor_nome) !== normalizeString(backupSetores[i].setor_nome)
       );
 
-      if (newSetores.length > 0) {
-        await cadastrarSetor(newSetores.map(s => s.setor_nome));
+      if (newSetores.length > 0 && userEmpCod) {
+        await cadastrarSetor(newSetores.map(s => s.setor_nome), userEmpCod);
         const updatedSetores = await verificarSetores();
         const mappedSetores = updatedSetores.map(s => ({
           setor_cod: s.setorCod,
@@ -336,7 +378,7 @@ function GerenciarEmpresa() {
 
   return (
     <main className={styles.mainContainer}>
-      <h2 className={styles.title}>Gerenciar Empresa</h2>
+      <h2 className={styles.title}>Gerenciar Empresa </h2>
 
       <div className={styles.empresaContainer}>
         {Object.entries(empresa).map(([key, value]) => (

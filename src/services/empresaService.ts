@@ -21,9 +21,9 @@ interface EmpresaAPI {
   empEndereco: string;
 }
 
-export const verificarEmpresa = async (): Promise<EmpresaAPI[]> => {
+export const verificarEmpresa = async (empCod: number): Promise<EmpresaAPI> => {
   try {
-    const response = await axios.get<EmpresaAPI[]>(`${API_URL}/empresa`, {
+    const response = await axios.get<EmpresaAPI>(`${API_URL}/empresa/${empCod}`, {
       headers: { "Content-Type": "application/json" },
     });
     return response.data; // Agora tipado como EmpresaAPI[]

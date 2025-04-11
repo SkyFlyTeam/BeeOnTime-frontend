@@ -50,13 +50,28 @@ export const verificarSetores = async (): Promise<SetorAPI[]> => {
   }
 } 
 
-export const cadastrarSetor = async (setoresData: string[]) => {
+export const verificarSetoresPorEmpresa = async (empCod: number): Promise<SetorAPI[]> => {
+  try {
+    const response = await axios.get(`${API_URL}/setor/empresa/${empCod}`, {
+      headers: { "Content-Type": "application/json" },
+    });
+    return response.data
+  }
+  catch(error) {
+    console.log(error)
+    throw error
+  }
+} 
+
+export const cadastrarSetor = async (setoresData: string[], empCod: number) => {
   try {
     console.log("📤 Dados sendo enviados:", JSON.stringify(setoresData, null, 2));
     const requests = setoresData.map(async (setor) => {
       const response = await axios.post(
-        `${API_URL}/setor`,
-        { setorNome: setor },
+        `${API_URL}/setor`,{ 
+          setorNome: setor,
+          empCod: empCod,
+         },
         { headers: { "Content-Type": "application/json" } }
       );
       console.log(`✅ Resposta do backend para "${setor}":`, response.data);
