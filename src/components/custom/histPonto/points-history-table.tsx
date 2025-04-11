@@ -1,25 +1,26 @@
 "use client";
-
+// General
 import * as React from "react";
 import { useState } from "react";
+
+// Utils
+import { cn } from "@/lib/utils"; 
+
+// Interfaces
+import { Ponto } from "@/interfaces/marcacaoPonto";
+import HistPontos from "@/interfaces/histPonto";
+import { Usuario } from "@/interfaces/usuario";
+
+// Components
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/custom/histPonto/table";
 import { Button } from "@/components/ui/button";
 import { PencilLine } from "lucide-react";
-import { cn } from "@/lib/utils";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/custom/tooltip";
-import HistPontos, { Ponto } from "@/interfaces/hisPonto";
-import RelatorioPonto from "@/interfaces/relatorioPonto";
-import { Usuario } from "@/interfaces/usuario";
-import ModalCriarSolicitacao from "../modal/modalEnvioSolicitacao";
+import ModalCriarSolicitacao from "../modalSolicitacao/modalEnvioSolicitacao";
+
 
 interface PointsHistoryTableProps {
-  entries: RelatorioPonto[] | null;
-  onEdit: (entry: RelatorioPonto) => void;
+  entries: HistPontos[] | null;
+  onEdit: (entry: HistPontos) => void;
   userInfo: Usuario | null;
   className?: string;
   accessLevel: "USER" | "ADM"; // Recebe o AccessLevel para diferentes acessos
@@ -44,9 +45,9 @@ const calculateCargaHoraria = (horasDiarias: number, diasTrabalhados: number) =>
 const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTableProps>(
   ({ entries, onEdit, userInfo, className, accessLevel }, ref) => {
     const [isModalOpen, setIsModalOpen] = useState(false); // Estado para abrir/fechar o modal
-    const [selectedPonto, setSelectedPonto] = useState<RelatorioPonto | null>(null); // Ponto selecionado
+    const [selectedPonto, setSelectedPonto] = useState<HistPontos | null>(null); // Ponto selecionado
 
-    const handleModalOpen = (entry: RelatorioPonto) => {
+    const handleModalOpen = (entry: HistPontos) => {
       setSelectedPonto(entry); // Seleciona o ponto para o modal
       setIsModalOpen(true); // Abre o modal
     };

@@ -299,12 +299,12 @@ const SidebarTrigger = React.forwardRef<
     >
       {isMobile ? (
         openMobile ? (
-          <CircleX /> // Ícone de fechar quando o Sheet está aberto
+          <CircleX className="!w-[1.2rem] !h-[1.2rem]" /> // Ícone de fechar quando o Sheet está aberto
         ) : (
-          <Menu /> // Ícone de hambúrguer quando o Sheet está fechado
+          <Menu className="!w-[1.2rem] !h-[1.2rem]" /> // Ícone de hambúrguer quando o Sheet está fechado
         )
       ) : (
-        <PanelLeft /> // Ícone padrão no desktop
+        <PanelLeft className="!w-[1.2rem] !h-[1.2rem]" /> // Ícone padrão no desktop
       )}
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
