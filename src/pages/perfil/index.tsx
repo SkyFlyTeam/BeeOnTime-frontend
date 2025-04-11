@@ -18,6 +18,7 @@ interface perfilFormData {
     usuario_senha: string;
 }
 const perfilSchema = z.object({
+    usuario_nome: z.string().regex(/^[A-Za-z ]+$/i, "Apenas letras e espaço"),
     usuarioEmail: z.string().email("Email inválido"),
     usuario_senha: z.string().min(1, "Senha é obrigatório"),
 });
@@ -127,9 +128,9 @@ export default function Page() {
                     break;
                 }
 
-                const result = perfilSchema.partial().safeParse({ [name]: value, })
-                if (!result.success) {
-                    setErrors(result.error.errors.reduce((acc, err) => ({ ...acc, [err.path[0]]: err.message }), {}));
+                const email = perfilSchema.partial().safeParse({ [name]: value, })
+                if (!email.success) {
+                    setErrors(email.error.errors.reduce((acc, err) => ({ ...acc, [err.path[0]]: err.message }), {}));
                     break;
                 }
 
@@ -147,6 +148,17 @@ export default function Page() {
                 break;
             // Adicionar outros filtros aqui
             case "usuario_nome":
+                if (value == "") {
+                    delete errors[name];
+                    break;
+                }
+
+                const nome = perfilSchema.partial().safeParse({ [name]: value, })
+                if (!nome.success) {
+                    setErrors(nome.error.errors.reduce((acc, err) => ({ ...acc, [err.path[0]]: err.message }), {}));
+                    break;
+                }
+
                 if (usuarioInfo.usuario_nome == value) {
                     setErrors((prev) => ({ ...prev, [name]: "Nome igual." }))
                     break;
