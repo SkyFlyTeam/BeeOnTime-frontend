@@ -2,7 +2,7 @@ import { ChangeEvent, useEffect, useState } from 'react';
 import { getUsuario, setLogIn } from '@/services/authService';
 import { usuarioServices } from '@/services/usuarioService';
 import { z } from 'zod';
-import { AccessPass } from '@/lib/server/auth';
+import { AccessPass } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
 import { Toaster } from '@/components/ui/toaster';
 

@@ -55,7 +55,7 @@ const rolesData: Record<RoleKey, { navMain: NavItem[]; navSecondary: SubNavItem[
       },
     ],
     navSecondary: [
-      // { title: "Administrador", url: "/administrador", icon: UserRound },
+      { title: "Perfil", url: "/perfil", icon: UserRound },
       { title: "Sair", url: "/logout", icon: LogOut },
     ],
   },
@@ -82,7 +82,7 @@ const rolesData: Record<RoleKey, { navMain: NavItem[]; navSecondary: SubNavItem[
       },
     ],
     navSecondary: [
-      // { title: "Gestor", url: "/gestor", icon: UserRound },
+      { title: "Perfil", url: "/perfil", icon: UserRound },
       { title: "Sair", url: "/logout", icon: LogOut },
     ],
   },
@@ -103,7 +103,7 @@ const rolesData: Record<RoleKey, { navMain: NavItem[]; navSecondary: SubNavItem[
       }
     ],
     navSecondary: [
-      // { title: "Funcionário", url: "/funcionario", icon: UserRound },
+      { title: "Perfil", url: "/perfil", icon: UserRound },
       { title: "Sair", url: "/logout", icon: LogOut },
     ],
   },

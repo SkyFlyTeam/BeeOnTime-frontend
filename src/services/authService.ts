@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { AccessPass } from '../lib/server/auth';
+import { AccessPass } from '../lib/auth';
 import { attemptLoginSession } from '../lib/server/auth/login';
 import { TextDecoderStream } from 'stream/web';
 import { Api } from '@/config/apiConfig';

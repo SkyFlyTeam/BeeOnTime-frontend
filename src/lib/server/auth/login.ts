@@ -14,7 +14,7 @@ export enum HttpStatusCode {
 import axios from "axios";
 import { NextRequest, NextResponse } from "next/server";
 // Lib
-import { AccessPass } from "../auth";
+import { AccessPass } from "../../auth";
 import { axiosToResponse } from "../../axiosAuth";
 import { getCodFromAuthCookie, getCredsFromAuthCookie, getEmailFromAuthCookie, getTokenFromAuthCookie } from "./cookie";
 // Constants

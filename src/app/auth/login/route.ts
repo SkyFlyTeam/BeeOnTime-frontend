@@ -1,7 +1,7 @@
 // "/auth/login"
 
 // Libs
-import { AccessPass } from '@/lib/server/auth';
+import { AccessPass } from '@/lib/auth';
 import { attemptLoginSession, attemptNewEmail } from '../../../lib/server/auth/login';
 
 

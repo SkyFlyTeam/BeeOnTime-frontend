@@ -242,16 +242,16 @@ export default function Home() {
                                             <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
                                                 <i><HiOutlineLockClosed /></i>
                                             </span>
-                                            <button className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
-                                                type='button'
-                                                onClick={() => changeIsShowingPassword()}>
-                                                {!isShowingPassword ? (<FaRegEye />) : (<FaRegEyeSlash />)}
-                                            </button>
                                             {isShowingPassword ? (
                                                 <Input className='w-full pl-12 pr-12' placeholder='Educação e Tecnologia' type={'password'} {...field} />
                                             ) : 
                                             (<Input className='w-full pl-12 pr-12' placeholder='Educação e Tecnologia' {...field} />)}
                                             
+                                            <button className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                                                type='button'
+                                                onClick={() => changeIsShowingPassword()}>
+                                                {!isShowingPassword ? (<FaRegEye />) : (<FaRegEyeSlash />)}
+                                            </button>
                                         </div>
                                         </FormControl>
                                         <FormMessage />
