@@ -70,7 +70,7 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
       const diasTrabalhados = userInfo?.jornadas.jornada_diasSemana
         .map((trabalha, index) => trabalha ? diasDaSemanaSiglas[index] : null)
         .filter((dia) => dia !== null);
-      if (diasTrabalhados && diasTrabalhados.length > 0) {
+      if (diasTrabalhados && diasTrabalhados.length > 0 && userInfo?.jornadas.jornada_horarioEntrada && userInfo?.jornadas.jornada_horarioSaida) {
         return `${diasTrabalhados.join(", ")} das ${userInfo?.jornadas.jornada_horarioEntrada.toString().slice(0, 5)} até ${userInfo?.jornadas.jornada_horarioSaida.toString().slice(0, 5)}`;
       } else {
         return "Horário flexível";

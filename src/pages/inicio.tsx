@@ -15,6 +15,7 @@ import InicioFuncionario from './inicioFuncionario';
 import CardCargaHoraria from '@/components/custom/cardCargaHoraria';
 import UsuarioInfo from '@/interfaces/usuarioInfo';
 import EditarFuncionarioForm from '@/components/custom/CardEditarFuncionario/editarFuncionarioForm';
+import { Skeleton } from '@/components/ui/skeleton';
 
 //Pagina sem nada, ajeitar para a integração de tudo
 export default function Page() {
@@ -44,7 +45,15 @@ export default function Page() {
 
   // Show loading message while fetching data
   if (isLoading) {
-    return <div>Carregando...</div>;
+    return (
+
+      <> </>
+      // <div className="flex flex-col gap-7">
+      //   <Skeleton className="h-10 w-1/3 bg-gray-200" /> {/* Título Olá, nome */}
+      //   <Skeleton className="h-48 w-full rounded-lg" /> {/* Card 1 */}
+      //   <Skeleton className="h-48 w-full rounded-lg" /> {/* Card 2 */}
+      // </div> 
+    );
   }
 
   return (
@@ -55,7 +64,7 @@ export default function Page() {
           {acessoCod === 0 ? null : <InicioFuncionario />}
         </div>
         <div>
-          {acessoCod === 0 ? null : <CardCargaHoraria usuarioInfo={usuarioInfo!} />}
+          {/* {acessoCod === 0 ? null : <CardCargaHoraria usuarioInfo={usuarioInfo!} />} */}
         </div>
       </div>
     </>

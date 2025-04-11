@@ -8,6 +8,8 @@ import Modal from '../../components/custom/modal'
 import SolicitacaoInterface from '../../interfaces/Solicitacao'
 import ModalDevolutiva from '../../components/custom/modal/modalDevolutiva'
 import { getUsuario } from '../../services/authService'
+import { Skeleton } from '@/components/ui/skeleton'
+import SolicitacaoCardSkeleton from './SolicitacaoCard/cardSkeleton'
 
 interface SolicitacoesState {
   all: SolicitacaoInterface[]
@@ -37,46 +39,53 @@ const Solicitacao = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(5)
   const [totalItems, setTotalItems] = useState(0)
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchSolicitacoes = async (usuarioCargo: string, usuarioCod: number) => {
-    const result = await solicitacaoServices.getAllSolicitacao()
-  
-    if (result instanceof ApiException) {
-      setSolicitacoesData({
-        all: [],
-        pendentes: [],
-        historico: [],
-      })
-      setTotalItems(0)
-    } else {
-      let filteredSolicitacoes = result
-  
-      // Aplica o filtro com base no cargo do usuário
-      if (usuarioCargo === 'Funcionário') {
-        filteredSolicitacoes = result.filter((s) => s.usuarioCod === usuarioCod)
-      } else if (usuarioCargo === 'Gestor' || usuarioCargo === 'Admin') {
-        filteredSolicitacoes = result.filter(
-          (s) => s.usuarioCod === usuarioCod || s.usuarioCargo === 'Funcionário'
-        )
+    setIsLoading(true)
+    try {
+      const result = await solicitacaoServices.getAllSolicitacao();
+
+      if (result instanceof ApiException) {
+        setSolicitacoesData({
+          all: [],
+          pendentes: [],
+          historico: [],
+        });
+        setTotalItems(0);
+      } else {
+        let filteredSolicitacoes = result;
+
+        if (usuarioCargo === 'Funcionário') {
+          filteredSolicitacoes = result.filter((s) => s.usuarioCod === usuarioCod);
+        } else if (usuarioCargo === 'Gestor' || usuarioCargo === 'Admin') {
+          filteredSolicitacoes = result.filter(
+            (s) => s.usuarioCod === usuarioCod || s.usuarioCargo === 'Funcionário'
+          );
+        }
+
+        setSolicitacoesData({
+          all: filteredSolicitacoes.filter((s) => s.solicitacaoStatus !== 'PENDENTE'),
+          pendentes: filteredSolicitacoes.filter((s) => s.solicitacaoStatus === 'PENDENTE'),
+          historico: filteredSolicitacoes.filter((s) => s.solicitacaoStatus !== 'PENDENTE'),
+        });
+
+        setTotalItems(filteredSolicitacoes.length);
       }
-  
-      setSolicitacoesData({
-        all: filteredSolicitacoes.filter((s) => s.solicitacaoStatus !== 'PENDENTE'),
-        pendentes: filteredSolicitacoes.filter((s) => s.solicitacaoStatus === 'PENDENTE'),
-        historico: filteredSolicitacoes.filter((s) => s.solicitacaoStatus !== 'PENDENTE'),
-      })
-  
-      setTotalItems(filteredSolicitacoes.length)
+    } catch (error) {
+      console.error('Erro ao buscar solicitações:', error);
+    } finally {
+      setIsLoading(false); // Finaliza o loading
     }
   }
-  
+
 
   const paginateData = () => {
     const dataToDisplay = toogle ? solicitacoesData.pendentes : solicitacoesData.historico
     const startIndex = (currentPage - 1) * itemsPerPage
     const endIndex = startIndex + itemsPerPage
     setDisplayedSolicitacoes(dataToDisplay.slice(startIndex, endIndex))
-  }  
+  }
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
@@ -116,13 +125,13 @@ const Solicitacao = () => {
       const updatedHistorico = prevData.historico.filter(
         (solicitacao) => solicitacao.solicitacaoCod !== updatedSolicitacao.solicitacaoCod
       )
-  
+
       if (updatedSolicitacao.solicitacaoStatus === 'PENDENTE') {
         updatedPendentes.push(updatedSolicitacao)
       } else {
         updatedHistorico.push(updatedSolicitacao)
       }
-  
+
       // Aplique o filtro novamente para garantir que o cargo do usuário seja levado em consideração
       return {
         ...prevData,
@@ -130,10 +139,10 @@ const Solicitacao = () => {
         historico: updatedHistorico,
       }
     })
-    
+
     paginateData()
   }
-  
+
 
   const handleDeleteSolicitacao = (idToDelete: number) => {
     setSolicitacoesData((prevData) => {
@@ -167,29 +176,50 @@ const Solicitacao = () => {
           console.error('Usuário não encontrado.')
           return
         }
-  
+
         const { usuario_cod, usuario_cargo } = response.data
         setUsuarioCod(usuario_cod)
         setUsuarioCargo(usuario_cargo)
-        
+
         // Chama fetchSolicitacoes sempre que o cargo ou código do usuário for alterado
         await fetchSolicitacoes(usuario_cargo, usuario_cod)
       } catch (error) {
         console.error('Erro ao obter usuário:', error)
       }
     }
-  
+
     initialize()
-    }, [usuarioCod, usuarioCargo])  // Reexecutar quando o cargo ou código do usuário mudar
-    
-    useEffect(() => {
-      paginateData()  // Reaplica a paginação após a mudança de solicitações
-    }, [currentPage, solicitacoesData, toogle])
-  
+  }, [usuarioCod, usuarioCargo])  // Reexecutar quando o cargo ou código do usuário mudar
+
+  useEffect(() => {
+    paginateData()  // Reaplica a paginação após a mudança de solicitações
+  }, [currentPage, solicitacoesData, toogle])
+
 
   const totalPages = Math.ceil(
     (toogle ? solicitacoesData.pendentes.length : solicitacoesData.historico.length) / itemsPerPage
   )
+
+  if (isLoading) {
+    return (
+      <div className={styles.solicitacao_container}>
+      <div className={styles.card_container}>
+        <h1 className='font-bold text-4xl'>Solicitações</h1>
+
+        <div className=' flex items-center justify-center mt-7'>
+          <Skeleton className='h-12 w-[16rem] bg-gray-200 ' />
+        </div>
+
+        {/* Tab e estrutura já visíveis, com skeletons abaixo */}
+        <div className={styles.container}>
+          {Array.from({ length: 5 }).map((_, index) => (
+            <SolicitacaoCardSkeleton key={index} />
+          ))}
+        </div>
+      </div>
+    </div>
+    )
+  }
 
   return (
     <div className={styles.solicitacao_container}>
@@ -214,7 +244,7 @@ const Solicitacao = () => {
                   usuarioCod={solicitacao.usuarioCod}
                   usuarioLogadoCargo={usuarioCargo}
                   usuarioLogadoCod={usuarioCod}
-                  onDelete={handleDeleteSolicitacao} 
+                  onDelete={handleDeleteSolicitacao}
                 />
 
                 <Modal

@@ -13,6 +13,7 @@ import { getUsuario } from "@/services/authService";
 
 import { useRouter } from "next/router";
 import EditarFuncionarioForm from "@/components/custom/CardEditarFuncionario/editarFuncionarioForm";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function PointsHistoryPage() {
   // Simulando o diferente acesso
@@ -80,7 +81,8 @@ export default function PointsHistoryPage() {
         fetchUsuario(usuario.usuario_cod);
       } else {
         setAccessLevel("ADM");
-        fetchHistPontos(parseInt(id!.toString()));
+        if (id)
+          fetchHistPontos(parseInt(id!.toString()));
         fetchUsuario(parseInt(id!.toString()));
       }
       setIsLoading(false); // Set loading to false after data is fetched
@@ -89,8 +91,33 @@ export default function PointsHistoryPage() {
     onMount();
   }, []); // Empty dependency array ensures the effect runs once after mount
 
+  const SkeletonRow = () => (
+    <div className="flex flex-row gap-7 mt-10 justify-between">
+      <Skeleton className="bg-gray-200 w-24 h-10" />
+      <Skeleton className="bg-gray-200 w-24 h-10" />
+      <Skeleton className="bg-gray-200 w-24 h-10" />
+      <Skeleton className="bg-gray-200 w-72 h-10" />
+      <Skeleton className="bg-gray-200 w-48 h-10" />
+      <Skeleton className="bg-gray-200 w-32 h-10" />
+    </div>
+  );
   if (isLoading) {
-    return <div>Carregando...</div>; // Show loading state while data is being fetched
+    return (
+      <div className="p-6 md:p-9">
+        <Skeleton className=" bg-gray-200 h-10 w-48" />
+        <div className="w-full rounded-xl mt-5 bg-gray-100 p-5">
+          <div className="flex flex-row gap-6 justify-between">
+            <Skeleton className="bg-gray-200 w-80 h-10" />
+            <Skeleton className="bg-gray-200 w-96 h-10" />
+          </div>
+          {[...Array(5)].map((_, idx) => (
+            <SkeletonRow key={idx} />
+          ))}
+
+
+        </div>
+      </div>
+    ); // Show loading state while data is being fetched
   }
 
   return (
