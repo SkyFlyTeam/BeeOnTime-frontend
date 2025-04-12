@@ -1,5 +1,6 @@
 // General
 import { useEffect, useState } from 'react';
+import axios from 'axios'
 
 // Interfaces
 import { Empresa, EmpresaAPI } from '@/interfaces/empresa';
@@ -20,6 +21,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 // Icons
 import { RiPencilFill } from 'react-icons/ri';
+import { ApiUsuario } from '@/config/apiUsuario';
 
 
 // Constantes
@@ -74,6 +76,35 @@ function GerenciarEmpresa() {
   const [isLoading, setIsLoading] = useState(true);
   const [cepInfo, setCepInfo] = useState<string>('');
   const [cnpjError, setCnpjError] = useState<string>('');
+  const [userEmpCod, setUserEmpCod] = useState<number | null>(null)
+
+  useEffect(() => {
+    async function fetchEmpCod() {
+      const empCod = await getUsuarioEmp_cod();
+      setUserEmpCod(empCod);
+    }
+  
+    fetchEmpCod();
+  },[]);
+
+  async function getUsuarioEmp_cod(): Promise<number | null> {
+    try {
+      console.log("→ [getUsuarioEmp_cod] Iniciando chamada ao /auth/token...");
+      const res = await axios.get<any>("/auth/token");
+      console.log("✔ [getUsuarioEmp_cod] Token recebido:", res.data.token);
+  
+      const resData = await ApiUsuario.get<any>(`/usuario/${res.data.token}`);
+      console.log("✔ [getUsuarioEmp_cod] Dados do usuário:", resData.data);
+  
+      const empCod = resData.data.empCod;
+      console.log("✔ [getUsuarioEmp_cod] empCod extraído:", empCod);
+  
+      return Number(empCod);
+    } catch (error) {
+      console.error("✖ [getUsuarioEmp_cod] Erro ao obter empCod:", error);
+      return null;
+    }
+  }
 
   // Carregamento inicial
   useEffect(() => {
@@ -86,7 +117,7 @@ function GerenciarEmpresa() {
       }
     };
     fetchInitialData();
-  }, []);
+  }, [userEmpCod]);
 
   // Consulta de CEP
   useEffect(() => {
@@ -114,20 +145,20 @@ function GerenciarEmpresa() {
   // Funções auxiliares
   const loadEmpresaData = async () => {
     try {
-      const result = await empresaServices.verificarEmpresa();
-      if (result instanceof ApiException) {
-        throw new Error(result.message);
+      if (userEmpCod){
+        const empresaData = await empresaServices.verificarEmpresaById(userEmpCod);
+
+        const mappedEmpresa = {
+          emp_nome: empresaData.empNome,
+          emp_razaoSocial: empresaData.empRazaoSocial,
+          emp_CNPJ: empresaData.empCnpj,
+          emp_CEP: empresaData.empCep,
+        };
+
+        setEmpresa(mappedEmpresa);
+        setBackupEmpresa(mappedEmpresa);
+        setOriginalEmpresaAPI(empresaData);
       }
-      const [empresaData] = result;
-      const mappedEmpresa = {
-        emp_nome: empresaData.empNome,
-        emp_razaoSocial: empresaData.empRazaoSocial,
-        emp_CNPJ: empresaData.empCnpj,
-        emp_CEP: empresaData.empCep,
-      };
-      setEmpresa(mappedEmpresa);
-      setBackupEmpresa(mappedEmpresa);
-      setOriginalEmpresaAPI(empresaData);
     } catch (error) {
       console.error('Error fetching empresa data:', error);
       setEmpresa(initialEmpresa);
@@ -136,16 +167,18 @@ function GerenciarEmpresa() {
 
   const loadSetorData = async () => {
     try {
-      const result = await setorServices.getAllSetores();
-      if (result instanceof ApiException) {
-        throw new Error(result.message);
+      if(userEmpCod){
+        const result = await setorServices.verificarSetoresPorEmpresa(userEmpCod);
+        if (result instanceof ApiException) {
+          throw new Error(result.message);
+        }
+        const mappedSetores = result.map((setor: Setor) => ({
+          setorCod: setor.setorCod,
+          setorNome: setor.setorNome,
+        }));
+        setSetores(mappedSetores);
+        setBackupSetores(mappedSetores);
       }
-      const mappedSetores = result.map((setor: Setor) => ({
-        setorCod: setor.setorCod,
-        setorNome: setor.setorNome,
-      }));
-      setSetores(mappedSetores);
-      setBackupSetores(mappedSetores);
     } catch (error) {
       console.error('Error fetching setores:', error);
       setSetores([]);
@@ -273,8 +306,8 @@ function GerenciarEmpresa() {
         !s.isNew && normalizeString(s.setorNome) !== normalizeString(backupSetores[i].setorNome)
       );
 
-      if (newSetores.length > 0) {
-        await setorServices.cadastrarSetor(newSetores.map(s => s.setorNome));
+      if (newSetores.length > 0 && userEmpCod) {
+        await setorServices.cadastrarSetor(newSetores.map(s => s.setorNome), userEmpCod);
         const result = await setorServices.getAllSetores();
         if (result instanceof ApiException) {
           throw new Error(result.message);
@@ -395,3 +428,4 @@ function GerenciarEmpresa() {
 }
 
 export default GerenciarEmpresa;
+

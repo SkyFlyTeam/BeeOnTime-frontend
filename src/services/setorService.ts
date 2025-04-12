@@ -14,12 +14,25 @@ const getAllSetores = async (): Promise<Setor[] | ApiException> => {
   }
 };
 
-const cadastrarSetor = async (setoresData: string[]): Promise<Setor[] | ApiException> => {
+const verificarSetoresPorEmpresa = async (empCod: number): Promise<Setor[]> => {
+  try {
+    const response = await ApiUsuario.get(`/setor/empresa/${empCod}`, {
+      headers: { "Content-Type": "application/json" },
+    });
+    return response.data
+  }
+  catch(error) {
+    console.log(error)
+    throw error
+  }
+} 
+
+const cadastrarSetor = async (setoresData: string[], empCod: number): Promise<Setor[] | ApiException> => {
   try {
     console.log("📤 Dados sendo enviados:", JSON.stringify(setoresData, null, 2));
     const requests = setoresData.map(async (setor) => {
       const { data } = await ApiUsuario.post(`/setor`, 
-        { setorNome: setor },
+        { setorNome: setor, empCod: empCod },
         { headers: { "Content-Type": "application/json" } }
       );
       console.log(`✅ Resposta do backend para "${setor}":`, data);
@@ -55,6 +68,7 @@ const atualizarSetor = async (setorData: Setor): Promise<Setor | ApiException> =
 
 export const setorServices = {
   getAllSetores,
+  verificarSetoresPorEmpresa,
   cadastrarSetor,
   atualizarSetor
 }; 
