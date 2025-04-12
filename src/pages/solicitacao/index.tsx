@@ -1,37 +1,28 @@
-// General
 import { useEffect, useState } from 'react'
-
-// Config
 import { ApiException } from '../../config/apiExceptions'
-
-// Interfaces
-import Solicitacao from '../../interfaces/solicitacao'
-
-// Services
 import { solicitacaoServices } from '../../services/solicitacaoServices'
+import SolicitationCard from './SolicitacaoCard'
+import styles from './Solicitacao.module.css'
+import Tab from '../../components/custom/tab'
+import Modal from '../../components/custom/modalSolicitacao/index'
+import SolicitacaoInterface from '../../interfaces/Solicitacao'
+import ModalDevolutiva from '../../components/custom/modalSolicitacao/modalDevolutiva'
 import { getUsuario } from '../../services/authService'
 
-// Components
-import SolicitationCard from './SolicitacaoCard'
-import Tab from '../../components/custom/tab'
-import Modal from '../../components/custom/modalSolicitacao'
-import ModalDevolutiva from '../../components/custom/modalSolicitacao/modalDevolutiva'
-
-// Styles
-import styles from './Solicitacao.module.css'
-
-
 interface SolicitacoesState {
-  all: Solicitacao[]
-  pendentes: Solicitacao[]
-  historico: Solicitacao[]
+  all: SolicitacaoInterface[]
+  pendentes: SolicitacaoInterface[]
+  historico: SolicitacaoInterface[]
 }
 
-const SolicitacaoPage = () => {
+const Solicitacao = () => {
   const [openDevolutivaModal, setOpenDevolutivaModal] = useState<boolean>(false)
+  const [isModalHoraExtraOpen, setIsModalHoraExtraOpen] = useState(false);
+
   const [usuarioCod, setUsuarioCod] = useState<number>(0)
   const [usuarioCargo, setUsuarioCargo] = useState<string>('')
   const [nivelAcessoCod, setNivelAcessoCod] = useState<number>()
+  const [setorCod, setSetorCod] = useState()
 
   const [toogle, setToogle] = useState(false)
 
@@ -41,7 +32,7 @@ const SolicitacaoPage = () => {
     historico: [],
   })
 
-  const [displayedSolicitacoes, setDisplayedSolicitacoes] = useState<Solicitacao[]>([])
+  const [displayedSolicitacoes, setDisplayedSolicitacoes] = useState<SolicitacaoInterface[]>([])
 
   const [openModal, setOpenModal] = useState<{
     [key: string]: boolean
@@ -50,7 +41,6 @@ const SolicitacaoPage = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(5)
   const [totalItems, setTotalItems] = useState(0)
-  const [setorCod, setSetorCod] = useState()
 
   const fetchSolicitacoes = async (usuarioCargo: string, usuarioCod: number, nivelAcessoCod: number, setorCod: number) => {
     let result: SolicitacaoInterface[] | ApiException | null = null
@@ -118,7 +108,7 @@ const SolicitacaoPage = () => {
     setToogle(status === 'pendentes')
   }
 
-  const handleSolicitacaoUpdate = async (updatedSolicitacao: Solicitacao) => {
+  const handleSolicitacaoUpdate = async (updatedSolicitacao: SolicitacaoInterface) => {
     setSolicitacoesData((prevData) => {
       // Refiltra as solicitações após a atualização.
       const updatedPendentes = prevData.pendentes.filter(
@@ -207,7 +197,6 @@ const SolicitacaoPage = () => {
     <div className={styles.solicitacao_container}>
       <div className={styles.card_container}>
         <h1 className='font-bold text-4xl'>Solicitações</h1>
-
         <Tab
           toogle={toogle}
           onClick={handleClick}
@@ -229,14 +218,16 @@ const SolicitacaoPage = () => {
                   onDelete={handleDeleteSolicitacao} 
                 />
 
-                <Modal
-                  isOpen={openModal[solicitacao.solicitacaoCod]}
-                  onClick={() => handleModal(solicitacao.solicitacaoCod, false)}
-                  solicitacao={solicitacao}
-                  onSolicitacaoUpdate={handleSolicitacaoUpdate}
-                  usuarioLogadoCod={usuarioCod}
-                  usuarioCargo={usuarioCargo}
-                />
+                {nivelAcessoCod == 0 || nivelAcessoCod == 1 && (
+                  <Modal
+                    isOpen={openModal[solicitacao.solicitacaoCod]}
+                    onClick={() => handleModal(solicitacao.solicitacaoCod, false)}
+                    solicitacao={solicitacao}
+                    onSolicitacaoUpdate={handleSolicitacaoUpdate}
+                    usuarioLogadoCod={usuarioCod}
+                    usuarioCargo={usuarioCargo}
+                  />
+                )}
               </div>
             ))
           ) : (
@@ -292,4 +283,4 @@ const SolicitacaoPage = () => {
   )
 }
 
-export default SolicitacaoPage
+export default Solicitacao

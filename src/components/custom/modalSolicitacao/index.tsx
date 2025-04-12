@@ -1,11 +1,7 @@
-// General  
 import ModalAjustePonto from './modalAjustePonto'
-
-// Interfaces
-import SolicitacaoInterface from '../../../interfaces/solicitacao'
-
-// Styles
 import styles from './style.module.css'
+import SolicitacaoInterface from '../../../interfaces/Solicitacao'
+import ModalDecisaoHoraExtra from './modalHoraExtra/modalHoraExtra'
 
 interface ModalProps {
   isOpen: boolean;
@@ -27,7 +23,8 @@ const Modal: React.FC<ModalProps> = ({
 
 
   const solicitacaoTitle: Record<string, string> = {
-    "Ajuste de ponto": "Solicitação de ajuste de ponto"
+    "Ajuste de ponto": "Solicitação de ajuste de ponto",
+    "Hora extra": "Solicitação de hora extra"
   }
 
   const ModalComponents: Record<
@@ -41,7 +38,8 @@ const Modal: React.FC<ModalProps> = ({
       usuarioCargo: string;
     }>
   > = {
-    "Ajuste de ponto": ModalAjustePonto
+    "Ajuste de ponto": ModalAjustePonto,
+    "Hora extra": ModalDecisaoHoraExtra
   }
 
 
