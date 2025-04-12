@@ -66,7 +66,7 @@ export default function Page() {
     }
 
     function isPerfilDisabled() {
-        return errors.usuarioEmail !== undefined || errors.usuario_nome !== undefined || isFormsPerfilEmpty();
+        return errors.usuarioEmail !== undefined || errors.usuario_nome !== undefined || isFormsPerfilEmpty() || isFormsPerfilDefault();
     }
 
     function isFormsPerfilEmpty() {
@@ -75,6 +75,13 @@ export default function Page() {
             formsData.usuarioEmail == ""
         );
     }
+    function isFormsPerfilDefault(){
+        return (
+            formsData.usuario_nome == usuarioInfo.usuario_nome &&
+            formsData.usuarioEmail == usuarioInfo.usuarioEmail
+        );
+    }
+
     function isFormsSenhaEmpty() {
         return (
             formsData.usuario_senhaNova1 == "" &&
@@ -86,13 +93,19 @@ export default function Page() {
     useEffect(() => {
         getAll();
         getUser();
+
+        
+        
     }, []);
 
     const getUser = async () => {
         try {
             const user = await getUsuario();
             const usuario = user.data;
-
+            setFormsData((prev) => ({ ...prev,
+                usuario_nome: usuario.usuario_nome,
+                usuarioEmail: usuario.usuarioEmail,
+               }));
             setUsuarioInfo(usuario);
         } catch (error) {
             console.error("Error fetching user data", error);
@@ -119,24 +132,24 @@ export default function Page() {
 
     function handleChangePerfil(e: ChangeEvent<HTMLInputElement>) {
         const { name, value } = e.target;
-        let val = value;
 
         switch (name) {
             case "usuarioEmail":
-                if (value == "") {
+                if (value == usuarioInfo.usuarioEmail) {
+                    //setErrors((prev) => ({ ...prev, [name]: "Email igual ao usado." }))
                     delete errors[name];
                     break;
                 }
 
+                if (value == "") {
+                    //delete errors[name];
+                    setErrors((prev) => ({ ...prev, [name]: "Email não pode ser vazio." }))
+                    break;
+                }
 
                 const email = perfilSchema.partial().safeParse({ [name]: value, })
                 if (!email.success) {
                     setErrors(email.error.errors.reduce((acc, err) => ({ ...acc, [err.path[0]]: err.message }), {}));
-                    break;
-                }
-
-                if (value == usuarioInfo.usuarioEmail) {
-                    setErrors((prev) => ({ ...prev, [name]: "Email igual ao usado." }))
                     break;
                 }
 
@@ -157,26 +170,31 @@ export default function Page() {
                         setErrors((prev) => ({ ...prev, [name]: "Nome inválido, há espaços extras." }))
                     break;
                 }*/
-                if (value == "") {
+                if (usuarioInfo.usuario_nome == value) {
+                    //setErrors((prev) => ({ ...prev, [name]: "Nome igual ao anterior." }))
                     delete errors[name];
                     break;
                 }
+
+                if (value == "") {
+                    //delete errors[name];
+                    setErrors((prev) => ({ ...prev, [name]: "Nome não pode ser vazio." }))
+                    break;
+                }
+                
+
                 const nome = perfilSchema.partial().safeParse({ [name]: value, })
                 if (!nome.success) {
                     setErrors(nome.error.errors.reduce((acc, err) => ({ ...acc, [err.path[0]]: err.message }), {}));
                     break;
                 }
 
-                if (usuarioInfo.usuario_nome == value) {
-                    setErrors((prev) => ({ ...prev, [name]: "Nome igual ao anterior." }))
-                    break;
-                }
                 delete errors[name];
                 break;
             default:
         }
 
-        setFormsData((prev) => ({ ...prev, [name]: value === null ? "" : value.replace(/\s+/g, " ").trim() }));
+        setFormsData((prev) => ({ ...prev, [name]: (value === null ? usuarioInfo[name] : value.replace(/\s+/g, " ").trim() )}));
     }
 
     function handleChangeSenha(e: ChangeEvent<HTMLInputElement>) {
@@ -193,9 +211,9 @@ export default function Page() {
             if (name.includes("senhaNova"))
                 delete errors["usuario_senhaNova"];
 
-            if ((name == "usuario_senha" && (value != "" || formsData.usuario_senhaNova1 == "")) || (name != "usuario_senha" && (formsData.usuario_senha != "" || value == "")))
+            if ((name == "usuario_senha" && (value != "" || formsData.usuario_senhaNova1 == "")) || (name != "usuario_senha" && (formsData.usuario_senha != "" || value == ""))){
                 delete errors["usuario_senha"];
-            else
+            } else
                 setErrors((prev) => ({ ...prev, usuario_senha: "Necessário senha atual para mudar a senha." }));
 
         }
@@ -382,7 +400,7 @@ export default function Page() {
                         {errors.submitPerfil && <p className="text-red-500 absolute top-15">{errors.submitPerfil}</p>}
                         <button
                             type="submit"
-                            className={"text-black border p-2 rounded-md " + (isPerfilDisabled() ? "" : "bg-[#FFB503] ") + (isFormsPerfilEmpty() ? "invisible" : "visible")}
+                            className={"text-black border p-2 rounded-md " + (isPerfilDisabled() ? "" : "bg-[#FFB503] ") + (isFormsPerfilDefault() ? "invisible" : "visible")}
                             disabled={isPerfilDisabled()}
                         >Salvar</button>
                     </div>
