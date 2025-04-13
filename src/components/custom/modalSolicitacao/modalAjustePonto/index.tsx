@@ -1,4 +1,4 @@
-// G eneral
+// General
 import clsx from 'clsx'
 import { FileText } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -114,6 +114,11 @@ const ModalAjustePonto: React.FC<AjusteProps> = ({
 
     if (status === 'APROVADA') {
       toast.success('Solicitação aprovada com sucesso!', {
+        position: "top-right",
+        autoClose: 3000,
+      })
+    } else if (status === 'PENDENTE'){
+      toast.success('Solicitação editada com sucesso!', {
         position: "top-right",
         autoClose: 3000,
       })

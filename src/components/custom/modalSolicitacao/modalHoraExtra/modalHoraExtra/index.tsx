@@ -1,8 +1,15 @@
+// Interfaces
 import SolicitacaoInterface from "@/interfaces/Solicitacao"
+
+// Styles
 import styles from './style.module.css'
+
+// Componentes
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { toast } from "react-toastify"
-import { useEffect, useState } from "react"
+
+// Services
 import { solicitacaoServices } from "@/services/solicitacaoServices"
 import { bancoHorasServices } from "@/services/bancoHorasService"
 import { extrasPagasServices } from "@/services/extraPagaService"
@@ -107,7 +114,7 @@ const ModalDecisaoHoraExtra: React.FC<ModalBancoHorasProps> = ({
                     value={solicitacao?.solicitacaoMensagem}
                     readOnly />
                 </div>
-                {solicitacao && usuarioLogadoCod != solicitacao.usuarioCod && (
+                {solicitacao && usuarioLogadoCod != solicitacao.usuarioCod  && solicitacao.solicitacaoStatus == "PENDENTE" && (
                     <div className={styles.button_container}>
                         <Button
                             variant={"outline-danger"}
