@@ -9,7 +9,7 @@ const accessRoutes = {
     ADMIN: [
         "/administrador",
         "/inicio",
-        "/horas",
+        "/bancoHoras",
         "/ausencias",
         "/falhas",
         "/colaboradores",
@@ -25,7 +25,7 @@ const accessRoutes = {
     GESTOR: [
         "/gestor",
         "/inicio",
-        "/horas",
+        "/bancoHoras",
         "/ausencias",
         "/falhas",
         "/colaboradores",
@@ -43,7 +43,7 @@ const accessRoutes = {
         "/inicio",
         "/solicitacao",
         "/marcacoes",
-        "/horas",
+        "/bancoHoras",
         "/pendencias",
         "/inicioFuncionario",
         "/historico-ponto",

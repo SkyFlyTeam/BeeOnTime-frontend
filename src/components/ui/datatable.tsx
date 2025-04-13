@@ -13,7 +13,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react"
+import { ArrowUpDown, ChevronDown, MoreHorizontal, TableRowsSplitIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 
@@ -35,18 +35,21 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import InputBusca from "../custom/InputBusca/inputBusca"
 
 // Defina as propriedades que o componente genérico vai receber
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
-    data: TData[]
+    data: TData[],
+    filterColumns: string[];  
 }
 
-export function DataTable<TData, TValue>({ data, columns }: DataTableProps<TData, TValue>) {
+export function DataTable<TData, TValue>({ data, columns, filterColumns }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
+  const [filterValue, setFilterValue] = React.useState<string>("");
 
   const table = useReactTable({
     data,
@@ -67,47 +70,55 @@ export function DataTable<TData, TValue>({ data, columns }: DataTableProps<TData
     },
   })
 
+  const handleFilterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setFilterValue(event.target.value);
+    setColumnFilters((prevFilters) => [
+      {
+        id: filterColumns[0], 
+        value: event.target.value,
+      },
+    ]);
+  };
+
   return (
     <div className="w-full">
-      <div className="flex items-center py-4">
-        <Input
-          placeholder={'Buscar...'}
-          value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("email")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
+      <div className="flex items-center gap-4 justify-end py-4">
+        <InputBusca
+          value={filterValue}
+          onChange={handleFilterChange}
+          placeholder="Buscar..."
         />
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
-              Columns <ChevronDown />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => (
-                <DropdownMenuCheckboxItem
-                  key={column.id}
-                  className="capitalize"
-                  checked={column.getIsVisible()}
-                  onCheckedChange={(value) => column.toggleVisibility(!!value)}
-                >
-                  {column.id}
-                </DropdownMenuCheckboxItem>
-              ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="bg-white">
+                Colunas <ChevronDown />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {table
+                .getAllColumns()
+                .filter((column) => column.getCanHide())
+                .map((column) => (
+                  <DropdownMenuCheckboxItem
+                    key={column.id}
+                    className="capitalize"
+                    checked={column.getIsVisible()}
+                    onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                  >
+                    {column.id}
+                  </DropdownMenuCheckboxItem>
+                ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      
+      <div className="hidden md:block">
+        <Table className="min-w-[900px] w-full">
+          <TableHeader className="bg-white">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
+                  <TableHead key={header.id} className="border border-gray-200 text-center font-bold text-black text-base p-4">
                     {header.isPlaceholder
                       ? null
                       : flexRender(header.column.columnDef.header, header.getContext())}
@@ -119,9 +130,9 @@ export function DataTable<TData, TValue>({ data, columns }: DataTableProps<TData
           <TableBody>
             {table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
+                <TableRow key={row.id} data-state={row.getIsSelected() && "selected"} className={row.index % 2 === 0 ? "bg-[#FFF8E1]" : "bg-[#FFFFFF]"}>
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell key={cell.id} className="border border-gray-200 text-black text-base p-3">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
@@ -137,17 +148,54 @@ export function DataTable<TData, TValue>({ data, columns }: DataTableProps<TData
           </TableBody>
         </Table>
       </div>
+
+      <div className="overflow-x-auto block md:hidden">
+        <Table className="min-w-[900px] w-full">
+          <TableBody>
+            {table.getHeaderGroups().map((headerGroup) => (
+              headerGroup.headers.map((header, idx) => (
+                <TableRow key={header.id} className={idx % 2 === 0 ? "bg-[#FFF8E1]" : "bg-[#FFFFFF]"}>
+                  <TableCell key={`header-${header.id}`} className="border border-gray-200 text-center font-bold text-black text-base p-4">
+                    {flexRender(header.column.columnDef.header, header.getContext())}
+                  </TableCell>
+
+                  {/* Para cada linha de dados, renderiza o valor correspondente para essa coluna */}
+                  {table.getRowModel().rows.map((row) => (
+                    <TableCell key={`cell-${row.id}-${idx}`} className="border border-gray-200 text-black text-base p-3">
+                      {flexRender(row.getVisibleCells()[idx].column.columnDef.cell, row.getVisibleCells()[idx].getContext())}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ))}
+
+            {/* Caso não haja dados */}
+            {table.getRowModel().rows.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="h-24 text-center">
+                  No results.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+
+
+
+
       <div className="flex items-center justify-end space-x-2 py-4">
         <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
+          {table.getFilteredSelectedRowModel().rows.length} de{" "}
+          {table.getFilteredRowModel().rows.length} linhas(s) selecionadas.
         </div>
         <div className="space-x-2">
           <Button variant="outline" size="sm" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
-            Previous
+            Anterior
           </Button>
           <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
-            Next
+            Próximo
           </Button>
         </div>
       </div>
