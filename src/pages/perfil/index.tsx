@@ -108,12 +108,11 @@ export default function Page() {
         try {
             const user = await getUsuario();
             const usuario = user.data;
-            if (isFormsPerfilDefault())
-                setFormsData((prev) => ({
-                    ...prev,
-                    usuario_nome: usuario.usuario_nome,
-                    usuarioEmail: usuario.usuarioEmail,
-                }));
+            setFormsData((prev) => ({
+                ...prev,
+                usuario_nome: usuario.usuario_nome,
+                usuarioEmail: usuario.usuarioEmail,
+            }));
             setUsuarioInfo(usuario);
         } catch (error) {
             console.error("Error fetching user data", error);
@@ -261,11 +260,14 @@ export default function Page() {
                 variant: "default",
             });
 
+
+            getUser();
+
             resetFormsPerfil();
         }
+        else
+            getUser();
 
-
-        getUser();
     }
 
     async function handleSubmitSenha(e: React.FormEvent) {
@@ -311,7 +313,6 @@ export default function Page() {
 
             resetFormsSenha();
         }
-        getUser();
     }
 
 
