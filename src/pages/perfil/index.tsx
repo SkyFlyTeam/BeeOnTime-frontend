@@ -41,24 +41,30 @@ export default function Page() {
 
     function toastDesc() {
         let msg = "";
-        if (formsData.usuario_nome != "")
+        if (formsData.usuario_nome != usuarioInfo.usuario_nome)
             msg += "Nome atualizado para \"" + formsData.usuario_nome + "\".";
 
-        if (formsData.usuarioEmail != "") {
-            if (formsData.usuario_nome != "")
+        if (formsData.usuarioEmail != usuarioInfo.usuarioEmail) {
+            if (formsData.usuario_nome != usuarioInfo.usuario_nome)
                 msg += "\n";
             msg += "Email atualizado para \"" + formsData.usuarioEmail + "\".";
         }
         return msg;
     }
-    function resetForms() {
-        setFormsData({
-            usuario_nome: "",
-            usuarioEmail: "",
+    function resetFormsSenha() {
+        setFormsData((prev) => ({
+            ...prev,
             usuario_senhaNova1: "",
             usuario_senhaNova2: "",
             usuario_senha: ""
-        })
+        }))
+    }
+    function resetFormsPerfil() {
+        setFormsData((prev) => ({
+            ...prev,
+            usuario_nome: "",
+            usuarioEmail: ""
+        }))
     }
 
     function isSenhaDisabled() {
@@ -75,7 +81,7 @@ export default function Page() {
             formsData.usuarioEmail == ""
         );
     }
-    function isFormsPerfilDefault(){
+    function isFormsPerfilDefault() {
         return (
             formsData.usuario_nome == usuarioInfo.usuario_nome &&
             formsData.usuarioEmail == usuarioInfo.usuarioEmail
@@ -94,18 +100,20 @@ export default function Page() {
         getAll();
         getUser();
 
-        
-        
+
+
     }, []);
 
     const getUser = async () => {
         try {
             const user = await getUsuario();
             const usuario = user.data;
-            setFormsData((prev) => ({ ...prev,
-                usuario_nome: usuario.usuario_nome,
-                usuarioEmail: usuario.usuarioEmail,
-               }));
+            if (isFormsPerfilDefault())
+                setFormsData((prev) => ({
+                    ...prev,
+                    usuario_nome: usuario.usuario_nome,
+                    usuarioEmail: usuario.usuarioEmail,
+                }));
             setUsuarioInfo(usuario);
         } catch (error) {
             console.error("Error fetching user data", error);
@@ -181,7 +189,7 @@ export default function Page() {
                     setErrors((prev) => ({ ...prev, [name]: "Nome não pode ser vazio." }))
                     break;
                 }
-                
+
 
                 const nome = perfilSchema.partial().safeParse({ [name]: value, })
                 if (!nome.success) {
@@ -194,7 +202,7 @@ export default function Page() {
             default:
         }
 
-        setFormsData((prev) => ({ ...prev, [name]: (value === null ? usuarioInfo[name] : value.replace(/\s+/g, " ").trim() )}));
+        setFormsData((prev) => ({ ...prev, [name]: (value === null ? usuarioInfo[name] : value) }));
     }
 
     function handleChangeSenha(e: ChangeEvent<HTMLInputElement>) {
@@ -211,7 +219,7 @@ export default function Page() {
             if (name.includes("senhaNova"))
                 delete errors["usuario_senhaNova"];
 
-            if ((name == "usuario_senha" && (value != "" || formsData.usuario_senhaNova1 == "")) || (name != "usuario_senha" && (formsData.usuario_senha != "" || value == ""))){
+            if ((name == "usuario_senha" && (value != "" || formsData.usuario_senhaNova1 == "")) || (name != "usuario_senha" && (formsData.usuario_senha != "" || value == ""))) {
                 delete errors["usuario_senha"];
             } else
                 setErrors((prev) => ({ ...prev, usuario_senha: "Necessário senha atual para mudar a senha." }));
@@ -229,7 +237,7 @@ export default function Page() {
 
         const novoPerfil = Object.assign({}, usuarioInfo)
         novoPerfil.usuario_senha = "";
-        novoPerfil.usuario_nome = (formsData.usuario_nome == "" ? usuarioInfo.usuario_nome : formsData.usuario_nome);
+        novoPerfil.usuario_nome = (formsData.usuario_nome == "" ? usuarioInfo.usuario_nome : formsData.usuario_nome.replace(/\s+/g, " ").trim());
         novoPerfil.usuarioEmail = (formsData.usuarioEmail == "" ? usuarioInfo.usuarioEmail : formsData.usuarioEmail);
 
         const res = await usuarioServices.atualizarUsuario(novoPerfil)
@@ -253,7 +261,7 @@ export default function Page() {
                 variant: "default",
             });
 
-            resetForms();
+            resetFormsPerfil();
         }
 
 
@@ -301,7 +309,7 @@ export default function Page() {
                 variant: "default",
             });
 
-            resetForms();
+            resetFormsSenha();
         }
         getUser();
     }
