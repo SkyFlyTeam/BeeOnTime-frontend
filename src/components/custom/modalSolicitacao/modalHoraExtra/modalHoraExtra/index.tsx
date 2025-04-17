@@ -54,14 +54,14 @@ const ModalDecisaoHoraExtra: React.FC<ModalBancoHorasProps> = ({
                 const bancoHoras = {
                     bancoHorasSaldoAtual: solicitacao.horasSolicitadas,
                     bancoHorasData: solicitacao.solicitacaoDataPeriodo,
-                    usuarioCod: usuarioLogadoCod
+                    usuarioCod: solicitacao.usuarioCod
                 }
                 await bancoHorasServices.createBancoHoras(bancoHoras)
             } else {
                 const extraPaga = {
                     extrasPagasSaldoAtual: solicitacao.horasSolicitadas,
                     extrasPagasData: solicitacao.solicitacaoDataPeriodo,
-                    usuarioCod: usuarioLogadoCod
+                    usuarioCod: solicitacao.usuarioCod
                 }
                 await extrasPagasServices.createExtraspagas(extraPaga)
             }
