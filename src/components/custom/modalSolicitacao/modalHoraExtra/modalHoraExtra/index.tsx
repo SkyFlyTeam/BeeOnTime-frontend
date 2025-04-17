@@ -13,6 +13,8 @@ import { toast } from "react-toastify"
 import { solicitacaoServices } from "@/services/solicitacaoServices"
 import { bancoHorasServices } from "@/services/bancoHorasService"
 import { extrasPagasServices } from "@/services/extraPagaService"
+import { horasServices } from "@/services/horasService"
+import { ApiException } from "@/config/apiExceptions"
 
 interface ModalBancoHorasProps {
   diaSelecionado: string
@@ -36,7 +38,7 @@ const ModalDecisaoHoraExtra: React.FC<ModalBancoHorasProps> = ({
     const horasToString = solicitacao && solicitacao.horasSolicitadas ? solicitacao.horasSolicitadas.toString() : ''
     let [horas, min] = horasToString.split('.')
     const minutos = min ? Math.round(Number('0.' + min) * 60) : 0
-
+    
     const handleSubmit = async (status: string, toastMensagem: string, tipo: string) => {
         if(!solicitacao) return 
 
@@ -63,7 +65,7 @@ const ModalDecisaoHoraExtra: React.FC<ModalBancoHorasProps> = ({
                 }
                 await extrasPagasServices.createExtraspagas(extraPaga)
             }
-        }
+        } 
 
         toast.success(toastMensagem, {
             position: "top-right",

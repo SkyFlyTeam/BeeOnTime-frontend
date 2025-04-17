@@ -9,7 +9,7 @@ import { ReactNode } from 'react';
 
 interface ModalProps {
   isOpen: boolean
-  solicitacao: SolicitacaoInterface
+  solicitacao?: SolicitacaoInterface
   onSolicitacaoUpdate: (updatedSolicitacao: SolicitacaoInterface) => void;
   onClick: () => void
   usuarioLogadoCod: number 
@@ -39,7 +39,7 @@ const Modal: React.FC<ModalProps> = ({
       <div className={styles.modal_container} onClick={onClick}>
         <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
           <p className={styles.modal_title}>{titulos[title]}</p>
-          <p className={styles.colaborador_label}><span>Colaborador: </span>{solicitacao.usuarioNome}</p>
+          <p className={styles.colaborador_label}><span>Colaborador: </span>{solicitacao && solicitacao.usuarioNome}</p>
           <div>
             {children}
           </div>
