@@ -1,7 +1,7 @@
 import { ApiException } from "../config/apiExceptions";
 import { ApiSolicitacao } from "../config/apiSolicitacao";
 // import SolicitacaoInterface, { EnviarSolciitacaoInterface } from "../interfaces/Solicitacao";
-import SolicitacaoInterface, { CriarSolicitacaoInterface } from "../interfaces/solicitacao";
+import SolicitacaoInterface, { CriarSolicitacaoInterface } from "../interfaces/Solicitacao";
 
 
 const getAllSolicitacao = async (): Promise<SolicitacaoInterface[] | ApiException> => {
@@ -111,7 +111,7 @@ const deleteSolicitacao = async (solicitacaoCod: number): Promise<SolicitacaoInt
       url: '/solicitacao/deletar',
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
-      data: { solicitacao_cod: solicitacaoCod }
+      data: { solicitacaoCod }
     });
 
     const solicitacaoDeletada: SolicitacaoInterface = data as unknown as SolicitacaoInterface;
