@@ -120,7 +120,7 @@ const BancoHorasDiario = () => {
                 <div className="flex w-full justify-between items-center mb-4">
                     <h1 className="text-xl md:text-3xl font-semibold ">
                         Banco de Horas
-                        {acessoCod == 0 || (acessoCod == 1 && id != usuario?.usuario_cod) && ` - ${colaborador?.usuario_nome}`}
+                        {(acessoCod == 0 || (acessoCod == 1 && id != usuario?.usuario_cod)) && ` - ${colaborador?.usuario_nome}`}
                     </h1>
                 </div>
             
@@ -128,8 +128,9 @@ const BancoHorasDiario = () => {
                     <DataTable 
                         columns={columnsDaily} 
                         data={bancoHorasDiario!} 
-                        filterColumns={["usuarioNome"]} 
+                        filterColumns={[]} 
                         title={`Mês de ${new Date(data as string).toLocaleString('pt-BR', { month: 'long' })}`}
+                        showSearchBar={false}
                     />
                 </div>
             </>

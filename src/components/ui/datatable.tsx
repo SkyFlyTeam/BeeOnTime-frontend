@@ -44,9 +44,10 @@ interface DataTableProps<TData, TValue> {
     data: TData[],
     filterColumns: string[];  
     title: string;
+    showSearchBar?: boolean;
 }
 
-export function DataTable<TData, TValue>({ data, columns, filterColumns, title }: DataTableProps<TData, TValue>) {
+export function DataTable<TData, TValue>({ data, columns, filterColumns, title, showSearchBar = true }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({usuarioCod: false, dataMes: false})
@@ -87,11 +88,14 @@ export function DataTable<TData, TValue>({ data, columns, filterColumns, title }
       <div className="w-full flex justify-between items-center">
         <h1 className="font-bold text-2xl">{title}</h1>
         <div className="flex items-center gap-4 justify-end py-4">
-          <InputBusca
-            value={filterValue}
-            onChange={handleFilterChange}
-            placeholder="Buscar..."
-          />
+          {showSearchBar && 
+            <InputBusca
+              value={filterValue}
+              onChange={handleFilterChange}
+              placeholder="Buscar..."
+            />
+          }
+          
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="bg-white text-base">

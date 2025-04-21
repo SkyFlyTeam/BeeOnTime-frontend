@@ -43,7 +43,10 @@ export default function BancoHoras() {
     const fetchBancoHorasMensais = async (date: String) => {
         try{
             const data = await relatorioBancoHorasServices.getRelatorioMensalAdmin(date);
-            setBancoHorasMensal(data as bancoHorasMensalAdmin[]);
+            const bancoHorasFiltrado = (data as bancoHorasMensalAdmin[]).filter(banco => 
+                banco.usuarioCod !== usuario?.usuario_cod
+              );
+            setBancoHorasMensal(bancoHorasFiltrado);
             setLoading(false);
         }catch (err) {
            console.error("Erro ao carregar o relatório de banco de horas mensais.");
@@ -228,6 +231,7 @@ export default function BancoHoras() {
                         <DataTable 
                             columns={adjustedColumnsFunc} 
                             data={bancoHorasMensal as bancoHorasMensalFunc[]} 
+                            showSearchBar={false}
                             filterColumns={[]} 
                             title={`Mês de ${currentData.toLocaleString('pt-BR', { month: 'long' })}`}
                         />

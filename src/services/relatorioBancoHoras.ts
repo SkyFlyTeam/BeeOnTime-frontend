@@ -16,7 +16,9 @@ const getRelatorioMensalAdmin = async (date: String) => {
         const usuariosData = usuariosResponse.data as Usuario[];
         const pontoData = pontoResponse.data as horasMensalAdminResponse[];
 
-        const relatorioMensal: bancoHorasMensalAdmin[] = usuariosData.map(usuario => {
+        const usuariosFiltrados = usuariosData.filter((usuario) => usuario.nivelAcesso.nivelAcesso_cod != 0)
+
+        const relatorioMensal: bancoHorasMensalAdmin[] = usuariosFiltrados.map(usuario => {
             // Encontrar os dados correspondentes do banco de horas e ponto
             const banco = bancoData.find(b => b.usuarioCod === usuario.usuario_cod);
             const ponto = pontoData.find(p => p.usuarioCod === usuario.usuario_cod);
