@@ -90,11 +90,6 @@ const BancoHorasDiario = () => {
         }
     }, [colaborador, data])
 
-    useEffect(() => {
-        console.log("banco diario data site", bancoHorasDiario)
-    }, [bancoHorasDiario])
-
-
     const SkeletonRow = () => (
         <div className="flex flex-row gap-6 mt-10 justify-between">
           <Skeleton className="bg-gray-200 w-24 h-10" />
