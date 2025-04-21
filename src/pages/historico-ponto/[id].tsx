@@ -32,6 +32,8 @@ export default function PointsHistoryPage() {
   const [histPontos, setHistPontos] = useState<HistPonto[] | null>(null);
   const [usuarioInfo, setUsuarioInfo] = useState<Usuario | null>(null);
 
+  const [usuarioLogado, setUsuarioLogado] = useState<Usuario | null>(null);
+
   // Loading state
   const [isLoading, setIsLoading] = useState(true);
 
@@ -86,6 +88,7 @@ export default function PointsHistoryPage() {
   useEffect(() => {
     const onMount = async () => {
       const usuario = await getUser();
+      setUsuarioLogado(usuario);
   
       // Verifique se id está disponível antes de continuar
       if (id) {
@@ -103,6 +106,10 @@ export default function PointsHistoryPage() {
   
     onMount();
   }, [id])
+
+  useEffect(() => {
+    console.log("acesso", usuarioInfo?.nivelAcesso.nivelAcesso_cod)
+  }, [usuarioInfo])
 
   const SkeletonRow = () => (
     <div className="flex flex-row gap-7 mt-10 justify-between">
@@ -138,16 +145,16 @@ export default function PointsHistoryPage() {
         <h1 className="text-xl md:text-3xl font-semibold mb-4">
           {accessLevel === "USER" ? "Meus Pontos" : `Pontos de ${usuarioInfo?.usuario_nome}`}
         </h1>
-        <div className={"p-6 shadow-xl rounded-xl bg-white"} style={{ boxShadow: "0px 0px 12px 4px rgba(0, 0, 0, 0.04)" }}>
           <PointsHistoryTable
             entries={histPontos}
             userInfo={usuarioInfo}
             onEdit={handleEdit}
             accessLevel={accessLevel}
           />
-        </div>
         <div className="flex w-full justify-end mt-10">
-          <CardBancoHoras usuarioCod={parseInt(id!.toString())}/>
+          {(usuarioLogado?.nivelAcesso.nivelAcesso_cod == 0 || (usuarioLogado?.nivelAcesso.nivelAcesso_cod == 1 && parseInt(id!.toString()) != usuarioLogado?.usuario_cod)) && 
+            <CardBancoHoras usuarioCod={parseInt(id!.toString())}/>
+          }
         </div>
       </div>
     )
