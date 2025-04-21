@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react'
 import { ApiException } from '../../config/apiExceptions'
 
 // Interfaces
-import Solicitacao from '../../interfaces/solicitacao'
+import Solicitacao from '@/interfaces/Solicitacao'
 
 // Services
 import { solicitacaoServices } from '../../services/solicitacaoServices'
@@ -19,6 +19,7 @@ import ModalDevolutiva from '../../components/custom/modalSolicitacao/modalDevol
 
 // Styles
 import styles from './Solicitacao.module.css'
+
 
 
 interface SolicitacoesState {
@@ -109,14 +110,14 @@ const SolicitacaoPage = () => {
     setOpenDevolutivaModal(status)
   }
 
-  const handleClick = (status: 'pendentes' | 'historico') => {
+  const handleClick = (status: string) => {
     setCurrentPage(1)
 
     setSolicitacoesData((prevState) => ({
       ...prevState,
-      all: prevState[status],
+      all: status == 'PENDENTES' ? prevState['pendentes'] : prevState['historico'],
     }))
-    setToogle(status === 'pendentes')
+    setToogle(status === 'PENDENTES')
   }
 
   const handleSolicitacaoUpdate = async (updatedSolicitacao: Solicitacao) => {
@@ -206,13 +207,16 @@ const SolicitacaoPage = () => {
   return (
     <div className={styles.solicitacao_container}>
       <div className={styles.card_container}>
-        <h1 className='font-bold text-4xl'>Solicitações</h1>
+        <h1 className='font-bold text-4xl self-start'>Solicitações</h1>
 
         <Tab
-          toogle={toogle}
+          activeTab={toogle ? 'PENDENTES' : 'HISTÓRICO'}
           onClick={handleClick}
-          pendentes_length={solicitacoesData.pendentes.length}
+          tabLabels={['PENDENTES', 'HISTÓRICO']}  
+          pendentesLength={solicitacoesData.pendentes.length}
+          showBadge={true}  
         />
+        
 
         <div className={styles.container}>
           {displayedSolicitacoes.length > 0 ? (

@@ -18,7 +18,7 @@ const InputBusca: React.FC<InputBuscaProps> = ({ value, onChange, placeholder = 
         placeholder={placeholder}
         value={value}
         onChange={onChange}
-        className="max-w-sm bg-white pl-8"
+        className="max-w-sm bg-white pl-8 text-base"
       />
     </div>
   );
