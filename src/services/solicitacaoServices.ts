@@ -1,7 +1,7 @@
 import { ApiException } from "../config/apiExceptions";
 import { ApiSolicitacao } from "../config/apiSolicitacao";
 // import SolicitacaoInterface, { EnviarSolciitacaoInterface } from "../interfaces/Solicitacao";
-import SolicitacaoInterface, { CriarSolicitacaoInterface } from "../interfaces/solicitacao";
+import SolicitacaoInterface, { CriarSolicitacaoInterface } from "../interfaces/Solicitacao";
 
 
 const getAllSolicitacao = async (): Promise<SolicitacaoInterface[] | ApiException> => {
@@ -17,6 +17,34 @@ const getAllSolicitacao = async (): Promise<SolicitacaoInterface[] | ApiExceptio
     return new ApiException("Erro desconhecido.");
   }
 };
+
+const getAllSolicitacaoByUsuario = async (id: number) => {
+  try {
+    const { data } = await ApiSolicitacao.get(`/solicitacao/usuario/${id}`);
+    return data;
+
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return new ApiException(error.message || "Erro ao consultar a API.");
+    }
+
+    return new ApiException("Erro desconhecido.");
+  }
+}
+
+const getAllSolicitacaoBySetor = async (id: number) => {
+  try {
+    const { data } = await ApiSolicitacao.get(`/solicitacao/setor/${id}`);
+    return data;
+
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return new ApiException(error.message || "Erro ao consultar a API.");
+    }
+
+    return new ApiException("Erro desconhecido.");
+  }
+}
 
 const getSolicitacaoById = async (id: number): Promise<SolicitacaoInterface | ApiException> => {
   try {
@@ -83,7 +111,7 @@ const deleteSolicitacao = async (solicitacaoCod: number): Promise<SolicitacaoInt
       url: '/solicitacao/deletar',
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
-      data: { solicitacao_cod: solicitacaoCod }
+      data: { solicitacaoCod }
     });
 
     const solicitacaoDeletada: SolicitacaoInterface = data as unknown as SolicitacaoInterface;
@@ -103,5 +131,7 @@ export const solicitacaoServices = {
   getSolicitacaoById,
   updateSolicitacao,
   deleteSolicitacao,
-  createSolicitacao
+  createSolicitacao,
+  getAllSolicitacaoByUsuario,
+  getAllSolicitacaoBySetor
 };

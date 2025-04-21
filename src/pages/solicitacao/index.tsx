@@ -1,37 +1,42 @@
-// General
 import { useEffect, useState } from 'react'
-
-// Config
 import { ApiException } from '../../config/apiExceptions'
 
 // Interfaces
-import Solicitacao from '@/interfaces/Solicitacao'
+import SolicitacaoInterface from '../../interfaces/Solicitacao'
 
 // Services
 import { solicitacaoServices } from '../../services/solicitacaoServices'
-import { getUsuario } from '../../services/authService'
-
-// Components
 import SolicitationCard from './SolicitacaoCard'
-import Tab from '../../components/custom/tab'
-import Modal from '../../components/custom/modalSolicitacao'
-import ModalDevolutiva from '../../components/custom/modalSolicitacao/modalDevolutiva'
-
-// Styles
 import styles from './Solicitacao.module.css'
+import Tab from '../../components/custom/tab'
+import Modal from '../../components/custom/modalSolicitacao/index'
 
+import ModalDevolutiva from '../../components/custom/modalSolicitacao/modalDevolutiva'
+import { getUsuario } from '../../services/authService'
+import ModalAjustePonto from '@/components/custom/modalSolicitacao/modalAjustePonto'
+import ModalDecisaoHoraExtra from '@/components/custom/modalSolicitacao/modalHoraExtra/modalHoraExtra'
+import { renderModalChildren } from '../../utils/renderModalByTipoSolicitacao.tsx'
 
 
 interface SolicitacoesState {
-  all: Solicitacao[]
-  pendentes: Solicitacao[]
-  historico: Solicitacao[]
+  all: SolicitacaoInterface[]
+  pendentes: SolicitacaoInterface[]
+  historico: SolicitacaoInterface[]
 }
 
-const SolicitacaoPage = () => {
+const Solicitacao = () => {
+  // Modais
   const [openDevolutivaModal, setOpenDevolutivaModal] = useState<boolean>(false)
+  const [isModalHoraExtraOpen, setIsModalHoraExtraOpen] = useState(false);
+  const [openModal, setOpenModal] = useState<{
+    [key: string]: boolean
+  }>({})
+
+  // Informações do usuário
   const [usuarioCod, setUsuarioCod] = useState<number>(0)
   const [usuarioCargo, setUsuarioCargo] = useState<string>('')
+  const [nivelAcessoCod, setNivelAcessoCod] = useState<number>()
+  const [setorCod, setSetorCod] = useState()
 
   const [toogle, setToogle] = useState(false)
 
@@ -41,48 +46,11 @@ const SolicitacaoPage = () => {
     historico: [],
   })
 
-  const [displayedSolicitacoes, setDisplayedSolicitacoes] = useState<Solicitacao[]>([])
-
-  const [openModal, setOpenModal] = useState<{
-    [key: string]: boolean
-  }>({})
-
+  // Paginação
+  const [displayedSolicitacoes, setDisplayedSolicitacoes] = useState<SolicitacaoInterface[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(5)
   const [totalItems, setTotalItems] = useState(0)
-
-  const fetchSolicitacoes = async (usuarioCargo: string, usuarioCod: number) => {
-    const result = await solicitacaoServices.getAllSolicitacao()
-  
-    if (result instanceof ApiException) {
-      setSolicitacoesData({
-        all: [],
-        pendentes: [],
-        historico: [],
-      })
-      setTotalItems(0)
-    } else {
-      let filteredSolicitacoes = result
-  
-      // Aplica o filtro com base no cargo do usuário
-      if (usuarioCargo === 'Funcionário') {
-        filteredSolicitacoes = result.filter((s) => s.usuarioCod === usuarioCod)
-      } else if (usuarioCargo === 'Gestor' || usuarioCargo === 'Admin') {
-        filteredSolicitacoes = result.filter(
-          (s) => s.usuarioCod === usuarioCod || s.usuarioCargo === 'Funcionário'
-        )
-      }
-  
-      setSolicitacoesData({
-        all: filteredSolicitacoes.filter((s) => s.solicitacaoStatus !== 'PENDENTE'),
-        pendentes: filteredSolicitacoes.filter((s) => s.solicitacaoStatus === 'PENDENTE'),
-        historico: filteredSolicitacoes.filter((s) => s.solicitacaoStatus !== 'PENDENTE'),
-      })
-  
-      setTotalItems(filteredSolicitacoes.length)
-    }
-  }
-  
 
   const paginateData = () => {
     const dataToDisplay = toogle ? solicitacoesData.pendentes : solicitacoesData.historico
@@ -120,9 +88,9 @@ const SolicitacaoPage = () => {
     setToogle(status === 'PENDENTES')
   }
 
-  const handleSolicitacaoUpdate = async (updatedSolicitacao: Solicitacao) => {
+  // Atualizar lista
+  const handleSolicitacaoUpdate = async (updatedSolicitacao: SolicitacaoInterface) => {
     setSolicitacoesData((prevData) => {
-      // Refiltra as solicitações após a atualização.
       const updatedPendentes = prevData.pendentes.filter(
         (solicitacao) => solicitacao.solicitacaoCod !== updatedSolicitacao.solicitacaoCod
       )
@@ -136,7 +104,6 @@ const SolicitacaoPage = () => {
         updatedHistorico.push(updatedSolicitacao)
       }
   
-      // Aplique o filtro novamente para garantir que o cargo do usuário seja levado em consideração
       return {
         ...prevData,
         pendentes: updatedPendentes,
@@ -147,7 +114,7 @@ const SolicitacaoPage = () => {
     paginateData()
   }
   
-
+  // Atualziar depois de uma exclusão
   const handleDeleteSolicitacao = (idToDelete: number) => {
     setSolicitacoesData((prevData) => {
       const updatedPendentes = prevData.pendentes.filter(
@@ -172,6 +139,35 @@ const SolicitacaoPage = () => {
     )
   }
 
+  const fetchSolicitacoes = async (usuarioCargo: string, usuarioCod: number, nivelAcessoCod: number, setorCod: number) => {
+    let result: SolicitacaoInterface[] | ApiException | null = null
+    if (nivelAcessoCod === 2) {
+      result = await solicitacaoServices.getAllSolicitacaoByUsuario(usuarioCod) as SolicitacaoInterface[] | ApiException
+    } else if (nivelAcessoCod === 1) {
+      result = await solicitacaoServices.getAllSolicitacaoBySetor(setorCod) as SolicitacaoInterface[] | ApiException
+    } else {
+      result = await solicitacaoServices.getAllSolicitacao()
+    }
+
+    if (result instanceof ApiException || result === null) {
+      setSolicitacoesData({
+        all: [],
+        pendentes: [],
+        historico: [],
+      })
+      setTotalItems(0)
+    } else {
+  
+      setSolicitacoesData({
+        all: result.filter((s: SolicitacaoInterface) => s.solicitacaoStatus !== 'PENDENTE'),
+        pendentes: result.filter((s: SolicitacaoInterface) => s.solicitacaoStatus === 'PENDENTE'),
+        historico: result.filter((s: SolicitacaoInterface) => s.solicitacaoStatus !== 'PENDENTE'),
+      })
+  
+      setTotalItems(result.length)
+    }
+  }
+
   useEffect(() => {
     const initialize = async () => {
       try {
@@ -181,22 +177,23 @@ const SolicitacaoPage = () => {
           return
         }
   
-        const { usuario_cod, usuario_cargo } = response.data
+        const { usuario_cod, usuario_cargo, nivelAcesso_cod, setorCod } = response.data
         setUsuarioCod(usuario_cod)
         setUsuarioCargo(usuario_cargo)
-        
-        // Chama fetchSolicitacoes sempre que o cargo ou código do usuário for alterado
-        await fetchSolicitacoes(usuario_cargo, usuario_cod)
+        setNivelAcessoCod(nivelAcesso_cod)
+        setSetorCod(setorCod)
+
+        await fetchSolicitacoes(usuario_cargo, usuario_cod, nivelAcesso_cod, setorCod)
       } catch (error) {
         console.error('Erro ao obter usuário:', error)
       }
     }
   
     initialize()
-    }, [usuarioCod, usuarioCargo])  // Reexecutar quando o cargo ou código do usuário mudar
+    }, [usuarioCod, usuarioCargo, nivelAcessoCod, setorCod])  
     
     useEffect(() => {
-      paginateData()  // Reaplica a paginação após a mudança de solicitações
+      paginateData()  
     }, [currentPage, solicitacoesData, toogle])
   
 
@@ -239,7 +236,17 @@ const SolicitacaoPage = () => {
                   solicitacao={solicitacao}
                   onSolicitacaoUpdate={handleSolicitacaoUpdate}
                   usuarioLogadoCod={usuarioCod}
-                  usuarioCargo={usuarioCargo}
+                  usuarioCargo={usuarioCargo} 
+                  children={renderModalChildren({
+                    solicitacao,
+                    onSolicitacaoUpdate: handleSolicitacaoUpdate,
+                    onClose: () => handleModal(solicitacao.solicitacaoCod, false),
+                    usuarioLogadoCod: usuarioCod,
+                    usuarioCargo: usuarioCargo,
+                    nivelAcessoCod: nivelAcessoCod
+                  })
+                  } 
+                  title={solicitacao.tipoSolicitacaoCod.tipoSolicitacaoNome}                  
                 />
               </div>
             ))
@@ -296,4 +303,4 @@ const SolicitacaoPage = () => {
   )
 }
 
-export default SolicitacaoPage
+export default Solicitacao

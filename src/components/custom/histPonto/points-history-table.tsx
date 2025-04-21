@@ -67,18 +67,18 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
     ];
 
     const jornadaFormatada = () => {
-      if(userInfo && userInfo?.jornadas.jornada_diasSemana){
-        const diasDaSemanaSiglas = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
-        const diasTrabalhados = userInfo?.jornadas.jornada_diasSemana
-          .map((trabalha, index) => trabalha ? diasDaSemanaSiglas[index] : null)
-          .filter((dia) => dia !== null);
-          if(userInfo?.jornadas.jornada_horarioFlexivel){
-            return `${diasTrabalhados!.join(", ")}`;
-          }else{
-            return `${diasTrabalhados!.join(", ")} das ${userInfo?.jornadas.jornada_horarioEntrada.toString().slice(0, 5)} até ${userInfo?.jornadas.jornada_horarioSaida.toString().slice(0, 5)}`;
-          }
-      }
-    }
+      const diasDaSemanaSiglas = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
+      const diasTrabalhados = userInfo?.jornadas.jornada_diasSemana
+        .map((trabalha, index) => trabalha ? diasDaSemanaSiglas[index] : null)
+        .filter((dia) => dia !== null);
+      if (diasTrabalhados && diasTrabalhados.length > 0) {
+        if(userInfo?.jornadas.jornada_horarioFlexivel){
+          return `${diasTrabalhados.join(", ")}`;
+        }else{
+          return `${diasTrabalhados.join(", ")} das ${userInfo?.jornadas.jornada_horarioEntrada.toString().slice(0, 5)} até ${userInfo?.jornadas.jornada_horarioSaida.toString().slice(0, 5)}`;
+        }
+      } 
+    };
 
     const { horasSemana, horasMes } = calculateCargaHoraria(userInfo?.usuario_cargaHoraria!, userInfo?.jornadas?.jornada_diasSemana?.filter(dia => dia).length ?? 0);
 

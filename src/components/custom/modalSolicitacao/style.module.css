@@ -28,7 +28,7 @@
 }
 
 .colaborador_label{
-  font-size: 1.2rem;
+  font-size: 1rem;
 }
 
 .colaborador_label span{
@@ -48,5 +48,9 @@
     flex-direction: column;
     row-gap: .2rem;
     padding: 1rem;
+  }
+
+  .modal_title {
+    font-size: 1.15rem;
   }
 }

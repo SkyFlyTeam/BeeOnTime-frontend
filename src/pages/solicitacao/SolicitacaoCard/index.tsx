@@ -67,7 +67,7 @@ const SolicitacaoCard = ({
     }
   }
 
-  const showName = usuarioCargo !== 'Funcionário' && solicitacao?.usuarioCod !== usuarioCod
+  const showName = usuarioLogadoCargo !== 'Funcionário' && solicitacao?.usuarioCod !== usuarioLogadoCod
 
   return (
     <div className={styles.card} onClick={() => onClick()}>

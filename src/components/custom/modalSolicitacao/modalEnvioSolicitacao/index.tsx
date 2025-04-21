@@ -10,6 +10,8 @@ import PontoProv from '../../../../interfaces/pontoProv'
 
 // Components
 import { Button } from '@/components/ui/button'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css'; // Importe o CSS do react-toastify
 
 // Styles
 import styles from './styles.module.css'
@@ -80,11 +82,17 @@ const ModalCriarSolicitacao = ({ isOpen, onClose, ponto }: ModalCriarSolicitacao
         ]
       }
       const resultPonto = await pontoServices.createSolicitacaoPonto(solicitacaoPonto)
-      // console.log(`SOLICITAÇÃO CRIADA: ${resultPonto}`)
+      toast.success('Solicitação enviada com sucesso!', {
+        position: "top-right",
+        autoClose: 3000,
+      })
       onClose();
     } catch (error: any) {
       console.error("Erro ao enviar solicitação:", error.message);
-      alert("Erro ao enviar solicitação: " + error.message);
+      toast.error('Erro ao enviar solicitação!', {
+        position: "top-right",
+        autoClose: 3000,
+      })
     }
   };
 

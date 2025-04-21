@@ -19,7 +19,8 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
         "outline-danger": "border-2 border-red-500 text-red-500 bg-transparent hover:bg-red-500 hover:text-white",
         "outline-success": "border-2 border-green-500 text-green-500 bg-transparent hover:bg-green-500 hover:text-white",
-        "warning": "bg-yellow-500 text-black hover:bg-yellow-600"
+        "warning": "bg-yellow-500 text-black hover:bg-yellow-600",
+        "outline-primary": "border-2 border-[#4179C9] text-[#4179C9] bg-transparent hover:bg-[#4179C9] hover:text-white",
       },
       size: {
         default: "h-10 px-4 py-2",

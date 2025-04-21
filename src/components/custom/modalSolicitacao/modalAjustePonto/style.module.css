@@ -13,7 +13,7 @@
 
 .FormGroup {
     margin-right: 2rem;
-
+    
     & input {
         border: 2px solid #eceff4;
         border-radius: .5rem;
@@ -26,14 +26,15 @@
     }
 }
 
-.justificativa {
+.justificativa, .justificativa_noFile {
     display: flex;
+    flex-direction: column;
     align-content: center;
     width: 100%;
 }
 
-.justificativa input {
-    width: 15rem;
+.justificativa input, .justificativa_noFile input {
+    width: 100%;
     padding: 0.5rem;
 }
 
@@ -43,6 +44,7 @@
 
     & input {
         margin-right: .5rem;
+        width: 100%;
     }
 }
 
