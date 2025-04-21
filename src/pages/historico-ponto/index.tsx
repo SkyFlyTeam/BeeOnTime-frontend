@@ -18,6 +18,7 @@ import MarcacaoPonto from "@/interfaces/marcacaoPonto";
 
 // Components
 import { PointsHistoryTable } from "@/components/custom/histPonto/points-history-table";
+import CardBancoHoras from "./_components/CardBancoHoras/cardBancoHoras";
 
 
 export default function PointsHistoryPage() {

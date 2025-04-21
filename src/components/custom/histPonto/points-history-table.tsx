@@ -83,7 +83,7 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
     const { horasSemana, horasMes } = calculateCargaHoraria(userInfo?.usuario_cargaHoraria!, userInfo?.jornadas?.jornada_diasSemana?.filter(dia => dia).length ?? 0);
 
     return (
-      <div ref={ref} className={cn("p-6 shadow-xl rounded-xl", className)} style={{ boxShadow: "0px 0px 12px 4px rgba(0, 0, 0, 0.04)" }}>
+      <div ref={ref}>
         {/* {accessLevel === "USER" ? ( */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 pb-3 md:py-2">
             <div className="flex flex-row items-start gap-2 md:gap-4">

@@ -20,6 +20,8 @@ import { usuarioServices } from "@/services/usuarioServices";
 // Components
 import { PointsHistoryTable } from "@/components/custom/histPonto/points-history-table";
 import EditarFuncionarioForm from "@/components/custom/CardEditarFuncionario/editarFuncionarioForm";
+import CardBancoHoras from "./_components/CardBancoHoras/cardBancoHoras";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Styles
 
@@ -84,37 +86,70 @@ export default function PointsHistoryPage() {
   useEffect(() => {
     const onMount = async () => {
       const usuario = await getUser();
-
-      if (usuario.nivelAcesso.nivelAcesso_cod == 2) {
-        fetchHistPontos(usuario.usuario_cod);
-        fetchUsuario(usuario.usuario_cod);
-      } else {
-        setAccessLevel("ADM");
-        fetchHistPontos(parseInt(id!.toString()));
-        fetchUsuario(parseInt(id!.toString()));
+  
+      // Verifique se id está disponível antes de continuar
+      if (id) {
+        if (usuario.nivelAcesso.nivelAcesso_cod == 2) {
+          fetchHistPontos(usuario.usuario_cod);
+          fetchUsuario(usuario.usuario_cod);
+        } else {
+          setAccessLevel("ADM");
+          fetchHistPontos(parseInt(id.toString()));
+          fetchUsuario(parseInt(id.toString()));
+        }
       }
       setIsLoading(false); // Set loading to false after data is fetched
     };
-
+  
     onMount();
-  }, [id]); // Empty dependency array ensures the effect runs once after mount
+  }, [id])
 
-  if (isLoading) {
-    return <div>Carregando...</div>; // Show loading state while data is being fetched
-  }
-
-  return (
-    <div className="flex flex-col p-6 md:p-9">
-      {/* {accessLevel == "ADM" ? <EditarFuncionarioForm usuarioInfo={usuarioInfo!} /> : null} */}
-      <h1 className="text-xl md:text-3xl font-semibold mb-4">
-        {accessLevel === "USER" ? "Meus Pontos" : `Pontos de ${usuarioInfo?.usuario_nome}`}
-      </h1>
-      <PointsHistoryTable
-        entries={histPontos}
-        userInfo={usuarioInfo}
-        onEdit={handleEdit}
-        accessLevel={accessLevel}
-      />
+  const SkeletonRow = () => (
+    <div className="flex flex-row gap-7 mt-10 justify-between">
+      <Skeleton className="bg-gray-200 w-24 h-10" />
+      <Skeleton className="bg-gray-200 w-24 h-10" />
+      <Skeleton className="bg-gray-200 w-24 h-10" />
+      <Skeleton className="bg-gray-200 w-72 h-10" />
+      <Skeleton className="bg-gray-200 w-48 h-10" />
+      <Skeleton className="bg-gray-200 w-32 h-10" />
     </div>
+  );
+  
+  return (
+    isLoading ? (
+      <div className="p-6 md:p-9">
+        <Skeleton className=" bg-gray-200 h-10 w-48" />
+        <div className="w-full rounded-xl mt-5 bg-gray-100 p-5">
+          <div className="flex flex-row gap-6 justify-between">
+            <Skeleton className="bg-gray-200 w-80 h-10" />
+            <Skeleton className="bg-gray-200 w-96 h-10" />
+          </div>
+          {[...Array(5)].map((_, idx) => (
+            <SkeletonRow key={idx} />
+          ))}
+        </div>
+        <div className="flex w-full justify-end mt-10">
+          <Skeleton className="bg-gray-200 h-40 w-[40rem]" />
+        </div>
+      </div>
+    ) : (
+      <div className="flex flex-col p-6 md:p-9">
+        {/* {accessLevel == "ADM" ? <EditarFuncionarioForm usuarioInfo={usuarioInfo!} /> : null} */}
+        <h1 className="text-xl md:text-3xl font-semibold mb-4">
+          {accessLevel === "USER" ? "Meus Pontos" : `Pontos de ${usuarioInfo?.usuario_nome}`}
+        </h1>
+        <div className={"p-6 shadow-xl rounded-xl bg-white"} style={{ boxShadow: "0px 0px 12px 4px rgba(0, 0, 0, 0.04)" }}>
+          <PointsHistoryTable
+            entries={histPontos}
+            userInfo={usuarioInfo}
+            onEdit={handleEdit}
+            accessLevel={accessLevel}
+          />
+        </div>
+        <div className="flex w-full justify-end mt-10">
+          <CardBancoHoras usuarioCod={parseInt(id!.toString())}/>
+        </div>
+      </div>
+    )
   );
 }
