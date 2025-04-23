@@ -49,10 +49,10 @@ export default function BotaoDropdownSolicitacao({
   };
 
   return (
-    <div>
+    <div className='flex gap-4 w-fit py-1 mb-4 '>
       <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
         <DropdownMenuTrigger
-          className="flex items-center bg-yellow-500 text-black px-4 py-2 rounded-md mt-4"
+          className="flex items-center bg-yellow-500 text-black px-4 py-2 rounded-md mt-4 "
         >
           Nova solicitação
           {isDropdownOpen ? (
@@ -66,7 +66,7 @@ export default function BotaoDropdownSolicitacao({
             <DropdownMenuItem
               key={tipo}
               onSelect={() => handleDropdownSelect(tipo)}
-              className="cursor-pointer hover:!bg-[#FFF4D9]"
+              className=" font-semibold cursor-pointer hover:!bg-[#FFF4D9]"
             >
               {tipo}
             </DropdownMenuItem>

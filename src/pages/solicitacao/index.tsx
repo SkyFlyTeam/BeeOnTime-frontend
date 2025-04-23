@@ -21,7 +21,7 @@ const Solicitacao = () => {
   // Modais
   const [openDevolutivaModal, setOpenDevolutivaModal] = useState<boolean>(false);
   const [openModal, setOpenModal] = useState<{ [key: string]: boolean }>({});
-  
+
 
   // Informações do usuário
   const [usuarioCod, setUsuarioCod] = useState<number>(0);
@@ -204,19 +204,25 @@ const Solicitacao = () => {
       <div className={styles.card_container}>
         <h1 className="font-bold text-4xl">Solicitações</h1>
 
-        {/* Componente do dropdown e modais */}
-        <BotaoDropdownSolicitacao
-          usuarioCod={usuarioCod}
-          usuarioCargo={usuarioCargo}
-          handleSolicitacaoUpdate={handleSolicitacaoUpdate}
-        />
+
+        <div className='flex flex-row justify-between'>
 
         <Tab
-          toogle={toogle}
-          onClick={handleClick}
-          pendentes_length={solicitacoesData.pendentes.length}
-        />
+            toogle={toogle}
+            onClick={handleClick}
+            pendentes_length={solicitacoesData.pendentes.length}
+          />
 
+          
+          {/* Componente do dropdown e modais */}
+          <BotaoDropdownSolicitacao
+            usuarioCod={usuarioCod}
+            usuarioCargo={usuarioCargo}
+            handleSolicitacaoUpdate={handleSolicitacaoUpdate}
+          />
+
+          
+        </div>
         <div className={styles.container}>
           {displayedSolicitacoes.length > 0 ? (
             displayedSolicitacoes.map((solicitacao) => (
