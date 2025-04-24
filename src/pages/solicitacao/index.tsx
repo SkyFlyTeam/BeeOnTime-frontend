@@ -235,10 +235,6 @@ const Solicitacao = () => {
                 <Modal
                   isOpen={openModal[solicitacao.solicitacaoCod]}
                   onClick={() => handleModal(solicitacao.solicitacaoCod, false)}
-                  solicitacao={solicitacao}
-                  onSolicitacaoUpdate={handleSolicitacaoUpdate}
-                  usuarioLogadoCod={usuarioCod}
-                  usuarioCargo={usuarioCargo} 
                   children={renderModalChildren({
                     solicitacao,
                     onSolicitacaoUpdate: handleSolicitacaoUpdate,
@@ -307,11 +303,8 @@ const Solicitacao = () => {
 
       {/* Hora extra */}
       <Modal 
-        isOpen={isModalHoraExtraOpen} 
-        onSolicitacaoUpdate={handleSolicitacaoUpdate}   
+        isOpen={isModalHoraExtraOpen}  
         onClick={() => handleModal(0, false)} 
-        usuarioLogadoCod={usuarioCod} 
-        usuarioCargo={usuarioCargo} 
         children={
           <ModalSolicitarHoraExtra 
             usuarioCod={usuarioCod} 

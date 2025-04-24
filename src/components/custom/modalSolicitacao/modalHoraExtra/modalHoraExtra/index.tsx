@@ -102,7 +102,8 @@ const ModalDecisaoHoraExtra: React.FC<ModalBancoHorasProps> = ({
     }, [])
 
     return(
-        <>
+        <>  
+            <p className={styles.colaborador_label}><span>Colaborador: </span>{solicitacao && solicitacao.usuarioNome}</p>
             <form className={styles.form_container}>
                 <div>
                     <span className={styles.data_span}>Dia(s) selecionado(s): </span>{diaSelecionado}
