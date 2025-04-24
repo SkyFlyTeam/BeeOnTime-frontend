@@ -30,6 +30,7 @@ const Solicitacao = () => {
   // Informações do usuário
   const [usuarioCod, setUsuarioCod] = useState<number>(0)
   const [usuarioCargo, setUsuarioCargo] = useState<string>('')
+  const [usuarioDataContratacao, setUsuarioDataContratacao] = useState<Date>(new Date())
   const [nivelAcessoCod, setNivelAcessoCod] = useState<number>()
   const [setorCod, setSetorCod] = useState()
 
@@ -172,9 +173,10 @@ const Solicitacao = () => {
           return
         }
   
-        const { usuario_cod, usuario_cargo, nivelAcesso_cod, setorCod } = response.data
+        const { usuario_cod, usuario_cargo, usuario_dataContratacao, nivelAcesso_cod, setorCod } = response.data
         setUsuarioCod(usuario_cod)
         setUsuarioCargo(usuario_cargo)
+        setUsuarioDataContratacao(usuario_dataContratacao)
         setNivelAcessoCod(nivelAcesso_cod)
         setSetorCod(setorCod)
 
@@ -200,6 +202,20 @@ const Solicitacao = () => {
     <div className={styles.solicitacao_container}>
       <div className={styles.card_container}>
         <h1 className='font-bold text-4xl'>Solicitações</h1>
+        <span>
+          {usuarioDataContratacao &&
+            (() => {
+              const data = new Date(usuarioDataContratacao)
+              const hoje = new Date()
+              const umAnoAtras = new Date()
+              umAnoAtras.setFullYear(hoje.getFullYear() - 1)
+
+              const formatada = data.toLocaleDateString('pt-BR')
+              const maisDeUmAno = data <= umAnoAtras
+
+              return `Contratado em ${formatada} (${maisDeUmAno ? 'há mais de 1 ano' : 'menos de 1 ano'})`
+            })()}
+        </span>
         <Tab
           toogle={toogle}
           onClick={handleClick}

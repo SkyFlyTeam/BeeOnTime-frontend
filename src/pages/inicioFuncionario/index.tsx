@@ -12,6 +12,7 @@ import CardCargaHoraria from './_components/cardCargaHoraria';
 // Interfaces
 import { Usuario } from '@/interfaces/usuario';
 import HistPontos from '@/interfaces/histPonto';
+import ModalFerias from '@/components/custom/modalSolicitacao/modalFerias';
 
 export default function InicioFuncionario() {
     const [nome, setNome] = useState("José");
@@ -47,6 +48,7 @@ export default function InicioFuncionario() {
         <div className='flex flex-wrap flex-row gap-8'>
             <TimeClock />
             <CardCargaHoraria usuarioInfo={usuarioInfo!} histPontos={histPontos!} />
+            <ModalFerias />
         </div>
     );
 }

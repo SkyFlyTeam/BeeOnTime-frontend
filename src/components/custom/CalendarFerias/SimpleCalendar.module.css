@@ -1,0 +1,85 @@
+.calendar {
+    width: 100%;
+    /* max-width: 350px; */
+    height: 100%;
+    min-height: 110%;
+    margin: auto;
+    padding: 1rem;
+    background: #f9f9f9;
+    font-family: sans-serif;
+  }
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    color: #FFB503;
+  }
+  
+  .header button {
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    cursor: pointer;
+  }
+  
+  .header h2 {
+    font-size: 1rem;
+    text-transform: capitalize;
+    font-weight: bold;
+  }
+  
+  .weekdays,
+  .days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.5rem;
+    text-align: center;
+  }
+  
+  .weekday {
+    font-weight: bold;
+    font-size: 0.85rem;
+    color: #555;
+  }
+  
+  .day {
+    padding: 0.75rem 0;
+    background: rgba(0, 0, 0, 0);
+    font-size: 0.9rem;
+    transition: background 0.2s ease;
+  }
+  
+  .day:hover {
+    background: #efefef;
+    cursor: pointer;
+  }
+  
+  .selected_button {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+  
+  .label_calendario {
+    color: rgb(148, 148, 148);
+  }
+
+  .selected {
+    background-color: #e0e0e0;
+    font-weight: bold;
+  }
+  
+  .selectedDay {
+    background-color: #FFB503 !important;
+    color: #000;
+    font-weight: bold;
+    border-radius: 8px;
+
+  }
+  
+  .disabled {
+    pointer-events: none;
+    opacity: 0.4;
+  }
+  
+  
