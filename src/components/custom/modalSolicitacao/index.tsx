@@ -9,22 +9,14 @@ import { ReactNode } from 'react';
 
 interface ModalProps {
   isOpen: boolean
-  solicitacao?: SolicitacaoInterface
-  onSolicitacaoUpdate: (updatedSolicitacao: SolicitacaoInterface) => void;
   onClick: () => void
-  usuarioLogadoCod: number 
-  usuarioCargo: string
   children: ReactNode
   title: string
 }
 
 const Modal: React.FC<ModalProps> = ({
   isOpen,
-  solicitacao,
   onClick,
-  onSolicitacaoUpdate,
-  usuarioLogadoCod,
-  usuarioCargo,
   children,
   title 
 }) => {
