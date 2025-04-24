@@ -32,6 +32,10 @@
 
 }
 
+.colaborador_label span{
+    color: var(--gray);
+  }
+
 @media (max-width: 426px) {
     .button_container {
         flex-direction: column;
