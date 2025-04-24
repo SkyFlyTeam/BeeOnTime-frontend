@@ -11,6 +11,9 @@ import { getUsuario } from '../../services/authService'
 import ModalAjustePonto from '@/components/custom/modalSolicitacao/modalAjustePonto'
 import ModalDecisaoHoraExtra from '@/components/custom/modalSolicitacao/modalHoraExtra/modalHoraExtra'
 import { renderModalChildren } from '../../utils/renderModalByTipoSolicitacao.tsx'
+import ModalSolicitarHoraExtra from '@/components/custom/modalSolicitacao/modalHoraExtra/modalSolicitarHoraExtra'
+import { pontoServices } from '@/services/pontoServices'
+import MarcacaoPonto from '@/interfaces/marcacaoPonto'
 
 import { Skeleton } from '@/components/ui/skeleton'
 import SolicitacaoCardSkeleton from './SolicitacaoCard/cardSkeleton'
@@ -34,6 +37,7 @@ const Solicitacao = () => {
   const [usuarioCargo, setUsuarioCargo] = useState<string>('')
   const [nivelAcessoCod, setNivelAcessoCod] = useState<number>()
   const [setorCod, setSetorCod] = useState()
+  const [cargaHoraria, setCargaHoraria] = useState<number>()
 
   const [toogle, setToogle] = useState(false)
 
@@ -118,6 +122,10 @@ const Solicitacao = () => {
   }
 
   const handleModal = (solicitacaoCod: number, status: boolean) => {
+    if (solicitacaoCod === 0) {
+      setIsModalHoraExtraOpen(false)
+      return
+    }
     setOpenModal((prevState) => ({
       ...prevState,
       [solicitacaoCod]: status,
@@ -206,11 +214,12 @@ const Solicitacao = () => {
           return
         }
   
-        const { usuario_cod, usuario_cargo, nivelAcesso_cod, setorCod } = response.data
+        const { usuario_cod, usuario_cargo, nivelAcesso_cod, setorCod, usuario_cargaHoraria} = response.data
         setUsuarioCod(usuario_cod)
         setUsuarioCargo(usuario_cargo)
         setNivelAcessoCod(nivelAcesso_cod)
         setSetorCod(setorCod)
+        setCargaHoraria(usuario_cargaHoraria)
 
         await fetchSolicitacoes(usuario_cargo, usuario_cod, nivelAcesso_cod, setorCod)
       } catch (error) {
@@ -260,7 +269,6 @@ const Solicitacao = () => {
           onClick={handleClick}
           pendentes_length={solicitacoesData.pendentes.length}
         />
-
         <div className={styles.container}>
           {displayedSolicitacoes.length > 0 ? (
             displayedSolicitacoes.map((solicitacao) => (
@@ -279,17 +287,14 @@ const Solicitacao = () => {
                 <Modal
                   isOpen={openModal[solicitacao.solicitacaoCod]}
                   onClick={() => handleModal(solicitacao.solicitacaoCod, false)}
-                  solicitacao={solicitacao}
-                  onSolicitacaoUpdate={handleSolicitacaoUpdate}
-                  usuarioLogadoCod={usuarioCod}
-                  usuarioCargo={usuarioCargo} 
                   children={renderModalChildren({
                     solicitacao,
                     onSolicitacaoUpdate: handleSolicitacaoUpdate,
                     onClose: () => handleModal(solicitacao.solicitacaoCod, false),
                     usuarioLogadoCod: usuarioCod,
                     usuarioCargo: usuarioCargo,
-                    nivelAcessoCod: nivelAcessoCod
+                    nivelAcessoCod: nivelAcessoCod,
+                    cargaHoraria: cargaHoraria
                   })
                   } 
                   title={solicitacao.tipoSolicitacaoCod.tipoSolicitacaoNome}                  
@@ -345,6 +350,22 @@ const Solicitacao = () => {
           )}
         </div>
       </div>
+
+      {/* ========= Modais de solicitações ========= */}
+
+      {/* Hora extra */}
+      <Modal 
+        isOpen={isModalHoraExtraOpen}  
+        onClick={() => handleModal(0, false)} 
+        children={
+          <ModalSolicitarHoraExtra 
+            usuarioCod={usuarioCod} 
+            cargaHoraria={cargaHoraria ? cargaHoraria : 0}
+            onClose={() => setIsModalHoraExtraOpen(false)}
+            onSolicitacaoUpdate={handleSolicitacaoUpdate}
+          /> } 
+        title={'Hora extra'}      
+      />
     </div>
   )
 }
