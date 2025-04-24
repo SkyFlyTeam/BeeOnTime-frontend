@@ -1,15 +1,24 @@
 "use client";
-
+// General
+import { ApiException } from "@/config/apiExceptions";
 import { ChangeEvent, useEffect, useState } from "react";
-import { cadastrarEmpresa } from "@/services/empresaService";
-import { cadastrarSetor } from "@/services/setorService";
-import { cadastrarUsuarioComJornada } from "@/services/usuariosServices";
-import { z } from "zod";
-import ModalEmpresa from "./ModalEmpresa";
 import router from "next/router";
 import { useToast } from "@/hooks/use-toast";
+import { z } from "zod";
+
+// Services
+import { empresaServices } from "@/services/empresaService";
+import { setorServices } from "@/services/setorService";
+import { usuarioServices } from "@/services/usuarioServices";
+import { Setor } from "@/interfaces/setor";
+
+// Components
+import ModalEmpresa from "./ModalEmpresa";
 import { Toaster } from "@/components/ui/toaster";
+
+// Utils
 import { generatePassword } from "@/utils/emails/generatePassword";
+
 
 // Interfaces e Schemas
 interface EmpresaFormData {
@@ -225,9 +234,16 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
     if (!validateStep(3)) return;
 
     try {
-      const empCod = await cadastrarEmpresa(empresaData);
-      const setoresCriados = await cadastrarSetor(setores);
-      const setorCodMap = setoresCriados.reduce((acc: Record<string, number>, setor: any) => {
+      const empCod = await empresaServices.cadastrarEmpresa(empresaData);
+      if (empCod instanceof ApiException) {
+        throw new Error(empCod.message);
+      }
+      
+      const setoresCriados = await setorServices.cadastrarSetor(setores);
+      if (setoresCriados instanceof ApiException) {
+        throw new Error(setoresCriados.message);
+      }
+      const setorCodMap = setoresCriados.reduce((acc: Record<string, number>, setor: Setor) => {
         acc[setor.setorNome] = setor.setorCod;
         return acc;
       }, {});
@@ -251,7 +267,10 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
         usuario_DataNascimento: null,
       };
 
-      await cadastrarUsuarioComJornada(usuarioData, {});
+      const usuarioResult = await usuarioServices.cadastrarUsuarioComJornada(usuarioData, {});
+      if (usuarioResult instanceof ApiException) {
+        throw new Error(usuarioResult.message);
+      }
 
       const res = await fetch('/api/email', {
         method: 'POST',

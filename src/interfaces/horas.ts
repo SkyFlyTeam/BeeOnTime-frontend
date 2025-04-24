@@ -1,5 +1,5 @@
 export default interface Horas {
-    horasCod: number,
+    horasCod?: number,
     horasExtras: number,
     horasTrabalhadas: number,
     horasNoturnas:number,

@@ -1,24 +1,34 @@
 "use client";
 
+// General
 import * as React from "react";
-import { PointsHistoryTable } from "@/components/custom/histPonto/points-history-table";
 import { useState, useEffect } from "react";
-import HistPontos, { Ponto } from "@/interfaces/hisPonto";
-import { pontoServices } from "@/services/pontoServices";
-import { horasServices } from "@/services/horasServices";
-import RelatorioPonto from "@/interfaces/relatorioPonto";
-import { usuarioServices } from "@/services/usuarioServices";
-import { Usuario } from "@/interfaces/usuario";
-import { getUsuario } from "@/services/authService";
-
 import { useRouter } from "next/router";
+
+// Interfaces
+import MarcacaoPonto from "@/interfaces/marcacaoPonto";
+import HistPonto from "@/interfaces/histPonto";
+import { Usuario } from "@/interfaces/usuario";
+import Horas from "@/interfaces/horas";
+
+// Services
+import { pontoServices } from "@/services/pontoServices";
+import { horasServices } from "@/services/horasService";
+import { getUsuario } from "@/services/authService";
+import { usuarioServices } from "@/services/usuarioServices";
+
+// Components
+import { PointsHistoryTable } from "@/components/custom/histPonto/points-history-table";
 import EditarFuncionarioForm from "@/components/custom/CardEditarFuncionario/editarFuncionarioForm";
 import { Skeleton } from "@/components/ui/skeleton";
+
+// Styles
+
 
 export default function PointsHistoryPage() {
   // Simulando o diferente acesso
   const [accessLevel, setAccessLevel] = useState<"USER" | "ADM">("USER");
-  const [histPontos, setHistPontos] = useState<RelatorioPonto[] | null>(null);
+  const [histPontos, setHistPontos] = useState<HistPonto[] | null>(null);
   const [usuarioInfo, setUsuarioInfo] = useState<Usuario | null>(null);
 
   // Loading state
@@ -27,7 +37,7 @@ export default function PointsHistoryPage() {
   const router = useRouter();
   const { id } = router.query;
 
-  const handleEdit = (entry: RelatorioPonto) => {
+  const handleEdit = (entry: HistPonto) => {
     // Lógica para editar a entrada (ex.: abrir um modal)
     console.log("Editar entrada:", entry);
   };
@@ -35,8 +45,8 @@ export default function PointsHistoryPage() {
   // Função para combinar as horas e os pontos
   const fetchHistPontos = async (usuario_cod: number) => {
     try {
-      const pontos = await pontoServices.getPontosByUsuario(usuario_cod);
-      const horas = await horasServices.getHorasByUsuario(usuario_cod);
+      const pontos = await pontoServices.getPontosByUsuario(usuario_cod) as MarcacaoPonto[];
+      const horas = await horasServices.getHorasByUsuario(usuario_cod) as Horas[];
 
       const combinedData = pontos.map((ponto: any) => {
         const hora = horas.find((hora: any) => hora.horasCod === ponto.horasCod);
@@ -60,7 +70,7 @@ export default function PointsHistoryPage() {
 
   const fetchUsuario = async (usuario_cod: number) => {
     try {
-      const usuario_data = await usuarioServices.getUsuarioById(usuario_cod);
+      const usuario_data = await usuarioServices.getUsuarioById(usuario_cod) as Usuario;
       setUsuarioInfo(usuario_data);
     } catch (error) {
       console.log("Erro ao recuperar usuário de id " + usuario_cod);
@@ -89,7 +99,7 @@ export default function PointsHistoryPage() {
     };
 
     onMount();
-  }, []); // Empty dependency array ensures the effect runs once after mount
+  }, [id]); // Empty dependency array ensures the effect runs once after mount
 
   const SkeletonRow = () => (
     <div className="flex flex-row gap-7 mt-10 justify-between">
