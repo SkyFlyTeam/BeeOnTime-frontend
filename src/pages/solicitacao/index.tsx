@@ -209,6 +209,9 @@ const Solicitacao = () => {
     <div className={styles.solicitacao_container}>
       <div className={styles.card_container}>
         <h1 className='font-bold text-4xl'>Solicitações</h1>
+        <button
+          onClick={() => setIsModalHoraExtraOpen(true)}
+        >a</button>
         <Tab
           toogle={toogle}
           onClick={handleClick}
