@@ -1,6 +1,7 @@
 import { ApiBancoHoras } from "@/config/apiBancoHoras";
 import { ApiException } from "@/config/apiExceptions";
-import BancoHoras from "@/interfaces/bancoHoras";
+import { BancoHoras } from "@/interfaces/bancoHoras";
+
 
 
 const getAllBancoHoras = async (): Promise<BancoHoras[] | ApiException> => {
