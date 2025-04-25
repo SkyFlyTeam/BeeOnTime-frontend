@@ -105,11 +105,7 @@ export default function PointsHistoryPage() {
     };
   
     onMount();
-  }, [id])
-
-  useEffect(() => {
-    console.log("acesso", usuarioInfo?.nivelAcesso.nivelAcesso_cod)
-  }, [usuarioInfo])
+  }, [id]); // Empty dependency array ensures the effect runs once after mount
 
   const SkeletonRow = () => (
     <div className="flex flex-row gap-7 mt-10 justify-between">
@@ -121,7 +117,7 @@ export default function PointsHistoryPage() {
       <Skeleton className="bg-gray-200 w-32 h-10" />
     </div>
   );
-  
+
   return (
     isLoading ? (
       <div className="p-6 md:p-9">
