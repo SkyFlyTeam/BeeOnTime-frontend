@@ -41,6 +41,9 @@ export async function middleware(req: NextRequest) {
         return res;
     }
 
+    if(isPath("/teste", req))
+        return NextResponse.next();
+
     // Access pass, controlled in "@/src/lib/permissions.ts"
     if (!(await isAuthorized(role, req)))
         if (isPath("/", req))

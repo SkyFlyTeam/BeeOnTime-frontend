@@ -1,15 +1,25 @@
 "use client";
-
+// General
+import { ApiException } from "@/config/apiExceptions";
 import { ChangeEvent, useEffect, useState } from "react";
-import { cadastrarEmpresa, verificarEmpresa } from "@/services/empresaService";
-import { cadastrarSetor } from "@/services/setorService";
-import { cadastrarUsuarioComJornada, Usuario } from "@/services/usuariosServices";
-import { z } from "zod";
-import ModalEmpresa from "./ModalEmpresa";
+
 import router from "next/router";
 import { useToast } from "@/hooks/use-toast";
+import { z } from "zod";
+
+// Services
+import { empresaServices } from "@/services/empresaService";
+import { setorServices } from "@/services/setorService";
+import { usuarioServices } from "@/services/usuarioServices";
+import { Setor } from "@/interfaces/setor";
+
+// Components
+import ModalEmpresa from "./ModalEmpresa";
 import { Toaster } from "@/components/ui/toaster";
+
+// Utils
 import { generatePassword } from "@/utils/emails/generatePassword";
+import { EmpresaAPI } from "@/interfaces/empresa";
 
 // Interfaces e Schemas
 interface EmpresaFormData {
@@ -240,7 +250,8 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
     //
     // ISTO DEVERIA SER VERIFICADO NO BACKEND, NÃO NO CLIENTE!
     if (modalAtual === 1) {
-      const empresas = await verificarEmpresa();
+      const empresasData = await empresaServices.verificarEmpresa();
+      const empresas = empresasData as EmpresaAPI[]
       if (empresas.some(emp => emp.empCnpj == empresaData.empCnpj)) {
         setErrors((prev) => ({ ...prev, empCnpj: "CNPJ já cadastrado" }));
         return;
@@ -258,7 +269,8 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
       setIsSubmitting(false);
       return;
     }
-    const empresas = await verificarEmpresa();
+    const empresasData = await empresaServices.verificarEmpresa();
+    const empresas = empresasData as EmpresaAPI[]
     if(empresas.some(emp => emp.usuarios.some((us: {usuarioEmail: string})=> adminData.admin_email == us.usuarioEmail))){
       setErrors((prev) => ({ ...prev, admin_email: "Email já cadastrado" }));
       setIsSubmitting(false);
@@ -266,9 +278,16 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
     }
 
     try {
-      const empCod = await cadastrarEmpresa(empresaData);
-      const setoresCriados = await cadastrarSetor(setores);
-      const setorCodMap = setoresCriados.reduce((acc: Record<string, number>, setor: any) => {
+      const empCod = await empresaServices.cadastrarEmpresa(empresaData);
+      if (empCod instanceof ApiException) {
+        throw new Error(empCod.message);
+      }
+      
+      const setoresCriados = await setorServices.cadastrarSetor(setores);
+      if (setoresCriados instanceof ApiException) {
+        throw new Error(setoresCriados.message);
+      }
+      const setorCodMap = setoresCriados.reduce((acc: Record<string, number>, setor: Setor) => {
         acc[setor.setorNome] = setor.setorCod;
         return acc;
       }, {});
@@ -292,7 +311,10 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
         usuario_DataNascimento: null,
       };
 
-      await cadastrarUsuarioComJornada(usuarioData, {});
+      const usuarioResult = await usuarioServices.cadastrarUsuarioComJornada(usuarioData, {});
+      if (usuarioResult instanceof ApiException) {
+        throw new Error(usuarioResult.message);
+      }
 
       const res = await fetch('/api/email', {
         method: 'POST',

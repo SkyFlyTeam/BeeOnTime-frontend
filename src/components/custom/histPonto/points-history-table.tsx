@@ -1,25 +1,26 @@
 "use client";
-
+// General
 import * as React from "react";
 import { useState } from "react";
+
+// Utils
+import { cn } from "@/lib/utils"; 
+
+// Interfaces
+import { Ponto } from "@/interfaces/marcacaoPonto";
+import HistPontos from "@/interfaces/histPonto";
+import { Usuario } from "@/interfaces/usuario";
+
+// Components
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/custom/histPonto/table";
 import { Button } from "@/components/ui/button";
 import { PencilLine } from "lucide-react";
-import { cn } from "@/lib/utils";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/custom/tooltip";
-import HistPontos, { Ponto } from "@/interfaces/hisPonto";
-import RelatorioPonto from "@/interfaces/relatorioPonto";
-import { Usuario } from "@/interfaces/usuario";
-import ModalCriarSolicitacao from "../modal/modalEnvioSolicitacao";
+import ModalCriarSolicitacao from "../modalSolicitacao/modalEnvioSolicitacao";
+
 
 interface PointsHistoryTableProps {
-  entries: RelatorioPonto[] | null;
-  onEdit: (entry: RelatorioPonto) => void;
+  entries: HistPontos[] | null;
+  onEdit: (entry: HistPontos) => void;
   userInfo: Usuario | null;
   className?: string;
   accessLevel: "USER" | "ADM"; // Recebe o AccessLevel para diferentes acessos
@@ -44,9 +45,9 @@ const calculateCargaHoraria = (horasDiarias: number, diasTrabalhados: number) =>
 const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTableProps>(
   ({ entries, onEdit, userInfo, className, accessLevel }, ref) => {
     const [isModalOpen, setIsModalOpen] = useState(false); // Estado para abrir/fechar o modal
-    const [selectedPonto, setSelectedPonto] = useState<RelatorioPonto | null>(null); // Ponto selecionado
+    const [selectedPonto, setSelectedPonto] = useState<HistPontos | null>(null); // Ponto selecionado
 
-    const handleModalOpen = (entry: RelatorioPonto) => {
+    const handleModalOpen = (entry: HistPontos) => {
       setSelectedPonto(entry); // Seleciona o ponto para o modal
       setIsModalOpen(true); // Abre o modal
     };
@@ -71,17 +72,19 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
         .map((trabalha, index) => trabalha ? diasDaSemanaSiglas[index] : null)
         .filter((dia) => dia !== null);
       if (diasTrabalhados && diasTrabalhados.length > 0) {
-        return `${diasTrabalhados.join(", ")} das ${userInfo?.jornadas.jornada_horarioEntrada.toString().slice(0, 5)} até ${userInfo?.jornadas.jornada_horarioSaida.toString().slice(0, 5)}`;
-      } else {
-        return "Horário flexível";
-      }
+        if(userInfo?.jornadas.jornada_horarioFlexivel){
+          return `${diasTrabalhados.join(", ")}`;
+        }else{
+          return `${diasTrabalhados.join(", ")} das ${userInfo?.jornadas.jornada_horarioEntrada.toString().slice(0, 5)} até ${userInfo?.jornadas.jornada_horarioSaida.toString().slice(0, 5)}`;
+        }
+      } 
     };
 
     const { horasSemana, horasMes } = calculateCargaHoraria(userInfo?.usuario_cargaHoraria!, userInfo?.jornadas?.jornada_diasSemana?.filter(dia => dia).length ?? 0);
 
     return (
       <div ref={ref} className={cn("p-6 shadow-xl rounded-xl", className)} style={{ boxShadow: "0px 0px 12px 4px rgba(0, 0, 0, 0.04)" }}>
-        {accessLevel === "USER" ? (
+        {/* {accessLevel === "USER" ? ( */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 pb-3 md:py-2">
             <div className="flex flex-row items-start gap-2 md:gap-4">
               <h1 className="text-base md:text-lg font-bold">Jornada de Trabalho:</h1>
@@ -92,11 +95,11 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
               <p className="text-base md:text-lg text-black">{horasSemana}h/semana - {horasMes}h/mês</p>
             </div>
           </div>
-        ) : (
+        {/* ) : (
           <div className="mb-6">
             <h1 className="text-base md:text-lg font-bold">Histórico de Pontos</h1>
           </div>
-        )}
+        )} */}
 
         {/* Desktop - Tabela horizontal */}
         <div className="overflow-x-auto hidden md:block">

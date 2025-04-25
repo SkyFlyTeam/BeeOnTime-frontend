@@ -6,6 +6,7 @@ export default interface SolicitacaoInterface {
   solicitacaoDevolutiva: string;
   solicitacaoDataPeriodo: string;
   solicitacaoStatus: string
+  horasSolicitadas: number | null
   tipoSolicitacaoCod: {
     tipoSolicitacaoCod: number;
     tipoSolicitacaoNome: string;

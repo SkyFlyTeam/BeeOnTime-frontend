@@ -1,35 +1,35 @@
-import clsx from "clsx"
-import styles from "./styles.module.css"
+import clsx from "clsx";
+import styles from "./styles.module.css";
 
-interface SolicitacaoButton {
-    toogle: boolean,
-    onClick: (status: 'pendentes' | 'historico') => void
-    pendentes_length: number
+interface TabProps {
+  activeTab: string;  // Tab ativo como default
+  onClick: (tab: string) => void;  // Ação de clique no tab
+  tabLabels: string[];  // Array com os nomes dos tab
+  pendentesLength?: number;  // Número de pendentes, opcional
+  showBadge?: boolean;  // Controla se o badge de pendentes deve aparecer
 }
 
-const Tab = ({toogle, onClick, pendentes_length}: SolicitacaoButton) => {
-    return(
-        <div className={styles.button_container}>
-          <button
-            onClick={() => onClick('pendentes')} 
-            className={clsx({
-              [styles.toogle]: toogle
-            })}>
-            PENDENTES 
+const Tab = ({ activeTab, onClick, tabLabels, pendentesLength = 0, showBadge = true }: TabProps) => {
+  return (
+    <div className={styles.button_container}>
+      {tabLabels.map((label, index) => (
+        <button
+          key={index}
+          onClick={() => onClick(label)}  
+          className={clsx({
+            [styles.toogle]: activeTab === label,  
+          })}
+        >
+          {label.toUpperCase()} 
+          {label === 'PENDENTES' && showBadge && pendentesLength > 0 && (  
             <span className={styles.pendente_badge}>
-              {pendentes_length}
+              {pendentesLength}
             </span>
-          </button>
+          )}
+        </button>
+      ))}
+    </div>
+  );
+};
 
-          <button
-            onClick={() => onClick('historico')} 
-            className={clsx({
-              [styles.toogle]: !toogle
-            })}>
-            HISTÓRICO
-          </button>
-        </div>
-    )
-}
-
-export default Tab
+export default Tab;
