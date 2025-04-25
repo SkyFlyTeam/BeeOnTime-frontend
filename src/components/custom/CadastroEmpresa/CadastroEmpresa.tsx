@@ -352,6 +352,7 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
                     onChange={handleSetorChange}
                     placeholder="Digite o nome do setor"
                     className="border p-2 rounded-md w-full"
+                    style={{marginBottom: "1vh"}}
                   />
                   {errors.setorInput && <p className="text-red-500 mt-1">{errors.setorInput}</p>}
                 </div>
@@ -365,7 +366,7 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
               {setores.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-2">
                   {setores.map((setor, index) => (
-                    <div key={index} className="relative inline-block">
+                    <div key={index} className="relative inline-block" style={{marginBottom: "1rem"}}>
                       <span className="border border-[#bbbbbb] rounded-md p-2">{setor}</span>
                       <button
                         onClick={() => handleRemoveSetor(index)}
@@ -426,6 +427,7 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
                     value={adminData.admin_tipoContrato}
                     onChange={handleAdminChange}
                     className="border p-2 rounded-md w-full"
+                    style={{backgroundColor:"#CBD5E1"}}
                     disabled
                   >
                     <option value="CLT">CLT</option>
@@ -434,10 +436,21 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
                 </div>
                 <div className="flex-1">
                   <label htmlFor="admin_nvlAcesso" className="mb-2">Nível de Acesso</label>
-                  <input id="admin_nvlAcesso" name="admin_nvlAcesso" value="Administrador" readOnly style={{color: "rgba(0, 0, 0, 0.65)"}} className="border p-2 rounded-md w-full" />
+                  <select
+                    id="admin_nvlAcesso"
+                    name="admin_nvlAcesso"
+                    value="Administrador"
+                    onChange={handleAdminChange}
+                    className="border p-2 rounded-md w-full"
+                    style={{backgroundColor:"#CBD5E1"}}
+                    disabled
+                  >
+                    <option value="CLT">Administrador</option>
+                  </select>
+                  {/* <input id="admin_nvlAcesso" name="admin_nvlAcesso" value="Administrador" readOnly style={{color: "rgba(0, 0, 0, 0.65)", backgroundColor:"#64748B"}} className="border p-2 rounded-md w-full" /> */}
                 </div>
               </div>
-              <button type="submit" className="text-black p-2 rounded-md bg-[#FFB503]">Finalizar</button>
+              <button type="submit" className="text-black p-2 rounded-md bg-[#FFB503]">Cadastrar</button>
             </form>
             {errors.submit && <p className="text-red-500 mt-2">{errors.submit}</p>}
           </div>
