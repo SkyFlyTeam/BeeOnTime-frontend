@@ -12,6 +12,7 @@ import CardCargaHoraria from './_components/cardCargaHoraria';
 // Interfaces
 import { Usuario } from '@/interfaces/usuario';
 import HistPontos from '@/interfaces/histPonto';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function InicioFuncionario() {
     const [nome, setNome] = useState("José");
@@ -40,7 +41,19 @@ export default function InicioFuncionario() {
     };
 
     if (loading) {
-        return <div>Carregando...</div>; // Renderiza uma mensagem ou spinner enquanto carrega
+        return (
+            <div className="flex flex-col md:flex-row  justify-between">
+                {/* Skeleton "Bater Ponto" */}
+                <div className="">
+                    <Skeleton className='h-52 w-96 bg-gray-200' />
+                </div>
+
+                {/* Skeleton "Carga diária" */}
+                <div className="">
+                    <Skeleton className='h-52 w-[30rem] bg-gray-200' />
+                </div>
+            </div>
+        ); // Renderiza uma mensagem ou spinner enquanto carrega
     }
 
     return (

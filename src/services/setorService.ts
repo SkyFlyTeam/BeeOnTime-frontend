@@ -1,6 +1,7 @@
 import { ApiException } from "@/config/apiExceptions";
 import { ApiUsuario } from "@/config/apiUsuario";
 import { Setor } from "@/interfaces/setor";
+import { Usuario } from "@/interfaces/usuario";
 
 const getAllSetores = async (): Promise<Setor[] | ApiException> => {
   try {
@@ -26,6 +27,18 @@ const verificarSetoresPorEmpresa = async (empCod: number): Promise<Setor[]> => {
     throw error
   }
 } 
+
+const getSetorUsuarios = async (setorCod: number): Promise<Usuario[] | ApiException> => {
+  try {
+    const { data } = await ApiUsuario.get(`/setor/${setorCod}/usuarios`);
+    return data as Usuario[];
+  } catch (error) {
+    if (error instanceof Error) {
+      return new ApiException(error.message || "Erro ao consultar a API.");
+    }
+    return new ApiException("Erro desconhecido.");
+  }
+};
 
 const cadastrarSetor = async (setoresData: string[], empCod: number): Promise<Setor[] | ApiException> => {
   try {
@@ -70,5 +83,6 @@ export const setorServices = {
   getAllSetores,
   verificarSetoresPorEmpresa,
   cadastrarSetor,
-  atualizarSetor
+  atualizarSetor,
+  getSetorUsuarios
 }; 
