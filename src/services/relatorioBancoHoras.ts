@@ -97,7 +97,7 @@ const getRelatorioDiarioFunc = async (date: String, usuario: Usuario) => {
                 usuarioCod: banco.usuarioCod,
                 data: banco.data,
                 totalHoras: horas ? horas.horasTotal : 0,
-                horasContratuais: calculateUserCargaMensal(usuario),  
+                horasContratuais: usuario.usuario_cargaHoraria,  
                 desconto: horas ? horas.desconto : 0,
                 horasAbonadas: banco.horasAbonadas,
                 extrasPagas: banco.extrasPagas,
