@@ -398,6 +398,7 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
                     onChange={handleSetorChange}
                     placeholder="Digite o nome do setor"
                     className="border p-2 rounded-md w-full"
+                    style={{marginBottom: "1vh"}}
                   />
                   {errors.setorInput && <p className="text-red-500 mt-1">{errors.setorInput}</p>}
                 </div>
@@ -411,7 +412,7 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
               {setores.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-2">
                   {setores.map((setor, index) => (
-                    <div key={index} className="relative inline-block">
+                    <div key={index} className="relative inline-block" style={{marginBottom: "1rem"}}>
                       <span className="border border-[#bbbbbb] rounded-md p-2">{setor}</span>
                       <button
                         onClick={() => handleRemoveSetor(index)}
@@ -472,6 +473,7 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
                     value={adminData.admin_tipoContrato}
                     onChange={handleAdminChange}
                     className="border p-2 rounded-md w-full"
+                    style={{backgroundColor:"#CBD5E1"}}
                     disabled
                   >
                     <option value="CLT">CLT <span className="text-red-500">*</span></option>
