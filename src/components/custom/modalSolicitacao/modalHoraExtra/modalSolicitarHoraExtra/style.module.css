@@ -31,7 +31,7 @@
 
 .data_span {
     font-weight: normal;
-    color: #666;
+    color: var(--gray);
 }
 
 .input_hours {
@@ -63,7 +63,7 @@
 .justificativa_content input[type='number']  {
     flex: 1;
     height: 2rem;
-    border: 2px solid #eceff4;
+    border: 2px solid #ddd;
     border-radius: .5rem;
     padding: 0 0.5rem;
 }
