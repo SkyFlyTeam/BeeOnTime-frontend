@@ -1,15 +1,20 @@
 "use client";
-
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+// General
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-// import { Switch } from "@/components/ui/switch"; // Assuming a switch component for 'Status'
-import { Button } from "@/components/ui/button";
+
+// Services
 import { usuarioServices } from "@/services/usuarioServices";
-import { useEffect, useState } from "react";
+
+// Interfaces
 import { Usuario } from "@/interfaces/usuario";
+
+// Components
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+
 
 const formSchema = z.object({
   nome: z.string().min(1, { message: "Campo obrigatório." }),
@@ -37,9 +42,9 @@ export default function EditarFuncionarioForm({usuarioInfo}: EditarFuncionarioFo
     defaultValues: {
       nome: usuarioInfo.usuario_nome,
       cpf: usuarioInfo.usuario_cpf,
-      email: usuarioInfo.usuario_email,
-      dataNascimento: usuarioInfo.usuario_DataNascimento,
-      dataContratacao: usuarioInfo.usuario_dataContratacao,
+      email: usuarioInfo.usuario_email as string,
+      dataNascimento: usuarioInfo.usuario_DataNascimento instanceof Date ? usuarioInfo.usuario_DataNascimento.toISOString().split('T')[0] : usuarioInfo.usuario_DataNascimento,
+      dataContratacao: usuarioInfo.usuario_dataContratacao instanceof Date ? usuarioInfo.usuario_dataContratacao.toISOString().split('T')[0] : usuarioInfo.usuario_dataContratacao,
       tipoContrato: "",
       cargo: usuarioInfo.usuario_cargo,
       nivelAcesso: "",

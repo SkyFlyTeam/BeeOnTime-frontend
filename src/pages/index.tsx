@@ -1,28 +1,25 @@
 "use client"
-import styles from '../styles/Home.module.css';
+// General
 import { useRouter } from 'next/router';
-
-//Icons
-import { FaRegEnvelope } from "react-icons/fa";
-import { HiOutlineLockClosed } from "react-icons/hi";
-import { FaRegEye } from "react-icons/fa";
-import { FaRegEyeSlash } from "react-icons/fa";
-
 import Image from 'next/image'
 
-import EmpresaAPI from '@/interfaces/empresa';
-import Empresa from '@/interfaces/empresa';
- 
 import { z } from "zod"
- 
-const formSchema = z.object({
-    email: z.string()
-      .min(1, { message: "Campo obrigatório." })
-      .email({ message: "Por favor, insira um e-mail válido." }), // You can add more specific validation like email format
-    senha: z.string()
-      .min(1, { message: "Campo obrigatório." })
-  });
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { useEffect, useState } from 'react';
+import { AccessPass } from '@/lib/auth';
 
+// Services
+import { getRoleID, getUsuario, setLogIn } from '@/services/authService';
+
+// Icons
+import { FaRegEnvelope, FaRegEye, FaRegEyeSlash } from "react-icons/fa";
+import { HiOutlineLockClosed } from "react-icons/hi";
+
+// Styles
+import styles from '../styles/Home.module.css';
+
+// Components
 import {
     Card,
     CardContent,
@@ -33,25 +30,25 @@ import {
 } from "@/components/ui/card"
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
 import { Input } from '@/components/ui/input';
-import { sources } from 'next/dist/compiled/webpack/webpack';
-import { url } from 'inspector';
-import { useEffect, useState } from 'react';
-
-import { AccessPass } from '@/lib/auth';
-import { getRoleID, getUsuario, setLogIn } from '@/services/authService';
-
 import { toast, ToastContainer} from "react-toastify"
 import CadastroEmpresaForm from '@/components/custom/CadastroEmpresa/CadastroEmpresa';
+
+
+const formSchema = z.object({
+    email: z.string()
+      .min(1, { message: "Campo obrigatório." })
+      .email({ message: "Por favor, insira um e-mail válido." }), 
+    senha: z.string()
+      .min(1, { message: "Campo obrigatório." })
+});
+
 
 export default function Home() {
 
     const router = useRouter();
 
-      // State que registra o togle da senha
+    // State que registra o togle da senha
     const [isShowingPassword, setIsShowingPassword] = useState(true);
     const [isCadastro, setIsCadastro] = useState(false)
 

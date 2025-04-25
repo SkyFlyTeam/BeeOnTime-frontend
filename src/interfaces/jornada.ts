@@ -7,4 +7,3 @@ export interface Jornada {
     jornada_horarioAlmoco: string | Date;
     usuario_cod: number;
   }
-  

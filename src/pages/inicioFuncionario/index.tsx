@@ -1,15 +1,22 @@
-import TimeClock from '@/pages/inicioFuncionario/_components/time-clock';
-import { Button } from '@/components/ui/button';
+// General
 import { useEffect, useState } from 'react';
+
+// Services
 import { getUsuario } from '@/services/authService';
-import CardCargaHoraria from '@/components/custom/cardCargaHoraria';
 import { pontoServices } from '@/services/pontoServices';
-import UsuarioInfo from '@/interfaces/usuarioInfo';
-import HistPontos from '@/interfaces/hisPonto';
+
+// Components
+import TimeClock from './_components/timeClock/time-clock';
+import CardCargaHoraria from './_components/cardCargaHoraria';
+
+// Interfaces
+import { Usuario } from '@/interfaces/usuario';
+import HistPontos from '@/interfaces/histPonto';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function InicioFuncionario() {
     const [nome, setNome] = useState("José");
-    const [usuarioInfo, setUsuarioInfo] = useState<UsuarioInfo | null>(null);
+    const [usuarioInfo, setUsuarioInfo] = useState<Usuario | null>(null);
     const [histPontos, setHistPontos] = useState<HistPontos[] | null>(null);
     const [loading, setLoading] = useState(true); // Estado para controle de carregamento
 
@@ -20,7 +27,7 @@ export default function InicioFuncionario() {
     const getUser = async () => {
         try {
             const user = await getUsuario();
-            const usuario: UsuarioInfo = user.data;
+            const usuario: Usuario = user.data;
             setNome(usuario.usuario_nome);
             setUsuarioInfo(usuario);
 
@@ -34,11 +41,23 @@ export default function InicioFuncionario() {
     };
 
     if (loading) {
-        return <div>Carregando...</div>; // Renderiza uma mensagem ou spinner enquanto carrega
+        return (
+            <div className="flex flex-col md:flex-row  justify-between">
+                {/* Skeleton "Bater Ponto" */}
+                <div className="">
+                    <Skeleton className='h-52 w-96 bg-gray-200' />
+                </div>
+
+                {/* Skeleton "Carga diária" */}
+                <div className="">
+                    <Skeleton className='h-52 w-[30rem] bg-gray-200' />
+                </div>
+            </div>
+        ); // Renderiza uma mensagem ou spinner enquanto carrega
     }
 
     return (
-        <div className='flex flex-wrap flex-row justify-between'>
+        <div className='flex flex-wrap flex-row gap-8'>
             <TimeClock />
             <CardCargaHoraria usuarioInfo={usuarioInfo!} histPontos={histPontos!} />
         </div>

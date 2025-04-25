@@ -1,14 +1,16 @@
-import '../styles/global.css';
+// General
 import type { AppProps } from 'next/app';
-// import 'bootstrap/dist/css/bootstrap.min.css';
-import { AuthProvider } from '../context/AuthContext'; 
-import "react-toastify/dist/ReactToastify.css";
-import { ToastContainer } from "react-toastify";
 import { useRouter } from 'next/router';
-import { AppSidebar } from '@/components/custom/app-sidebar';
-import { SidebarProvider, SidebarInset, SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
-import { Separator } from '@/components/ui/separator';
 import { useEffect } from 'react';
+
+// Components
+import { AppSidebar } from '@/components/custom/Sidebar/app-sidebar';
+import { SidebarProvider, SidebarInset, SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
+import { ToastContainer } from "react-toastify";
+
+// Styles
+import '../styles/global.css';
+import "react-toastify/dist/ReactToastify.css";
 
 function MyApp({ Component, pageProps }: AppProps) {
   const router = useRouter();
