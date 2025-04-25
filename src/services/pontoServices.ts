@@ -72,7 +72,6 @@ const getPontosByUsuario = async (usuario_cod: number) => {
     try {
         const { data } = await ApiPonto.get(`/mpontos/usuario/${usuario_cod}`)
 
-
         return data 
     } catch (error) {
         if (error instanceof Error) {

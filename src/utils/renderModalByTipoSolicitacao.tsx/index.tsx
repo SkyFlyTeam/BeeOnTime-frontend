@@ -2,6 +2,7 @@ import React from 'react'
 import SolicitacaoInterface from '@/interfaces/Solicitacao'
 import ModalAjustePonto from '@/components/custom/modalSolicitacao/modalAjustePonto'
 import ModalDecisaoHoraExtra from '@/components/custom/modalSolicitacao/modalHoraExtra/modalHoraExtra'
+import ModalSolictarHoraExtra from '@/components/custom/modalSolicitacao/modalHoraExtra/modalSolicitarHoraExtra'
 
 interface ModalChildrenProps {
   solicitacao: SolicitacaoInterface
@@ -10,6 +11,7 @@ interface ModalChildrenProps {
   usuarioLogadoCod: number
   usuarioCargo: string
   nivelAcessoCod?: number
+  cargaHoraria?: number
 }
 
 export function renderModalChildren({
@@ -19,6 +21,7 @@ export function renderModalChildren({
   usuarioLogadoCod,
   usuarioCargo,
   nivelAcessoCod,
+  cargaHoraria
 }: ModalChildrenProps): React.ReactNode {
 
   const formatarData = (data: string) => {
@@ -50,6 +53,16 @@ export function renderModalChildren({
             onClose={onClose}
             usuarioLogadoCod={usuarioLogadoCod}
             usuarioCargo={usuarioCargo}
+          />
+        )
+      } else {
+        return(
+          <ModalSolictarHoraExtra 
+            solicitacao={solicitacao}
+            usuarioCod={solicitacao.usuarioCod} 
+            cargaHoraria={cargaHoraria ?? 0}
+            onClose={onClose}
+            onSolicitacaoUpdate={onSolicitacaoUpdate}
           />
         )
       }
