@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils"
 const Slider = React.forwardRef<
   React.ElementRef<typeof SliderPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root>
->(({ className, value, max = 100, legend = false,  minEffective = 0, legendSuffix, ...props }, ref) => {
+>(({ className, value, max = 100, legend = false, legendSuffix, ...props }, ref) => {
   // Calcular a quantidade restante
   const remainingValue = max - (value as number[]).at(0)!;
 

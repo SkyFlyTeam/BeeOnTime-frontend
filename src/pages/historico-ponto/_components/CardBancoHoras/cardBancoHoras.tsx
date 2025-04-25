@@ -29,7 +29,8 @@ export const CardBancoHoras = ({ usuarioCod }: CardBancoHorasProps) => {
     const [bancoExtraSoma, setBancoExtraSoma] = useState(0);
     const [showChangeBanco, setShowChangeBanco] = useState(false);
     const [valorAdicional, setValorAdicional] = useState(0);
-    
+    const [sliderKey, setSliderKey] = useState(0);
+
     const getUser = async () => {
         try {
             const user = await getUsuario();
@@ -231,6 +232,7 @@ export const CardBancoHoras = ({ usuarioCod }: CardBancoHorasProps) => {
                             <span>Banco de horas</span>
                         </div>
                         <Slider 
+                            key={sliderKey}
                             value={[extraSlider]}
                             min={extrasPagas?.extrasPagasSaldoAtual}
                             max={bancoExtraSoma} 
@@ -244,7 +246,7 @@ export const CardBancoHoras = ({ usuarioCod }: CardBancoHorasProps) => {
                         <div className="w-fit flex gap-3 self-end items-center">
                             <span>{`Adicionar ${valorAdicional} ${valorAdicional <= 1 ? 'hora extra paga' : 'horas extras pagas'}?`}</span>
                             <Button variant={"outline"} onClick={handleEditBancoHoras} className="border-green-700 text-green-700 py-0 px-4 hover:bg-green-700 hover:text-white transition-all duration-200">Sim</Button>
-                            <Button variant={"outline"} onClick={() => {setShowChangeBanco(false); setValorAdicional(0)}} className="border-red-700 text-red-700 py-0 px-4 hover:bg-red-700 hover:text-white transition-all duration-200">Não</Button>
+                            <Button variant={"outline"} onClick={() => {setShowChangeBanco(false); setValorAdicional(0); setSliderKey(prev => prev + 1);}} className="border-red-700 text-red-700 py-0 px-4 hover:bg-red-700 hover:text-white transition-all duration-200">Não</Button>
                         </div>
                     }
                 </div>
