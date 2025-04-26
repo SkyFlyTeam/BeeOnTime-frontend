@@ -283,7 +283,7 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
         throw new Error(empCod.message);
       }
       
-      const setoresCriados = await setorServices.cadastrarSetor(setores);
+      const setoresCriados = await setorServices.cadastrarSetor(setores, empCod);
       if (setoresCriados instanceof ApiException) {
         throw new Error(setoresCriados.message);
       }
