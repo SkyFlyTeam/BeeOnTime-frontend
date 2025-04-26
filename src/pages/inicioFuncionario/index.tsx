@@ -13,6 +13,7 @@ import CardCargaHoraria from './_components/cardCargaHoraria';
 import { Usuario } from '@/interfaces/usuario';
 import HistPontos from '@/interfaces/histPonto';
 import { Skeleton } from '@/components/ui/skeleton';
+import CardHorasTrabalhadas from './_components/cardHorasTrabalhadas/cardHorasTrabalhadas';
 
 export default function InicioFuncionario() {
     const [nome, setNome] = useState("José");
@@ -57,9 +58,16 @@ export default function InicioFuncionario() {
     }
 
     return (
-        <div className='flex flex-wrap flex-row gap-8'>
-            <TimeClock />
-            <CardCargaHoraria usuarioInfo={usuarioInfo!} histPontos={histPontos!} />
+        <div>
+            <div className='flex flex-wrap flex-row gap-8'>
+                <TimeClock />
+                <CardCargaHoraria usuarioInfo={usuarioInfo!} histPontos={histPontos!} />
+                
+            </div>
+            <div className='flex mt-8 flex-wrap flex-row gap-8'>
+                <CardHorasTrabalhadas usuarioInfo={usuarioInfo} histPontos={histPontos!} />
+                {/* <TimeClock /> */}
+            </div>
         </div>
     );
 }
