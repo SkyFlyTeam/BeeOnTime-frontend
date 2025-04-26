@@ -164,26 +164,28 @@ const ModalSolictarHoraExtra = ({ usuarioCod, cargaHoraria, solicitacao, onClose
         />
       </div>
 
-      <div>
-        <label htmlFor="inHoras">Horas diárias</label>
-        <input
-          type="number"
-          className={styles.input_hours}
-          onChange={(e) => setHorasSolicitadas(+e.target.value)}
-          value={horasSolicitadas ?? ''}
-        />
-      </div>
-
-      <div className={styles.justificativa_group}>
-        <label>Justificativa</label>
-        <div className={styles.justificativa_content}>
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-0.5">
+          <label htmlFor="inHoras">Horas diárias</label>
           <input
-            type="text"
-            value={mensagem}
-            onChange={(e) => setMensagem(e.target.value)}
+            type="number"
+            className={styles.input_hours}
+            onChange={(e) => setHorasSolicitadas(+e.target.value)}
+            value={horasSolicitadas ?? ''}
           />
-          <input type="file" style={{ display: 'none' }} />
-          <Paperclip strokeWidth={1} className={styles.anexo_icon} />
+        </div>
+
+        <div className="flex flex-col gap-0.5">
+          <label>Justificativa</label>
+          <div className={styles.justificativa_content}>
+            <input
+              type="text"
+              value={mensagem}
+              onChange={(e) => setMensagem(e.target.value)}
+            />
+            <input type="file" style={{ display: 'none' }} />
+            <Paperclip strokeWidth={1} className={styles.anexo_icon} />
+          </div>
         </div>
       </div>
 
