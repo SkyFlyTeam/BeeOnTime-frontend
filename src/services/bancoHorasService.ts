@@ -30,6 +30,19 @@ const getAllBancoHorasById = async (id: number): Promise<BancoHoras | ApiExcepti
     }
 }
 
+const getBancoHorasSaldoAtual = async (usuarioCod: number, date: string): Promise<BancoHoras | ApiException> => {
+    try {
+        const { data } = await ApiBancoHoras.get(`/banco_horas/saldoAtual/usuario/${usuarioCod}/data/${date}`)
+        return data as BancoHoras
+    } catch (error) {
+        if (error instanceof Error) {
+            return new ApiException(error.message || "Erro ao consultar a API.");
+        }
+      
+        return new ApiException("Erro desconhecido.");
+    }
+}
+
 const getAllBancoHorasByUsuario = async (usuarioCod: number): Promise<BancoHoras | ApiException> => {
     try {
         const { data } = await ApiBancoHoras.get(`/banco_horas/usuario/${usuarioCod}`)
@@ -87,6 +100,7 @@ const deleteBancoHoras = async (bancoHorasCod: number) => {
 export const bancoHorasServices = {
     getAllBancoHoras,
     getAllBancoHorasById,
+    getBancoHorasSaldoAtual,
     getAllBancoHorasByUsuario,
     createBancoHoras,
     updatedBancoHoras,
