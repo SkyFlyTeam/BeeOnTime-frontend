@@ -1,72 +1,38 @@
-// General  
-import ModalAjustePonto from './modalAjustePonto'
-
-// Interfaces
-import SolicitacaoInterface from '../../../interfaces/solicitacao'
-
 // Styles
 import styles from './style.module.css'
 
+// Interfaces
+import SolicitacaoInterface from '../../../interfaces/Solicitacao'
+
+// Componente react
+import { ReactNode } from 'react';
+
 interface ModalProps {
-  isOpen: boolean;
-  solicitacao: SolicitacaoInterface;
-  onSolicitacaoUpdate: (updatedSolicitacao: SolicitacaoInterface) => void; 
-  onClick: () => void;
-  usuarioLogadoCod: number 
-  usuarioCargo: string;
+  isOpen: boolean
+  onClick: () => void
+  children: ReactNode
+  title: string
 }
 
 const Modal: React.FC<ModalProps> = ({
   isOpen,
-  solicitacao,
   onClick,
-  onSolicitacaoUpdate,
-  usuarioLogadoCod,
-  usuarioCargo 
+  children,
+  title 
 }) => {
 
-
-  const solicitacaoTitle: Record<string, string> = {
-    "Ajuste de ponto": "Solicitação de ajuste de ponto"
+  const titulos: Record<string, string> = {
+    "Ajuste de ponto": "Solicitação de ajuste de ponto",
+    "Hora extra": "Solicitação de hora extra",
   }
-
-  const ModalComponents: Record<
-    string,
-    React.FC<{
-      diaSelecionado: string,
-      solicitacaoSelected: SolicitacaoInterface,
-      onSolicitacaoUpdate: (updatedSolicitacao: SolicitacaoInterface) => void,
-      onClose: () => void,
-      usuarioLogadoCod: number 
-      usuarioCargo: string;
-    }>
-  > = {
-    "Ajuste de ponto": ModalAjustePonto
-  }
-
-
-  const SelectedModal = ModalComponents[solicitacao.tipoSolicitacaoCod.tipoSolicitacaoNome]
-
-  const [ano, mes, dia] = solicitacao.solicitacaoDataPeriodo.split("-");
-  const dataFormatada = `${String(dia).padStart(2, '0')}/${String(mes).padStart(2, '0')}/${ano}`;
 
   if (isOpen) {
     return (
       <div className={styles.modal_container} onClick={onClick}>
         <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-          <p className={styles.modal_title}>{solicitacaoTitle[solicitacao.tipoSolicitacaoCod.tipoSolicitacaoNome]}</p>
-          <p className={styles.colaborador_label}><span>Colaborador: </span>{solicitacao.usuarioNome}</p>
+          <p className={styles.modal_title}>{titulos[title]}</p>
           <div>
-            {SelectedModal && (
-              <SelectedModal
-                diaSelecionado={dataFormatada}
-                solicitacaoSelected={solicitacao}
-                onSolicitacaoUpdate={onSolicitacaoUpdate}
-                onClose={onClick}
-                usuarioLogadoCod={usuarioLogadoCod} 
-                usuarioCargo={usuarioCargo}
-              />
-            )}
+            {children}
           </div>
         </div>
       </div>
