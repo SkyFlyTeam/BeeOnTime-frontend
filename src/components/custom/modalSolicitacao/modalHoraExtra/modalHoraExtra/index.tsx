@@ -13,6 +13,8 @@ import { toast } from "react-toastify"
 import { solicitacaoServices } from "@/services/solicitacaoServices"
 import { bancoHorasServices } from "@/services/bancoHorasService"
 import { extrasPagasServices } from "@/services/extraPagaService"
+import { horasServices } from "@/services/horasService"
+import { ApiException } from "@/config/apiExceptions"
 
 interface ModalBancoHorasProps {
   diaSelecionado: string
@@ -36,7 +38,7 @@ const ModalDecisaoHoraExtra: React.FC<ModalBancoHorasProps> = ({
     const horasToString = solicitacao && solicitacao.horasSolicitadas ? solicitacao.horasSolicitadas.toString() : ''
     let [horas, min] = horasToString.split('.')
     const minutos = min ? Math.round(Number('0.' + min) * 60) : 0
-
+    
     const handleSubmit = async (status: string, toastMensagem: string, tipo: string) => {
         if(!solicitacao) return 
 
@@ -52,18 +54,18 @@ const ModalDecisaoHoraExtra: React.FC<ModalBancoHorasProps> = ({
                 const bancoHoras = {
                     bancoHorasSaldoAtual: solicitacao.horasSolicitadas,
                     bancoHorasData: solicitacao.solicitacaoDataPeriodo,
-                    usuarioCod: usuarioLogadoCod
+                    usuarioCod: solicitacao.usuarioCod
                 }
                 await bancoHorasServices.createBancoHoras(bancoHoras)
             } else {
                 const extraPaga = {
                     extrasPagasSaldoAtual: solicitacao.horasSolicitadas,
                     extrasPagasData: solicitacao.solicitacaoDataPeriodo,
-                    usuarioCod: usuarioLogadoCod
+                    usuarioCod: solicitacao.usuarioCod
                 }
                 await extrasPagasServices.createExtraspagas(extraPaga)
             }
-        }
+        } 
 
         toast.success(toastMensagem, {
             position: "top-right",
@@ -100,7 +102,8 @@ const ModalDecisaoHoraExtra: React.FC<ModalBancoHorasProps> = ({
     }, [])
 
     return(
-        <>
+        <>  
+            <p className={styles.colaborador_label}><span>Colaborador: </span>{solicitacao && solicitacao.usuarioNome}</p>
             <form className={styles.form_container}>
                 <div>
                     <span className={styles.data_span}>Dia(s) selecionado(s): </span>{diaSelecionado}

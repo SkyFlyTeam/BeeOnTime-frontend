@@ -7,6 +7,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { IconType } from "react-icons";
 
 export function NavSecondary({
   items,
@@ -15,7 +16,7 @@ export function NavSecondary({
   items: {
     title: string;
     url: string;
-    icon: LucideIcon;
+    icon: LucideIcon | IconType;
   }[];
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
   return (

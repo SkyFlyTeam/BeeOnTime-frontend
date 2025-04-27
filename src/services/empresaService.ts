@@ -14,6 +14,18 @@ const verificarEmpresa = async (): Promise<EmpresaAPI[] | ApiException> => {
   }
 };
 
+const verificarEmpresaById = async (empCod: number): Promise<EmpresaAPI> => {
+  try {
+    const response = await ApiUsuario.get<EmpresaAPI>(`/empresa/${empCod}`, {
+      headers: { "Content-Type": "application/json" },
+    });
+    return response.data;
+  } catch (error) {
+    console.log("Error: ", error);
+    throw error; // Re-throw the error for the caller to handle
+  }
+};
+
 const cadastrarEmpresa = async (formData: any): Promise<number | ApiException> => {
   try {
     console.log("📤 Dados sendo enviados:", JSON.stringify(formData, null, 2));
@@ -50,6 +62,7 @@ const atualizarEmpresa = async (empresaData: EmpresaAPI): Promise<number | ApiEx
 
 export const empresaServices = {
   verificarEmpresa,
+  verificarEmpresaById,
   cadastrarEmpresa,
-  atualizarEmpresa
+  atualizarEmpresa,
 };
