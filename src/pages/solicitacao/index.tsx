@@ -54,6 +54,10 @@ const Solicitacao = () => {
     all: [],
     pendentes: [],
     historico: [],
+    analisesPendentes: [],
+    analisesHistorico: [],
+    meusPendentes: [],
+    meusHistorico: [],
   })
 
   // Paginação
@@ -161,9 +165,14 @@ const Solicitacao = () => {
         : solicitacoesData.historico
     }
 
-    const startIndex = (currentPage - 1) * itemsPerPage
-    const endIndex = startIndex + itemsPerPage
-    setDisplayedSolicitacoes(dataToDisplay.slice(startIndex, endIndex))
+    const start = (currentPage - 1) * itemsPerPage
+    const end = start + itemsPerPage
+    setDisplayedSolicitacoes(dataToDisplay.slice(start, end))
+  }
+
+  const handleClick = (status: 'pendentes' | 'historico' | 'analises' | 'meus pontos') => {
+    setCurrentPage(1)
+    setToogle(status === 'analises' || status === 'pendentes')
   }
 
   const handlePageChange = (page: number) => {
@@ -189,34 +198,34 @@ const Solicitacao = () => {
     setOpenDevolutivaModal(status)
   }
 
-  const handleClick = (status: 'pendentes' | 'historico' | 'analises' | 'meus pontos') => {
-    setCurrentPage(1)
-    let data: SolicitacaoInterface[] = []
+  // const handleClick = (status: 'pendentes' | 'historico' | 'analises' | 'meus pontos') => {
+  //   setCurrentPage(1)
+  //   let data: SolicitacaoInterface[] = []
 
-    const ordenar = (arr: SolicitacaoInterface[]) =>
-      [...arr].sort((a, b) => new Date(b.dataCriacao).getTime() - new Date(a.dataCriacao).getTime())
+  //   const ordenar = (arr: SolicitacaoInterface[]) =>
+  //     [...arr].sort((a, b) => new Date(b.dataCriacao).getTime() - new Date(a.dataCriacao).getTime())
 
-    if (nivelAcessoCod === 1) {
-      if (status === 'analises') {
-        data = [
-          ...(solicitacoesData.analisesPendentes || []),
-          ...(solicitacoesData.analisesHistorico || [])
-        ]
-      } else if (status === 'meus pontos') {
-        data = [
-          ...(solicitacoesData.meusPendentes || []),
-          ...(solicitacoesData.meusHistorico || [])
-        ]
-      }
-    } else {
-      data = status === 'pendentes'
-        ? solicitacoesData.pendentes
-        : solicitacoesData.historico
-    }
+  //   if (nivelAcessoCod === 1) {
+  //     if (status === 'analises') {
+  //       data = [
+  //         ...(solicitacoesData.analisesPendentes || []),
+  //         ...(solicitacoesData.analisesHistorico || [])
+  //       ]
+  //     } else if (status === 'meus pontos') {
+  //       data = [
+  //         ...(solicitacoesData.meusPendentes || []),
+  //         ...(solicitacoesData.meusHistorico || [])
+  //       ]
+  //     }
+  //   } else {
+  //     data = status === 'pendentes'
+  //       ? solicitacoesData.pendentes
+  //       : solicitacoesData.historico
+  //   }
 
-    setDisplayedSolicitacoes(ordenar(data).slice(0, itemsPerPage))
-    setToogle(status === 'analises' || status === 'pendentes')
-  }
+  //   setDisplayedSolicitacoes(ordenar(data).slice(0, itemsPerPage))
+  //   setToogle(status === 'analises' || status === 'pendentes')
+  // }
 
 
   // Atualizar lista
@@ -343,18 +352,10 @@ const Solicitacao = () => {
         <h1 className='font-bold text-4xl self-start'>Solicitações</h1>
 
         <Tab
-          activeTab={toogle ? 'PENDENTES' : 'HISTÓRICO'}
+          toogle={toogle}
           onClick={handleClick}
-          pendentes_length={
-            nivelAcessoCod === 1
-              ? (solicitacoesData.meusPendentes?.length || 0)
-              : solicitacoesData.pendentes.length
-          }
-          analises_length={
-            nivelAcessoCod === 1
-              ? (solicitacoesData.analisesPendentes?.length || 0)
-              : 0
-          }
+          pendentes_length={nivelAcessoCod === 1 ? solicitacoesData.meusPendentes?.length || 0 : solicitacoesData.pendentes.length}
+          analises_length={nivelAcessoCod === 1 ? solicitacoesData.analisesPendentes?.length || 0 : 0}
           isGestor={nivelAcessoCod === 1}
         />
 
