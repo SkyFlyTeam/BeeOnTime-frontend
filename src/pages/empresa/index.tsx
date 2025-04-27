@@ -22,6 +22,7 @@ import 'react-toastify/dist/ReactToastify.css';
 // Icons
 import { RiPencilFill } from 'react-icons/ri';
 import { ApiUsuario } from '@/config/apiUsuario';
+import { getUsuario } from '@/services/authService';
 
 
 // Constantes
@@ -89,11 +90,7 @@ function GerenciarEmpresa() {
 
   async function getUsuarioEmp_cod(): Promise<number | null> {
     try {
-      console.log("→ [getUsuarioEmp_cod] Iniciando chamada ao /auth/token...");
-      const res = await axios.get<any>("/auth/token");
-      console.log("✔ [getUsuarioEmp_cod] Token recebido:", res.data.token);
-  
-      const resData = await ApiUsuario.get<any>(`/usuario/${res.data.token}`);
+      const resData = await getUsuario();
       console.log("✔ [getUsuarioEmp_cod] Dados do usuário:", resData.data);
   
       const empCod = resData.data.empCod;
@@ -180,7 +177,7 @@ function GerenciarEmpresa() {
         setBackupSetores(mappedSetores);
       }
     } catch (error) {
-      console.error('Error fetching setores:', error);
+      console.log('Error fetching setores:', error);
       setSetores([]);
       setBackupSetores([]);
     }
