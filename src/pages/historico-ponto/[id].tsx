@@ -22,6 +22,7 @@ import { PointsHistoryTable } from "@/components/custom/histPonto/points-history
 import EditarFuncionarioForm from "@/components/custom/CardEditarFuncionario/editarFuncionarioForm";
 import CardBancoHoras from "./_components/CardBancoHoras/cardBancoHoras";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ToastContainer } from "react-toastify";
 
 // Styles
 
@@ -80,11 +81,13 @@ export default function PointsHistoryPage() {
   const fetchUsuario = async (usuario_cod: number) => {
     try {
       const usuario_data = await usuarioServices.getUsuarioById(usuario_cod) as Usuario;
+      //alert(JSON.stringify(usuario_data))
       setUsuarioInfo(usuario_data);
     } catch (error) {
       console.log("Erro ao recuperar usuário de id " + usuario_cod);
     }
   };
+
 
   const getUser = async () => {
     const user = await getUsuario();
@@ -95,12 +98,11 @@ export default function PointsHistoryPage() {
     const onMount = async () => {
       const usuario = await getUser();
       setUsuarioLogado(usuario);
-  
       // Verifique se id está disponível antes de continuar
       if (id) {
         if (usuario.nivelAcesso.nivelAcesso_cod == 2) {
           fetchHistPontos(usuario.usuario_cod);
-          fetchUsuario(usuario.usuario_cod);
+          setUsuarioInfo(usuario);
         } else {
           setAccessLevel("ADM");
           fetchHistPontos(parseInt(id.toString()));
@@ -109,7 +111,7 @@ export default function PointsHistoryPage() {
       }
       setIsLoading(false); // Set loading to false after data is fetched
     };
-  
+
     onMount();
   }, [id]); // Empty dependency array ensures the effect runs once after mount
 
@@ -143,21 +145,24 @@ export default function PointsHistoryPage() {
       </div>
     ) : (
       <div className="flex flex-col p-6 md:p-9">
-        {/* {accessLevel == "ADM" ? <EditarFuncionarioForm usuarioInfo={usuarioInfo!} /> : null} */}
         <h1 className="text-xl md:text-3xl font-semibold mb-4">
-          {accessLevel === "USER" ? "Meus Pontos" : `Pontos de ${usuarioInfo?.usuario_nome}`}
+          {accessLevel === "USER" ? "Meus Pontos" : `Informações de ${usuarioInfo?.usuario_nome}`}
         </h1>
-          <PointsHistoryTable
-            entries={histPontos}
-            userInfo={usuarioInfo}
-            onEdit={handleEdit}
-            accessLevel={accessLevel}
-          />
+        {accessLevel === "ADM" && usuarioInfo != null ?
+         <EditarFuncionarioForm usuarioInfo={usuarioInfo} /> : null}
+        {accessLevel === "ADM" ? <h2 className="text-lg md:text-2xl font-semibold mb-4">Histórico de pontos</h2> : null}
+        <PointsHistoryTable
+          entries={histPontos}
+          userInfo={usuarioInfo}
+          onEdit={handleEdit}
+          accessLevel={accessLevel}
+        />
         <div className="flex w-full justify-end mt-10">
-          {(usuarioLogado?.nivelAcesso.nivelAcesso_cod == 0 || (usuarioLogado?.nivelAcesso.nivelAcesso_cod == 1 && parseInt(id!.toString()) != usuarioLogado?.usuario_cod)) && 
-            <CardBancoHoras usuarioCod={parseInt(id!.toString())}/>
+          {(usuarioLogado?.nivelAcesso.nivelAcesso_cod == 0 || (usuarioLogado?.nivelAcesso.nivelAcesso_cod == 1 && parseInt(id!.toString()) != usuarioLogado?.usuario_cod)) &&
+            <CardBancoHoras usuarioCod={parseInt(id!.toString())} />
           }
         </div>
+
       </div>
     )
   );
