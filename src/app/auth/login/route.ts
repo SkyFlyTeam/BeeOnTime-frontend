@@ -2,7 +2,7 @@
 
 // Libs
 import { AccessPass } from '@/lib/auth';
-import { attemptLoginSession } from '../../../lib/server/auth/login';
+import { attemptLoginSession, attemptNewEmail } from '../../../lib/server/auth/login';
 
 
 
@@ -12,4 +12,11 @@ import { attemptLoginSession } from '../../../lib/server/auth/login';
 export async function POST(req: Request) {
     const creds = await req.text()
     return attemptLoginSession(JSON.parse(creds) as AccessPass);
+}
+
+
+export async function PUT(req: Request) {
+    const email = await req.text();
+    console.log(email)
+    return attemptNewEmail(email, req);
 }
