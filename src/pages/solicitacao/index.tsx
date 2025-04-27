@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { ApiException } from '../../config/apiExceptions'
 import { solicitacaoServices } from '../../services/solicitacaoServices'
 import SolicitationCard from './SolicitacaoCard'
-import styles from './Solicitacao.module.css'
+// Removed duplicate import
 import Tab from '../../components/custom/tab'
 import Modal from '../../components/custom/modalSolicitacao/index'
 import SolicitacaoInterface from '../../interfaces/Solicitacao'
@@ -10,10 +10,14 @@ import ModalDevolutiva from '../../components/custom/modalSolicitacao/modalDevol
 import { getUsuario } from '../../services/authService'
 import ModalAjustePonto from '@/components/custom/modalSolicitacao/modalAjustePonto'
 import ModalDecisaoHoraExtra from '@/components/custom/modalSolicitacao/modalHoraExtra/modalHoraExtra'
+import SolicitarFolgaModal from '@/components/custom/modalSolicitacao/modalFolga/modalSolicitarFolga'
 import { renderModalChildren } from '../../utils/renderModalByTipoSolicitacao.tsx'
 import ModalSolicitarHoraExtra from '@/components/custom/modalSolicitacao/modalHoraExtra/modalSolicitarHoraExtra'
 import { pontoServices } from '@/services/pontoServices'
 import MarcacaoPonto from '@/interfaces/marcacaoPonto'
+import SolicitacaoFolgaInterface from '@/interfaces/SolicitacaoFolga'
+import styles from './Solicitacao.module.css'
+
 
 
 interface SolicitacoesState {
@@ -45,6 +49,9 @@ const Solicitacao = () => {
     historico: [],
   })
 
+  // Modal folga
+  const [isModalFolgaOpen, setIsModalFolgaOpen] = useState(false);
+
   // Paginação
   const [displayedSolicitacoes, setDisplayedSolicitacoes] = useState<SolicitacaoInterface[]>([])
   const [currentPage, setCurrentPage] = useState(1)
@@ -61,6 +68,11 @@ const Solicitacao = () => {
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
   }
+
+  // Função para abrir o modal de folga
+  const handleModalFolga = (status: boolean) => {
+    setIsModalFolgaOpen(status);
+  };
 
   const handleModal = (solicitacaoCod: number, status: boolean) => {
     if (solicitacaoCod === 0) {
@@ -215,6 +227,12 @@ const Solicitacao = () => {
           pendentes_length={solicitacoesData.pendentes.length}
         />
         <div className={styles.container}>
+
+        {/* Adicionando o botão para testar o modal de folga */}
+        <div className={styles.buttonContainer}>
+        <button onClick={() => handleModalFolga(true)}>Solicitar Folga</button> {/* Abre o modal de folga */}
+        </div>
+
           {displayedSolicitacoes.length > 0 ? (
             displayedSolicitacoes.map((solicitacao) => (
               <div key={solicitacao.solicitacaoCod}>
@@ -311,6 +329,19 @@ const Solicitacao = () => {
           /> } 
         title={'Hora extra'}      
       />
+
+      {/* Folga */}
+
+      {/* Modal de Solicitação de Folga */}
+      {isModalFolgaOpen && (
+          <Modal isOpen={isModalFolgaOpen} onClick={() => handleModalFolga(false)} title="Solicitar Folga">
+            <SolicitarFolgaModal
+              usuarioLogadoCod={usuarioCod}
+              onClose={() => handleModalFolga(false)} // Fecha o modal ao clicar no botão de fechar
+            />
+          </Modal>
+        )}
+
     </div>
   )
 }

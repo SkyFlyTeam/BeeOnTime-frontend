@@ -2,6 +2,25 @@ import { ApiBancoHoras } from "@/config/apiBancoHoras";
 import { ApiException } from "@/config/apiExceptions";
 import BancoHoras from "@/interfaces/bancoHoras";
 
+// Função para obter as horas disponíveis para um usuário
+const getHorasDisponiveisPorUsuario = async (usuarioCod: number): Promise<number | ApiException> => {
+    try {
+      const { data } = await ApiBancoHoras.get(`/banco_horas/usuario/${usuarioCod}/horas-disponiveis`);
+      
+      // Certifique-se de que o retorno da API é um número.
+      if (typeof data === 'number') {
+        return data; // Retorna as horas disponíveis.
+      } else {
+        return new ApiException("A resposta da API não é um número.");
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        return new ApiException(error.message || "Erro ao consultar as horas disponíveis.");
+      }
+      return new ApiException("Erro desconhecido ao consultar as horas disponíveis.");
+    }
+  };
+  
 
 const getAllBancoHoras = async (): Promise<BancoHoras[] | ApiException> => {
     try {
@@ -89,5 +108,6 @@ export const bancoHorasServices = {
     getAllBancoHorasByUsuario,
     createBancoHoras,
     updatedBancoHoras,
-    deleteBancoHoras
+    deleteBancoHoras,
+    getHorasDisponiveisPorUsuario,
 }
