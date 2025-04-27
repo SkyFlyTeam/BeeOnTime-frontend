@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { JSX, useEffect, useState } from 'react'
 import { ApiException } from '../../config/apiExceptions'
 
 // Interfaces
@@ -12,7 +12,7 @@ import Tab from '../../components/custom/tab'
 import Modal from '../../components/custom/modalSolicitacao/index'
 
 import ModalDevolutiva from '../../components/custom/modalSolicitacao/modalDevolutiva'
-import { getUsuario } from '../../services/authService' 
+import { getUsuario } from '../../services/authService'
 import ModalAjustePonto from '@/components/custom/modalSolicitacao/modalAjustePonto'
 import ModalDecisaoHoraExtra from '@/components/custom/modalSolicitacao/modalHoraExtra/modalHoraExtra'
 import { renderModalChildren } from '../../utils/renderModalByTipoSolicitacao.tsx'
@@ -24,6 +24,7 @@ import BotaoDropdownSolicitacao from '../../components/custom/BotaoSolicitacao/d
 
 import { Skeleton } from '@/components/ui/skeleton'
 import SolicitacaoCardSkeleton from './SolicitacaoCard/cardSkeleton'
+import { IsModalFeriasOpen } from './testeModal'
 
 interface SolicitacoesState {
   all: SolicitacaoInterface[];
@@ -35,6 +36,7 @@ const Solicitacao = () => {
   // Modais
   const [openDevolutivaModal, setOpenDevolutivaModal] = useState<boolean>(false);
   const [openModal, setOpenModal] = useState<{ [key: string]: boolean }>({});
+  const [modalAberto, setModalAberto] = useState<string | null>(null)
 
 
   // Informações do usuário
@@ -52,6 +54,13 @@ const Solicitacao = () => {
     historico: [],
   });
 
+  const handleOpenModal = (tipo: string) => {
+    setModalAberto(tipo)
+  }
+
+
+
+
   // Paginação
   const [displayedSolicitacoes, setDisplayedSolicitacoes] = useState<SolicitacaoInterface[]>([])
   const [currentPage, setCurrentPage] = useState(1)
@@ -59,7 +68,7 @@ const Solicitacao = () => {
   const [totalItems, setTotalItems] = useState(0)
   const [isLoading, setIsLoading] = useState(true);
 
-  
+
   const fetchSolicitacoes = async (
     usuarioCargo: string,
     usuarioCod: number,
@@ -67,10 +76,10 @@ const Solicitacao = () => {
     setorCod?: number
   ) => {
     setIsLoading(true)
-    
+
     try {
       let result: unknown;
-  
+
       if (nivelAcessoCod === 2 && usuarioCod) {
         result = await solicitacaoServices.getAllSolicitacaoByUsuario(usuarioCod)
       } else if (nivelAcessoCod === 1 && setorCod) {
@@ -78,14 +87,14 @@ const Solicitacao = () => {
       } else {
         result = await solicitacaoServices.getAllSolicitacao()
       }
-  
+
       // Confirmação de tipo seguro
       if (!Array.isArray(result)) {
         throw new Error('Erro inesperado: formato de dados inválido.')
       }
-  
+
       let solicitacoesFiltradas = result as SolicitacaoInterface[]
-  
+
       if (usuarioCargo === 'Funcionário') {
         solicitacoesFiltradas = solicitacoesFiltradas.filter((s) => s.usuarioCod === usuarioCod)
       } else if (usuarioCargo === 'Gestor' || usuarioCargo === 'Admin') {
@@ -93,13 +102,13 @@ const Solicitacao = () => {
           (s) => s.usuarioCod === usuarioCod || s.usuarioCargo === 'Funcionário'
         )
       }
-  
+
       setSolicitacoesData({
         all: solicitacoesFiltradas.filter((s) => s.solicitacaoStatus !== 'PENDENTE'),
         pendentes: solicitacoesFiltradas.filter((s) => s.solicitacaoStatus === 'PENDENTE'),
         historico: solicitacoesFiltradas.filter((s) => s.solicitacaoStatus !== 'PENDENTE'),
       })
-  
+
       setTotalItems(solicitacoesFiltradas.length)
     } catch (error) {
       console.error('Erro ao buscar solicitações:', error)
@@ -113,7 +122,7 @@ const Solicitacao = () => {
       setIsLoading(false)
     }
   }
-  
+
 
   const paginateData = () => {
     const dataToDisplay = toogle ? solicitacoesData.pendentes : solicitacoesData.historico
@@ -170,7 +179,7 @@ const Solicitacao = () => {
       } else {
         updatedHistorico.push(updatedSolicitacao);
       }
-  
+
 
       // Aplique o filtro novamente para garantir que o cargo do usuário seja levado em consideração
       return {
@@ -182,7 +191,7 @@ const Solicitacao = () => {
 
     paginateData()
   }
-  
+
   // Atualziar depois de uma exclusão
   const handleDeleteSolicitacao = (idToDelete: number) => {
     setSolicitacoesData((prevData) => {
@@ -208,7 +217,48 @@ const Solicitacao = () => {
     );
   };
 
-  
+  // Novo mapeamento de Modal para renderização automática
+  {/* ========= Modais de solicitações ========= */}
+  const modaisMapeados: { [key: string]: JSX.Element } = {
+    // 'Férias': (
+    //   <IsModalFeriasOpen
+    //     usuarioCod={usuarioCod}
+    //     onClose={() => setModalAberto(null)}
+    //     onSolicitacaoUpdate={handleSolicitacaoUpdate}
+    //   />
+    // ),
+    'Hora extra': (
+      <ModalSolicitarHoraExtra
+        usuarioCod={usuarioCod}
+        cargaHoraria={cargaHoraria ? cargaHoraria : 0}
+        onClose={() => setModalAberto(null)}
+        onSolicitacaoUpdate={handleSolicitacaoUpdate}
+      />
+    ),
+    // 'Ajuste de ponto': (
+    //   // <ModalAjustePonto
+    //   //   usuarioCod={usuarioCod}
+    //   //   onClose={() => setModalAberto(null)}
+    //   //   onSolicitacaoUpdate={handleSolicitacaoUpdate}
+    //   // />
+    // ),
+    // 'Licença médica': (
+    //   // <ModalLicencaMedica
+    //   //   usuarioCod={usuarioCod}
+    //   //   onClose={() => setModalAberto(null)}
+    //   //   onSolicitacaoUpdate={handleSolicitacaoUpdate}
+    //   // />
+    // ),
+    // 'Folga': (
+    //   // <ModalFolga
+    //   //   usuarioCod={usuarioCod}
+    //   //   onClose={() => setModalAberto(null)}
+    //   //   onSolicitacaoUpdate={handleSolicitacaoUpdate}
+    //   // />
+    // )
+  };
+
+
 
   useEffect(() => {
     const initialize = async () => {
@@ -218,8 +268,8 @@ const Solicitacao = () => {
           console.error('Usuário não encontrado.');
           return;
         }
-  
-        const { usuario_cod, usuario_cargo, nivelAcesso_cod, setorCod, usuario_cargaHoraria} = response.data
+
+        const { usuario_cod, usuario_cargo, nivelAcesso_cod, setorCod, usuario_cargaHoraria } = response.data
         setUsuarioCod(usuario_cod)
         setUsuarioCargo(usuario_cargo)
         setNivelAcessoCod(nivelAcesso_cod)
@@ -234,12 +284,12 @@ const Solicitacao = () => {
     }
 
     initialize()
-    }, [usuarioCod, usuarioCargo, nivelAcessoCod, setorCod])  
-    
-    useEffect(() => {
-      paginateData()  
-    }, [currentPage, solicitacoesData, toogle])
-  
+  }, [usuarioCod, usuarioCargo, nivelAcessoCod, setorCod])
+
+  useEffect(() => {
+    paginateData()
+  }, [currentPage, solicitacoesData, toogle])
+
 
   const totalPages = Math.ceil(
     (toogle ? solicitacoesData.pendentes.length : solicitacoesData.historico.length) / itemsPerPage
@@ -248,51 +298,61 @@ const Solicitacao = () => {
   if (isLoading) {
     return (
       <div className={styles.solicitacao_container}>
-      <div className={styles.card_container}>
-        <h1 className='font-bold text-4xl'>Solicitações</h1>
+        <div className={styles.card_container}>
+          <h1 className='font-bold text-4xl'>Solicitações</h1>
 
-        <div className=' flex items-center justify-center mt-7'>
-          <Skeleton className='h-12 w-[16rem] bg-gray-200 ' />
-        </div>
+          <div className=' flex items-center justify-center mt-7'>
+            <Skeleton className='h-12 w-[16rem] bg-gray-200 ' />
+          </div>
 
-        {/* Tab e estrutura já visíveis, com skeletons abaixo */}
-        <div className={styles.container}>
-          {Array.from({ length: 5 }).map((_, index) => (
-            <SolicitacaoCardSkeleton key={index} />
-          ))}
+          {/* Tab e estrutura já visíveis, com skeletons abaixo */}
+          <div className={styles.container}>
+            {Array.from({ length: 5 }).map((_, index) => (
+              <SolicitacaoCardSkeleton key={index} />
+            ))}
+          </div>
         </div>
       </div>
-    </div>
     )
   }
 
-    return (
-      <div className={styles.solicitacao_container}>
+  return (
+    <div className={styles.solicitacao_container}>
       <div className={styles.card_container}>
         <h1 className='font-bold text-4xl self-start'>Solicitações</h1>
 
-        <Tab
-          activeTab={toogle ? 'PENDENTES' : 'HISTÓRICO'}
-          onClick={handleClick}
-          tabLabels={['PENDENTES', 'HISTÓRICO']}  
-          pendentesLength={solicitacoesData.pendentes.length}
-          showBadge={true}  
-        />
-
-
         <div className='flex flex-row justify-between'>
 
+          <Tab
+            activeTab={toogle ? 'PENDENTES' : 'HISTÓRICO'}
+            onClick={handleClick}
+            tabLabels={['PENDENTES', 'HISTÓRICO']}
+            pendentesLength={solicitacoesData.pendentes.length}
+            showBadge={true}
+          />
 
-          
           {/* Componente do dropdown e modais */}
           <BotaoDropdownSolicitacao
             usuarioCod={usuarioCod}
             usuarioCargo={usuarioCargo}
             handleSolicitacaoUpdate={handleSolicitacaoUpdate}
+            onOpenModal={handleOpenModal}
           />
 
-          
+
         </div>
+
+        {/* Renderizar Modal automaticamente */}
+        {modalAberto && (
+          <Modal
+            isOpen={!!modalAberto}
+            onClick={() => setModalAberto(null)}
+            title={modalAberto}
+          >
+            {modaisMapeados[modalAberto]}
+          </Modal>
+        )}
+
         <div className={styles.container}>
           {displayedSolicitacoes.length > 0 ? (
             displayedSolicitacoes.map((solicitacao) => (
@@ -320,8 +380,8 @@ const Solicitacao = () => {
                     nivelAcessoCod: nivelAcessoCod,
                     cargaHoraria: cargaHoraria
                   })
-                  } 
-                  title={solicitacao.tipoSolicitacaoCod.tipoSolicitacaoNome}                  
+                  }
+                  title={solicitacao.tipoSolicitacaoCod.tipoSolicitacaoNome}
                 />
               </div>
             ))
@@ -375,21 +435,7 @@ const Solicitacao = () => {
         </div>
       </div>
 
-      {/* ========= Modais de solicitações ========= */}
-
-      {/* Hora extra */}
-      <Modal 
-        isOpen={isModalHoraExtraOpen}  
-        onClick={() => handleModal(0, false)} 
-        children={
-          <ModalSolicitarHoraExtra 
-            usuarioCod={usuarioCod} 
-            cargaHoraria={cargaHoraria ? cargaHoraria : 0}
-            onClose={() => setIsModalHoraExtraOpen(false)}
-            onSolicitacaoUpdate={handleSolicitacaoUpdate}
-          /> } 
-        title={'Hora extra'}      
-      />
+      
     </div>
   );
 };
