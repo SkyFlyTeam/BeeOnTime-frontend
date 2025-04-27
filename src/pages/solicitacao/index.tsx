@@ -1,11 +1,16 @@
 import { useEffect, useState } from 'react'
 import { ApiException } from '../../config/apiExceptions'
+
+// Interfaces
+import SolicitacaoInterface from '../../interfaces/Solicitacao'
+
+// Services
 import { solicitacaoServices } from '../../services/solicitacaoServices'
 import SolicitationCard from './SolicitacaoCard'
 import styles from './Solicitacao.module.css'
 import Tab from '../../components/custom/tab'
 import Modal from '../../components/custom/modalSolicitacao/index'
-import SolicitacaoInterface from '../../interfaces/Solicitacao'
+
 import ModalDevolutiva from '../../components/custom/modalSolicitacao/modalDevolutiva'
 import { getUsuario } from '../../services/authService'
 import ModalAjustePonto from '@/components/custom/modalSolicitacao/modalAjustePonto'
@@ -332,12 +337,13 @@ const Solicitacao = () => {
     )
   }
 
-  return (
-    <div className={styles.solicitacao_container}>
+    return (
+      <div className={styles.solicitacao_container}>
       <div className={styles.card_container}>
-        <h1 className='font-bold text-4xl'>Solicitações</h1>
+        <h1 className='font-bold text-4xl self-start'>Solicitações</h1>
+
         <Tab
-          toogle={toogle}
+          activeTab={toogle ? 'PENDENTES' : 'HISTÓRICO'}
           onClick={handleClick}
           pendentes_length={
             nivelAcessoCod === 1
@@ -351,6 +357,7 @@ const Solicitacao = () => {
           }
           isGestor={nivelAcessoCod === 1}
         />
+
         <div className={styles.container}>
           {displayedSolicitacoes.length > 0 ? (
             displayedSolicitacoes.map((solicitacao) => (

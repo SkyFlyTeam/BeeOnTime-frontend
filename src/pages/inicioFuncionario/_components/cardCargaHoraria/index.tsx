@@ -11,6 +11,8 @@ import  HistPontos  from '@/../src/interfaces/histPonto';
 
 // Styles
 import styles from './styles.module.css';
+import { solicitacaoServices } from '@/services/solicitacaoServices';
+import SolicitacaoInterface from '@/interfaces/Solicitacao';
 
 interface CardCargaHorariaProps {
     usuarioInfo: Usuario;
@@ -21,6 +23,7 @@ const CardCargaHoraria = ({ usuarioInfo, histPontos }: CardCargaHorariaProps) =>
     const [pontoDia, setPontoDia] = useState<HistPontos | undefined>(undefined);
     const [horas, setHoras] = useState<Horas | undefined>(undefined);
     const [saidaPrevista, setSaidaPrevista] = useState<String | undefined>(undefined);
+    const [solicitacaoExtra, setSolicitacaoExtra] = useState<SolicitacaoInterface | undefined>(undefined);
 
     const formatTime = (time: string | Date): string => {
         if (typeof time === 'string') {
@@ -138,9 +141,27 @@ const CardCargaHoraria = ({ usuarioInfo, histPontos }: CardCargaHorariaProps) =>
         setPontoDia(pontoAtual[0]);
     };
 
+    const fetchSolicitacoes = async () => {
+        try {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = (today.getMonth() + 1).toString().padStart(2, '0');
+            const day = today.getDate().toString().padStart(2, '0');
+            const data = `${year}-${month}-${day}`;
+
+            const solicitacoes = await solicitacaoServices.getAllSolicitacaoByUsuario(usuarioInfo.usuario_cod) as SolicitacaoInterface[];
+
+            const solicitacaoExtraHoje = solicitacoes.find((solicitacao) => solicitacao.tipoSolicitacaoCod.tipoSolicitacaoCod == 5 && solicitacao.solicitacaoDataPeriodo == data);
+            
+            setSolicitacaoExtra(solicitacaoExtraHoje);
+        } catch (error) {
+            console.error("erro ao resgatar solicitações", error)
+        }
+    };
+
     useEffect(() => {
         fetchHoras();
-       
+        fetchSolicitacoes()
     }, []);
 
     useEffect(() => {
@@ -165,11 +186,12 @@ const CardCargaHoraria = ({ usuarioInfo, histPontos }: CardCargaHorariaProps) =>
                 {!usuarioInfo.jornadas.jornada_horarioFlexivel &&
                     <span>Jornada de trabalho: {jornadaHorarioEntrada} às {jornadaHorarioSaida}</span>
                 }
-                    { horasExtras > 0 && (
-                        <span>Horas extras: {horasExtras}h</span>
+                    { horasExtras > 0 ? (
+                        <span>Horas extras: {horasExtras}h {solicitacaoExtra ? `Planejada: (${solicitacaoExtra.horasSolicitadas}h)` : ''} </span>
+                    ) : (
+                        solicitacaoExtra ? (<span>Horas extras planejadas: {solicitacaoExtra.horasSolicitadas}h </span>) : (null)
                     )}
                 </div>
-
         </div>
     );
 };
