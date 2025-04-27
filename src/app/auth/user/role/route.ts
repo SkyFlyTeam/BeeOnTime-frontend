@@ -1,7 +1,7 @@
 // "/auth/user/role"
 
 // Libs
-import { attemptGetLocalUserRoleID } from '../../../../lib/server/auth/login';
+import { attemptGetLocalUserRoleID } from '@/lib/server/auth/login';
 
 
 

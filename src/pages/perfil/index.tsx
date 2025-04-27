@@ -1,6 +1,6 @@
 import { ChangeEvent, useEffect, useState } from 'react';
 import { getUsuario, setLogIn } from '@/services/authService';
-import { usuarioServices } from '@/services/usuarioService';
+import { usuarioServices } from '@/services/usuarioServices';
 import { z } from 'zod';
 import { AccessPass } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
