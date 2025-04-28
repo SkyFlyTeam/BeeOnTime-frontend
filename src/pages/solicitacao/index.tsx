@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { JSX, useEffect, useState } from 'react'
 import { ApiException } from '../../config/apiExceptions'
 
 // Interfaces
@@ -19,14 +19,16 @@ import { renderModalChildren } from '../../utils/renderModalByTipoSolicitacao.ts
 import ModalSolicitarHoraExtra from '@/components/custom/modalSolicitacao/modalHoraExtra/modalSolicitarHoraExtra'
 import { pontoServices } from '@/services/pontoServices'
 import MarcacaoPonto from '@/interfaces/marcacaoPonto'
+import BotaoDropdownSolicitacao from '../../components/custom/BotaoSolicitacao/dropdownSolicitacao'; // Ajuste o caminho conforme necessário
+
 
 import { Skeleton } from '@/components/ui/skeleton'
 import SolicitacaoCardSkeleton from './SolicitacaoCard/cardSkeleton'
 
 interface SolicitacoesState {
-  all: SolicitacaoInterface[]
-  pendentes: SolicitacaoInterface[]
-  historico: SolicitacaoInterface[]
+  all: SolicitacaoInterface[];
+  pendentes: SolicitacaoInterface[];
+  historico: SolicitacaoInterface[];
   analisesPendentes?: SolicitacaoInterface[]
   analisesHistorico?: SolicitacaoInterface[]
   meusPendentes?: SolicitacaoInterface[]
@@ -35,11 +37,10 @@ interface SolicitacoesState {
 
 const Solicitacao = () => {
   // Modais
-  const [openDevolutivaModal, setOpenDevolutivaModal] = useState<boolean>(false)
+  const [openDevolutivaModal, setOpenDevolutivaModal] = useState<boolean>(false);
+  const [openModal, setOpenModal] = useState<{ [key: string]: boolean }>({});
+  const [modalAberto, setModalAberto] = useState<string | null>(null)
   const [isModalHoraExtraOpen, setIsModalHoraExtraOpen] = useState(false);
-  const [openModal, setOpenModal] = useState<{
-    [key: string]: boolean
-  }>({})
 
   // Informações do usuário
   const [usuarioCod, setUsuarioCod] = useState<number>(0)
@@ -48,7 +49,7 @@ const Solicitacao = () => {
   const [setorCod, setSetorCod] = useState()
   const [cargaHoraria, setCargaHoraria] = useState<number>()
 
-  const [toogle, setToogle] = useState(false)
+  const [toogle, setToogle] = useState(false);
 
   const [solicitacoesData, setSolicitacoesData] = useState<SolicitacoesState>({
     all: [],
@@ -58,7 +59,13 @@ const Solicitacao = () => {
     analisesHistorico: [],
     meusPendentes: [],
     meusHistorico: [],
-  })
+  });
+
+  const handleOpenModal = (tipo: string) => {
+    setModalAberto(tipo)
+  }
+
+
 
   // Paginação
   const [displayedSolicitacoes, setDisplayedSolicitacoes] = useState<SolicitacaoInterface[]>([])
@@ -66,6 +73,7 @@ const Solicitacao = () => {
   const [itemsPerPage, setItemsPerPage] = useState(5)
   const [totalItems, setTotalItems] = useState(0)
   const [isLoading, setIsLoading] = useState(true);
+
 
 
   const fetchSolicitacoes = async (
@@ -87,7 +95,7 @@ const Solicitacao = () => {
 
         const minhas = solicitacoes.filter(s => s.usuarioCod === usuarioCod)
         const analises = solicitacoes.filter(s => s.usuarioCod !== usuarioCod)
-
+        
         const ordenar = (arr: SolicitacaoInterface[]) =>
           [...arr].sort((a, b) => new Date(b.dataCriacao).getTime() - new Date(a.dataCriacao).getTime())
 
@@ -100,11 +108,8 @@ const Solicitacao = () => {
           meusPendentes: ordenar(minhas.filter(s => s.solicitacaoStatus === 'PENDENTE')),
           meusHistorico: ordenar(minhas.filter(s => s.solicitacaoStatus !== 'PENDENTE')),
         })
-
-        // Exibir Análises por padrão
-        setDisplayedSolicitacoes(
-          ordenar(analises.filter(s => s.solicitacaoStatus === 'PENDENTE')).slice(0, itemsPerPage)
-        )
+      
+        setDisplayedSolicitacoes(ordenar(analises.filter(s => s.solicitacaoStatus === 'PENDENTE')).slice(0, itemsPerPage))
         return
       } else {
         result = await solicitacaoServices.getAllSolicitacao()
@@ -170,14 +175,9 @@ const Solicitacao = () => {
     setDisplayedSolicitacoes(dataToDisplay.slice(start, end))
   }
 
-  const handleClick = (status: 'pendentes' | 'historico' | 'analises' | 'meus pontos') => {
-    setCurrentPage(1)
-    setToogle(status === 'analises' || status === 'pendentes')
-  }
-
   const handlePageChange = (page: number) => {
-    setCurrentPage(page)
-  }
+    setCurrentPage(page);
+  };
 
   const handleModal = (solicitacaoCod: number, status: boolean) => {
     if (solicitacaoCod === 0) {
@@ -187,61 +187,36 @@ const Solicitacao = () => {
     setOpenModal((prevState) => ({
       ...prevState,
       [solicitacaoCod]: status,
-    }))
+    }));
 
     if (status === true) {
-      handleDevolutivaModal(false)
+      handleDevolutivaModal(false);
     }
-  }
+  };
 
   const handleDevolutivaModal = (status: boolean) => {
-    setOpenDevolutivaModal(status)
+    setOpenDevolutivaModal(status);
+  };
+
+  const handleClick = (status: 'pendentes' | 'historico' | 'analises' | 'meus pontos') => {
+    setCurrentPage(1)
+    setToogle(status === 'analises' || status === 'pendentes')
   }
-
-  // const handleClick = (status: 'pendentes' | 'historico' | 'analises' | 'meus pontos') => {
-  //   setCurrentPage(1)
-  //   let data: SolicitacaoInterface[] = []
-
-  //   const ordenar = (arr: SolicitacaoInterface[]) =>
-  //     [...arr].sort((a, b) => new Date(b.dataCriacao).getTime() - new Date(a.dataCriacao).getTime())
-
-  //   if (nivelAcessoCod === 1) {
-  //     if (status === 'analises') {
-  //       data = [
-  //         ...(solicitacoesData.analisesPendentes || []),
-  //         ...(solicitacoesData.analisesHistorico || [])
-  //       ]
-  //     } else if (status === 'meus pontos') {
-  //       data = [
-  //         ...(solicitacoesData.meusPendentes || []),
-  //         ...(solicitacoesData.meusHistorico || [])
-  //       ]
-  //     }
-  //   } else {
-  //     data = status === 'pendentes'
-  //       ? solicitacoesData.pendentes
-  //       : solicitacoesData.historico
-  //   }
-
-  //   setDisplayedSolicitacoes(ordenar(data).slice(0, itemsPerPage))
-  //   setToogle(status === 'analises' || status === 'pendentes')
-  // }
-
 
   // Atualizar lista
   const handleSolicitacaoUpdate = async (updatedSolicitacao: SolicitacaoInterface) => {
     setSolicitacoesData((prevData) => {
       const updatedPendentes = prevData.pendentes.filter(
         (solicitacao) => solicitacao.solicitacaoCod !== updatedSolicitacao.solicitacaoCod
-      )
+      );
       const updatedHistorico = prevData.historico.filter(
         (solicitacao) => solicitacao.solicitacaoCod !== updatedSolicitacao.solicitacaoCod
       )
 
       if (updatedSolicitacao.solicitacaoStatus === 'PENDENTE') {
-        updatedPendentes.push(updatedSolicitacao)
+        updatedPendentes.push(updatedSolicitacao);
       } else {
-        updatedHistorico.push(updatedSolicitacao)
+        updatedHistorico.push(updatedSolicitacao);
       }
 
 
@@ -261,47 +236,89 @@ const Solicitacao = () => {
     setSolicitacoesData((prevData) => {
       const updatedPendentes = prevData.pendentes.filter(
         (solicitacao) => solicitacao.solicitacaoCod !== idToDelete
-      )
+      );
       const updatedHistorico = prevData.historico.filter(
         (solicitacao) => solicitacao.solicitacaoCod !== idToDelete
-      )
+      );
       const updatedAll = prevData.all.filter(
         (solicitacao) => solicitacao.solicitacaoCod !== idToDelete
-      )
+      );
       return {
         ...prevData,
         pendentes: updatedPendentes,
         historico: updatedHistorico,
         all: updatedAll,
-      }
-    })
+      };
+    });
 
     setDisplayedSolicitacoes((prev) =>
       prev.filter((solicitacao) => solicitacao.solicitacaoCod !== idToDelete)
-    )
-  }
+    );
+  };
+
+  // Novo mapeamento de Modal para renderização automática
+  {/* ========= Modais de solicitações ========= */}
+  const modaisMapeados: { [key: string]: JSX.Element } = {
+    // 'Férias': (
+    //   <IsModalFeriasOpen
+    //     usuarioCod={usuarioCod}
+    //     onClose={() => setModalAberto(null)}
+    //     onSolicitacaoUpdate={handleSolicitacaoUpdate}
+    //   />
+    // ),
+    'Hora extra': (
+      <ModalSolicitarHoraExtra
+        usuarioCod={usuarioCod}
+        cargaHoraria={cargaHoraria ? cargaHoraria : 0}
+        onClose={() => setModalAberto(null)}
+        onSolicitacaoUpdate={handleSolicitacaoUpdate}
+      />
+    ),
+    // 'Ajuste de ponto': (
+    //   // <ModalAjustePonto
+    //   //   usuarioCod={usuarioCod}
+    //   //   onClose={() => setModalAberto(null)}
+    //   //   onSolicitacaoUpdate={handleSolicitacaoUpdate}
+    //   // />
+    // ),
+    // 'Licença médica': (
+    //   // <ModalLicencaMedica
+    //   //   usuarioCod={usuarioCod}
+    //   //   onClose={() => setModalAberto(null)}
+    //   //   onSolicitacaoUpdate={handleSolicitacaoUpdate}
+    //   // />
+    // ),
+    // 'Folga': (
+    //   // <ModalFolga
+    //   //   usuarioCod={usuarioCod}
+    //   //   onClose={() => setModalAberto(null)}
+    //   //   onSolicitacaoUpdate={handleSolicitacaoUpdate}
+    //   // />
+    // )
+  };
 
 
 
   useEffect(() => {
     const initialize = async () => {
       try {
-        const response = await getUsuario()
+        const response = await getUsuario();
         if (!response || !response.data) {
-          console.error('Usuário não encontrado.')
-          return
+          console.error('Usuário não encontrado.');
+          return;
         }
-  
-        const { usuario_cod, usuario_cargo, nivelAcesso_cod, setorCod, usuario_cargaHoraria} = response.data
+
+        const { usuario_cod, usuario_cargo, nivelAcesso_cod, setorCod, usuario_cargaHoraria } = response.data
         setUsuarioCod(usuario_cod)
         setUsuarioCargo(usuario_cargo)
         setNivelAcessoCod(nivelAcesso_cod)
         setSetorCod(setorCod)
         setCargaHoraria(usuario_cargaHoraria)
 
-        await fetchSolicitacoes(usuario_cargo, usuario_cod, nivelAcesso_cod, setorCod)
+
+        await fetchSolicitacoes(usuario_cargo, usuario_cod, nivelAcesso_cod, setorCod);
       } catch (error) {
-        console.error('Erro ao obter usuário:', error)
+        console.error('Erro ao obter usuário:', error);
       }
     }
 
@@ -323,7 +340,7 @@ const Solicitacao = () => {
           ? solicitacoesData.pendentes.length
           : solicitacoesData.historico.length)
     ) / itemsPerPage
-  )
+  );
 
   if (isLoading) {
     return (
@@ -346,10 +363,12 @@ const Solicitacao = () => {
     )
   }
 
-    return (
-      <div className={styles.solicitacao_container}>
+  return (
+    <div className={styles.solicitacao_container}>
       <div className={styles.card_container}>
         <h1 className='font-bold text-4xl self-start'>Solicitações</h1>
+
+        <div className='flex flex-row justify-between'>
 
         <Tab
           toogle={toogle}
@@ -358,6 +377,29 @@ const Solicitacao = () => {
           analises_length={nivelAcessoCod === 1 ? solicitacoesData.analisesPendentes?.length || 0 : 0}
           isGestor={nivelAcessoCod === 1}
         />
+
+          {/* Componente do dropdown e modais */}
+          <BotaoDropdownSolicitacao
+            usuarioCod={usuarioCod}
+            usuarioCargo={usuarioCargo}
+            handleSolicitacaoUpdate={handleSolicitacaoUpdate}
+            onOpenModal={handleOpenModal}
+          />
+
+
+        </div>
+
+        {/* Renderizar Modal automaticamente */}
+        {modalAberto && (
+          <Modal
+            isOpen={!!modalAberto}
+            onClick={() => setModalAberto(null)}
+            title={modalAberto}
+          >
+            {modaisMapeados[modalAberto]}
+          </Modal>
+        )}
+        
 
         <div className={styles.container}>
           {displayedSolicitacoes.length > 0 ? (
@@ -377,10 +419,6 @@ const Solicitacao = () => {
                 <Modal
                   isOpen={openModal[solicitacao.solicitacaoCod]}
                   onClick={() => handleModal(solicitacao.solicitacaoCod, false)}
-                  solicitacao={solicitacao}
-                  onSolicitacaoUpdate={handleSolicitacaoUpdate}
-                  usuarioLogadoCod={usuarioCod}
-                  usuarioCargo={usuarioCargo} 
                   children={renderModalChildren({
                     solicitacao,
                     onSolicitacaoUpdate: handleSolicitacaoUpdate,
@@ -409,11 +447,11 @@ const Solicitacao = () => {
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 1}
               >
-                &lt;
+                {'<'}
               </button>
 
               {Array.from({ length: totalPages }, (_, index) => {
-                const page = index + 1
+                const page = index + 1;
                 if (page === 1 || page === totalPages || Math.abs(page - currentPage) <= 1) {
                   return (
                     <button
@@ -423,14 +461,14 @@ const Solicitacao = () => {
                     >
                       {page}
                     </button>
-                  )
+                  );
                 } else if (Math.abs(page - currentPage) === 2 && page < currentPage) {
-                  return <span key={`left-ellipsis`} className={styles.ellipsis}>...</span>
+                  return <span key={`left-ellipsis`} className={styles.ellipsis}>...</span>;
                 } else if (Math.abs(page - currentPage) === 2 && page > currentPage) {
-                  return <span key={`right-ellipsis`} className={styles.ellipsis}>...</span>
+                  return <span key={`right-ellipsis`} className={styles.ellipsis}>...</span>;
                 }
 
-                return null
+                return null;
               })}
 
               <button
@@ -438,30 +476,16 @@ const Solicitacao = () => {
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
               >
-                &gt;
+                {'>'}
               </button>
             </div>
           )}
         </div>
       </div>
 
-      {/* ========= Modais de solicitações ========= */}
-
-      {/* Hora extra */}
-      <Modal 
-        isOpen={isModalHoraExtraOpen}  
-        onClick={() => handleModal(0, false)} 
-        children={
-          <ModalSolicitarHoraExtra 
-            usuarioCod={usuarioCod} 
-            cargaHoraria={cargaHoraria ? cargaHoraria : 0}
-            onClose={() => setIsModalHoraExtraOpen(false)}
-            onSolicitacaoUpdate={handleSolicitacaoUpdate}
-          /> } 
-        title={'Hora extra'}      
-      />
+      
     </div>
-  )
-}
+  );
+};
 
-export default Solicitacao
+export default Solicitacao;
