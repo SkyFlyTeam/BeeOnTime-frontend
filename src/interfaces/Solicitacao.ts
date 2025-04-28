@@ -1,4 +1,7 @@
 export default interface SolicitacaoInterface {
+  Solicitacao_data: string | Date;
+  solicitacaoTipoNome: string;
+  solicitacaoData: string | number | Date;
   dataCriacao: string | number | Date;
   solicitacaoCod: number;
   solicitacaoAnexo: number[] | null
@@ -25,3 +28,8 @@ export interface CriarSolicitacaoInterface {
   },
   usuarioCod: number
 }
+
+export interface TipoSolicitacao  {
+  tipoSolicitacaoCod: number;
+  tipoSolicitacaoNome: string;
+};
