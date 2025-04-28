@@ -8,7 +8,7 @@ git clone https://github.com/SkyFlyTeam/BeeOnTime-frontend.git
 ### 2. Instale as dependências
 Acesse a pasta do projeto e execute:
 ```bash
-npm install
+npm install --force
 ```
 
 ### 3. Configure as variáveis de ambiente
