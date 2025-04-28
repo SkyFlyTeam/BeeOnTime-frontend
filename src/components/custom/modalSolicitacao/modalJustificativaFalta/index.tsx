@@ -19,6 +19,8 @@ import ModalDevolutiva from '../modalDevolutiva'
 
 // Styles
 import styles from './style.module.css'
+import { faltaServices } from '@/services/faltaService'
+import Faltas from '@/interfaces/faltas'
 
 
 interface AjusteProps {
@@ -106,6 +108,10 @@ const ModalJustificativaFalta: React.FC<AjusteProps> = ({
         id: idApproved,
       }
       await pontoServices.aproveSolicitacaoPonto(solicitacaoPonto, solicitacao.solicitacaoCod)
+      console.log(updatedSolicitacao.solicitacaoDataPeriodo)
+      const faltaObj = await faltaServices.getFaltabyUsuarioCodAndDate(usuarioLogadoCod, updatedSolicitacao.solicitacaoDataPeriodo)
+      const faltaData = faltaObj as Faltas
+      await faltaServices.updateFalta(faltaData.faltaCod, updatedSolicitacao.solicitacaoMensagem)
     }
 
     // Chama a função de atualização após a solicitação ser aprovada ou recusada
@@ -161,8 +167,9 @@ const ModalJustificativaFalta: React.FC<AjusteProps> = ({
           <span className={styles.data_span}>Dia selecionado: </span>{diaSelecionado}
         </div>
 
-        <div className={styles.column}>
-          <label>Justificativa</label>
+        
+          <label>Justificativa: </label>
+          <div className={styles.column}>
           <div className={styles.justificativa_content}>
             <input
               type="text"
