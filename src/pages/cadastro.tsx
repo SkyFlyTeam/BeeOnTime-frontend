@@ -1,17 +1,20 @@
 "use client";
-import styles from '../styles/Home.module.css';
-import { useRouter } from 'next/router';
-import { FaRegEnvelope, FaRegEye, FaRegEyeSlash } from "react-icons/fa";
-import Image from 'next/image';
-import { z } from "zod";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+// General
+import { useEffect, useState } from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Input } from '@/components/ui/input';
-import { useEffect, useState } from 'react';
+
+import { useRouter } from 'next/router';
+import Image from 'next/image';
+import { z } from "zod";
+
+// Components
+import { Button } from '@/components/ui/button';
 import CadastroEmpresaForm from '../components/custom/CadastroEmpresa/CadastroEmpresa';
+
+// Styles
+import styles from '../styles/Home.module.css';
+
 
 const formSchema = z.object({
     email: z.string().min(1, { message: "Campo obrigatório." }).email({ message: "Por favor, insira um e-mail válido." }),

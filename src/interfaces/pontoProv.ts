@@ -1,7 +1,4 @@
-interface Ponto {
-    horarioPonto: string | Date | null;
-    tipoPonto: number;
-}
+import { Ponto } from "./marcacaoPonto";
 
 export default interface PontoProv {
     id: string | null | undefined;

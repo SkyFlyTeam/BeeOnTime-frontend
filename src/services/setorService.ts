@@ -1,100 +1,89 @@
-
 import { ApiException } from "@/config/apiExceptions";
 import { ApiUsuario } from "@/config/apiUsuario";
-import Setor from "@/interfaces/usuarioInfo";
+import { Setor } from "@/interfaces/setor";
+import { Usuario } from "@/interfaces/usuario";
 
-// Função para obter todos os sotores
-const getAllSetores = async () => {
+const getAllSetores = async (): Promise<Setor[] | ApiException> => {
   try {
-    const response = await ApiUsuario.get(`/setor`);
-    return response.data;
+    const { data } = await ApiUsuario.get(`/setor`);
+    return data as Setor[];
   } catch (error) {
     if (error instanceof Error) {
       return new ApiException(error.message || "Erro ao consultar a API.");
     }
-  
     return new ApiException("Erro desconhecido.");
   }
 };
+ 
 
-export const setorSevices = {
-  getAllSetores
-}
-
-// src/services/usuarioService.ts
-import axios from 'axios';
-
-// Define a URL base do backend
-const API_URL = 'http://localhost:8081';
-
-interface Setor {
-  setor_cod: number;
-  setor_nome: string;
-}
-
-interface SetorAPI {
-  setorCod: number;
-  setorNome: string;
-}
-
-export const verificarSetores = async (): Promise<SetorAPI[]> => {
+const verificarSetoresPorEmpresa = async (empCod: number): Promise<Setor[]> => {
   try {
-    const response = await axios.get(`${API_URL}/setor`, {
+    const response = await ApiUsuario.get(`/setor/empresa/${empCod}`, {
       headers: { "Content-Type": "application/json" },
     });
-    return response.data
-  }
+    return response.data as Setor[]
+  } 
   catch(error) {
     console.log(error)
     throw error
   }
 } 
 
-export const cadastrarSetor = async (setoresData: string[]) => {
+const getSetorUsuarios = async (setorCod: number): Promise<Usuario[] | ApiException> => {
+  try {
+    const { data } = await ApiUsuario.get(`/setor/${setorCod}/usuarios`);
+    return data as Usuario[];
+  } catch (error) {
+    if (error instanceof Error) {
+      return new ApiException(error.message || "Erro ao consultar a API.");
+    }
+    return new ApiException("Erro desconhecido.");
+  }
+};
+
+const cadastrarSetor = async (setoresData: string[], empCod: number): Promise<Setor[] | ApiException> => {
   try {
     console.log("📤 Dados sendo enviados:", JSON.stringify(setoresData, null, 2));
     const requests = setoresData.map(async (setor) => {
-      const response = await axios.post(
-        `${API_URL}/setor`,
-        { setorNome: setor },
+      const { data } = await ApiUsuario.post(`/setor`, 
+        { setorNome: setor, empCod: empCod },
         { headers: { "Content-Type": "application/json" } }
       );
-      console.log(`✅ Resposta do backend para "${setor}":`, response.data);
-      return { setorCod: response.data.setorCod, setorNome: response.data.setorNome }; // Ajuste conforme o retorno
+      console.log(`✅ Resposta do backend para "${setor}":`, data);
+      return data as Setor;
     });
     const setoresCriados = await Promise.all(requests);
-    return setoresCriados; // Retorna array de { setorCod, setorNome }
+    return setoresCriados;
   } catch (error: any) {
-    if (error.response) {
-      console.error("❌ Erro no backend:", error.response.data);
-    } else {
-      console.error("❌ Erro na requisição:", error.message);
+    if (error instanceof Error) {
+      return new ApiException(error.message || "Erro ao cadastrar setor.");
     }
-    throw error;
+    return new ApiException("Erro desconhecido.");
   }
 };
 
-export const atualizarSetor = async (setorData: Setor) => {
+const atualizarSetor = async (setorData: Setor): Promise<Setor | ApiException> => {
   try {
     console.log("📤 Dados sendo enviados:", JSON.stringify(setorData, null, 2));
-
-    const response = await axios.put(
-      `${API_URL}/setor/${setorData.setor_cod}`, // Endpoint includes the sector ID
-      { setorNome: setorData.setor_nome }, // Send the updated sector name
-      {
-        headers: { "Content-Type": "application/json" },
-      }
+    const { data } = await ApiUsuario.put(
+      `/setor/${setorData.setorCod}`,
+      { setorNome: setorData.setorNome },
+      { headers: { "Content-Type": "application/json" } }
     );
-
-    console.log(`✅ Resposta do backend para setor "${setorData.setor_nome}":`, response.data);
-    return response.status; // Return the status code (e.g., 200)
-
+    console.log(`✅ Resposta do backend para setor "${setorData.setorNome}":`, data);
+    return data as Setor;
   } catch (error: any) {
-    if (error.response) {
-      console.error("❌ Erro no backend:", error.response.data);
-    } else {
-      console.error("❌ Erro na requisição:", error.message);
+    if (error instanceof Error) {
+      return new ApiException(error.message || "Erro ao atualizar setor.");
     }
-    throw error; // Re-throw the error for the caller to handle
+    return new ApiException("Erro desconhecido.");
   }
 };
+
+export const setorServices = {
+  getAllSetores,
+  verificarSetoresPorEmpresa,
+  cadastrarSetor,
+  atualizarSetor,
+  getSetorUsuarios
+}; 

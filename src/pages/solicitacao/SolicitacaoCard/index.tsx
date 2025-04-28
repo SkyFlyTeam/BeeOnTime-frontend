@@ -1,17 +1,31 @@
+// General
 import React from 'react'
-import styles from './styles.module.css'
-import { CircleCheck, XCircle } from 'lucide-react'
-import clsx from 'clsx'
-import Flag from '../../../components/custom/flag'
-import SolicitacaoInterface from '../../../interfaces/Solicitacao'
-import { solicitacaoServices } from '../../../services/solicitacaoServices'
+
+// Config
 import { ApiException } from '../../../config/apiExceptions'
+
+// Interfaces
+import Solicitacao from '../../../interfaces/Solicitacao'
+
+// Services
+import { solicitacaoServices } from '../../../services/solicitacaoServices'
+
+// Styles
+import styles from './styles.module.css'
+
+// Icons
+import { CircleCheck, XCircle } from 'lucide-react'
 import { AiFillDelete } from 'react-icons/ai'
 import { BiSolidEditAlt } from "react-icons/bi";
 
+// Components
+import clsx from 'clsx'
+import Flag from '../../../components/custom/flag'
+
+
 interface SolicitacaoCard {
-  solicitacao: SolicitacaoInterface
-  onSolicitacaoUpdate: (updatedSolicitacao: SolicitacaoInterface) => void
+  solicitacao: Solicitacao
+  onSolicitacaoUpdate: (updatedSolicitacao: Solicitacao) => void
   onClick: () => void
   usuarioCargo: string
   usuarioCod: number
@@ -53,7 +67,7 @@ const SolicitacaoCard = ({
     }
   }
 
-  const showName = usuarioCargo !== 'Funcionário' && solicitacao?.usuarioCod !== usuarioCod
+  const showName = usuarioLogadoCargo !== 'Funcionário' && solicitacao?.usuarioCod !== usuarioLogadoCod
 
   return (
     <div className={styles.card} onClick={() => onClick()}>

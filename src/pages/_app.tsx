@@ -1,14 +1,16 @@
-import '../styles/global.css';
+// General
 import type { AppProps } from 'next/app';
-// import 'bootstrap/dist/css/bootstrap.min.css';
-import { AuthProvider } from '../context/AuthContext'; 
-import "react-toastify/dist/ReactToastify.css";
-import { ToastContainer } from "react-toastify";
 import { useRouter } from 'next/router';
-import { AppSidebar } from '@/components/custom/app-sidebar';
-import { SidebarProvider, SidebarInset, SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
-import { Separator } from '@/components/ui/separator';
 import { useEffect } from 'react';
+
+// Components
+import { AppSidebar } from '@/components/custom/Sidebar/app-sidebar';
+import { SidebarProvider, SidebarInset, SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
+import { ToastContainer } from "react-toastify";
+
+// Styles
+import '../styles/global.css';
+import "react-toastify/dist/ReactToastify.css";
 
 function MyApp({ Component, pageProps }: AppProps) {
   const router = useRouter();
@@ -33,7 +35,7 @@ function MyApp({ Component, pageProps }: AppProps) {
       <AppSidebar />
       <SidebarInset>
         <Header />
-        <main className="flex flex-1 flex-col gap-4 lg:px-12 md:px-12 sm:px-8 py-0">
+        <main className="flex flex-1 flex-col gap-4 px-0 md:px-12 py-0">
           <Component {...pageProps} />
           <ToastContainer />
         </main>

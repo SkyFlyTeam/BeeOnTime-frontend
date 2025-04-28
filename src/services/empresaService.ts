@@ -1,76 +1,68 @@
-import axios from 'axios';
+import { ApiException } from "@/config/apiExceptions";
+import { ApiUsuario } from "@/config/apiUsuario";
+import { Empresa, EmpresaAPI } from "@/interfaces/empresa";
 
-// Define a URL base do backend
-const API_URL = 'http://localhost:8081';
-
-interface Empresa {
-  emp_nome: string;
-  emp_razaoSocial: string;
-  emp_CNPJ: string;
-  emp_CEP: string;
-}
-
-interface EmpresaAPI {
-  empCod: number;
-  empNome: string;
-  empCnpj: string;
-  empRazaoSocial: string;
-  empCep: string;
-  empCidade: string;
-  empEstado: string;
-  empEndereco: string;
-}
-
-export const verificarEmpresa = async (): Promise<EmpresaAPI[]> => {
+const verificarEmpresa = async (): Promise<EmpresaAPI[] | ApiException> => {
   try {
-    const response = await axios.get<EmpresaAPI[]>(`${API_URL}/empresa`, {
+    const { data } = await ApiUsuario.get('/empresa');
+    return data as EmpresaAPI[];
+  } catch (error) {
+    if (error instanceof Error) {
+      return new ApiException(error.message || "Erro ao consultar empresas.");
+    }
+    return new ApiException("Erro desconhecido.");
+  }
+};
+
+const verificarEmpresaById = async (empCod: number): Promise<EmpresaAPI> => {
+  try {
+    const response = await ApiUsuario.get<EmpresaAPI>(`/empresa/${empCod}`, {
       headers: { "Content-Type": "application/json" },
     });
-    return response.data; // Agora tipado como EmpresaAPI[]
+    return response.data;
   } catch (error) {
-    console.log("Erro: ", error);
+    console.log("Error: ", error);
     throw error; // Re-throw the error for the caller to handle
   }
 };
 
-// Função para cadastrar empresas
-export const cadastrarEmpresa = async (formData: any) => {
+const cadastrarEmpresa = async (formData: any): Promise<number | ApiException> => {
   try {
     console.log("📤 Dados sendo enviados:", JSON.stringify(formData, null, 2));
-    const response = await axios.post(`${API_URL}/empresa`, formData, {
-      headers: { "Content-Type": "application/json" },
+    const { data } = await ApiUsuario.post('/empresa', formData, {
+      headers: { "Content-Type": "application/json" }
     });
-    console.log("✅ Resposta do backend:", response.data);
-    return response.data.empCod;
+    console.log("✅ Resposta do backend:", data);
+    return (data as { empCod: number }).empCod;
   } catch (error: any) {
-    if (error.response) {
-      console.error("❌ Erro no backend:", error.response.data);
-    } else {
-      console.error("❌ Erro na requisição:", error.message);
+    if (error instanceof Error) {
+      return new ApiException(error.message || "Erro ao cadastrar empresa.");
     }
-    throw error;
+    return new ApiException("Erro desconhecido.");
   }
 };
 
-// Função para atualizar empresas
-export const atualizarEmpresa = async (empresaData: EmpresaAPI) => {
+const atualizarEmpresa = async (empresaData: EmpresaAPI): Promise<number | ApiException> => {
   try {
     console.log("📤 Dados sendo enviados:", JSON.stringify(empresaData, null, 2));
-    const response = await axios.put(
-      `${API_URL}/empresa/${empresaData.empCod}`,
+    const { data } = await ApiUsuario.put(
+      `/empresa/${empresaData.empCod}`,
       empresaData,
-      {
-        headers: { "Content-Type": "application/json" },
-      }
+      { headers: { "Content-Type": "application/json" } }
     );
-    console.log("✅ Resposta do backend:", response.data);
-    return response.status;
+    console.log("✅ Resposta do backend:", data);
+    return (data as { status: number }).status;
   } catch (error: any) {
-    if (error.response) {
-      console.error("❌ Erro no backend:", error.response.data);
-    } else {
-      console.error("❌ Erro na requisição:", error.message);
+    if (error instanceof Error) {
+      return new ApiException(error.message || "Erro ao atualizar empresa.");
     }
-    throw error;
+    return new ApiException("Erro desconhecido.");
   }
+};
+
+export const empresaServices = {
+  verificarEmpresa,
+  verificarEmpresaById,
+  cadastrarEmpresa,
+  atualizarEmpresa,
 };

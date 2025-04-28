@@ -1,15 +1,25 @@
 "use client";
-
+// General
+import { ApiException } from "@/config/apiExceptions";
 import { ChangeEvent, useEffect, useState } from "react";
-import { cadastrarEmpresa } from "@/services/empresaService";
-import { cadastrarSetor } from "@/services/setorService";
-import { cadastrarUsuarioComJornada } from "@/services/usuariosServices";
-import { z } from "zod";
-import ModalEmpresa from "./ModalEmpresa";
+
 import router from "next/router";
 import { useToast } from "@/hooks/use-toast";
+import { z } from "zod";
+
+// Services
+import { empresaServices } from "@/services/empresaService";
+import { setorServices } from "@/services/setorService";
+import { usuarioServices } from "@/services/usuarioServices";
+import { Setor } from "@/interfaces/setor";
+
+// Components
+import ModalEmpresa from "./ModalEmpresa";
 import { Toaster } from "@/components/ui/toaster";
+
+// Utils
 import { generatePassword } from "@/utils/emails/generatePassword";
+import { EmpresaAPI } from "@/interfaces/empresa";
 
 // Interfaces e Schemas
 interface EmpresaFormData {
@@ -45,6 +55,7 @@ const adminSchema = z.object({
   admin_nome: z.string().min(1, "Nome do administrador é obrigatório"),
   admin_email: z.string().email("Email inválido").min(1, "Email é obrigatório"),
   admin_setor: z.string().min(1, "Setor é obrigatório"),
+  admin_cargo: z.string().min(1, "Cargo é obrigatório"),
   admin_tipoContrato: z.string().min(1, "Tipo de contrato é obrigatório"),
 });
 
@@ -54,6 +65,7 @@ interface CadastroEmpresaFormProps {
 
 export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormProps) {
   const [isOpen, setIsOpen] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [modalAtual, setModalAtual] = useState(1);
   const [empresaData, setEmpresaData] = useState<EmpresaFormData>({
     empNome: "",
@@ -142,15 +154,31 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
     };
     const formattedValue = formatters[name] ? formatters[name](value) : value;
     setEmpresaData((prev) => ({ ...prev, [name]: formattedValue }));
+
+    if (Object.keys(errors).length == 0)
+      return;
+
+    const result = empresaSchema.partial().safeParse({ [name]: (name == "empCnpj" || name == "empCep" ? formattedValue.replace(/\D/g, "") : formattedValue) })
+    if (result.success)
+      delete errors[name];
   };
 
-  const handleAdminChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleAdminChange = async (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setAdminData((prev) => ({ ...prev, [name]: value }));
+
+    if (Object.keys(errors).length == 0)
+      return;
+
+    const result = empresaSchema.partial().safeParse({ [name]: value })
+    if (result.success)
+      delete errors[name];
+
   };
 
   const handleSetorChange = (e: ChangeEvent<HTMLInputElement>) => {
     setSetorInput(e.target.value);
+    delete errors["setorInput"];
   };
 
   const handleAddSetor = () => {
@@ -164,7 +192,8 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
 
     setSetores((prev) => [...prev, trimmedInput]);
     setSetorInput("");
-    setErrors((prev) => ({ ...prev, setorInput: "" }));
+    //setErrors((prev) => ({ ...prev, setorInput: "" }));
+    delete errors["setores"];
   };
 
   const handleRemoveSetor = (index: number) => {
@@ -210,24 +239,55 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
     return true;
   };
 
-  const handleNextStep = (nextStep: number) => {
-    if ((modalAtual === 1 || modalAtual === 3) && !validateStep(modalAtual)) return;
+  const handleNextStep = async (nextStep: number) => {
+    if ((modalAtual === 1 || modalAtual === 3) && !validateStep(modalAtual))
+      return;
     if (modalAtual === 2 && setores.length === 0) {
       setErrors((prev) => ({ ...prev, setores: "É necessário cadastrar pelo menos um setor" }));
       return;
     }
+    // Terminado filtro de entradas, verificar email e cnpj
+    //
+    // ISTO DEVERIA SER VERIFICADO NO BACKEND, NÃO NO CLIENTE!
+    if (modalAtual === 1) {
+      const empresasData = await empresaServices.verificarEmpresa();
+      const empresas = empresasData as EmpresaAPI[]
+      if (empresas.some(emp => emp.empCnpj == empresaData.empCnpj)) {
+        setErrors((prev) => ({ ...prev, empCnpj: "CNPJ já cadastrado" }));
+        return;
+      }
+    }
+    // Tudo ok
     setErrors({});
     setModalAtual(nextStep);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateStep(3)) return;
+    setIsSubmitting(true);
+    if (!validateStep(3)) {
+      setIsSubmitting(false);
+      return;
+    }
+    const empresasData = await empresaServices.verificarEmpresa();
+    const empresas = empresasData as EmpresaAPI[]
+    if(empresas.some(emp => emp.usuarios.some((us: {usuarioEmail: string})=> adminData.admin_email == us.usuarioEmail))){
+      setErrors((prev) => ({ ...prev, admin_email: "Email já cadastrado" }));
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
-      const empCod = await cadastrarEmpresa(empresaData);
-      const setoresCriados = await cadastrarSetor(setores);
-      const setorCodMap = setoresCriados.reduce((acc: Record<string, number>, setor: any) => {
+      const empCod = await empresaServices.cadastrarEmpresa(empresaData);
+      if (empCod instanceof ApiException) {
+        throw new Error(empCod.message);
+      }
+      
+      const setoresCriados = await setorServices.cadastrarSetor(setores, empCod);
+      if (setoresCriados instanceof ApiException) {
+        throw new Error(setoresCriados.message);
+      }
+      const setorCodMap = setoresCriados.reduce((acc: Record<string, number>, setor: Setor) => {
         acc[setor.setorNome] = setor.setorCod;
         return acc;
       }, {});
@@ -251,7 +311,10 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
         usuario_DataNascimento: null,
       };
 
-      await cadastrarUsuarioComJornada(usuarioData, {});
+      const usuarioResult = await usuarioServices.cadastrarUsuarioComJornada(usuarioData, {});
+      if (usuarioResult instanceof ApiException) {
+        throw new Error(usuarioResult.message);
+      }
 
       const res = await fetch('/api/email', {
         method: 'POST',
@@ -270,11 +333,13 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
       });
 
       console.log("Dados enviados:", { empresaData, setores, usuarioData });
+      await router.push("/");
       resetForm();
     } catch (error) {
       console.error("Erro ao cadastrar:", error);
       setErrors((prev) => ({ ...prev, submit: "Erro ao finalizar cadastro" }));
     }
+    setIsSubmitting(false);
   };
 
   // Render
@@ -286,22 +351,22 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
           <div className="w-[85%] mx-auto">
             <form className="flex flex-col gap-4">
               <div className="flex-1 mt-3">
-                <label htmlFor="empNome" className="mb-2">Nome</label>
+                <label htmlFor="empNome" className="mb-2">Nome <span className="text-red-500">*</span></label>
                 <input id="empNome" name="empNome" value={empresaData.empNome} onChange={handleInputChange} className="border p-2 rounded-md w-full" />
                 {errors.empNome && <p className="text-red-500">{errors.empNome}</p>}
               </div>
               <div className="flex-1 mt-3">
-                <label htmlFor="empRazaoSocial" className="mb-2">Razão Social</label>
+                <label htmlFor="empRazaoSocial" className="mb-2">Razão Social <span className="text-red-500">*</span></label>
                 <input id="empRazaoSocial" name="empRazaoSocial" value={empresaData.empRazaoSocial} onChange={handleInputChange} className="border p-2 rounded-md w-full" />
                 {errors.empRazaoSocial && <p className="text-red-500">{errors.empRazaoSocial}</p>}
               </div>
               <div className="flex-1">
-                <label htmlFor="empCnpj" className="mb-2">CNPJ</label>
+                <label htmlFor="empCnpj" className="mb-2">CNPJ <span className="text-red-500">*</span></label>
                 <input id="empCnpj" name="empCnpj" value={empresaData.empCnpj} onChange={handleInputChange} maxLength={18} className="border p-2 rounded-md w-full" />
                 {errors.empCnpj && <p className="text-red-500">{errors.empCnpj}</p>}
               </div>
               <div className="flex-1 mt-3">
-                <label htmlFor="empCep" className="mb-2">CEP do Endereço</label>
+                <label htmlFor="empCep" className="mb-2">CEP do Endereço <span className="text-red-500">*</span></label>
                 <input id="empCep" name="empCep" value={empresaData.empCep} onChange={handleInputChange} className="border p-2 rounded-md w-full" />
                 {errors.empCep && <p className="text-red-500">{errors.empCep}</p>}
               </div>
@@ -326,13 +391,14 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
             <div>
               <div className="flex items-center gap-2">
                 <div className="flex-1">
-                  <label htmlFor="setorInput" className="mb-2">Nome do Setor:</label>
+                  <label htmlFor="setorInput" className="mb-2">Nome do Setor: <span className="text-red-500">*</span></label>
                   <input
                     id="setorInput"
                     value={setorInput}
                     onChange={handleSetorChange}
                     placeholder="Digite o nome do setor"
                     className="border p-2 rounded-md w-full"
+                    style={{marginBottom: "1vh"}}
                   />
                   {errors.setorInput && <p className="text-red-500 mt-1">{errors.setorInput}</p>}
                 </div>
@@ -346,7 +412,7 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
               {setores.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-2">
                   {setores.map((setor, index) => (
-                    <div key={index} className="relative inline-block">
+                    <div key={index} className="relative inline-block" style={{marginBottom: "1rem"}}>
                       <span className="border border-[#bbbbbb] rounded-md p-2">{setor}</span>
                       <button
                         onClick={() => handleRemoveSetor(index)}
@@ -376,22 +442,22 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
           <div className="w-[85%] mx-auto">
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <div className="flex-1">
-                <label htmlFor="admin_nome" className="mb-2">Nome do Administrador</label>
+                <label htmlFor="admin_nome" className="mb-2">Nome do Administrador <span className="text-red-500">*</span></label>
                 <input id="admin_nome" name="admin_nome" value={adminData.admin_nome} onChange={handleAdminChange} className="border p-2 rounded-md w-full" />
                 {errors.admin_nome && <p className="text-red-500">{errors.admin_nome}</p>}
               </div>
               <div className="flex-1">
-                <label htmlFor="admin_email" className="mb-2">Email</label>
+                <label htmlFor="admin_email" className="mb-2">Email <span className="text-red-500">*</span></label>
                 <input id="admin_email" name="admin_email" type="email" value={adminData.admin_email} onChange={handleAdminChange} className="border p-2 rounded-md w-full" />
                 {errors.admin_email && <p className="text-red-500">{errors.admin_email}</p>}
               </div>
-              <div className ="flex-1">
-                <label htmlFor="admin_cargo" className="mb-2">Cargo</label>
+              <div className="flex-1">
+                <label htmlFor="admin_cargo" className="mb-2">Cargo <span className="text-red-500">*</span></label>
                 <input id="admin_cargo" name="admin_cargo" value={adminData.admin_cargo} onChange={handleAdminChange} className="border p-2 rounded-md w-full" />
                 {errors.admin_cargo && <p className="text-red-500">{errors.admin_cargo}</p>}
               </div>
               <div className="flex-1">
-                <label htmlFor="admin_setor" className="mb-2">Setor</label>
+                <label htmlFor="admin_setor" className="mb-2">Setor <span className="text-red-500">*</span></label>
                 <select id="admin_setor" name="admin_setor" value={adminData.admin_setor} onChange={handleAdminChange} className="border p-2 rounded-md w-full">
                   <option value="" disabled>Selecione um setor</option>
                   {setores.map((setor, index) => <option key={index} value={setor}>{setor}</option>)}
@@ -400,25 +466,26 @@ export default function CadastroEmpresaForm({ isMobile }: CadastroEmpresaFormPro
               </div>
               <div className="flex gap-5">
                 <div className="flex-1">
-                  <label htmlFor="admin_tipoContrato" className="mb-2">Tipo de Contrato</label>
+                  <label htmlFor="admin_tipoContrato" className="mb-2">Tipo de Contrato <span className="text-red-500">*</span></label>
                   <select
                     id="admin_tipoContrato"
                     name="admin_tipoContrato"
                     value={adminData.admin_tipoContrato}
                     onChange={handleAdminChange}
                     className="border p-2 rounded-md w-full"
+                    style={{backgroundColor:"#CBD5E1"}}
                     disabled
                   >
-                    <option value="CLT">CLT</option>
+                    <option value="CLT">CLT <span className="text-red-500">*</span></option>
                   </select>
                   {errors.admin_tipoContrato && <p className="text-red-500">{errors.admin_tipoContrato}</p>}
                 </div>
                 <div className="flex-1">
-                  <label htmlFor="admin_nvlAcesso" className="mb-2">Nível de Acesso</label>
-                  <input id="admin_nvlAcesso" name="admin_nvlAcesso" value="Administrador" readOnly style={{color: "rgba(0, 0, 0, 0.65)"}} className="border p-2 rounded-md w-full" />
+                  <label htmlFor="admin_nvlAcesso" className="mb-2">Nível de Acesso <span className="text-red-500">*</span></label>
+                  <input id="admin_nvlAcesso" name="admin_nvlAcesso" value="Administrador" readOnly style={{ color: "rgba(0, 0, 0, 0.65)" }} className="border p-2 rounded-md w-full" />
                 </div>
               </div>
-              <button type="submit" className="text-black p-2 rounded-md bg-[#FFB503]">Finalizar</button>
+              <button type="submit" className="text-black p-2 rounded-md bg-[#FFB503]" disabled={isSubmitting}>{isSubmitting == false ? "Finalizar" : "Cadastrando..."}</button>
             </form>
             {errors.submit && <p className="text-red-500 mt-2">{errors.submit}</p>}
           </div>
