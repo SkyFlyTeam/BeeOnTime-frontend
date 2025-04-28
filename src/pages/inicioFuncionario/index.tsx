@@ -43,16 +43,21 @@ export default function InicioFuncionario() {
 
     if (loading) {
         return (
-            <div className="flex flex-col md:flex-row  justify-between">
-                {/* Skeleton "Bater Ponto" */}
-                <div className="">
-                    <Skeleton className='h-52 w-96 bg-gray-200' />
-                </div>
+            <div className='flex flex-col justify-items-center 
+                '>
+                <div className="flex flex-row flex-wrap gap-8 justify-between">
+                    {/* Skeleton "Bater Ponto" */}
+                        <Skeleton className='h-52 w-[30rem] bg-gray-200' />
 
-                {/* Skeleton "Carga diária" */}
-                <div className="">
-                    <Skeleton className='h-52 w-[30rem] bg-gray-200' />
+
+                    {/* Skeleton "Carga diária" */}
+
+                        <Skeleton className='h-52 w-[40rem] bg-gray-200' />
+                    
                 </div>
+                    <div className='flex mt-8'>
+                        <Skeleton className='h-36 w-[45rem] bg-gray-200' />
+                    </div>
             </div>
         ); // Renderiza uma mensagem ou spinner enquanto carrega
     }
@@ -62,7 +67,7 @@ export default function InicioFuncionario() {
             <div className='flex flex-wrap flex-row gap-8'>
                 <TimeClock />
                 <CardCargaHoraria usuarioInfo={usuarioInfo!} histPontos={histPontos!} />
-                
+
             </div>
             <div className='flex mt-8 flex-wrap flex-row gap-8'>
                 <CardHorasTrabalhadas usuarioInfo={usuarioInfo} histPontos={histPontos!} />
