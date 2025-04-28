@@ -16,12 +16,11 @@ import { getUsuario } from '../../services/authService'
 import ModalAjustePonto from '@/components/custom/modalSolicitacao/modalAjustePonto'
 import ModalDecisaoHoraExtra from '@/components/custom/modalSolicitacao/modalHoraExtra/modalHoraExtra'
 import { renderModalChildren } from '../../utils/renderModalByTipoSolicitacao.tsx'
-import BotaoDropdownSolicitacao from '@/components/custom/BotaoSolicitacao/dropdownSolicitacao'
-import { userInfo } from 'os'
 import ModalSolicitarHoraExtra from '@/components/custom/modalSolicitacao/modalHoraExtra/modalSolicitarHoraExtra'
 import { pontoServices } from '@/services/pontoServices'
 import MarcacaoPonto from '@/interfaces/marcacaoPonto'
 import BotaoDropdownSolicitacao from '../../components/custom/BotaoSolicitacao/dropdownSolicitacao'; // Ajuste o caminho conforme necessário
+
 
 import { Skeleton } from '@/components/ui/skeleton'
 import SolicitacaoCardSkeleton from './SolicitacaoCard/cardSkeleton'
@@ -46,10 +45,10 @@ const Solicitacao = () => {
   // Informações do usuário
   const [usuarioCod, setUsuarioCod] = useState<number>(0)
   const [usuarioCargo, setUsuarioCargo] = useState<string>('')
-  const [usuarioDataContratacao, setUsuarioDataContratacao] = useState<Date>(new Date())
   const [nivelAcessoCod, setNivelAcessoCod] = useState<number>()
   const [setorCod, setSetorCod] = useState()
   const [cargaHoraria, setCargaHoraria] = useState<number>()
+  const [usuarioDataContratacao, setUsuarioDataContratacao] = useState<Date>(new Date())
 
   const [toogle, setToogle] = useState(false);
 
@@ -63,16 +62,15 @@ const Solicitacao = () => {
     meusHistorico: [],
   });
 
+  const [numeroSolicitacoesFeriasAbertas, setNumeroSolicitacoesFeriasAbertas] = useState<number>(0)
+  const [solicitacoesUser, setSolicitacoesUser] = useState<any>()
+  const [primeiraSolicitacaoFeriasCod, setPrimeiraSolicitacaoFeriasCod] = useState<number | null>(null)
+
   const handleOpenModal = (tipo: string) => {
     setModalAberto(tipo)
   }
 
 
-
-  const [solicitacoesUser, setSolicitacoesUser] = useState<any>()
-  const [numeroSolicitacoesFeriasAbertas, setNumeroSolicitacoesFeriasAbertas] = useState<number>(0)
-
-  const [primeiraSolicitacaoFeriasCod, setPrimeiraSolicitacaoFeriasCod] = useState<number | null>(null)
 
   // Paginação
   const [displayedSolicitacoes, setDisplayedSolicitacoes] = useState<SolicitacaoInterface[]>([])
@@ -96,6 +94,7 @@ const Solicitacao = () => {
 
       if (nivelAcessoCod === 2 && usuarioCod) {
         result = await solicitacaoServices.getAllSolicitacaoByUsuario(usuarioCod)
+        setSolicitacoesUser(result);
       } else if (nivelAcessoCod === 1 && setorCod) {
         result = await solicitacaoServices.getAllSolicitacaoBySetor(setorCod)
         const solicitacoes = result as SolicitacaoInterface[]
@@ -139,7 +138,7 @@ const Solicitacao = () => {
 
       setSolicitacoesData({
         all: solicitacoesFiltradas.filter((s) => s.solicitacaoStatus !== 'PENDENTE'),
-        pendentes: solicitacoesFiltradas.filter((s) => s.solicitacaoStatus === 'PENDENTE'),
+        pendentes: filtrarPrimeirasSolicitacoesFeriasPendentes(result.filter((s) => s.solicitacaoStatus === 'PENDENTE')),
         historico: solicitacoesFiltradas.filter((s) => s.solicitacaoStatus !== 'PENDENTE'),
       })
 
@@ -157,24 +156,6 @@ const Solicitacao = () => {
     }
   }
 
-
-
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await solicitacaoServices.getAllSolicitacaoByUsuario(usuarioCod);
-        setSolicitacoesUser(data);
-      } catch (error) {
-        console.log("unfechtable");
-      }
-    };
-  
-    if (usuarioCod) { // só busca se já tiver o cod do usuário
-      fetchData();
-    }
-  }, [usuarioCod]);
-
   useEffect(() => {
     function countSolicitacoesFeriasAbertas(solicitacoesUser: any) {
       if (!Array.isArray(solicitacoesUser)) return 0;
@@ -191,9 +172,8 @@ const Solicitacao = () => {
       const numeroFerias = countSolicitacoesFeriasAbertas(solicitacoesUser);
       setNumeroSolicitacoesFeriasAbertas(numeroFerias);  // Aqui é onde o estado é atualizado!
     }
-  }, [solicitacoesUser]); // Esse useEffect vai ser chamado toda vez que solicitacoesUser mudar
-  
-  
+  }, [solicitacoesUser]);
+
   const paginateData = () => {
     let dataToDisplay: SolicitacaoInterface[] = []
 
@@ -243,11 +223,6 @@ const Solicitacao = () => {
 
   const handleClick = (status: 'pendentes' | 'historico' | 'analises' | 'meus pontos') => {
     setCurrentPage(1)
-    setOpenModal({})
-    setSolicitacoesData((prevState) => ({
-      ...prevState,
-      all: prevState[status],
-    }))
     setToogle(status === 'analises' || status === 'pendentes')
   }
 
@@ -273,7 +248,7 @@ const Solicitacao = () => {
         ...prevData,
         pendentes: filtrarPrimeirasSolicitacoesFeriasPendentes(updatedPendentes),
         historico: updatedHistorico,
-      };      
+      }
     })
 
     paginateData()
@@ -345,24 +320,7 @@ const Solicitacao = () => {
     // )
   };
 
-    if (result instanceof ApiException || result === null) {
-      setSolicitacoesData({
-        all: [],
-        pendentes: [],
-        historico: [],
-      })
-      setTotalItems(0)
-    } else {
-  
-      setSolicitacoesData({
-        all: result.filter((s: SolicitacaoInterface) => s.solicitacaoStatus !== 'PENDENTE'),
-        pendentes: filtrarPrimeirasSolicitacoesFeriasPendentes(result.filter((s) => s.solicitacaoStatus === 'PENDENTE')),
-        historico: result.filter((s: SolicitacaoInterface) => s.solicitacaoStatus !== 'PENDENTE'),
-      })
-  
-      setTotalItems(result.length)
-    }
-  }
+
 
   useEffect(() => {
     const initialize = async () => {
@@ -372,6 +330,7 @@ const Solicitacao = () => {
           console.error('Usuário não encontrado.');
           return;
         }
+
         const { usuario_cod, usuario_cargo, usuario_dataContratacao, nivelAcesso_cod, setorCod, usuario_cargaHoraria } = response.data
         setUsuarioCod(usuario_cod)
         setUsuarioCargo(usuario_cargo)
@@ -388,22 +347,12 @@ const Solicitacao = () => {
     }
 
     initialize()
-    }, [usuarioCod, usuarioCargo, nivelAcessoCod, setorCod])  
-    
-    useEffect(() => {
-      paginateData()  
-    }, [currentPage, solicitacoesData, toogle])
-  
-    const isContratadoMaisDeUmAno = (usuarioDataContratacao: any) => {
-      const data = new Date(usuarioDataContratacao)
-      const hoje = new Date()
-      const umAnoAtras = new Date()
-      umAnoAtras.setFullYear(hoje.getFullYear() - 1)
+  }, [usuarioCod, usuarioCargo, nivelAcessoCod, setorCod])
 
-      const formatada = data.toLocaleDateString('pt-BR')
-      const maisDeUmAno = data <= umAnoAtras
-      return maisDeUmAno;
-    }
+  useEffect(() => {
+    paginateData()
+  }, [currentPage, solicitacoesData, toogle])
+
 
   const totalPages = Math.ceil(
     (
@@ -457,14 +406,25 @@ const Solicitacao = () => {
   
     return [...Object.values(primeirasSolicitacoes), ...outrasSolicitacoes];
   }
-  
-  
+
+  const isContratadoMaisDeUmAno = (usuarioDataContratacao: any) => {
+    const data = new Date(usuarioDataContratacao)
+    const hoje = new Date()
+    const umAnoAtras = new Date()
+    umAnoAtras.setFullYear(hoje.getFullYear() - 1)
+
+    const formatada = data.toLocaleDateString('pt-BR')
+    const maisDeUmAno = data <= umAnoAtras
+    return maisDeUmAno;
+  }
+
   return (
     <div className={styles.solicitacao_container}>
       <div className={styles.card_container}>
         <h1 className='font-bold text-4xl self-start'>Solicitações</h1>
 
         <div className='flex flex-row justify-between'>
+
         <Tab
           toogle={toogle}
           onClick={handleClick}
@@ -472,16 +432,16 @@ const Solicitacao = () => {
           analises_length={nivelAcessoCod === 1 ? solicitacoesData.analisesPendentes?.length || 0 : 0}
           isGestor={nivelAcessoCod === 1}
         />
-          
-        <BotaoDropdownSolicitacao
-          usuarioCod={usuarioCod}
-          usuarioCargo={usuarioCargo}
-          isContratadoMaisDeUmAno={isContratadoMaisDeUmAno(usuarioDataContratacao)}
-          numeroSolicitacoesFeriasAbertas={numeroSolicitacoesFeriasAbertas}
-          handleSolicitacaoUpdate={handleSolicitacaoUpdate}
-          onOpenModal={handleOpenModal}
-          />
 
+          {/* Componente do dropdown e modais */}
+          <BotaoDropdownSolicitacao
+            usuarioCod={usuarioCod}
+            usuarioCargo={usuarioCargo}
+            handleSolicitacaoUpdate={handleSolicitacaoUpdate}
+            onOpenModal={handleOpenModal} 
+            isContratadoMaisDeUmAno={isContratadoMaisDeUmAno(usuarioDataContratacao)}
+            numeroSolicitacoesFeriasAbertas={numeroSolicitacoesFeriasAbertas}
+          />
 
         </div>
 
@@ -490,11 +450,13 @@ const Solicitacao = () => {
           <Modal
             isOpen={!!modalAberto}
             onClick={() => setModalAberto(null)}
-            title={modalAberto}
-          >
+            title={""}
+            onSolicitacaoUpdate = {() => handleSolicitacaoUpdate}
+            >
             {modaisMapeados[modalAberto]}
           </Modal>
         )}
+        
 
         <div className={styles.container}>
           {displayedSolicitacoes.length > 0 ? (
@@ -515,7 +477,7 @@ const Solicitacao = () => {
                   isOpen={openModal[solicitacao.solicitacaoCod!]}
                   onClick={() => handleModal(solicitacao.solicitacaoCod!, false)}
                   solicitacao={solicitacao}
-                  onSolicitacaoUpdate={handleSolicitacaoUpdate}
+                  onSolicitacaoUpdate={() => handleSolicitacaoUpdate}
                   usuarioLogadoCod={usuarioCod}
                   usuarioCargo={usuarioCargo} 
                   children={renderModalChildren({

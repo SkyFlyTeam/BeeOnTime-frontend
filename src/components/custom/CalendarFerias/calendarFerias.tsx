@@ -234,20 +234,6 @@ const CalendarFerias = () => {
         ))}
       </div>
 
-      {selectedDates.map((bloco, blocoIdx) => (
-        <div key={blocoIdx} style={{ marginBottom: 8, marginTop: 10 }}>
-          <strong>Bloco {blocoIdx + 1}:</strong>{" "}
-          {bloco.map((dia, idx) => (
-            <span key={idx} style={{ marginRight: 8 }}>
-              {dia.toLocaleDateString("pt-BR", {
-                day: "2-digit",
-                month: "short",
-              }).replace(".", "")}
-            </span>
-          ))}
-        </div>
-      ))}
-
       <p className={styles.label_calendario}>Selecionar dias:</p>
 
       <div className={styles.calendar}>
