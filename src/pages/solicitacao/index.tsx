@@ -24,12 +24,15 @@ import BotaoDropdownSolicitacao from '../../components/custom/BotaoSolicitacao/d
 
 import { Skeleton } from '@/components/ui/skeleton'
 import SolicitacaoCardSkeleton from './SolicitacaoCard/cardSkeleton'
-import { IsModalFeriasOpen } from './testeModal'
 
 interface SolicitacoesState {
   all: SolicitacaoInterface[];
   pendentes: SolicitacaoInterface[];
   historico: SolicitacaoInterface[];
+  analisesPendentes?: SolicitacaoInterface[]
+  analisesHistorico?: SolicitacaoInterface[]
+  meusPendentes?: SolicitacaoInterface[]
+  meusHistorico?: SolicitacaoInterface[]
 }
 
 const Solicitacao = () => {
@@ -37,7 +40,7 @@ const Solicitacao = () => {
   const [openDevolutivaModal, setOpenDevolutivaModal] = useState<boolean>(false);
   const [openModal, setOpenModal] = useState<{ [key: string]: boolean }>({});
   const [modalAberto, setModalAberto] = useState<string | null>(null)
-
+  const [isModalHoraExtraOpen, setIsModalHoraExtraOpen] = useState(false);
 
   // Informações do usuário
   const [usuarioCod, setUsuarioCod] = useState<number>(0)
@@ -52,12 +55,15 @@ const Solicitacao = () => {
     all: [],
     pendentes: [],
     historico: [],
+    analisesPendentes: [],
+    analisesHistorico: [],
+    meusPendentes: [],
+    meusHistorico: [],
   });
 
   const handleOpenModal = (tipo: string) => {
     setModalAberto(tipo)
   }
-
 
 
 
@@ -67,6 +73,7 @@ const Solicitacao = () => {
   const [itemsPerPage, setItemsPerPage] = useState(5)
   const [totalItems, setTotalItems] = useState(0)
   const [isLoading, setIsLoading] = useState(true);
+
 
 
   const fetchSolicitacoes = async (
@@ -84,6 +91,26 @@ const Solicitacao = () => {
         result = await solicitacaoServices.getAllSolicitacaoByUsuario(usuarioCod)
       } else if (nivelAcessoCod === 1 && setorCod) {
         result = await solicitacaoServices.getAllSolicitacaoBySetor(setorCod)
+        const solicitacoes = result as SolicitacaoInterface[]
+
+        const minhas = solicitacoes.filter(s => s.usuarioCod === usuarioCod)
+        const analises = solicitacoes.filter(s => s.usuarioCod !== usuarioCod)
+        
+        const ordenar = (arr: SolicitacaoInterface[]) =>
+          [...arr].sort((a, b) => new Date(b.dataCriacao).getTime() - new Date(a.dataCriacao).getTime())
+
+        setSolicitacoesData({
+          all: ordenar([...minhas, ...analises]),
+          pendentes: [],
+          historico: [],
+          analisesPendentes: ordenar(analises.filter(s => s.solicitacaoStatus === 'PENDENTE')),
+          analisesHistorico: ordenar(analises.filter(s => s.solicitacaoStatus !== 'PENDENTE')),
+          meusPendentes: ordenar(minhas.filter(s => s.solicitacaoStatus === 'PENDENTE')),
+          meusHistorico: ordenar(minhas.filter(s => s.solicitacaoStatus !== 'PENDENTE')),
+        })
+      
+        setDisplayedSolicitacoes(ordenar(analises.filter(s => s.solicitacaoStatus === 'PENDENTE')).slice(0, itemsPerPage))
+        return
       } else {
         result = await solicitacaoServices.getAllSolicitacao()
       }
@@ -125,10 +152,27 @@ const Solicitacao = () => {
 
 
   const paginateData = () => {
-    const dataToDisplay = toogle ? solicitacoesData.pendentes : solicitacoesData.historico
-    const startIndex = (currentPage - 1) * itemsPerPage
-    const endIndex = startIndex + itemsPerPage
-    setDisplayedSolicitacoes(dataToDisplay.slice(startIndex, endIndex))
+    let dataToDisplay: SolicitacaoInterface[] = []
+
+    if (nivelAcessoCod === 1) {
+      dataToDisplay = toogle
+        ? [
+          ...(solicitacoesData.analisesPendentes || []),
+          ...(solicitacoesData.analisesHistorico || [])
+        ]
+        : [
+          ...(solicitacoesData.meusPendentes || []),
+          ...(solicitacoesData.meusHistorico || [])
+        ]
+    } else {
+      dataToDisplay = toogle
+        ? solicitacoesData.pendentes
+        : solicitacoesData.historico
+    }
+
+    const start = (currentPage - 1) * itemsPerPage
+    const end = start + itemsPerPage
+    setDisplayedSolicitacoes(dataToDisplay.slice(start, end))
   }
 
   const handlePageChange = (page: number) => {
@@ -154,14 +198,9 @@ const Solicitacao = () => {
     setOpenDevolutivaModal(status);
   };
 
-  const handleClick = (status: string) => {
+  const handleClick = (status: 'pendentes' | 'historico' | 'analises' | 'meus pontos') => {
     setCurrentPage(1)
-
-    setSolicitacoesData((prevState) => ({
-      ...prevState,
-      all: status == 'PENDENTES' ? prevState['pendentes'] : prevState['historico'],
-    }))
-    setToogle(status === 'PENDENTES')
+    setToogle(status === 'analises' || status === 'pendentes')
   }
 
   // Atualizar lista
@@ -292,7 +331,15 @@ const Solicitacao = () => {
 
 
   const totalPages = Math.ceil(
-    (toogle ? solicitacoesData.pendentes.length : solicitacoesData.historico.length) / itemsPerPage
+    (
+      nivelAcessoCod === 1
+        ? (toogle
+          ? (solicitacoesData.analisesPendentes?.length || 0) + (solicitacoesData.analisesHistorico?.length || 0)
+          : (solicitacoesData.meusPendentes?.length || 0) + (solicitacoesData.meusHistorico?.length || 0))
+        : (toogle
+          ? solicitacoesData.pendentes.length
+          : solicitacoesData.historico.length)
+    ) / itemsPerPage
   );
 
   if (isLoading) {
@@ -323,13 +370,13 @@ const Solicitacao = () => {
 
         <div className='flex flex-row justify-between'>
 
-          <Tab
-            activeTab={toogle ? 'PENDENTES' : 'HISTÓRICO'}
-            onClick={handleClick}
-            tabLabels={['PENDENTES', 'HISTÓRICO']}
-            pendentesLength={solicitacoesData.pendentes.length}
-            showBadge={true}
-          />
+        <Tab
+          toogle={toogle}
+          onClick={handleClick}
+          pendentes_length={nivelAcessoCod === 1 ? solicitacoesData.meusPendentes?.length || 0 : solicitacoesData.pendentes.length}
+          analises_length={nivelAcessoCod === 1 ? solicitacoesData.analisesPendentes?.length || 0 : 0}
+          isGestor={nivelAcessoCod === 1}
+        />
 
           {/* Componente do dropdown e modais */}
           <BotaoDropdownSolicitacao
@@ -352,6 +399,7 @@ const Solicitacao = () => {
             {modaisMapeados[modalAberto]}
           </Modal>
         )}
+        
 
         <div className={styles.container}>
           {displayedSolicitacoes.length > 0 ? (

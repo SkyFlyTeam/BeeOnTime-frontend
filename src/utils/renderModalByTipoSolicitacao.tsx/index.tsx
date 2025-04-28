@@ -3,6 +3,7 @@ import SolicitacaoInterface from '@/interfaces/Solicitacao'
 import ModalAjustePonto from '@/components/custom/modalSolicitacao/modalAjustePonto'
 import ModalDecisaoHoraExtra from '@/components/custom/modalSolicitacao/modalHoraExtra/modalHoraExtra'
 import ModalSolictarHoraExtra from '@/components/custom/modalSolicitacao/modalHoraExtra/modalSolicitarHoraExtra'
+import ModalJustificativaFalta from '@/components/custom/modalSolicitacao/modalJustificativaFalta'
 
 interface ModalChildrenProps {
   solicitacao: SolicitacaoInterface
@@ -41,6 +42,18 @@ export function renderModalChildren({
           usuarioLogadoCod={usuarioLogadoCod}
           usuarioCargo={usuarioCargo}
         />
+      )
+    
+    case 4:
+      return (
+        <ModalJustificativaFalta
+        diaSelecionado={formatarData(solicitacao.solicitacaoDataPeriodo)}
+        solicitacaoSelected={solicitacao}
+        onSolicitacaoUpdate={onSolicitacaoUpdate}
+        onClose={onClose}
+        usuarioLogadoCod={usuarioLogadoCod}
+        usuarioCargo={usuarioCargo}
+      />
       )
 
     case 5:
