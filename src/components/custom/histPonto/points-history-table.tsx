@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 
 // Utils
 import { cn } from "@/lib/utils"; 
-import { ApiException } from '../../config/apiExceptions'
 
 // Interfaces
 import { Ponto } from "@/interfaces/marcacaoPonto";
@@ -21,7 +20,6 @@ import SolicitacaoInterface, { TipoSolicitacao } from "@/interfaces/Solicitacao"
 import { solicitacaoServices } from "@/services/solicitacaoServices";
 import Solicitacao from "@/interfaces/Solicitacao";
 import { faltaServices } from "@/services/faltaService";
-import React from "react";
 import Faltas from "@/interfaces/faltas";
 import ModalCriarSolicitacaoFalta from "../modalSolicitacao/modalEnvioSolicitacaoFalta";
 
@@ -120,7 +118,7 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
       // Ordenar entradas por data (mais recente primeiro)
       newEntries.sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
       
-      setCombinedEntries(newEntries.reverse());
+      setCombinedEntries(newEntries);
     }, [entries, diasJornada]);
 
     const fetchFaltas = async () => {
@@ -128,7 +126,7 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
         const faltaData: { [key: string]: any } = {};  // Initialize an object to store the full Falta objects
         if (entries) {
           for (const entry of entries) {
-            const falta = await faltaServices.getFaltabyUsuarioCodAndDate(userInfo!.usuario_cod, entry.data);
+            const falta = await faltaServices.getFaltabyUsuarioCodAndDate(userInfo!.usuario_cod, String(entry.data));
             faltaData[entry.data.toLocaleString()] = falta || null;  // Store the full Falta object or null
           }
         }
@@ -197,8 +195,8 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
       };
   
       solicitacoes.forEach((solicitacao) => {
-        const dataFormatada = new Date(solicitacao.solicitacaoDataPeriodo).toISOString().split('T')[0];
-        mapa[dataFormatada] = ENUMTipoSolicitacaoNome[solicitacao.tipoSolicitacaoCod.tipoSolicitacaoCod];
+        const dataFormatada = new Date(solicitacao.solicitacaoDataPeriodo!).toISOString().split('T')[0];
+        mapa[dataFormatada] = ENUMTipoSolicitacaoNome[solicitacao.tipoSolicitacaoCod!.tipoSolicitacaoCod!];
       });
       
     
@@ -213,6 +211,12 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
       }
     }, [solicitacoes]);
     
+
+    const calculateCargaHoraria = (horasDiarias: number, diasTrabalhados: number) => {
+      const horasSemana = horasDiarias * diasTrabalhados; // Total de horas na semana
+      const horasMes = horasSemana * 4; // Aproximadamente 4 semanas por mês
+      return { horasSemana, horasMes };
+    };
 
     const { horasSemana, horasMes } = calculateCargaHoraria(userInfo?.usuario_cargaHoraria!, userInfo?.jornadas?.jornada_diasSemana?.filter(dia => dia).length ?? 0);
 
@@ -265,7 +269,8 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
 
     const indexOfLastEntry = currentPage * entriesPerPage;
     const indexOfFirstEntry = indexOfLastEntry - entriesPerPage;
-    const currentEntries = combinedEntries.slice(indexOfFirstEntry, indexOfLastEntry);
+    const currentEntriesUnformatted = combinedEntries.slice(indexOfFirstEntry, indexOfLastEntry);
+    const currentEntries = currentEntriesUnformatted.reverse()
 
     const totalPages = Math.ceil(combinedEntries.length / entriesPerPage);
 
@@ -284,7 +289,7 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
         </div>
 
         {/* Desktop - Tabela horizontal */}
-        <div className="overflow-x-auto hidden md:block">
+        <div className="overflow-x-auto">
           <Table className="min-w-[900px] w-full">
             <TableHeader>
               <TableRow>
@@ -332,7 +337,8 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
                     )} */}
 
                   {accessLevel === "USER" && (
-                    <TableCell className="border border-gray-200 text-center text-black text-base p-3">
+                    <>
+                      <TableCell className="border border-gray-200 text-center text-black text-base p-3">
                       <Button
                         variant="ghost"
                         size="icon"
@@ -341,10 +347,12 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
                       >
                         <PencilLine className="h-4 w-4 text-[#42130F]" />
                       </Button>
-                    </TableCell>
-                    <TableCell className="border border-gray-200 text-center text-black text-base p-3">{entry.horasTrabalhadas}</TableCell>
-                    <TableCell className="border border-gray-200 text-center text-black text-base p-3">{entry.horasExtras}</TableCell>
-                    <TableCell className="border border-gray-200 text-center text-black text-base p-3">{entry.horasFaltantes}</TableCell>
+                      </TableCell>
+                      <TableCell className="border border-gray-200 text-center text-black text-base p-3">{entry.horasTrabalhadas}</TableCell>
+                      <TableCell className="border border-gray-200 text-center text-black text-base p-3">{entry.horasExtras}</TableCell>
+                      <TableCell className="border border-gray-200 text-center text-black text-base p-3">{entry.horasFaltantes}</TableCell>
+                    </>
+                  )}
                     {accessLevel === "USER" && (
                       <TableCell className="border border-gray-200 text-center text-black text-base p-3">
                         {!faltas[entry.data.toLocaleString()] ? (
