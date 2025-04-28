@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 
 // Utils
 import { cn } from "@/lib/utils"; 
+import { ApiException } from '../../config/apiExceptions'
 
 // Interfaces
 import { Ponto } from "@/interfaces/marcacaoPonto";
@@ -19,6 +20,13 @@ import ModalCriarSolicitacao from "../modalSolicitacao/modalEnvioSolicitacao";
 import SolicitacaoInterface, { TipoSolicitacao } from "@/interfaces/Solicitacao";
 import { solicitacaoServices } from "@/services/solicitacaoServices";
 import Solicitacao from "@/interfaces/Solicitacao";
+import { faltaServices } from "@/services/faltaService";
+import React from "react";
+import Faltas from "@/interfaces/faltas";
+import ModalCriarSolicitacaoFalta from "../modalSolicitacao/modalEnvioSolicitacaoFalta";
+
+import styles from "./styles.module.css"
+
 
 interface PointsHistoryTableProps {
   entries: HistPontos[] | null;
@@ -27,22 +35,6 @@ interface PointsHistoryTableProps {
   className?: string;
   accessLevel: "USER" | "ADM"; // Recebe o AccessLevel para diferentes acessos
 }
-
-// Função para formatar a data no formato brasileiro (DD/MM/YYYY)
-const formatDate = (date: string): string => {
-  const parsedDate = new Date(date);
-  const day = String(parsedDate.getDate()).padStart(2, "0");
-  const month = String(parsedDate.getMonth() + 1).padStart(2, "0");
-  const year = parsedDate.getFullYear();
-  return `${day}/${month}/${year}`;
-};
-
-// Função para calcular carga horária semanal e mensal
-const calculateCargaHoraria = (horasDiarias: number, diasTrabalhados: number) => {
-  const horasSemana = horasDiarias * diasTrabalhados; // Total de horas na semana
-  const horasMes = horasSemana * 4; // Aproximadamente 4 semanas por mês
-  return { horasSemana, horasMes };
-};
 
 const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTableProps>(
   ({ entries, onEdit, userInfo, className, accessLevel }, ref) => {
@@ -54,6 +46,9 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
     const [solicitacaoHashMap, setSolicitacaoHashMap] = useState<any>();
     const [currentPage, setCurrentPage] = useState(1);
     const entriesPerPage = 5;
+    const [isModalAusenciaOpen, setIsModalAusenciaOpen] = useState(false);
+    const [selectedFalta, setSelectedFalta] = useState<Faltas | null>(null);
+    const [faltas, setFaltas] = useState<{ [key: string]: boolean }>({}); // Store falta data for each entry
 
     React.useEffect(() => {
       if (userInfo?.jornadas?.jornada_diasSemana) {
@@ -128,14 +123,44 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
       setCombinedEntries(newEntries.reverse());
     }, [entries, diasJornada]);
 
+    const fetchFaltas = async () => {
+      try {
+        const faltaData: { [key: string]: any } = {};  // Initialize an object to store the full Falta objects
+        if (entries) {
+          for (const entry of entries) {
+            const falta = await faltaServices.getFaltabyUsuarioCodAndDate(userInfo!.usuario_cod, entry.data);
+            faltaData[entry.data.toLocaleString()] = falta || null;  // Store the full Falta object or null
+          }
+        }
+        setFaltas(faltaData);  // Set the fetched falta data
+      } catch (error) {
+        console.error("Error fetching falta data:", error);
+      }
+    };
+
+    useEffect(() => {
+      // Fetch faltas when the component mounts or entries change
+      fetchFaltas();
+    }, [entries]);
+
     const handleModalOpen = (entry: HistPontos) => {
-      setSelectedPonto(entry); // Seleciona o ponto para o modal
-      setIsModalOpen(true); // Abre o modal
+      setSelectedPonto(entry);
+      setIsModalOpen(true);
     };
 
     const handleModalClose = () => {
-      setIsModalOpen(false); // Fecha o modal
-      setSelectedPonto(null); // Limpa o ponto selecionado
+      setIsModalOpen(false);
+      setSelectedPonto(null);
+    };
+
+    const handleModalAusenciaOpen = (entry: any) => {
+      setSelectedFalta(entry);
+      setIsModalAusenciaOpen(true);
+    };
+
+    const handleModalAusenciaClose = () => {
+      setIsModalAusenciaOpen(false);
+      setSelectedFalta(null);
     };
 
     const headers = [
@@ -317,9 +342,40 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
                         <PencilLine className="h-4 w-4 text-[#42130F]" />
                       </Button>
                     </TableCell>
-                  )}
-                </TableRow>
-              ))}
+                    <TableCell className="border border-gray-200 text-center text-black text-base p-3">{entry.horasTrabalhadas}</TableCell>
+                    <TableCell className="border border-gray-200 text-center text-black text-base p-3">{entry.horasExtras}</TableCell>
+                    <TableCell className="border border-gray-200 text-center text-black text-base p-3">{entry.horasFaltantes}</TableCell>
+                    {accessLevel === "USER" && (
+                      <TableCell className="border border-gray-200 text-center text-black text-base p-3">
+                        {!faltas[entry.data.toLocaleString()] ? (
+                          <div className={styles.relative}>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="relative bg-[#FFC107] hover:bg-[#e0a800] text-white"
+                            onClick={() => handleModalOpen(entry)} // Open modal for the point
+                          >
+                            <PencilLine className="h-4 w-4 text-[#42130F]" />
+                            <span className={styles.tooltip_text}>Solicitar ajuste</span> {/* Tooltip */}
+                          </Button>
+                          </div>
+                        ) : (
+                          <div className={styles.relative}>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="relative bg-[#FFC107] hover:bg-[#e0a800] text-white"
+                            onClick={() => handleModalAusenciaOpen(faltas[entry.data.toLocaleString()])}
+                          >
+                            <PencilLine className="h-4 w-4 text-[#42130F]" />
+                            <span className={styles.tooltip_text}>Justificar ausência</span> {/* Tooltip */}
+                          </Button>
+                          </div>
+                        )}
+                      </TableCell>
+                    )}
+                  </TableRow>
+                ))}
             </TableBody>
           </Table>
           <div className="flex justify-end items-center gap-2 mt-4">
@@ -377,6 +433,14 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
             isOpen={isModalOpen}
             onClose={handleModalClose}
             ponto={selectedPonto}
+          />
+        )}
+
+        {isModalAusenciaOpen && selectedFalta && (
+          <ModalCriarSolicitacaoFalta
+            isOpen={isModalAusenciaOpen}
+            onClose={handleModalAusenciaClose}
+            falta={selectedFalta}
           />
         )}
       </div>

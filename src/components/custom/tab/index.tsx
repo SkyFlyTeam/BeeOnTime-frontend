@@ -1,33 +1,67 @@
 import clsx from "clsx";
 import styles from "./styles.module.css";
 
-interface TabProps {
-  activeTab: string;  // Tab ativo como default
-  onClick: (tab: string) => void;  // Ação de clique no tab
-  tabLabels: string[];  // Array com os nomes dos tab
-  pendentesLength?: number;  // Número de pendentes, opcional
-  showBadge?: boolean;  // Controla se o badge de pendentes deve aparecer
+interface SolicitacaoButtonProps {
+  toogle: boolean;
+  onClick: (status: 'pendentes' | 'historico' | 'analises' | 'meus pontos') => void;
+  pendentes_length: number;
+  analises_length?: number;
+  isGestor?: boolean;
+  showBadge?: boolean;
 }
 
-const Tab = ({ activeTab, onClick, tabLabels, pendentesLength = 0, showBadge = true }: TabProps) => {
+const Tab = ({
+  toogle,
+  onClick,
+  pendentes_length,
+  analises_length = 0,
+  isGestor = false,
+  showBadge = true,
+}: SolicitacaoButtonProps) => {
   return (
     <div className={styles.button_container}>
-      {tabLabels.map((label, index) => (
-        <button
-          key={index}
-          onClick={() => onClick(label)}  
-          className={clsx({
-            [styles.toogle]: activeTab === label,  
-          })}
-        >
-          {label.toUpperCase()} 
-          {label === 'PENDENTES' && showBadge && pendentesLength > 0 && (  
-            <span className={styles.pendente_badge}>
-              {pendentesLength}
-            </span>
-          )}
-        </button>
-      ))}
+      {isGestor ? (
+        <>
+          <button
+            onClick={() => onClick('analises')}
+            className={clsx(styles.button, { [styles.toogle]: toogle })}
+          >
+            Análises
+            {showBadge && analises_length > 0 && (
+              <span className={styles.pendente_badge}>{analises_length}</span>
+            )}
+          </button>
+
+          <button
+            onClick={() => onClick('meus pontos')}
+            className={clsx(styles.button, { [styles.toogle]: !toogle })}
+          >
+            Meus pedidos
+            {showBadge && pendentes_length > 0 && (
+              <span className={styles.pendente_badge}>{pendentes_length}</span>
+            )}
+          </button>
+        </>
+      ) : (
+        <>
+          <button
+            onClick={() => onClick('pendentes')}
+            className={clsx(styles.button, { [styles.toogle]: toogle })}
+          >
+            Pendentes
+            {showBadge && pendentes_length > 0 && (
+              <span className={styles.pendente_badge}>{pendentes_length}</span>
+            )}
+          </button>
+
+          <button
+            onClick={() => onClick('historico')}
+            className={clsx(styles.button, { [styles.toogle]: !toogle })}
+          >
+            Histórico
+          </button>
+        </>
+      )}
     </div>
   );
 };

@@ -12,6 +12,7 @@ import CardCargaHoraria from './_components/cardCargaHoraria';
 // Interfaces
 import { Usuario } from '@/interfaces/usuario';
 import HistPontos from '@/interfaces/histPonto';
+import ModalFerias from '@/components/custom/modalSolicitacao/modalFerias';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function InicioFuncionario() {

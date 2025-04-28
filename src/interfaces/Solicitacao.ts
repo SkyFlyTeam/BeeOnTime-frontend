@@ -2,22 +2,22 @@ export default interface SolicitacaoInterface {
   Solicitacao_data: string | Date;
   solicitacaoTipoNome: string;
   solicitacaoData: string | number | Date;
-  SolicitacaoTipoNome: string;
+  dataCriacao: string | number | Date;
   solicitacaoCod: number;
   solicitacaoAnexo: number[] | null
   solicitacaoAnexoNome?: string
-  solicitacaoMensagem: string;
-  solicitacaoDevolutiva: string;
-  solicitacaoDataPeriodo: string;
-  solicitacaoStatus: string
-  horasSolicitadas: number | null
-  tipoSolicitacaoCod: {
-    tipoSolicitacaoCod: number;
+  solicitacaoMensagem?: string;
+  solicitacaoDevolutiva?: string;
+  solicitacaoDataPeriodo?: string;
+  solicitacaoStatus?: string
+  horasSolicitadas?: number | null
+  tipoSolicitacaoCod?: {
+    tipoSolicitacaoCod?: number;
     tipoSolicitacaoNome: string;
   };
   usuarioCod: number;
-  usuarioNome: string;
-  usuarioCargo: string;
+  usuarioNome?: string;
+  usuarioCargo?: string;
 }
 
 export interface CriarSolicitacaoInterface {

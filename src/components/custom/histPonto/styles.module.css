@@ -1,0 +1,35 @@
+/* Tooltip container */
+.tooltip_text {
+  visibility: hidden; /* Hidden by default */
+  width: 140px; /* Width of the tooltip */
+  background-color: #FFC107; /* Background color */
+  color: #42130F; /* Text color */
+  text-align: center;
+  border-radius: 5px;
+  padding: 5px;
+  position: absolute;
+  z-index: 10; /* Ensure it appears above the button */
+  bottom: 100%; /* Position it above the button */
+  left: 80%;
+  margin-left: -120px; /* Center the tooltip */
+  opacity: 0; /* Initially hidden */
+  transition: opacity 0.3s ease; /* Fade-in effect */
+}
+
+/* Tooltip arrow */
+.tooltip_text::after {
+  content: "";
+  position: absolute;
+  top: 100%; /* Position it below the tooltip */
+  left: 80%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #FFC107 transparent transparent transparent; /* Tooltip arrow */
+}
+
+/* Show the tooltip when hovering over the button */
+.relative:hover .tooltip_text {
+  visibility: visible;
+  opacity: 1;
+}
