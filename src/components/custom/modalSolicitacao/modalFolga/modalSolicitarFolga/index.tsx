@@ -63,6 +63,10 @@ const SolicitarFolgaModal: React.FC<SolicitarFolgaModalProps> = ({
     }));
   };
 
+  useEffect(() => {
+    console.log("dataperiodo", solicitacao.folDataPeriodo)
+  }, [solicitacao])
+
   // Função para remover uma data selecionada
   const handleDateRemove = (date: Date) => {
     setSolicitacao((prev) => ({
@@ -113,19 +117,27 @@ const SolicitarFolgaModal: React.FC<SolicitarFolgaModalProps> = ({
     try {
       const formData = new FormData();
 
+      const formattedData = solicitacao.folDataPeriodo.map(date => 
+        date instanceof Date ? date.toISOString().split('T')[0] : date
+      )
+
+
+      // Prepara o payload no formato esperado
       formData.append("solicitacaoJson", JSON.stringify({
         folObservacao: solicitacao.folObservacao,
-        folgaTipo: solicitacao.folgaTipo,
-        usuario: { usuario_cod: usuarioLogadoCod },
-        folDataPeriodo: solicitacao.folDataPeriodo.map(date => 
-          date instanceof Date ? date.toISOString().split('T')[0] : date
-        ), // <-- datas como string "yyyy-MM-dd"
+        folgaTipo: {
+          folTipoCod: solicitacao.folgaTipo.folTipoCod // Assume que você está enviando o ID da folga tipo
+        },
+        usuario: { usuario_cod: usuarioLogadoCod }, // Aqui, você está passando o ID do usuário
+        folDataPeriodo: formattedData, // Envia as datas já como uma lista de strings
       }));
 
+      // Se houver um documento, anexa ao FormData
       if (solicitacao.documento) {
         formData.append("solicitacaoAnexo", solicitacao.documento);
       }
 
+      // Faz a requisição POST
       const response = await ApiUsuario.post("/folgas/cadastrar", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
