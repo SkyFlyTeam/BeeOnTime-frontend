@@ -17,8 +17,6 @@ import { getUsuario } from '@/services/authService';
 
 // Components
 import InicioFuncionario from './inicioFuncionario';
-import CalendarFeriasGestor from '@/components/custom/CalendarFerias/calendarFeriasGestor';
-import ModalFeriasGestor from '@/components/custom/modalSolicitacao/modalFerias/modalGestor';
 
 //Pagina sem nada, ajeitar para a integração de tudo
 export default function Home() {
@@ -26,7 +24,6 @@ export default function Home() {
   const [usuarioNome, setUsuarioNome] = useState<string | undefined>();
   const [acessoCod, setAcessoCod] = useState<any>();
   const [usuarioInfo, setUsuarioInfo] = useState<any>();
-  const [isModalOpen, setIsModalOpen] = useState(true);
   const [isLoading, setIsLoading] = useState(true); // Loading state
 
   useEffect(() => {

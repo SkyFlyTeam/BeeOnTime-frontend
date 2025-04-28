@@ -5,27 +5,18 @@ import styles from './style.module.css'
 import SolicitacaoInterface from '../../../interfaces/Solicitacao'
 
 // Componente react
-import { ReactNode, useState } from 'react';
-import ModalFeriasGestor from './modalFerias/modalGestor';
+import { ReactNode } from 'react';
 
 interface ModalProps {
   isOpen: boolean
-  solicitacao?: SolicitacaoInterface
-  onSolicitacaoUpdate: (updatedSolicitacao: SolicitacaoInterface) => void;
   onClick: () => void
-  usuarioLogadoCod?: number 
-  usuarioCargo?: string
-  children?: ReactNode
+  children: ReactNode
   title: string
 }
 
 const Modal: React.FC<ModalProps> = ({
   isOpen,
-  solicitacao,
   onClick,
-  onSolicitacaoUpdate,
-  usuarioLogadoCod,
-  usuarioCargo,
   children,
   title 
 }) => {
@@ -35,11 +26,9 @@ const Modal: React.FC<ModalProps> = ({
   const titulos: Record<string, string> = {
     "Ajuste de ponto": "Solicitação de ajuste de ponto",
     "Hora extra": "Solicitação de hora extra",
-    "Férias": "Solicitação de Férias",
   }
 
   if (isOpen) {
-
     if (title === "Férias") {
       return(
         <div>
@@ -49,12 +38,10 @@ const Modal: React.FC<ModalProps> = ({
         </div>
       )
     }
-
     return (
       <div className={styles.modal_container} onClick={onClick}>
         <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
           <p className={styles.modal_title}>{titulos[title]}</p>
-          <p className={styles.colaborador_label}><span>Colaborador: </span>{solicitacao!.usuarioNome}</p>
           <div>
             {children}
           </div>
