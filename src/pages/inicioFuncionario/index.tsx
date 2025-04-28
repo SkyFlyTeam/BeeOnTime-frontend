@@ -48,7 +48,6 @@ export default function InicioFuncionario() {
         <div className='flex flex-wrap flex-row gap-8'>
             <TimeClock />
             <CardCargaHoraria usuarioInfo={usuarioInfo!} histPontos={histPontos!} />
-            <ModalFerias />
         </div>
     );
 }

@@ -82,4 +82,8 @@
     opacity: 0.4;
   }
   
-  
+  .solicitacaoDay {
+    background-color: yellow;
+    color: black;
+    border-radius: 50%;
+  }

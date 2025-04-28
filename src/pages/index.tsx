@@ -97,14 +97,8 @@ export default function Home() {
         else{
             showErrorToast()
         }
-
-        
-
       }
-
-
-    
-
+      
   // Checa o tamanho da tela em pixels quando a janela é reajustada
   useEffect(() => {
     const handleResize = () => {

@@ -1,15 +1,14 @@
 import CalendarFerias from '@/components/custom/CalendarFerias/calendarFerias';
 import styles from './style.module.css';
 import { useState } from 'react';
+import CalendarFeriasGestor from '../../CalendarFerias/calendarFeriasGestor';
 
 interface ModalFeriasProps {
+  userCod: number;
   onClose: () => void;
 }
 
-const ModalFerias: React.FC<ModalFeriasProps> = ({ onClose }) => {
-  const [selectedPeriodo, setSelectedPeriodo] = useState<string>("30 Dias");
-
-  const periodos = ["30 Dias", "15 e 15 Dias", "20 e 10 Dias", "10, 15 e 5 Dias"];
+const ModalFeriasGestor: React.FC<ModalFeriasProps> = ({ onClose, userCod }) => {
 
   return (
     <div className={styles.modal_container} onClick={onClose}>
@@ -20,11 +19,11 @@ const ModalFerias: React.FC<ModalFeriasProps> = ({ onClose }) => {
         </button>
         <p className={styles.modal_title}>Solicitação de Férias</p>
         <div>
-          <CalendarFerias />
+          <CalendarFeriasGestor userPedido={userCod} />
         </div>
       </div>
     </div>
   );
 };
 
-export default ModalFerias;
+export default ModalFeriasGestor;

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import SolicitacaoInterface from "@/interfaces/Solicitacao";
 import { getUsuario } from "@/services/authService";
 import { solicitacaoServices } from "@/services/solicitacaoServices";
+import { toast } from "react-toastify"; // Importando o toast
 
 const weekDays = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sab"];
 const periodoDict = {"30 Dias": 0, "15 e 15 Dias": 1, "20 e 10 Dias": 2, "10, 15 e 5 Dias": 3}
@@ -18,7 +19,7 @@ const CalendarFerias = () => {
   const today = new Date();
   const [currentDate, setCurrentDate] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
   const [solicitacoes, setSolicitacoes] = useState<SolicitacaoInterface[]>([])
-  const [justificativaDigitada, setJustificativaDigitada] = useState<String>("")
+  const [justificativaDigitada, setJustificativaDigitada] = useState<string>("")
 
   useEffect(() => {
     getUser()
@@ -32,6 +33,10 @@ const CalendarFerias = () => {
       setUserCod(usuario.usuario_cod);
     } catch (error) {
       console.error("Error fetching user data", error);
+      toast.error("Erro ao carregar dados do usuário", {
+        position: "top-right",
+        autoClose: 3000,
+      });
     }
   };
 
@@ -79,12 +84,24 @@ const CalendarFerias = () => {
     minSelectableDate.setDate(minSelectableDate.getDate() + 60);
     minSelectableDate.setHours(0, 0, 0, 0);
 
-    if (clickedDate < minSelectableDate) return;
+    if (clickedDate < minSelectableDate) {
+      toast.info("Só é possível selecionar datas com mais de 60 dias de antecedência", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+      return;
+    }
 
     const daysToSelect = diasPorBloco[stepIndex];
     const totalDiasSelecionados = selectedDates.reduce((acc, bloco) => acc + bloco.length, 0);
     const totalDiasPermitidos = diasPorBloco.reduce((acc, cur) => acc + cur, 0);
-    if (totalDiasSelecionados + daysToSelect > totalDiasPermitidos) return;
+    if (totalDiasSelecionados + daysToSelect > totalDiasPermitidos) {
+      toast.warning(`Limite de ${totalDiasPermitidos} dias atingido para o período selecionado`, {
+        position: "top-right",
+        autoClose: 3000,
+      });
+      return;
+    }
   
     const newDates: Date[] = [];
   
@@ -95,6 +112,11 @@ const CalendarFerias = () => {
     }
   
     setSelectedDates(prev => [...prev, newDates]);
+    
+    toast.success(`Bloco de ${daysToSelect} dias selecionado com sucesso`, {
+      position: "top-right",
+      autoClose: 2000,
+    });
   
     if (stepIndex + 1 < diasPorBloco.length) {
       setStepIndex(stepIndex + 1);
@@ -116,47 +138,77 @@ const CalendarFerias = () => {
     date1.getMonth() === date2.getMonth() &&
     date1.getFullYear() === date2.getFullYear();
 
-    const handleSubmit = async () => {
-      console.log("opa")
-      if (!userCod) return;
-
-      const justificativa = justificativaDigitada; 
-      const anexo = null;
-    
-      const promises = selectedDates.map(async (bloco) => {
-        const datasFormatadas = bloco
-          .map((data) =>
-            data.toLocaleDateString("pt-BR", {
-              day: "2-digit",
-              month: "2-digit",
-              year: "numeric",
-            })
-          )
-          .join(";");
-    
-        const formData = new FormData();
-        formData.append("solicitacaoJson", JSON.stringify({
-          solicitacaoMensagem: justificativa,
-          solicitacaoDataPeriodo: datasFormatadas,
-          usuarioCod: userCod,
-          tipoSolicitacaoCod: { tipoSolicitacaoCod: 1 }
-        }));        
-    
-        if (anexo) {
-          formData.append("solicitacaoAnexo", anexo);
-        }
-    
-        return solicitacaoServices.createSolicitacao(formData);
+  const handleSubmit = async () => {
+    if (!userCod) {
+      toast.error("Usuário não identificado", {
+        position: "top-right",
+        autoClose: 3000,
       });
+      return;
+    }
     
-      try {
-        const results = await Promise.all(promises);
-        setSolicitacoes(results as SolicitacaoInterface[]);
-        console.log("Solicitações enviadas com sucesso:", results);
-      } catch (error) {
-        console.error("Erro ao enviar solicitações:", error);
+    if (selectedDates.length === 0) {
+      toast.warning("Selecione pelo menos um período de férias", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+      return;
+    }
+    
+    const justificativa = justificativaDigitada;
+    const anexo = null;
+    
+    // Pega cada dia individualmente, não em blocos
+    const allSelectedDates = selectedDates.flat(); // Junta todos os blocos em um array único
+    
+    const promises = allSelectedDates.map(async (data) => {
+      const dataFormatada = data.toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      }).replace(/\//g, "-"); // aqui troca as barras por hífens
+    
+      const formData = new FormData();
+      formData.append("solicitacaoJson", JSON.stringify({
+        solicitacaoMensagem: justificativa,
+        solicitacaoDataPeriodo: dataFormatada, // agora uma única data por vez
+        usuarioCod: userCod,
+        tipoSolicitacaoCod: { tipoSolicitacaoCod: 2 }
+      }));
+    
+      if (anexo) {
+        formData.append("solicitacaoAnexo", anexo);
       }
-    };   
+    
+      return solicitacaoServices.createSolicitacao(formData);
+    });
+    
+    try {
+      toast.info("Enviando solicitações...", {
+        position: "top-right",
+        autoClose: 2000,
+      });
+      
+      const results = await Promise.all(promises);
+      setSolicitacoes(results as SolicitacaoInterface[]);
+      setSelectedDates([]);
+      setJustificativaDigitada("");
+      
+      toast.success(`${allSelectedDates.length} solicitações de férias enviadas com sucesso!`, {
+        position: "top-right",
+        autoClose: 3000,
+      });
+      
+      console.log("Solicitações enviadas com sucesso:", results);
+    } catch (error) {
+      console.error("Erro ao enviar solicitações:", error);
+      toast.error("Erro ao enviar solicitações. Verifique o console para mais detalhes.", {
+        position: "top-right",
+        autoClose: 4000,
+      });
+    }
+  };
+
   
   return (
     <div>
@@ -182,10 +234,8 @@ const CalendarFerias = () => {
         ))}
       </div>
 
-      <p className={styles.label_calendario}>Selecionar dias:</p>
-
       {selectedDates.map((bloco, blocoIdx) => (
-        <div key={blocoIdx} style={{ marginBottom: 8 }}>
+        <div key={blocoIdx} style={{ marginBottom: 8, marginTop: 10 }}>
           <strong>Bloco {blocoIdx + 1}:</strong>{" "}
           {bloco.map((dia, idx) => (
             <span key={idx} style={{ marginRight: 8 }}>
@@ -198,8 +248,7 @@ const CalendarFerias = () => {
         </div>
       ))}
 
-
-
+      <p className={styles.label_calendario}>Selecionar dias:</p>
 
       <div className={styles.calendar}>
         <div className={styles.header}>
@@ -243,7 +292,6 @@ const CalendarFerias = () => {
               >
                 {day}
               </div>
-
             );
           })}
         </div>
@@ -267,8 +315,6 @@ const CalendarFerias = () => {
           Enviar
         </Button>
       </div>
-
-
     </div>
   );
 };

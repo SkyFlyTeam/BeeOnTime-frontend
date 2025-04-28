@@ -11,6 +11,8 @@ import { getUsuario } from '../../services/authService'
 import ModalAjustePonto from '@/components/custom/modalSolicitacao/modalAjustePonto'
 import ModalDecisaoHoraExtra from '@/components/custom/modalSolicitacao/modalHoraExtra/modalHoraExtra'
 import { renderModalChildren } from '../../utils/renderModalByTipoSolicitacao.tsx'
+import BotaoDropdownSolicitacao from '@/components/custom/BotaoSolicitacao/dropdownSolicitacao'
+import { userInfo } from 'os'
 
 
 interface SolicitacoesState {
@@ -42,12 +44,53 @@ const Solicitacao = () => {
     historico: [],
   })
 
+  const [solicitacoesUser, setSolicitacoesUser] = useState<any>()
+  const [numeroSolicitacoesFeriasAbertas, setNumeroSolicitacoesFeriasAbertas] = useState<number>(0)
+
+  const [primeiraSolicitacaoFeriasCod, setPrimeiraSolicitacaoFeriasCod] = useState<number | null>(null)
+
   // Paginação
   const [displayedSolicitacoes, setDisplayedSolicitacoes] = useState<SolicitacaoInterface[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(5)
   const [totalItems, setTotalItems] = useState(0)
 
+
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await solicitacaoServices.getAllSolicitacaoByUsuario(usuarioCod);
+        setSolicitacoesUser(data);
+      } catch (error) {
+        console.log("unfechtable");
+      }
+    };
+  
+    if (usuarioCod) { // só busca se já tiver o cod do usuário
+      fetchData();
+    }
+  }, [usuarioCod]);
+
+  useEffect(() => {
+    function countSolicitacoesFeriasAbertas(solicitacoesUser: any) {
+      if (!Array.isArray(solicitacoesUser)) return 0;
+  
+      return solicitacoesUser.filter(
+        (solicitacao: { solicitacaoStatus: string; tipoSolicitacaoCod: { tipoSolicitacaoCod: number } }) =>
+          solicitacao.solicitacaoStatus === "PENDENTE" &&
+          solicitacao.tipoSolicitacaoCod.tipoSolicitacaoCod === 2
+          
+      ).length;
+    }
+  
+    if (solicitacoesUser) {
+      const numeroFerias = countSolicitacoesFeriasAbertas(solicitacoesUser);
+      setNumeroSolicitacoesFeriasAbertas(numeroFerias);  // Aqui é onde o estado é atualizado!
+    }
+  }, [solicitacoesUser]); // Esse useEffect vai ser chamado toda vez que solicitacoesUser mudar
+  
+  
   const paginateData = () => {
     const dataToDisplay = toogle ? solicitacoesData.pendentes : solicitacoesData.historico
     const startIndex = (currentPage - 1) * itemsPerPage
@@ -76,7 +119,7 @@ const Solicitacao = () => {
 
   const handleClick = (status: 'pendentes' | 'historico') => {
     setCurrentPage(1)
-
+    setOpenModal({})
     setSolicitacoesData((prevState) => ({
       ...prevState,
       all: prevState[status],
@@ -102,9 +145,9 @@ const Solicitacao = () => {
   
       return {
         ...prevData,
-        pendentes: updatedPendentes,
+        pendentes: filtrarPrimeirasSolicitacoesFeriasPendentes(updatedPendentes),
         historico: updatedHistorico,
-      }
+      };      
     })
     
     paginateData()
@@ -156,7 +199,7 @@ const Solicitacao = () => {
   
       setSolicitacoesData({
         all: result.filter((s: SolicitacaoInterface) => s.solicitacaoStatus !== 'PENDENTE'),
-        pendentes: result.filter((s: SolicitacaoInterface) => s.solicitacaoStatus === 'PENDENTE'),
+        pendentes: filtrarPrimeirasSolicitacoesFeriasPendentes(result.filter((s) => s.solicitacaoStatus === 'PENDENTE')),
         historico: result.filter((s: SolicitacaoInterface) => s.solicitacaoStatus !== 'PENDENTE'),
       })
   
@@ -193,33 +236,60 @@ const Solicitacao = () => {
       paginateData()  
     }, [currentPage, solicitacoesData, toogle])
   
+    const isContratadoMaisDeUmAno = (usuarioDataContratacao: any) => {
+      const data = new Date(usuarioDataContratacao)
+      const hoje = new Date()
+      const umAnoAtras = new Date()
+      umAnoAtras.setFullYear(hoje.getFullYear() - 1)
+
+      const formatada = data.toLocaleDateString('pt-BR')
+      const maisDeUmAno = data <= umAnoAtras
+      return maisDeUmAno;
+    }
+
 
   const totalPages = Math.ceil(
     (toogle ? solicitacoesData.pendentes.length : solicitacoesData.historico.length) / itemsPerPage
   )
 
+  function filtrarPrimeirasSolicitacoesFeriasPendentes(pendentes: SolicitacaoInterface[]) {
+    const primeirasSolicitacoes: { [usuarioCod: number]: SolicitacaoInterface } = {};
+  
+    pendentes.forEach((solicitacao) => {
+      if (
+        solicitacao.tipoSolicitacaoCod!.tipoSolicitacaoCod === 2 && // Tipo: Férias
+        !primeirasSolicitacoes[solicitacao.usuarioCod] // Ainda não peguei a primeira desse usuário
+      ) {
+        primeirasSolicitacoes[solicitacao.usuarioCod] = solicitacao;
+      }
+    });
+  
+    // Pega todas as solicitações normais + primeiras de férias
+    const outrasSolicitacoes = pendentes.filter(
+      (s) => s.tipoSolicitacaoCod!.tipoSolicitacaoCod !== 2
+    );
+  
+    return [...Object.values(primeirasSolicitacoes), ...outrasSolicitacoes];
+  }
+  
+  
   return (
     <div className={styles.solicitacao_container}>
       <div className={styles.card_container}>
         <h1 className='font-bold text-4xl'>Solicitações</h1>
-        <span>
-          {usuarioDataContratacao &&
-            (() => {
-              const data = new Date(usuarioDataContratacao)
-              const hoje = new Date()
-              const umAnoAtras = new Date()
-              umAnoAtras.setFullYear(hoje.getFullYear() - 1)
 
-              const formatada = data.toLocaleDateString('pt-BR')
-              const maisDeUmAno = data <= umAnoAtras
-
-              return `Contratado em ${formatada} (${maisDeUmAno ? 'há mais de 1 ano' : 'menos de 1 ano'})`
-            })()}
-        </span>
         <Tab
           toogle={toogle}
           onClick={handleClick}
           pendentes_length={solicitacoesData.pendentes.length}
+        />
+
+        <BotaoDropdownSolicitacao
+          usuarioCod={usuarioCod}
+          usuarioCargo={usuarioCargo}
+          isContratadoMaisDeUmAno={isContratadoMaisDeUmAno(usuarioDataContratacao)}
+          numeroSolicitacoesFeriasAbertas={numeroSolicitacoesFeriasAbertas}
+          handleSolicitacaoUpdate={handleSolicitacaoUpdate}
         />
 
         <div className={styles.container}>
@@ -228,9 +298,9 @@ const Solicitacao = () => {
               <div key={solicitacao.solicitacaoCod}>
                 <SolicitationCard
                   solicitacao={solicitacao}
-                  onClick={() => handleModal(solicitacao.solicitacaoCod, true)}
+                  onClick={() => handleModal(solicitacao.solicitacaoCod!, true)}
                   onSolicitacaoUpdate={handleSolicitacaoUpdate}
-                  usuarioCargo={solicitacao.usuarioCargo}
+                  usuarioCargo={solicitacao.usuarioCargo!}
                   usuarioCod={solicitacao.usuarioCod}
                   usuarioLogadoCargo={usuarioCargo}
                   usuarioLogadoCod={usuarioCod}
@@ -238,8 +308,8 @@ const Solicitacao = () => {
                 />
 
                 <Modal
-                  isOpen={openModal[solicitacao.solicitacaoCod]}
-                  onClick={() => handleModal(solicitacao.solicitacaoCod, false)}
+                  isOpen={openModal[solicitacao.solicitacaoCod!]}
+                  onClick={() => handleModal(solicitacao.solicitacaoCod!, false)}
                   solicitacao={solicitacao}
                   onSolicitacaoUpdate={handleSolicitacaoUpdate}
                   usuarioLogadoCod={usuarioCod}
@@ -247,13 +317,13 @@ const Solicitacao = () => {
                   children={renderModalChildren({
                     solicitacao,
                     onSolicitacaoUpdate: handleSolicitacaoUpdate,
-                    onClose: () => handleModal(solicitacao.solicitacaoCod, false),
+                    onClose: () => handleModal(solicitacao.solicitacaoCod!, false),
                     usuarioLogadoCod: usuarioCod,
                     usuarioCargo: usuarioCargo,
                     nivelAcessoCod: nivelAcessoCod
                   })
                   } 
-                  title={solicitacao.tipoSolicitacaoCod.tipoSolicitacaoNome}                  
+                  title={solicitacao.tipoSolicitacaoCod!.tipoSolicitacaoNome}                  
                 />
               </div>
             ))
