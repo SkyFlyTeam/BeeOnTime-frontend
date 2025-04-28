@@ -27,6 +27,10 @@ interface SolicitacoesState {
   all: SolicitacaoInterface[]
   pendentes: SolicitacaoInterface[]
   historico: SolicitacaoInterface[]
+  analisesPendentes?: SolicitacaoInterface[]
+  analisesHistorico?: SolicitacaoInterface[]
+  meusPendentes?: SolicitacaoInterface[]
+  meusHistorico?: SolicitacaoInterface[]
 }
 
 const Solicitacao = () => {
@@ -50,6 +54,10 @@ const Solicitacao = () => {
     all: [],
     pendentes: [],
     historico: [],
+    analisesPendentes: [],
+    analisesHistorico: [],
+    meusPendentes: [],
+    meusHistorico: [],
   })
 
   // Paginação
@@ -59,7 +67,7 @@ const Solicitacao = () => {
   const [totalItems, setTotalItems] = useState(0)
   const [isLoading, setIsLoading] = useState(true);
 
-  
+
   const fetchSolicitacoes = async (
     usuarioCargo: string,
     usuarioCod: number,
@@ -67,25 +75,48 @@ const Solicitacao = () => {
     setorCod?: number
   ) => {
     setIsLoading(true)
-    
+
     try {
       let result: unknown;
-  
+
       if (nivelAcessoCod === 2 && usuarioCod) {
         result = await solicitacaoServices.getAllSolicitacaoByUsuario(usuarioCod)
       } else if (nivelAcessoCod === 1 && setorCod) {
         result = await solicitacaoServices.getAllSolicitacaoBySetor(setorCod)
+        const solicitacoes = result as SolicitacaoInterface[]
+
+        const minhas = solicitacoes.filter(s => s.usuarioCod === usuarioCod)
+        const analises = solicitacoes.filter(s => s.usuarioCod !== usuarioCod)
+
+        const ordenar = (arr: SolicitacaoInterface[]) =>
+          [...arr].sort((a, b) => new Date(b.dataCriacao).getTime() - new Date(a.dataCriacao).getTime())
+
+        setSolicitacoesData({
+          all: ordenar([...minhas, ...analises]),
+          pendentes: [],
+          historico: [],
+          analisesPendentes: ordenar(analises.filter(s => s.solicitacaoStatus === 'PENDENTE')),
+          analisesHistorico: ordenar(analises.filter(s => s.solicitacaoStatus !== 'PENDENTE')),
+          meusPendentes: ordenar(minhas.filter(s => s.solicitacaoStatus === 'PENDENTE')),
+          meusHistorico: ordenar(minhas.filter(s => s.solicitacaoStatus !== 'PENDENTE')),
+        })
+
+        // Exibir Análises por padrão
+        setDisplayedSolicitacoes(
+          ordenar(analises.filter(s => s.solicitacaoStatus === 'PENDENTE')).slice(0, itemsPerPage)
+        )
+        return
       } else {
         result = await solicitacaoServices.getAllSolicitacao()
       }
-  
+
       // Confirmação de tipo seguro
       if (!Array.isArray(result)) {
         throw new Error('Erro inesperado: formato de dados inválido.')
       }
-  
+
       let solicitacoesFiltradas = result as SolicitacaoInterface[]
-  
+
       if (usuarioCargo === 'Funcionário') {
         solicitacoesFiltradas = solicitacoesFiltradas.filter((s) => s.usuarioCod === usuarioCod)
       } else if (usuarioCargo === 'Gestor' || usuarioCargo === 'Admin') {
@@ -93,13 +124,13 @@ const Solicitacao = () => {
           (s) => s.usuarioCod === usuarioCod || s.usuarioCargo === 'Funcionário'
         )
       }
-  
+
       setSolicitacoesData({
         all: solicitacoesFiltradas.filter((s) => s.solicitacaoStatus !== 'PENDENTE'),
         pendentes: solicitacoesFiltradas.filter((s) => s.solicitacaoStatus === 'PENDENTE'),
         historico: solicitacoesFiltradas.filter((s) => s.solicitacaoStatus !== 'PENDENTE'),
       })
-  
+
       setTotalItems(solicitacoesFiltradas.length)
     } catch (error) {
       console.error('Erro ao buscar solicitações:', error)
@@ -113,13 +144,35 @@ const Solicitacao = () => {
       setIsLoading(false)
     }
   }
-  
+
 
   const paginateData = () => {
-    const dataToDisplay = toogle ? solicitacoesData.pendentes : solicitacoesData.historico
-    const startIndex = (currentPage - 1) * itemsPerPage
-    const endIndex = startIndex + itemsPerPage
-    setDisplayedSolicitacoes(dataToDisplay.slice(startIndex, endIndex))
+    let dataToDisplay: SolicitacaoInterface[] = []
+
+    if (nivelAcessoCod === 1) {
+      dataToDisplay = toogle
+        ? [
+          ...(solicitacoesData.analisesPendentes || []),
+          ...(solicitacoesData.analisesHistorico || [])
+        ]
+        : [
+          ...(solicitacoesData.meusPendentes || []),
+          ...(solicitacoesData.meusHistorico || [])
+        ]
+    } else {
+      dataToDisplay = toogle
+        ? solicitacoesData.pendentes
+        : solicitacoesData.historico
+    }
+
+    const start = (currentPage - 1) * itemsPerPage
+    const end = start + itemsPerPage
+    setDisplayedSolicitacoes(dataToDisplay.slice(start, end))
+  }
+
+  const handleClick = (status: 'pendentes' | 'historico' | 'analises' | 'meus pontos') => {
+    setCurrentPage(1)
+    setToogle(status === 'analises' || status === 'pendentes')
   }
 
   const handlePageChange = (page: number) => {
@@ -145,15 +198,35 @@ const Solicitacao = () => {
     setOpenDevolutivaModal(status)
   }
 
-  const handleClick = (status: string) => {
-    setCurrentPage(1)
+  // const handleClick = (status: 'pendentes' | 'historico' | 'analises' | 'meus pontos') => {
+  //   setCurrentPage(1)
+  //   let data: SolicitacaoInterface[] = []
 
-    setSolicitacoesData((prevState) => ({
-      ...prevState,
-      all: status == 'PENDENTES' ? prevState['pendentes'] : prevState['historico'],
-    }))
-    setToogle(status === 'PENDENTES')
-  }
+  //   const ordenar = (arr: SolicitacaoInterface[]) =>
+  //     [...arr].sort((a, b) => new Date(b.dataCriacao).getTime() - new Date(a.dataCriacao).getTime())
+
+  //   if (nivelAcessoCod === 1) {
+  //     if (status === 'analises') {
+  //       data = [
+  //         ...(solicitacoesData.analisesPendentes || []),
+  //         ...(solicitacoesData.analisesHistorico || [])
+  //       ]
+  //     } else if (status === 'meus pontos') {
+  //       data = [
+  //         ...(solicitacoesData.meusPendentes || []),
+  //         ...(solicitacoesData.meusHistorico || [])
+  //       ]
+  //     }
+  //   } else {
+  //     data = status === 'pendentes'
+  //       ? solicitacoesData.pendentes
+  //       : solicitacoesData.historico
+  //   }
+
+  //   setDisplayedSolicitacoes(ordenar(data).slice(0, itemsPerPage))
+  //   setToogle(status === 'analises' || status === 'pendentes')
+  // }
+
 
   // Atualizar lista
   const handleSolicitacaoUpdate = async (updatedSolicitacao: SolicitacaoInterface) => {
@@ -170,7 +243,7 @@ const Solicitacao = () => {
       } else {
         updatedHistorico.push(updatedSolicitacao)
       }
-  
+
 
       // Aplique o filtro novamente para garantir que o cargo do usuário seja levado em consideração
       return {
@@ -182,7 +255,7 @@ const Solicitacao = () => {
 
     paginateData()
   }
-  
+
   // Atualziar depois de uma exclusão
   const handleDeleteSolicitacao = (idToDelete: number) => {
     setSolicitacoesData((prevData) => {
@@ -208,7 +281,7 @@ const Solicitacao = () => {
     )
   }
 
-  
+
 
   useEffect(() => {
     const initialize = async () => {
@@ -233,35 +306,43 @@ const Solicitacao = () => {
     }
 
     initialize()
-    }, [usuarioCod, usuarioCargo, nivelAcessoCod, setorCod])  
-    
-    useEffect(() => {
-      paginateData()  
-    }, [currentPage, solicitacoesData, toogle])
-  
+  }, [usuarioCod, usuarioCargo, nivelAcessoCod, setorCod])
+
+  useEffect(() => {
+    paginateData()
+  }, [currentPage, solicitacoesData, toogle])
+
 
   const totalPages = Math.ceil(
-    (toogle ? solicitacoesData.pendentes.length : solicitacoesData.historico.length) / itemsPerPage
+    (
+      nivelAcessoCod === 1
+        ? (toogle
+          ? (solicitacoesData.analisesPendentes?.length || 0) + (solicitacoesData.analisesHistorico?.length || 0)
+          : (solicitacoesData.meusPendentes?.length || 0) + (solicitacoesData.meusHistorico?.length || 0))
+        : (toogle
+          ? solicitacoesData.pendentes.length
+          : solicitacoesData.historico.length)
+    ) / itemsPerPage
   )
 
   if (isLoading) {
     return (
       <div className={styles.solicitacao_container}>
-      <div className={styles.card_container}>
-        <h1 className='font-bold text-4xl'>Solicitações</h1>
+        <div className={styles.card_container}>
+          <h1 className='font-bold text-4xl'>Solicitações</h1>
 
-        <div className=' flex items-center justify-center mt-7'>
-          <Skeleton className='h-12 w-[16rem] bg-gray-200 ' />
-        </div>
+          <div className=' flex items-center justify-center mt-7'>
+            <Skeleton className='h-12 w-[16rem] bg-gray-200 ' />
+          </div>
 
-        {/* Tab e estrutura já visíveis, com skeletons abaixo */}
-        <div className={styles.container}>
-          {Array.from({ length: 5 }).map((_, index) => (
-            <SolicitacaoCardSkeleton key={index} />
-          ))}
+          {/* Tab e estrutura já visíveis, com skeletons abaixo */}
+          <div className={styles.container}>
+            {Array.from({ length: 5 }).map((_, index) => (
+              <SolicitacaoCardSkeleton key={index} />
+            ))}
+          </div>
         </div>
       </div>
-    </div>
     )
   }
 
@@ -271,11 +352,11 @@ const Solicitacao = () => {
         <h1 className='font-bold text-4xl self-start'>Solicitações</h1>
 
         <Tab
-          activeTab={toogle ? 'PENDENTES' : 'HISTÓRICO'}
+          toogle={toogle}
           onClick={handleClick}
-          tabLabels={['PENDENTES', 'HISTÓRICO']}  
-          pendentesLength={solicitacoesData.pendentes.length}
-          showBadge={true}  
+          pendentes_length={nivelAcessoCod === 1 ? solicitacoesData.meusPendentes?.length || 0 : solicitacoesData.pendentes.length}
+          analises_length={nivelAcessoCod === 1 ? solicitacoesData.analisesPendentes?.length || 0 : 0}
+          isGestor={nivelAcessoCod === 1}
         />
 
         <div className={styles.container}>
@@ -296,6 +377,10 @@ const Solicitacao = () => {
                 <Modal
                   isOpen={openModal[solicitacao.solicitacaoCod]}
                   onClick={() => handleModal(solicitacao.solicitacaoCod, false)}
+                  solicitacao={solicitacao}
+                  onSolicitacaoUpdate={handleSolicitacaoUpdate}
+                  usuarioLogadoCod={usuarioCod}
+                  usuarioCargo={usuarioCargo} 
                   children={renderModalChildren({
                     solicitacao,
                     onSolicitacaoUpdate: handleSolicitacaoUpdate,
@@ -305,8 +390,8 @@ const Solicitacao = () => {
                     nivelAcessoCod: nivelAcessoCod,
                     cargaHoraria: cargaHoraria
                   })
-                  } 
-                  title={solicitacao.tipoSolicitacaoCod.tipoSolicitacaoNome}                  
+                  }
+                  title={solicitacao.tipoSolicitacaoCod.tipoSolicitacaoNome}
                 />
               </div>
             ))
