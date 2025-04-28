@@ -224,7 +224,18 @@ const Solicitacao = () => {
   const handleClick = (status: 'pendentes' | 'historico' | 'analises' | 'meus pontos') => {
     setCurrentPage(1)
     setToogle(status === 'analises' || status === 'pendentes')
+
+    if (status === 'pendentes') {
+      fecharTodosModais();
+    }
   }
+
+  const fecharTodosModais = () => {
+    setOpenDevolutivaModal(false);
+    setOpenModal({}); // Fecha todos modais mapeados
+    setModalAberto(null);
+    setIsModalHoraExtraOpen(false);
+  };
 
   // Atualizar lista
   const handleSolicitacaoUpdate = async (updatedSolicitacao: SolicitacaoInterface) => {

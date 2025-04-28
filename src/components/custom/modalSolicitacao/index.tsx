@@ -30,7 +30,7 @@ const Modal: React.FC<ModalProps> = ({
   title 
 }) => {
 
-  const [isModalFeriasOpen, setIsModalFeriasOpen] = useState<boolean>(true)
+  const [isModalFeriasOpen, setIsModalFeriasOpen] = useState<any>(true)
 
   const titulos: Record<string, string> = {
     "Ajuste de ponto": "Solicitação de ajuste de ponto",
@@ -44,7 +44,7 @@ const Modal: React.FC<ModalProps> = ({
       return(
         <div>
           {isModalFeriasOpen && (
-            <ModalFeriasGestor userCod = {solicitacao!.usuarioCod} onClose={() => setIsModalFeriasOpen(false)}/>
+            <ModalFeriasGestor userCod = {solicitacao!.usuarioCod} onClose={() => setIsModalFeriasOpen(null)}/>
           )}
         </div>
       )
