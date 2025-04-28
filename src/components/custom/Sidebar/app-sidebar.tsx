@@ -1,6 +1,8 @@
 import * as React from "react";
 import { usePathname } from "next/navigation";
 import { Users, Building, Home, LogOut, MessageSquare, AlarmClockCheck, UserRound, LucideIcon } from "lucide-react";
+import { LiaBusinessTimeSolid } from "react-icons/lia";
+import { IconType } from "react-icons";
 
 // Components
 import {
@@ -28,7 +30,7 @@ type RoleKey = "Administrador" | "Gestor" | "Funcionário";
 type SubNavItem = {
   title: string;
   url: string;
-  icon: LucideIcon;
+  icon: LucideIcon | IconType;
 };
 
 type NavItem = {
@@ -68,6 +70,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           ],
         },
         {
+          title: "RELATÓRIOS",
+          items: [
+            { title: "Banco de Horas", url: "/bancoHoras", icon: LiaBusinessTimeSolid },
+          ],
+        },
+        {
           title: "GESTÃO DA EMPRESA",
           items: [
             { title: "Empresa", url: "/empresa", icon: Building },
@@ -96,6 +104,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           ]
         },
         {
+          title: "RELATÓRIOS",
+          items: [
+            { title: "Banco de Horas", url: "/bancoHoras", icon: LiaBusinessTimeSolid },
+          ],
+        },
+        {
           title: "GESTÃO DA EMPRESA",
           items: [
             { title: "Colaboradores", url: "/colaboradores", icon: Building },
@@ -119,9 +133,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {
           title: "MARCAÇÕES",
           items: [
-            { title: "Meus Pontos", url: "/historico-ponto", icon: AlarmClockCheck }
+            { title: "Meus Pontos", url: "/historico-ponto", icon: AlarmClockCheck },
+            { title: "Banco de Horas", url: "/bancoHoras", icon: LiaBusinessTimeSolid }
           ]
-        }
+        },
       ],
       navSecondary: [
         { title: usuario?.usuario_nome || "Usuário", url: "/funcionario", icon: UserRound },

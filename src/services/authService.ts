@@ -35,9 +35,8 @@ export async function getRoleID(): Promise<any> {
 // Função para obter dados do usuário
 export async function getUsuario(): Promise<any> {
   try {
-    const res = await axios.get<any>("/auth/token");
-    const resData = await ApiUsuario.get(`/usuario/${res.data.token}`);
-    return resData;
+    const res = await axios.get("/auth/user");
+    return res;
   } catch (error) {
     const res = (error as any).response as any;
     return res;

@@ -1,3 +1,5 @@
+import { Usuario } from "./usuario";
+
 export interface Empresa {
   emp_nome: string;
   emp_razaoSocial: string;
@@ -14,4 +16,5 @@ export interface EmpresaAPI {
   empCidade: string;
   empEstado: string;
   empEndereco: string;
+  usuarios: Usuario[];
 } 

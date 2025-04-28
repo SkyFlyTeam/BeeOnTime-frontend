@@ -1,7 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
 import { getTokenFromAuthCookie } from './server/auth/cookie';
 
-const axiosAuth = axios.create();
+//const axiosAuth = axios.create();
 
 export function axiosToResponse(res: AxiosResponse): Response{
     return new Response(`${res}`, { status: res.status });
@@ -17,4 +17,4 @@ export function axiosToResponse(res: AxiosResponse): Response{
 );*/
 
 
-export default axiosAuth;
+//export default axiosAuth;
