@@ -6,7 +6,7 @@ import { useRouter } from 'next/router';
 import { Usuario } from "@/interfaces/usuario";
 
 // Services
-import { getUsuario } from "@/services/authService";
+
 import { usuarioServices } from "@/services/usuarioServices";
 
 // Components
@@ -20,7 +20,13 @@ import { faEye } from "@fortawesome/free-solid-svg-icons";
 
 // Styles
 import 'react-toastify/dist/ReactToastify.css';
-import styles from './Colaboradores.module.css';
+import UsuarioInfo from "@/interfaces/usuarioInfo";
+
+// import styles from '@/styles/Colaboradores.module.css'
+// import CadastroUsuario from "@/components/CadastroUsuario";
+import { getUsuario } from "@/services/authService";
+import { Skeleton } from "@/components/ui/skeleton";
+// import styles from './Colaboradores.module.css';
 
 export default function Colaboradores() {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]); // Garante que seja um array vazio inicialmente
@@ -28,7 +34,7 @@ export default function Colaboradores() {
   const [error, setError] = useState<string>("");
   const [thisUser, setThisUser] = useState<Usuario>();
 
-  const [isOpen, setIsOpen] = useState(false); 
+  const [isOpen, setIsOpen] = useState(false);
 
   const router = useRouter();
 
@@ -44,18 +50,18 @@ export default function Colaboradores() {
     }
   };
 
-      const getUser = async() => {
-        const user = await getUsuario();
-        console.log (user);
-        return user.data;
-      }
+  const getUser = async () => {
+    const user = await getUsuario();
+    console.log(user);
+    return user.data;
+  }
 
   useEffect(() => {
     fetchUsuarios();
   }, []);
 
   const showToast = (success: boolean) => {
-      success ? showSucessToast() : showErrorToast();
+    success ? showSucessToast() : showErrorToast();
   }
 
   const showSucessToast = () => {
@@ -81,8 +87,50 @@ export default function Colaboradores() {
     router.push(`/historico-ponto/${usuarioId}`)
   };
 
+  const SkeletonRow = () => (
+    <div className="flex flex-row gap-7 mt-10">
+      <Skeleton className="bg-gray-200 w-24 h-10" />
+      <Skeleton className="bg-gray-200 w-24 h-10" />
+      <Skeleton className="bg-gray-200 w-24 h-10" />
+      <Skeleton className="bg-gray-200 w-72 h-10" />
+      <Skeleton className="bg-gray-200 w-48 h-10" />
+      <Skeleton className="bg-gray-200 w-32 h-10" />
+      <Skeleton className="bg-gray-200 w-24 h-10" />
+    </div>
+  );
+
   if (loading) {
-    return <div>Carregando...</div>;
+    return (
+      <div>
+        <div className="container mx-auto px-4 flex justify-between">
+          <h1 className="text-3xl font-bold text-left">Colaboradores</h1>
+          <button
+            onClick={() => setIsOpen(true)}
+            className="bg-[#FFB503] text-black py-1 px-8 rounded-md hover:bg-[#FFCB50] transition-colors"
+          >
+            Adicionar
+          </button>
+        </div>
+        <div className="w-full rounded-xl mt-5 bg-gray-100 p-5">
+          {/* <Skeleton className="h-[3rem] w-full rounded-xl mt-5" /> */}
+          <div className="flex flex-row gap-7">
+            <Skeleton className="bg-gray-200 w-24 h-10" />
+            <Skeleton className="bg-gray-200 w-24 h-10" />
+            <Skeleton className="bg-gray-200 w-24 h-10" />
+            <Skeleton className="bg-gray-200 w-72 h-10" />
+            <Skeleton className="bg-gray-200 w-48 h-10" />
+            <Skeleton className="bg-gray-200 w-32 h-10" />
+            <Skeleton className="bg-gray-200 w-24 h-10" />
+          </div>
+          {[...Array(5)].map((_, idx) => (
+            <SkeletonRow key={idx} />
+          ))}
+
+
+        </div>
+      </div>
+
+    );
   }
 
   if (error) {
@@ -93,7 +141,7 @@ export default function Colaboradores() {
     <div>
       <div className="container mx-auto px-4 flex justify-between">
         <h1 className="text-3xl font-bold text-left">Colaboradores</h1>
-        <button 
+        <button
           onClick={() => setIsOpen(true)}
           className="bg-[#FFB503] text-black py-1 px-8 rounded-md hover:bg-[#FFCB50] transition-colors"
         >
@@ -105,7 +153,7 @@ export default function Colaboradores() {
         <CadastroUsuario onClose={() => setIsOpen(false)} onSave={showToast} />
       )}
 
-      <div className="container mx-auto p-4 bg-white rounded-lg shadow-lg">
+      <div className="container mx-auto p-4 bg-white rounded-lg shadow-lg mt-5">
         <div className="overflow-x-auto">
           {/* Desktop - Tabela horizontal */}
           <div className="hidden md:block">
@@ -124,7 +172,7 @@ export default function Colaboradores() {
               </TableHeader>
               <TableBody>
                 {usuarios.length > 0 ? (
-                  usuarios.map((usuario, index) => ( (usuario.usuario_cod !== thisUser?.usuario_cod && usuario.nivelAcesso.nivelAcesso_cod !== 0) ? (
+                  usuarios.map((usuario, index) => ((usuario.usuario_cod !== thisUser?.usuario_cod && usuario.nivelAcesso.nivelAcesso_cod !== 0) ? (
                     <TableRow
                       key={index}
                       className={index % 2 === 0 ? "bg-[#FFF8E1]" : "bg-[#FFFFFF]"}
@@ -136,15 +184,15 @@ export default function Colaboradores() {
                       <TableCell className="border border-gray-200 text-center text-black text-base p-3">{usuario.usuarioTipoContratacao}</TableCell>
                       <TableCell className="border border-gray-200 text-center text-black text-base p-3">{usuario.nivelAcesso?.nivelAcesso_nome}</TableCell>
                       <TableCell className="border-r border-gray-300 text-left justify-center flex">
-                        <button 
-                          onClick={() => handleViewUser(usuario.usuario_cod)} 
+                        <button
+                          onClick={() => handleViewUser(usuario.usuario_cod)}
                           className="bg-[#FFB503] rounded-md p-2 hover:bg-orange-600">
-                          <FontAwesomeIcon icon={faEye} className="text-black-600"/>
+                          <FontAwesomeIcon icon={faEye} className="text-black-600" />
                         </button>
                       </TableCell>
-                    
+
                     </TableRow>
-                  ): null))
+                  ) : null))
                 ) : (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center">Nenhum colaborador encontrado</TableCell>
@@ -159,21 +207,23 @@ export default function Colaboradores() {
             <table className="min-w-[900px] w-full border-collapse text-sm text-black">
               <tbody>
                 {[
-                  { label: "NOME", render: (usuario: Usuario) => usuario.usuario_nome },
-                  { label: "CARGO", render: (usuario: Usuario) => usuario.usuario_cargo },
-                  { label: "SETOR", render: (usuario: Usuario) => usuario.setor?.setorNome },
-                  { label: "CARGA HORÁRIA DIÁRIA", render: (usuario: Usuario) => usuario.usuario_cargaHoraria },
-                  { label: "CONTRATO", render: (usuario: Usuario) => usuario.usuarioTipoContratacao },
-                  { label: "NÍVEL ACESSO", render: (usuario: Usuario) => usuario.nivelAcesso?.nivelAcesso_nome },
-                  { label: "AÇÕES", render: (usuario: Usuario) => ( <button onClick={() => handleViewUser(usuario.usuario_cod)} 
-                  className="bg-[#FFB503] rounded-md p-2 hover:bg-orange-600">
-                  <FontAwesomeIcon icon={faEye} className="text-black-600"/>
-                </button>) }
+                  { label: "NOME", render: (usuario: UsuarioInfo) => usuario.usuario_nome },
+                  { label: "CARGO", render: (usuario: UsuarioInfo) => usuario.usuario_cargo },
+                  { label: "SETOR", render: (usuario: UsuarioInfo) => usuario.setor?.setorNome },
+                  { label: "CARGA HORÁRIA DIÁRIA", render: (usuario: UsuarioInfo) => usuario.usuario_cargaHoraria },
+                  { label: "CONTRATO", render: (usuario: UsuarioInfo) => usuario.usuarioTipoContratacao },
+                  { label: "NÍVEL ACESSO", render: (usuario: UsuarioInfo) => usuario.nivelAcesso?.nivelAcesso_nome },
+                  {
+                    label: "AÇÕES", render: (usuario: UsuarioInfo) => (<button onClick={() => handleViewUser(usuario.usuario_cod)}
+                      className="bg-[#FFB503] rounded-md p-2 hover:bg-orange-600">
+                      <FontAwesomeIcon icon={faEye} className="text-black-600" />
+                    </button>)
+                  }
                 ].map((row, idx) => (
                   <tr key={idx}>
                     <td className="border border-gray-200 p-3 font-semibold">{row.label}</td>
                     {usuarios.length > 0 ? (
-                      usuarios.map((usuario, i) => ( (usuario.usuario_cod !== thisUser?.usuario_cod && usuario.nivelAcesso.nivelAcesso_cod !== 0) ? (
+                      usuarios.map((usuario, i) => ((usuario.usuario_cod !== thisUser?.usuario_cod && usuario.nivelAcesso.nivelAcesso_cod !== 0) ? (
                         <td
                           key={i}
                           className={`border border-gray-200 p-3 text-center text-base ${i % 2 === 0 ? "bg-[#FFF8E1]" : "bg-[#FFFFFF]"}
@@ -181,7 +231,7 @@ export default function Colaboradores() {
                         >
                           {row.render(usuario)}
                         </td>
-                      ): null))
+                      ) : null))
                     ) : (
                       <td colSpan={6} className="text-center">Nenhum colaborador encontrado</td>
                     )}

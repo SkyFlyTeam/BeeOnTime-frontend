@@ -7,9 +7,9 @@ const ROLES = {
 }
 const accessRoutes = {
     ADMIN: [
-        "/administrador",
+        "/perfil",
         "/inicio",
-        "/horas",
+        "/bancoHoras",
         "/ausencias",
         "/falhas",
         "/colaboradores",
@@ -23,9 +23,9 @@ const accessRoutes = {
         "/notFound"
     ],
     GESTOR: [
-        "/gestor",
+        "/perfil",
         "/inicio",
-        "/horas",
+        "/bancoHoras",
         "/ausencias",
         "/falhas",
         "/colaboradores",
@@ -39,11 +39,11 @@ const accessRoutes = {
         "/notFound"
     ],
     FUNCIONARIO: [
-        "/funcionario",
+        "/perfil",
         "/inicio",
         "/solicitacao",
         "/marcacoes",
-        "/horas",
+        "/bancoHoras",
         "/pendencias",
         "/inicioFuncionario",
         "/historico-ponto",

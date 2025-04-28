@@ -1,11 +1,16 @@
-import { useEffect, useState } from 'react'
+import { JSX, useEffect, useState } from 'react'
 import { ApiException } from '../../config/apiExceptions'
+
+// Interfaces
+import SolicitacaoInterface from '../../interfaces/Solicitacao'
+
+// Services
 import { solicitacaoServices } from '../../services/solicitacaoServices'
 import SolicitationCard from './SolicitacaoCard'
 import styles from './Solicitacao.module.css'
 import Tab from '../../components/custom/tab'
 import Modal from '../../components/custom/modalSolicitacao/index'
-import SolicitacaoInterface from '../../interfaces/Solicitacao'
+
 import ModalDevolutiva from '../../components/custom/modalSolicitacao/modalDevolutiva'
 import { getUsuario } from '../../services/authService'
 import ModalAjustePonto from '@/components/custom/modalSolicitacao/modalAjustePonto'
@@ -13,21 +18,30 @@ import ModalDecisaoHoraExtra from '@/components/custom/modalSolicitacao/modalHor
 import { renderModalChildren } from '../../utils/renderModalByTipoSolicitacao.tsx'
 import BotaoDropdownSolicitacao from '@/components/custom/BotaoSolicitacao/dropdownSolicitacao'
 import { userInfo } from 'os'
+import ModalSolicitarHoraExtra from '@/components/custom/modalSolicitacao/modalHoraExtra/modalSolicitarHoraExtra'
+import { pontoServices } from '@/services/pontoServices'
+import MarcacaoPonto from '@/interfaces/marcacaoPonto'
+import BotaoDropdownSolicitacao from '../../components/custom/BotaoSolicitacao/dropdownSolicitacao'; // Ajuste o caminho conforme necessário
 
+import { Skeleton } from '@/components/ui/skeleton'
+import SolicitacaoCardSkeleton from './SolicitacaoCard/cardSkeleton'
 
 interface SolicitacoesState {
-  all: SolicitacaoInterface[]
-  pendentes: SolicitacaoInterface[]
-  historico: SolicitacaoInterface[]
+  all: SolicitacaoInterface[];
+  pendentes: SolicitacaoInterface[];
+  historico: SolicitacaoInterface[];
+  analisesPendentes?: SolicitacaoInterface[]
+  analisesHistorico?: SolicitacaoInterface[]
+  meusPendentes?: SolicitacaoInterface[]
+  meusHistorico?: SolicitacaoInterface[]
 }
 
 const Solicitacao = () => {
   // Modais
-  const [openDevolutivaModal, setOpenDevolutivaModal] = useState<boolean>(false)
+  const [openDevolutivaModal, setOpenDevolutivaModal] = useState<boolean>(false);
+  const [openModal, setOpenModal] = useState<{ [key: string]: boolean }>({});
+  const [modalAberto, setModalAberto] = useState<string | null>(null)
   const [isModalHoraExtraOpen, setIsModalHoraExtraOpen] = useState(false);
-  const [openModal, setOpenModal] = useState<{
-    [key: string]: boolean
-  }>({})
 
   // Informações do usuário
   const [usuarioCod, setUsuarioCod] = useState<number>(0)
@@ -35,14 +49,25 @@ const Solicitacao = () => {
   const [usuarioDataContratacao, setUsuarioDataContratacao] = useState<Date>(new Date())
   const [nivelAcessoCod, setNivelAcessoCod] = useState<number>()
   const [setorCod, setSetorCod] = useState()
+  const [cargaHoraria, setCargaHoraria] = useState<number>()
 
-  const [toogle, setToogle] = useState(false)
+  const [toogle, setToogle] = useState(false);
 
   const [solicitacoesData, setSolicitacoesData] = useState<SolicitacoesState>({
     all: [],
     pendentes: [],
     historico: [],
-  })
+    analisesPendentes: [],
+    analisesHistorico: [],
+    meusPendentes: [],
+    meusHistorico: [],
+  });
+
+  const handleOpenModal = (tipo: string) => {
+    setModalAberto(tipo)
+  }
+
+
 
   const [solicitacoesUser, setSolicitacoesUser] = useState<any>()
   const [numeroSolicitacoesFeriasAbertas, setNumeroSolicitacoesFeriasAbertas] = useState<number>(0)
@@ -54,6 +79,84 @@ const Solicitacao = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(5)
   const [totalItems, setTotalItems] = useState(0)
+  const [isLoading, setIsLoading] = useState(true);
+
+
+
+  const fetchSolicitacoes = async (
+    usuarioCargo: string,
+    usuarioCod: number,
+    nivelAcessoCod?: number,
+    setorCod?: number
+  ) => {
+    setIsLoading(true)
+
+    try {
+      let result: unknown;
+
+      if (nivelAcessoCod === 2 && usuarioCod) {
+        result = await solicitacaoServices.getAllSolicitacaoByUsuario(usuarioCod)
+      } else if (nivelAcessoCod === 1 && setorCod) {
+        result = await solicitacaoServices.getAllSolicitacaoBySetor(setorCod)
+        const solicitacoes = result as SolicitacaoInterface[]
+
+        const minhas = solicitacoes.filter(s => s.usuarioCod === usuarioCod)
+        const analises = solicitacoes.filter(s => s.usuarioCod !== usuarioCod)
+        
+        const ordenar = (arr: SolicitacaoInterface[]) =>
+          [...arr].sort((a, b) => new Date(b.dataCriacao).getTime() - new Date(a.dataCriacao).getTime())
+
+        setSolicitacoesData({
+          all: ordenar([...minhas, ...analises]),
+          pendentes: [],
+          historico: [],
+          analisesPendentes: ordenar(analises.filter(s => s.solicitacaoStatus === 'PENDENTE')),
+          analisesHistorico: ordenar(analises.filter(s => s.solicitacaoStatus !== 'PENDENTE')),
+          meusPendentes: ordenar(minhas.filter(s => s.solicitacaoStatus === 'PENDENTE')),
+          meusHistorico: ordenar(minhas.filter(s => s.solicitacaoStatus !== 'PENDENTE')),
+        })
+      
+        setDisplayedSolicitacoes(ordenar(analises.filter(s => s.solicitacaoStatus === 'PENDENTE')).slice(0, itemsPerPage))
+        return
+      } else {
+        result = await solicitacaoServices.getAllSolicitacao()
+      }
+
+      // Confirmação de tipo seguro
+      if (!Array.isArray(result)) {
+        throw new Error('Erro inesperado: formato de dados inválido.')
+      }
+
+      let solicitacoesFiltradas = result as SolicitacaoInterface[]
+
+      if (usuarioCargo === 'Funcionário') {
+        solicitacoesFiltradas = solicitacoesFiltradas.filter((s) => s.usuarioCod === usuarioCod)
+      } else if (usuarioCargo === 'Gestor' || usuarioCargo === 'Admin') {
+        solicitacoesFiltradas = solicitacoesFiltradas.filter(
+          (s) => s.usuarioCod === usuarioCod || s.usuarioCargo === 'Funcionário'
+        )
+      }
+
+      setSolicitacoesData({
+        all: solicitacoesFiltradas.filter((s) => s.solicitacaoStatus !== 'PENDENTE'),
+        pendentes: solicitacoesFiltradas.filter((s) => s.solicitacaoStatus === 'PENDENTE'),
+        historico: solicitacoesFiltradas.filter((s) => s.solicitacaoStatus !== 'PENDENTE'),
+      })
+
+      setTotalItems(solicitacoesFiltradas.length)
+    } catch (error) {
+      console.error('Erro ao buscar solicitações:', error)
+      setSolicitacoesData({
+        all: [],
+        pendentes: [],
+        historico: [],
+      })
+      setTotalItems(0)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
 
 
 
@@ -92,39 +195,60 @@ const Solicitacao = () => {
   
   
   const paginateData = () => {
-    const dataToDisplay = toogle ? solicitacoesData.pendentes : solicitacoesData.historico
-    const startIndex = (currentPage - 1) * itemsPerPage
-    const endIndex = startIndex + itemsPerPage
-    setDisplayedSolicitacoes(dataToDisplay.slice(startIndex, endIndex))
-  }  
+    let dataToDisplay: SolicitacaoInterface[] = []
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page)
+    if (nivelAcessoCod === 1) {
+      dataToDisplay = toogle
+        ? [
+          ...(solicitacoesData.analisesPendentes || []),
+          ...(solicitacoesData.analisesHistorico || [])
+        ]
+        : [
+          ...(solicitacoesData.meusPendentes || []),
+          ...(solicitacoesData.meusHistorico || [])
+        ]
+    } else {
+      dataToDisplay = toogle
+        ? solicitacoesData.pendentes
+        : solicitacoesData.historico
+    }
+
+    const start = (currentPage - 1) * itemsPerPage
+    const end = start + itemsPerPage
+    setDisplayedSolicitacoes(dataToDisplay.slice(start, end))
   }
 
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
   const handleModal = (solicitacaoCod: number, status: boolean) => {
+    if (solicitacaoCod === 0) {
+      setIsModalHoraExtraOpen(false)
+      return
+    }
     setOpenModal((prevState) => ({
       ...prevState,
       [solicitacaoCod]: status,
-    }))
+    }));
 
     if (status === true) {
-      handleDevolutivaModal(false)
+      handleDevolutivaModal(false);
     }
-  }
+  };
 
   const handleDevolutivaModal = (status: boolean) => {
-    setOpenDevolutivaModal(status)
-  }
+    setOpenDevolutivaModal(status);
+  };
 
-  const handleClick = (status: 'pendentes' | 'historico') => {
+  const handleClick = (status: 'pendentes' | 'historico' | 'analises' | 'meus pontos') => {
     setCurrentPage(1)
     setOpenModal({})
     setSolicitacoesData((prevState) => ({
       ...prevState,
       all: prevState[status],
     }))
-    setToogle(status === 'pendentes')
+    setToogle(status === 'analises' || status === 'pendentes')
   }
 
   // Atualizar lista
@@ -132,61 +256,94 @@ const Solicitacao = () => {
     setSolicitacoesData((prevData) => {
       const updatedPendentes = prevData.pendentes.filter(
         (solicitacao) => solicitacao.solicitacaoCod !== updatedSolicitacao.solicitacaoCod
-      )
+      );
       const updatedHistorico = prevData.historico.filter(
         (solicitacao) => solicitacao.solicitacaoCod !== updatedSolicitacao.solicitacaoCod
       )
-  
+
       if (updatedSolicitacao.solicitacaoStatus === 'PENDENTE') {
-        updatedPendentes.push(updatedSolicitacao)
+        updatedPendentes.push(updatedSolicitacao);
       } else {
-        updatedHistorico.push(updatedSolicitacao)
+        updatedHistorico.push(updatedSolicitacao);
       }
-  
+
+
+      // Aplique o filtro novamente para garantir que o cargo do usuário seja levado em consideração
       return {
         ...prevData,
         pendentes: filtrarPrimeirasSolicitacoesFeriasPendentes(updatedPendentes),
         historico: updatedHistorico,
       };      
     })
-    
+
     paginateData()
   }
-  
+
   // Atualziar depois de uma exclusão
   const handleDeleteSolicitacao = (idToDelete: number) => {
     setSolicitacoesData((prevData) => {
       const updatedPendentes = prevData.pendentes.filter(
         (solicitacao) => solicitacao.solicitacaoCod !== idToDelete
-      )
+      );
       const updatedHistorico = prevData.historico.filter(
         (solicitacao) => solicitacao.solicitacaoCod !== idToDelete
-      )
+      );
       const updatedAll = prevData.all.filter(
         (solicitacao) => solicitacao.solicitacaoCod !== idToDelete
-      )
+      );
       return {
         ...prevData,
         pendentes: updatedPendentes,
         historico: updatedHistorico,
         all: updatedAll,
-      }
-    })
+      };
+    });
 
     setDisplayedSolicitacoes((prev) =>
       prev.filter((solicitacao) => solicitacao.solicitacaoCod !== idToDelete)
-    )
-  }
+    );
+  };
 
-  const fetchSolicitacoes = async (usuarioCargo: string, usuarioCod: number, nivelAcessoCod: number, setorCod: number) => {
-    let result: SolicitacaoInterface[] | ApiException | null = null
-    if (nivelAcessoCod === 2) {
-      result = await solicitacaoServices.getAllSolicitacaoByUsuario(usuarioCod) as SolicitacaoInterface[] | ApiException
-    } else if (nivelAcessoCod === 1) {
-      result = await solicitacaoServices.getAllSolicitacaoBySetor(setorCod) as SolicitacaoInterface[] | ApiException
-    } else {
-      result = await solicitacaoServices.getAllSolicitacao()
-    }
+  // Novo mapeamento de Modal para renderização automática
+  {/* ========= Modais de solicitações ========= */}
+  const modaisMapeados: { [key: string]: JSX.Element } = {
+    // 'Férias': (
+    //   <IsModalFeriasOpen
+    //     usuarioCod={usuarioCod}
+    //     onClose={() => setModalAberto(null)}
+    //     onSolicitacaoUpdate={handleSolicitacaoUpdate}
+    //   />
+    // ),
+    'Hora extra': (
+      <ModalSolicitarHoraExtra
+        usuarioCod={usuarioCod}
+        cargaHoraria={cargaHoraria ? cargaHoraria : 0}
+        onClose={() => setModalAberto(null)}
+        onSolicitacaoUpdate={handleSolicitacaoUpdate}
+      />
+    ),
+    // 'Ajuste de ponto': (
+    //   // <ModalAjustePonto
+    //   //   usuarioCod={usuarioCod}
+    //   //   onClose={() => setModalAberto(null)}
+    //   //   onSolicitacaoUpdate={handleSolicitacaoUpdate}
+    //   // />
+    // ),
+    // 'Licença médica': (
+    //   // <ModalLicencaMedica
+    //   //   usuarioCod={usuarioCod}
+    //   //   onClose={() => setModalAberto(null)}
+    //   //   onSolicitacaoUpdate={handleSolicitacaoUpdate}
+    //   // />
+    // ),
+    // 'Folga': (
+    //   // <ModalFolga
+    //   //   usuarioCod={usuarioCod}
+    //   //   onClose={() => setModalAberto(null)}
+    //   //   onSolicitacaoUpdate={handleSolicitacaoUpdate}
+    //   // />
+    // )
+  };
 
     if (result instanceof ApiException || result === null) {
       setSolicitacoesData({
@@ -210,25 +367,26 @@ const Solicitacao = () => {
   useEffect(() => {
     const initialize = async () => {
       try {
-        const response = await getUsuario()
+        const response = await getUsuario();
         if (!response || !response.data) {
-          console.error('Usuário não encontrado.')
-          return
+          console.error('Usuário não encontrado.');
+          return;
         }
-  
-        const { usuario_cod, usuario_cargo, usuario_dataContratacao, nivelAcesso_cod, setorCod } = response.data
+        const { usuario_cod, usuario_cargo, usuario_dataContratacao, nivelAcesso_cod, setorCod, usuario_cargaHoraria } = response.data
         setUsuarioCod(usuario_cod)
         setUsuarioCargo(usuario_cargo)
         setUsuarioDataContratacao(usuario_dataContratacao)
         setNivelAcessoCod(nivelAcesso_cod)
         setSetorCod(setorCod)
+        setCargaHoraria(usuario_cargaHoraria)
 
-        await fetchSolicitacoes(usuario_cargo, usuario_cod, nivelAcesso_cod, setorCod)
+
+        await fetchSolicitacoes(usuario_cargo, usuario_cod, nivelAcesso_cod, setorCod);
       } catch (error) {
-        console.error('Erro ao obter usuário:', error)
+        console.error('Erro ao obter usuário:', error);
       }
     }
-  
+
     initialize()
     }, [usuarioCod, usuarioCargo, nivelAcessoCod, setorCod])  
     
@@ -247,10 +405,38 @@ const Solicitacao = () => {
       return maisDeUmAno;
     }
 
-
   const totalPages = Math.ceil(
-    (toogle ? solicitacoesData.pendentes.length : solicitacoesData.historico.length) / itemsPerPage
-  )
+    (
+      nivelAcessoCod === 1
+        ? (toogle
+          ? (solicitacoesData.analisesPendentes?.length || 0) + (solicitacoesData.analisesHistorico?.length || 0)
+          : (solicitacoesData.meusPendentes?.length || 0) + (solicitacoesData.meusHistorico?.length || 0))
+        : (toogle
+          ? solicitacoesData.pendentes.length
+          : solicitacoesData.historico.length)
+    ) / itemsPerPage
+  );
+
+  if (isLoading) {
+    return (
+      <div className={styles.solicitacao_container}>
+        <div className={styles.card_container}>
+          <h1 className='font-bold text-4xl'>Solicitações</h1>
+
+          <div className=' flex items-center justify-center mt-7'>
+            <Skeleton className='h-12 w-[16rem] bg-gray-200 ' />
+          </div>
+
+          {/* Tab e estrutura já visíveis, com skeletons abaixo */}
+          <div className={styles.container}>
+            {Array.from({ length: 5 }).map((_, index) => (
+              <SolicitacaoCardSkeleton key={index} />
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   function filtrarPrimeirasSolicitacoesFeriasPendentes(pendentes: SolicitacaoInterface[]) {
     const primeirasSolicitacoes: { [usuarioCod: number]: SolicitacaoInterface } = {};
@@ -276,21 +462,39 @@ const Solicitacao = () => {
   return (
     <div className={styles.solicitacao_container}>
       <div className={styles.card_container}>
-        <h1 className='font-bold text-4xl'>Solicitações</h1>
+        <h1 className='font-bold text-4xl self-start'>Solicitações</h1>
 
+        <div className='flex flex-row justify-between'>
         <Tab
           toogle={toogle}
           onClick={handleClick}
-          pendentes_length={solicitacoesData.pendentes.length}
+          pendentes_length={nivelAcessoCod === 1 ? solicitacoesData.meusPendentes?.length || 0 : solicitacoesData.pendentes.length}
+          analises_length={nivelAcessoCod === 1 ? solicitacoesData.analisesPendentes?.length || 0 : 0}
+          isGestor={nivelAcessoCod === 1}
         />
-
+          
         <BotaoDropdownSolicitacao
           usuarioCod={usuarioCod}
           usuarioCargo={usuarioCargo}
           isContratadoMaisDeUmAno={isContratadoMaisDeUmAno(usuarioDataContratacao)}
           numeroSolicitacoesFeriasAbertas={numeroSolicitacoesFeriasAbertas}
           handleSolicitacaoUpdate={handleSolicitacaoUpdate}
-        />
+          onOpenModal={handleOpenModal}
+          />
+
+
+        </div>
+
+        {/* Renderizar Modal automaticamente */}
+        {modalAberto && (
+          <Modal
+            isOpen={!!modalAberto}
+            onClick={() => setModalAberto(null)}
+            title={modalAberto}
+          >
+            {modaisMapeados[modalAberto]}
+          </Modal>
+        )}
 
         <div className={styles.container}>
           {displayedSolicitacoes.length > 0 ? (
@@ -304,7 +508,7 @@ const Solicitacao = () => {
                   usuarioCod={solicitacao.usuarioCod}
                   usuarioLogadoCargo={usuarioCargo}
                   usuarioLogadoCod={usuarioCod}
-                  onDelete={handleDeleteSolicitacao} 
+                  onDelete={handleDeleteSolicitacao}
                 />
 
                 <Modal
@@ -320,7 +524,8 @@ const Solicitacao = () => {
                     onClose: () => handleModal(solicitacao.solicitacaoCod!, false),
                     usuarioLogadoCod: usuarioCod,
                     usuarioCargo: usuarioCargo,
-                    nivelAcessoCod: nivelAcessoCod
+                    nivelAcessoCod: nivelAcessoCod,
+                    cargaHoraria: cargaHoraria
                   })
                   } 
                   title={solicitacao.tipoSolicitacaoCod!.tipoSolicitacaoNome}                  
@@ -341,11 +546,11 @@ const Solicitacao = () => {
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 1}
               >
-                &lt;
+                {'<'}
               </button>
 
               {Array.from({ length: totalPages }, (_, index) => {
-                const page = index + 1
+                const page = index + 1;
                 if (page === 1 || page === totalPages || Math.abs(page - currentPage) <= 1) {
                   return (
                     <button
@@ -355,14 +560,14 @@ const Solicitacao = () => {
                     >
                       {page}
                     </button>
-                  )
+                  );
                 } else if (Math.abs(page - currentPage) === 2 && page < currentPage) {
-                  return <span key={`left-ellipsis`} className={styles.ellipsis}>...</span>
+                  return <span key={`left-ellipsis`} className={styles.ellipsis}>...</span>;
                 } else if (Math.abs(page - currentPage) === 2 && page > currentPage) {
-                  return <span key={`right-ellipsis`} className={styles.ellipsis}>...</span>
+                  return <span key={`right-ellipsis`} className={styles.ellipsis}>...</span>;
                 }
 
-                return null
+                return null;
               })}
 
               <button
@@ -370,14 +575,16 @@ const Solicitacao = () => {
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
               >
-                &gt;
+                {'>'}
               </button>
             </div>
           )}
         </div>
       </div>
-    </div>
-  )
-}
 
-export default Solicitacao
+      
+    </div>
+  );
+};
+
+export default Solicitacao;

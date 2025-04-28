@@ -1,6 +1,7 @@
 export default interface SolicitacaoInterface {
-  solicitacaoCod?: number;
-  solicitacaoAnexo?: number[] | null
+  dataCriacao: string | number | Date;
+  solicitacaoCod: number;
+  solicitacaoAnexo: number[] | null
   solicitacaoAnexoNome?: string
   solicitacaoMensagem?: string;
   solicitacaoDevolutiva?: string;

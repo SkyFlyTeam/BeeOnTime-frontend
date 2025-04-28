@@ -1,3 +1,14 @@
+import TimeClock from '@/pages/inicioFuncionario/_components/timeClock/time-clock';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
+import { Button } from '@/components/ui/button';
+
 // General
 import { useEffect, useState } from 'react';
 
@@ -38,7 +49,15 @@ export default function Home() {
 
   // Show loading message while fetching data
   if (isLoading) {
-    return <div>Carregando...</div>;
+    return (
+
+      <> </>
+      // <div className="flex flex-col gap-7">
+      //   <Skeleton className="h-10 w-1/3 bg-gray-200" /> {/* Título Olá, nome */}
+      //   <Skeleton className="h-48 w-full rounded-lg" /> {/* Card 1 */}
+      //   <Skeleton className="h-48 w-full rounded-lg" /> {/* Card 2 */}
+      // </div> 
+    );
   }
 
   return (
@@ -47,6 +66,9 @@ export default function Home() {
         <h1 className='text-4xl font-semibold'>Olá, {usuarioNome}!</h1>
         <div>
           {acessoCod === 0 ? null : <InicioFuncionario />}
+        </div>
+        <div>
+          {/* {acessoCod === 0 ? null : <CardCargaHoraria usuarioInfo={usuarioInfo!} />} */}
         </div>
       </div>
     </>

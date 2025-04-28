@@ -8,6 +8,9 @@ import { IsModalFeriasOpen } from '../../../pages/solicitacao/testeModal'; // Aj
 import SolicitacaoInterface from '../../../interfaces/Solicitacao';
 import CalendarFerias from '../CalendarFerias/calendarFerias';
 import ModalFerias from '../modalSolicitacao/modalFerias';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
+import { ChevronUp, ChevronDown } from 'lucide-react';
+import SolicitacaoInterface from '../../../interfaces/Solicitacao';
 
 interface BotaoDropdownSolicitacaoProps {
   usuarioCod: number;
@@ -15,6 +18,7 @@ interface BotaoDropdownSolicitacaoProps {
   isContratadoMaisDeUmAno: boolean;
   numeroSolicitacoesFeriasAbertas: number;
   handleSolicitacaoUpdate: (updatedSolicitacao: SolicitacaoInterface) => Promise<void>;
+  onOpenModal: (tipo: string) => void; // <- NOVO
 }
 
 export default function BotaoDropdownSolicitacao({

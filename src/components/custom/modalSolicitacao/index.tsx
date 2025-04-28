@@ -10,22 +10,14 @@ import ModalFeriasGestor from './modalFerias/modalGestor';
 
 interface ModalProps {
   isOpen: boolean
-  solicitacao: SolicitacaoInterface
-  onSolicitacaoUpdate: (updatedSolicitacao: SolicitacaoInterface) => void;
   onClick: () => void
-  usuarioLogadoCod: number 
-  usuarioCargo: string
   children: ReactNode
   title: string
 }
 
 const Modal: React.FC<ModalProps> = ({
   isOpen,
-  solicitacao,
   onClick,
-  onSolicitacaoUpdate,
-  usuarioLogadoCod,
-  usuarioCargo,
   children,
   title 
 }) => {
@@ -54,7 +46,6 @@ const Modal: React.FC<ModalProps> = ({
       <div className={styles.modal_container} onClick={onClick}>
         <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
           <p className={styles.modal_title}>{titulos[title]}</p>
-          <p className={styles.colaborador_label}><span>Colaborador: </span>{solicitacao.usuarioNome}</p>
           <div>
             {children}
           </div>
