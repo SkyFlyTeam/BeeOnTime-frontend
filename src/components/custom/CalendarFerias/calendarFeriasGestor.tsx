@@ -237,15 +237,30 @@ const CalendarFeriasGestor = ({userPedido}: CalendarFeriasGestorProps) => {
         </div>
       </div>
       Justificativa
-      <div className="flex w-full gap-2 items-center" style={{marginTop: "2%"}}>
+      <div className="flex w-full gap-2 items-center" style={{ marginTop: "2%" }}>
         <Input
           className="flex-1 h-10"
           value={justificativaDigitada.toString()}
           onChange={(e) => setJustificativaDigitada(e.target.value)}
         />
-        <div className="flex items-center justify-center h-10 w-10">
+
+        {/* Botão de anexo */}
+        {/* <label htmlFor="anexo" className="cursor-pointer flex items-center justify-center h-10 w-10">
           <FaPaperclip className="text-gray-500" />
-        </div>
+        </label>
+        <input
+          type="file"
+          id="anexo"
+          style={{ display: "none" }}
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) {
+              // Exemplo: enviar arquivo ou exibir nome
+              console.log("Arquivo selecionado:", file.name);
+              toast.success("Arquivo anexado: " + file.name, { autoClose: 2000 });
+            }
+          }}
+        /> */}
       </div>
         
       <div style={{ marginTop: "2%", display: "flex", justifyContent: "flex-end", gap: "10px" }}>

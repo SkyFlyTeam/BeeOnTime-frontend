@@ -24,6 +24,8 @@ import BotaoDropdownSolicitacao from '../../components/custom/BotaoSolicitacao/d
 
 import { Skeleton } from '@/components/ui/skeleton'
 import SolicitacaoCardSkeleton from './SolicitacaoCard/cardSkeleton'
+import ModalFerias from '@/components/custom/modalSolicitacao/modalFerias'
+import ModalFeriasGestor from '@/components/custom/modalSolicitacao/modalFerias/modalGestor'
 
 interface SolicitacoesState {
   all: SolicitacaoInterface[];
@@ -41,16 +43,20 @@ const Solicitacao = () => {
   const [openModal, setOpenModal] = useState<{ [key: string]: boolean }>({});
   const [modalAberto, setModalAberto] = useState<string | null>(null)
   const [isModalHoraExtraOpen, setIsModalHoraExtraOpen] = useState(false);
+  const [isModalFeriasGestorOpen, setIsModalFeriasGestorOpen] = useState<boolean>(false)
+  const [isModalFeriasOpen, setIsModalFeriasOpen] = useState<boolean>(false)
 
   // Informações do usuário
   const [usuarioCod, setUsuarioCod] = useState<number>(0)
   const [usuarioCargo, setUsuarioCargo] = useState<string>('')
+  const [usuarioDataContratacao, setUsuarioDataContratacao] = useState<Date>(new Date())
   const [nivelAcessoCod, setNivelAcessoCod] = useState<number>()
   const [setorCod, setSetorCod] = useState()
   const [cargaHoraria, setCargaHoraria] = useState<number>()
-
   const [toogle, setToogle] = useState(false);
-
+  const [isFuncionario, setIsFuncionario] = useState(false)
+  const [solicitacaoSelecionada, setSolicitacaoSelecionada] = useState<SolicitacaoInterface | null>(null);
+  const [numeroSolicitacoesFeriasAbertas, setNumeroSolicitacoesFeriasAbertas] = useState<number>(0)
   const [solicitacoesData, setSolicitacoesData] = useState<SolicitacoesState>({
     all: [],
     pendentes: [],
@@ -73,7 +79,6 @@ const Solicitacao = () => {
   const [itemsPerPage, setItemsPerPage] = useState(5)
   const [totalItems, setTotalItems] = useState(0)
   const [isLoading, setIsLoading] = useState(true);
-
 
 
   const fetchSolicitacoes = async (
@@ -198,6 +203,24 @@ const Solicitacao = () => {
     setOpenDevolutivaModal(status);
   };
 
+  useEffect(() => {
+    function countSolicitacoesFeriasAbertas(solicitacoesUser: any) {
+      if (!Array.isArray(solicitacoesUser)) return 0;
+  
+      return solicitacoesUser.filter(
+        (solicitacao: { solicitacaoStatus: string; tipoSolicitacaoCod: { tipoSolicitacaoCod: number } }) =>
+          solicitacao.solicitacaoStatus === "PENDENTE" &&
+          solicitacao.tipoSolicitacaoCod.tipoSolicitacaoCod === 2
+          
+      ).length;
+    }
+  
+    if (solicitacoesData) {
+      const numeroFerias = countSolicitacoesFeriasAbertas(solicitacoesData.pendentes);
+      setNumeroSolicitacoesFeriasAbertas(numeroFerias);
+    }
+  }, [solicitacoesData]);
+
   const handleClick = (status: 'pendentes' | 'historico' | 'analises' | 'meus pontos') => {
     setCurrentPage(1)
     setToogle(status === 'analises' || status === 'pendentes')
@@ -270,13 +293,10 @@ const Solicitacao = () => {
   // Novo mapeamento de Modal para renderização automática
   {/* ========= Modais de solicitações ========= */}
   const modaisMapeados: { [key: string]: JSX.Element } = {
-    // 'Férias': (
-    //   <IsModalFeriasOpen
-    //     usuarioCod={usuarioCod}
-    //     onClose={() => setModalAberto(null)}
-    //     onSolicitacaoUpdate={handleSolicitacaoUpdate}
-    //   />
-    // ),
+    'Férias': (
+      <ModalFerias
+        onClose={() => setModalAberto(null)}/>
+    ),
     'Hora extra': (
       <ModalSolicitarHoraExtra
         usuarioCod={usuarioCod}
@@ -319,13 +339,14 @@ const Solicitacao = () => {
           return;
         }
 
-        const { usuario_cod, usuario_cargo, nivelAcesso_cod, setorCod, usuario_cargaHoraria } = response.data
+        const { usuario_cod, usuario_cargo, usuario_dataContratacao, nivelAcesso_cod, setorCod, usuario_cargaHoraria } = response.data
         setUsuarioCod(usuario_cod)
         setUsuarioCargo(usuario_cargo)
+        setUsuarioDataContratacao(usuario_dataContratacao)
         setNivelAcessoCod(nivelAcesso_cod)
         setSetorCod(setorCod)
         setCargaHoraria(usuario_cargaHoraria)
-
+        setIsFuncionario(usuarioCargo === "Funcionário")
 
         await fetchSolicitacoes(usuario_cargo, usuario_cod, nivelAcesso_cod, setorCod);
       } catch (error) {
@@ -339,7 +360,6 @@ const Solicitacao = () => {
   useEffect(() => {
     paginateData()
   }, [currentPage, solicitacoesData, toogle])
-
 
   const totalPages = Math.ceil(
     (
@@ -374,6 +394,17 @@ const Solicitacao = () => {
     )
   }
 
+  const handleAbrirModalSolicitacao = (solicitacao: SolicitacaoInterface) => {
+    if (solicitacao.tipoSolicitacaoCod.tipoSolicitacaoCod === 2) {
+      setIsModalFeriasGestorOpen(true)
+      setSolicitacaoSelecionada(solicitacao);
+    } else {
+      // Para outros tipos, use sua lógica existente
+      setModalAberto(solicitacao.tipoSolicitacaoCod.tipoSolicitacaoNome)
+    }
+  }
+  
+
   function filtrarPrimeirasSolicitacoesFeriasPendentes(pendentes: SolicitacaoInterface[]) {
     const primeirasSolicitacoes: { [usuarioCod: number]: SolicitacaoInterface } = {};
   
@@ -394,6 +425,17 @@ const Solicitacao = () => {
     return [...Object.values(primeirasSolicitacoes), ...outrasSolicitacoes];
   }
 
+  const isContratadoMaisDeUmAno = (usuarioDataContratacao: any) => {
+    const data = new Date(usuarioDataContratacao)
+    const hoje = new Date()
+    const umAnoAtras = new Date()
+    umAnoAtras.setFullYear(hoje.getFullYear() - 1)
+
+    const formatada = data.toLocaleDateString('pt-BR')
+    const maisDeUmAno = data <= umAnoAtras
+    return maisDeUmAno;
+  }
+
   return (
     <div className={styles.solicitacao_container}>
       <div className={styles.card_container}>
@@ -408,11 +450,12 @@ const Solicitacao = () => {
           analises_length={nivelAcessoCod === 1 ? solicitacoesData.analisesPendentes?.length || 0 : 0}
           isGestor={nivelAcessoCod === 1}
         />
-
           {/* Componente do dropdown e modais */}
           <BotaoDropdownSolicitacao
             usuarioCod={usuarioCod}
             usuarioCargo={usuarioCargo}
+            isContratadoMaisDeUmAno={isContratadoMaisDeUmAno(usuarioDataContratacao)} 
+            numeroSolicitacoesFeriasAbertas={numeroSolicitacoesFeriasAbertas}
             handleSolicitacaoUpdate={handleSolicitacaoUpdate}
             onOpenModal={handleOpenModal}
           />
@@ -438,7 +481,7 @@ const Solicitacao = () => {
               <div key={solicitacao.solicitacaoCod}>
                 <SolicitationCard
                   solicitacao={solicitacao}
-                  onClick={() => handleModal(solicitacao.solicitacaoCod, true)}
+                  onClick={() => handleAbrirModalSolicitacao(solicitacao)}
                   onSolicitacaoUpdate={handleSolicitacaoUpdate}
                   usuarioCargo={solicitacao.usuarioCargo}
                   usuarioCod={solicitacao.usuarioCod}
@@ -470,6 +513,14 @@ const Solicitacao = () => {
               <img src="/images/sem_conteudo.svg" alt="" />
               <p>Ops! Parece que não tem nada aqui!</p>
             </div>
+          )}
+
+          {isModalFeriasGestorOpen && solicitacaoSelecionada &&(
+            <ModalFeriasGestor onClose={() => setIsModalFeriasGestorOpen(false)} userCod={solicitacaoSelecionada.usuarioCod} />
+          )}
+
+          {modalAberto === 'Férias' && (
+            <ModalFerias onClose={() => setModalAberto(null)} />
           )}
 
           {displayedSolicitacoes.length > 0 && totalPages > 1 && (

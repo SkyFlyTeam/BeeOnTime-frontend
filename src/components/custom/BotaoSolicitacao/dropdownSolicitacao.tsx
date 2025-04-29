@@ -6,6 +6,8 @@ import SolicitacaoInterface from '../../../interfaces/Solicitacao';
 interface BotaoDropdownSolicitacaoProps {
   usuarioCod: number;
   usuarioCargo: string;
+  isContratadoMaisDeUmAno: boolean;
+  numeroSolicitacoesFeriasAbertas: number;
   handleSolicitacaoUpdate: (updatedSolicitacao: SolicitacaoInterface) => Promise<void>;
   onOpenModal: (tipo: string) => void; // <- NOVO
 }
@@ -14,6 +16,8 @@ export default function BotaoDropdownSolicitacao({
   usuarioCod,
   usuarioCargo,
   handleSolicitacaoUpdate,
+  isContratadoMaisDeUmAno,
+  numeroSolicitacoesFeriasAbertas,
   onOpenModal,
 }: BotaoDropdownSolicitacaoProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -35,17 +39,22 @@ export default function BotaoDropdownSolicitacao({
           )}
         </DropdownMenuTrigger>
         <DropdownMenuContent className="bg-white border border-gray-200 mr-[3rem] w-full">
-          {['Férias', 'Folga', 'Hora extra', 'Ajuste de ponto', 'Licença médica'].map((tipo) => (
-            
-            <DropdownMenuItem
-              key={tipo}
-              onSelect={() => handleDropdownSelect(tipo)}
-              className="font-medium cursor-pointer hover:!bg-[#FFF4D9]"
-            >
-              {tipo}
-            </DropdownMenuItem>
-          ))}
+          {['Férias', 'Folga', 'Hora extra', 'Ajuste de ponto', 'Licença médica'].map((tipo) => {
+            const isFerias = (tipo === 'Férias');
+            const isDisabled = isFerias && (!isContratadoMaisDeUmAno);
+
+            return (
+              <DropdownMenuItem
+                key={tipo}
+                onSelect={() => !isDisabled && handleDropdownSelect(tipo)}
+                className={`font-semibold cursor-pointer hover:!bg-[#FFF4D9] ${isDisabled ? 'opacity-50 pointer-events-none' : ''}`}
+              >
+                {tipo}
+              </DropdownMenuItem>
+            );
+          })}
         </DropdownMenuContent>
+
       </DropdownMenu>
     </div>
   );

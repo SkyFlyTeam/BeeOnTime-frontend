@@ -34,13 +34,13 @@ const Modal: React.FC<ModalProps> = ({
   }
 
   if (isOpen) {
-    if (title === "Férias") {
-      return (
-        <div>
-          <ModalFeriasGestor onClose={onClick} userCod={solicitacao?.usuarioCod!}/>
-        </div>
-      )
-    }
+    // if (title === "Férias") {
+    //   return (
+    //     <div>
+    //       <ModalFeriasGestor onClose={onClick} userCod={solicitacao?.usuarioCod!}/>
+    //     </div>
+    //   )
+    // }
     return (
       <div className={styles.modal_container} onClick={onClick}>
         <div className={styles.modal} onClick={(e) => e.stopPropagation()}>

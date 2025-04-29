@@ -290,9 +290,9 @@ const CalendarFerias = () => {
           value={justificativaDigitada.toString()}
           onChange={(e) => setJustificativaDigitada(e.target.value)}
         />
-        <div className="flex items-center justify-center h-10 w-10">
+        {/* <div className="flex items-center justify-center h-10 w-10">
           <FaPaperclip className="text-gray-500" />
-        </div>
+        </div> */}
       </div>
 
         
