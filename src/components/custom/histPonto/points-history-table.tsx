@@ -39,8 +39,8 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
         const faltaData: { [key: string]: any } = {};  // Initialize an object to store the full Falta objects
         if (entries) {
           for (const entry of entries) {
-            const falta = await faltaServices.getFaltabyUsuarioCodAndDate(userInfo!.usuario_cod, entry.data);
-            faltaData[entry.data.toLocaleString()] = falta || null;  // Store the full Falta object or null
+            const falta = await faltaServices.getFaltabyUsuarioCodAndDate(userInfo!.usuario_cod, entry.horasData.toLocaleString());
+            faltaData[entry.horasData.toLocaleString()] = falta || null;  // Store the full Falta object or null
           }
         }
         setFaltas(faltaData);  // Set the fetched falta data
@@ -103,11 +103,13 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
                 entries.map((entry, index) => (
                   <TableRow key={index} className={index % 2 === 0 ? "bg-[#FFF8E1]" : "bg-[#FFFFFF]"}>
                     <TableCell className="border border-gray-200 text-center text-black text-base p-3">
-                      {new Date(entry.data).toLocaleDateString("pt-BR")}
+                      {new Date(entry.horasData).toLocaleDateString("pt-BR")}
                     </TableCell>
                     <TableCell className="border border-gray-200 text-center text-black text-base p-3">
                       <div className="flex flex-col">
+                        {entry.pontos.length > 0 ? (
                         <div>{entry.pontos.map((ponto: Ponto) => `${ponto.horarioPonto.toString().substring(0, 5)}`).join(" - ")}</div>
+                        ) : (<div>---</div>)}
                       </div>
                     </TableCell>
                     <TableCell className="border border-gray-200 text-center text-black text-base p-3">{entry.horasTrabalhadas}</TableCell>
@@ -115,7 +117,7 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
                     <TableCell className="border border-gray-200 text-center text-black text-base p-3">{entry.horasFaltantes}</TableCell>
                     {accessLevel === "USER" && (
                       <TableCell className="border border-gray-200 text-center text-black text-base p-3">
-                        {!faltas[entry.data.toLocaleString()] ? (
+                        {!faltas[entry.horasData.toLocaleString()] ? (
                           <div className={styles.relative}>
                           <Button
                             variant="ghost"
@@ -133,7 +135,7 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
                             variant="ghost"
                             size="icon"
                             className="relative bg-[#FFC107] hover:bg-[#e0a800] text-white"
-                            onClick={() => handleModalAusenciaOpen(faltas[entry.data.toLocaleString()])}
+                            onClick={() => handleModalAusenciaOpen(faltas[entry.horasData.toLocaleString()])}
                           >
                             <PencilLine className="h-4 w-4 text-[#42130F]" />
                             <span className={styles.tooltip_text}>Justificar ausência</span> {/* Tooltip */}
