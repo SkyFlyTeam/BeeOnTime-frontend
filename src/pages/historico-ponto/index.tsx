@@ -144,7 +144,6 @@ export default function PointsHistoryPage() {
       <h1 className="text-xl md:text-3xl font-semibold mb-4">
         {accessLevel === "USER" ? "Meus Pontos" : "Pontos"}
       </h1>
-      { void console.log(histPontos)}
       <PointsHistoryTable
         entries={histPontos}
         userInfo={usuarioInfo}
