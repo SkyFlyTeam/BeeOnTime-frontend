@@ -25,6 +25,7 @@ import BotaoDropdownSolicitacao from '../../components/custom/BotaoSolicitacao/d
 import { Skeleton } from '@/components/ui/skeleton'
 import SolicitacaoCardSkeleton from './SolicitacaoCard/cardSkeleton'
 import ModalSolictarHoraExtra from '@/components/custom/modalSolicitacao/modalAusenciaMedica/modalSolicitarHoraExtra'
+import ModalSolictarAusenciaMedica from '@/components/custom/modalSolicitacao/modalAusenciaMedica/modalSolicitarHoraExtra'
 
 interface SolicitacoesState {
   all: SolicitacaoInterface[];
@@ -271,13 +272,6 @@ const Solicitacao = () => {
   // Novo mapeamento de Modal para renderização automática
   {/* ========= Modais de solicitações ========= */}
   const modaisMapeados: { [key: string]: JSX.Element } = {
-    // 'Férias': (
-    //   <IsModalFeriasOpen
-    //     usuarioCod={usuarioCod}
-    //     onClose={() => setModalAberto(null)}
-    //     onSolicitacaoUpdate={handleSolicitacaoUpdate}
-    //   />
-    // ),
     'Hora extra': (
       <ModalSolicitarHoraExtra
         usuarioCod={usuarioCod}
@@ -286,28 +280,14 @@ const Solicitacao = () => {
         onSolicitacaoUpdate={handleSolicitacaoUpdate}
       />
     ),
-    // 'Ajuste de ponto': (
-    //   // <ModalAjustePonto
-    //   //   usuarioCod={usuarioCod}
-    //   //   onClose={() => setModalAberto(null)}
-    //   //   onSolicitacaoUpdate={handleSolicitacaoUpdate}
-    //   // />
-    // ),
-    'Licença médica': (
-      <ModalSolictarHoraExtra
+    'Ausência médica': (
+      <ModalSolictarAusenciaMedica
         usuarioCod={usuarioCod}
         cargaHoraria={cargaHoraria ? cargaHoraria : 0}
         onClose={() => setModalAberto(null)}
         onSolicitacaoUpdate={handleSolicitacaoUpdate}
       />
-    ),
-    // 'Folga': (
-    //   // <ModalFolga
-    //   //   usuarioCod={usuarioCod}
-    //   //   onClose={() => setModalAberto(null)}
-    //   //   onSolicitacaoUpdate={handleSolicitacaoUpdate}
-    //   // />
-    // )
+    )
   };
 
 

@@ -5,6 +5,7 @@ import ModalDecisaoHoraExtra from '@/components/custom/modalSolicitacao/modalHor
 import ModalSolictarHoraExtra from '@/components/custom/modalSolicitacao/modalHoraExtra/modalSolicitarHoraExtra'
 import ModalJustificativaFalta from '@/components/custom/modalSolicitacao/modalJustificativaFalta'
 import ModalDecisaoAusenciaMedica from '@/components/custom/modalSolicitacao/modalAusenciaMedica/modalAusenciaMedica'
+import ModalSolictarAusenciaMedica from '@/components/custom/modalSolicitacao/modalAusenciaMedica/modalSolicitarHoraExtra'
 
 interface ModalChildrenProps {
   solicitacao: SolicitacaoInterface
@@ -31,7 +32,6 @@ export function renderModalChildren({
     const dataFormatada = `${dia.padStart(2, '0')}/${mes.padStart(2, '0')}/${ano}`
     return dataFormatada
   }
-
   switch (solicitacao.tipoSolicitacaoCod.tipoSolicitacaoCod) {
     case 1:
       return (
@@ -68,8 +68,18 @@ export function renderModalChildren({
             usuarioLogadoCod={usuarioLogadoCod}
             usuarioCargo={usuarioCargo}
           />
-        )}
-
+        )
+      } else {
+        return(
+          <ModalSolictarHoraExtra 
+            solicitacao={solicitacao}
+            usuarioCod={solicitacao.usuarioCod} 
+            cargaHoraria={cargaHoraria ?? 0}
+            onClose={onClose}
+            onSolicitacaoUpdate={onSolicitacaoUpdate}
+          />
+        )
+      }
       case 6:
         if (solicitacao.solicitacaoStatus !== 'PENDENTE' || nivelAcessoCod === 0 || nivelAcessoCod === 1) {
           return (
@@ -82,18 +92,17 @@ export function renderModalChildren({
               usuarioCargo={usuarioCargo}
             />
           )
-      } else {
-        return(
-          <ModalSolictarHoraExtra 
-            solicitacao={solicitacao}
-            usuarioCod={solicitacao.usuarioCod} 
-            cargaHoraria={cargaHoraria ?? 0}
-            onClose={onClose}
-            onSolicitacaoUpdate={onSolicitacaoUpdate}
-          />
-        )
-      }
-      return null
+        } else {
+          return(
+            <ModalSolictarAusenciaMedica
+              solicitacao={solicitacao}
+              usuarioCod={usuarioLogadoCod}
+              cargaHoraria={cargaHoraria ? cargaHoraria : 0}
+              onClose={onClose}
+              onSolicitacaoUpdate={onSolicitacaoUpdate}
+            />
+          )
+        }
 
     default:
       return null

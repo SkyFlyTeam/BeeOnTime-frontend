@@ -36,7 +36,8 @@ const ModalDecisaoAusenciaMedica: React.FC<ModalBancoHorasProps> = ({
     usuarioCargo
 }) => {
     const [solicitacao, setSolicitacao] = useState<SolicitacaoInterface>(solicitacaoSelected)
-
+    const [mensagem, setMensagem] = useState<string>('');
+    
     const horasToString = solicitacao && solicitacao.horasSolicitadas ? solicitacao.horasSolicitadas.toString() : ''
     let [horas, min] = horasToString.split('.')
     const minutos = min ? Math.round(Number('0.' + min) * 60) : 0
@@ -44,9 +45,10 @@ const ModalDecisaoAusenciaMedica: React.FC<ModalBancoHorasProps> = ({
     const handleSubmit = async (status: string, toastMensagem: string, tipo: string) => {
         if(!solicitacao) return 
 
-        const updatedSolicitacao = {
+        const updatedSolicitacao: SolicitacaoInterface = {
             ...solicitacao,
-            solicitacaoStatus: status
+            solicitacaoStatus: status,
+            solicitacaoMensagem: mensagem 
         }
 
         await solicitacaoServices.updateSolicitacao(updatedSolicitacao)
@@ -74,9 +76,10 @@ const ModalDecisaoAusenciaMedica: React.FC<ModalBancoHorasProps> = ({
     }
 
     useEffect(() => {
-        const solicitacaoSelecionada = {...solicitacaoSelected}
-        setSolicitacao(solicitacaoSelecionada)
-    }, [])
+        const solicitacaoSelecionada = { ...solicitacaoSelected };
+        setSolicitacao(solicitacaoSelecionada);
+        setMensagem(solicitacao.solicitacaoMensagem || ''); 
+    }, [solicitacaoSelected]); 
 
     const handleDownload = () => {
         if (!solicitacao?.solicitacaoAnexo || solicitacao.solicitacaoAnexo.length === 0) return;
@@ -108,7 +111,7 @@ const ModalDecisaoAusenciaMedica: React.FC<ModalBancoHorasProps> = ({
         document.body.removeChild(link);
         URL.revokeObjectURL(url); 
       };
-
+      console.log(`JUSTIFICATIVA: ${solicitacao?.solicitacaoMensagem}`)
     return(
         <>  
             <p className={styles.colaborador_label}><span>Colaborador: </span>{solicitacao && solicitacao.usuarioNome}</p>
@@ -123,20 +126,13 @@ const ModalDecisaoAusenciaMedica: React.FC<ModalBancoHorasProps> = ({
                     <label>Justificativa</label>
                     <div className={styles.justificativa_content}>
                         <input
-                        type="text"
-                        value={solicitacao?.solicitacaoMensagem}
-                        readOnly={
-                            usuarioLogadoCod !== solicitacao?.usuarioCod ||
-                            solicitacao.solicitacaoStatus !== 'PENDENTE'
-                        }
-                        onChange={(e) => {
-                            if (usuarioLogadoCod === solicitacao.usuarioCod) {
-                              setSolicitacao((prev) => ({
-                                ...prev,
-                                solicitacaoMensagem: e.target.value,
-                              }))
+                            type="text"
+                            value={mensagem} 
+                            readOnly={
+                                usuarioLogadoCod !== solicitacao?.usuarioCod ||
+                                solicitacao.solicitacaoStatus !== 'PENDENTE'
                             }
-                          }}
+                            onChange={(e) => setMensagem(e.target.value)} 
                         />
                         {solicitacao?.solicitacaoAnexo && (
                         <button
