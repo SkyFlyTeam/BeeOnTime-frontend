@@ -9,6 +9,7 @@ const Flag = ({ status }: { status: string }) => {
         [styles.ausencia]: status === "Ausência",
         [styles.ponto]: status === "Ajuste de ponto",
         [styles.extra]: status === "Hora extra",
+        [styles.ausencia_medica]: status === "Ausência médica",
     })}>
       {status === "Ajuste de ponto" ? "Ponto" : status}
     </span>

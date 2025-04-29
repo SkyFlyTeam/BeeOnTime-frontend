@@ -27,6 +27,7 @@ const Modal: React.FC<ModalProps> = ({
   const titulos: Record<string, string> = {
     "Ajuste de ponto": "Solicitação de ajuste de ponto",
     "Hora extra": "Solicitação de hora extra",
+    "Licença médica": "Solicitação de ausência médica",
   }
 
   if (isOpen) {

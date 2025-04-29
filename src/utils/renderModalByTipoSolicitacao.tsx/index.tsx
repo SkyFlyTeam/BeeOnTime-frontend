@@ -4,6 +4,7 @@ import ModalAjustePonto from '@/components/custom/modalSolicitacao/modalAjustePo
 import ModalDecisaoHoraExtra from '@/components/custom/modalSolicitacao/modalHoraExtra/modalHoraExtra'
 import ModalSolictarHoraExtra from '@/components/custom/modalSolicitacao/modalHoraExtra/modalSolicitarHoraExtra'
 import ModalJustificativaFalta from '@/components/custom/modalSolicitacao/modalJustificativaFalta'
+import ModalDecisaoAusenciaMedica from '@/components/custom/modalSolicitacao/modalAusenciaMedica/modalAusenciaMedica'
 
 interface ModalChildrenProps {
   solicitacao: SolicitacaoInterface
@@ -67,7 +68,20 @@ export function renderModalChildren({
             usuarioLogadoCod={usuarioLogadoCod}
             usuarioCargo={usuarioCargo}
           />
-        )
+        )}
+
+      case 6:
+        if (solicitacao.solicitacaoStatus !== 'PENDENTE' || nivelAcessoCod === 0 || nivelAcessoCod === 1) {
+          return (
+            <ModalDecisaoAusenciaMedica
+              diaSelecionado={formatarData(solicitacao.solicitacaoDataPeriodo)}
+              solicitacaoSelected={solicitacao}
+              onSolicitacaoUpdate={onSolicitacaoUpdate}
+              onClose={onClose}
+              usuarioLogadoCod={usuarioLogadoCod}
+              usuarioCargo={usuarioCargo}
+            />
+          )
       } else {
         return(
           <ModalSolictarHoraExtra 
