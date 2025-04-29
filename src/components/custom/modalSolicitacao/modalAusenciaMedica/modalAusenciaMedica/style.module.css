@@ -17,19 +17,18 @@
     margin-top: .5rem;
 }
 
+
 .justificativa_content {
     display: flex;
-    flex-direction: column;
-    width: 100%;
-    padding: 0;
+    align-items: center;
 
     & input {
+        margin-right: .5rem;
+        width: 100%;
         border: 2px solid #eceff4;
         border-radius: .5rem;
         height: 2rem;
-        padding-left: .5rem;
     }
-
 }
 
 .colaborador_label span{

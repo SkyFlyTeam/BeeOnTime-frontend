@@ -1,6 +1,6 @@
 // components/custom/modalSolicitacao/modalHoraExtra/SolicitarHoraExtraContent.tsx
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import "react-datepicker/dist/react-datepicker.css";
 import { Paperclip } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -30,6 +30,22 @@ const ModalSolictarAusenciaMedica = ({ usuarioCod, cargaHoraria, solicitacao, on
   const [mensagem, setMensagem] = useState<string>();
   const [horasSolicitadas, setHorasSolicitadas] = useState<number>();
   const [horarioSaidaPrevista, setHorarioSaidaPrevista] = useState<string>();
+  const [file, setFile] = useState<File | null>(null);
+
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const uploaded = e.target.files?.[0];
+    if (uploaded) {
+      setFile(uploaded);
+    }
+  }
+
+  const abrirSeletorArquivo = () => {
+    fileInputRef.current?.click();
+  };
+  
 
   const fetchPontoAtual = async () => {
     const today = new Date();
@@ -104,6 +120,9 @@ const ModalSolictarAusenciaMedica = ({ usuarioCod, cargaHoraria, solicitacao, on
   
       const formData = new FormData();
       formData.append("solicitacaoJson", JSON.stringify(solicitacaoJson));
+      if (file) {
+        formData.append("solicitacaoAnexo", file);
+      }
       
       if (solicitacao) {
         const updateJson: SolicitacaoInterface = {
@@ -173,8 +192,17 @@ const ModalSolictarAusenciaMedica = ({ usuarioCod, cargaHoraria, solicitacao, on
               value={mensagem}
               onChange={(e) => setMensagem(e.target.value)}
             />
-            <input type="file" style={{ display: 'none' }} />
-            <Paperclip strokeWidth={1} className={styles.anexo_icon} />
+            <input
+                type='file'
+                ref={fileInputRef}
+                onChange={handleFile}
+                style={{ display: 'none' }}
+              />
+              <Paperclip
+                strokeWidth={1}
+                className={styles.anexo_icon}
+                onClick={abrirSeletorArquivo}
+              />
           </div>
         </div>
       </div>
