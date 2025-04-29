@@ -379,7 +379,7 @@ const Solicitacao = () => {
       <div className={styles.card_container}>
         <h1 className='font-bold text-4xl self-start'>Solicitações</h1>
 
-        <div className='flex flex-row justify-between'>
+        <div className='flex flex-row' style={{ justifyContent: nivelAcessoCod !== 0 ? 'space-between' : 'center' }}>
 
         <Tab
           toogle={toogle}
@@ -390,12 +390,14 @@ const Solicitacao = () => {
         />
 
           {/* Componente do dropdown e modais */}
+          {nivelAcessoCod != 0 && (
           <BotaoDropdownSolicitacao
-            usuarioCod={usuarioCod}
-            usuarioCargo={usuarioCargo}
-            handleSolicitacaoUpdate={handleSolicitacaoUpdate}
-            onOpenModal={handleOpenModal}
-          />
+              usuarioCod={usuarioCod}
+              usuarioCargo={usuarioCargo}
+              handleSolicitacaoUpdate={handleSolicitacaoUpdate}
+              onOpenModal={handleOpenModal}
+            />
+          )}
 
 
         </div>
