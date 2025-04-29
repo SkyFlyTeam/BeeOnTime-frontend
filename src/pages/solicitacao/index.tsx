@@ -132,7 +132,7 @@ const Solicitacao = () => {
 
       setSolicitacoesData({
         all: solicitacoesFiltradas.filter((s) => s.solicitacaoStatus !== 'PENDENTE'),
-        pendentes: solicitacoesFiltradas.filter((s) => s.solicitacaoStatus === 'PENDENTE'),
+        pendentes: filtrarPrimeirasSolicitacoesFeriasPendentes(result.filter((s) => s.solicitacaoStatus === 'PENDENTE')),
         historico: solicitacoesFiltradas.filter((s) => s.solicitacaoStatus !== 'PENDENTE'),
       })
 
@@ -234,7 +234,7 @@ const Solicitacao = () => {
       // Aplique o filtro novamente para garantir que o cargo do usuário seja levado em consideração
       return {
         ...prevData,
-        pendentes: updatedPendentes,
+        pendentes: filtrarPrimeirasSolicitacoesFeriasPendentes(updatedPendentes),
         historico: updatedHistorico,
       }
     })
@@ -374,6 +374,26 @@ const Solicitacao = () => {
     )
   }
 
+  function filtrarPrimeirasSolicitacoesFeriasPendentes(pendentes: SolicitacaoInterface[]) {
+    const primeirasSolicitacoes: { [usuarioCod: number]: SolicitacaoInterface } = {};
+  
+    pendentes.forEach((solicitacao) => {
+      if (
+        solicitacao.tipoSolicitacaoCod!.tipoSolicitacaoCod === 2 && // Tipo: Férias
+        !primeirasSolicitacoes[solicitacao.usuarioCod] // Ainda não peguei a primeira desse usuário
+      ) {
+        primeirasSolicitacoes[solicitacao.usuarioCod] = solicitacao;
+      }
+    });
+  
+    // Pega todas as solicitações normais + primeiras de férias
+    const outrasSolicitacoes = pendentes.filter(
+      (s) => s.tipoSolicitacaoCod!.tipoSolicitacaoCod !== 2
+    );
+  
+    return [...Object.values(primeirasSolicitacoes), ...outrasSolicitacoes];
+  }
+
   return (
     <div className={styles.solicitacao_container}>
       <div className={styles.card_container}>
@@ -430,6 +450,7 @@ const Solicitacao = () => {
                 <Modal
                   isOpen={openModal[solicitacao.solicitacaoCod]}
                   onClick={() => handleModal(solicitacao.solicitacaoCod, false)}
+                  solicitacao={solicitacao}
                   children={renderModalChildren({
                     solicitacao,
                     onSolicitacaoUpdate: handleSolicitacaoUpdate,

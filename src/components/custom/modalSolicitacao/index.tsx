@@ -7,19 +7,23 @@ import SolicitacaoInterface from '../../../interfaces/Solicitacao'
 // Componente react
 import { ReactNode } from 'react';
 import { useState } from 'react';
+import ModalFerias from './modalFerias';
+import ModalFeriasGestor from './modalFerias/modalGestor';
 
 interface ModalProps {
   isOpen: boolean
   onClick: () => void
   children: ReactNode
   title: string
+  solicitacao?: SolicitacaoInterface
 }
 
 const Modal: React.FC<ModalProps> = ({
   isOpen,
   onClick,
   children,
-  title 
+  title,
+  solicitacao
 }) => {
 
   const [isModalFeriasOpen, setIsModalFeriasOpen] = useState<any>(true)
@@ -31,11 +35,9 @@ const Modal: React.FC<ModalProps> = ({
 
   if (isOpen) {
     if (title === "Férias") {
-      return(
+      return (
         <div>
-          {isModalFeriasOpen && (
-            <ModalFeriasGestor userCod = {solicitacao!.usuarioCod} onClose={() => setIsModalFeriasOpen(null)}/>
-          )}
+          <ModalFeriasGestor onClose={onClick} userCod={solicitacao?.usuarioCod!}/>
         </div>
       )
     }
@@ -50,7 +52,7 @@ const Modal: React.FC<ModalProps> = ({
       </div>
     );
   }
-  return null;
+  return null;  
 };
 
 export default Modal;

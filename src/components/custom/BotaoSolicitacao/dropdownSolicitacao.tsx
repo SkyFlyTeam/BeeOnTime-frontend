@@ -36,6 +36,7 @@ export default function BotaoDropdownSolicitacao({
         </DropdownMenuTrigger>
         <DropdownMenuContent className="bg-white border border-gray-200 mr-[3rem] w-full">
           {['Férias', 'Folga', 'Hora extra', 'Ajuste de ponto', 'Licença médica'].map((tipo) => (
+            
             <DropdownMenuItem
               key={tipo}
               onSelect={() => handleDropdownSelect(tipo)}
