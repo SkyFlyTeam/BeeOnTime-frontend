@@ -25,7 +25,7 @@ const SolicitarFolgaModal: React.FC<SolicitarFolgaModalProps> = ({
     folDataPeriodo: [],
     folObservacao: "",
     documento: null,
-    folgaTipo: { folTipoCod: 1 },
+    folgaTipo: { folTipoCod: 5 },
     usuarioCod: usuarioLogadoCod, // Verifique se o valor está sendo passado corretamente
     onClose,
   });
