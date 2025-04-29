@@ -7,7 +7,7 @@ import { set } from "react-hook-form";
 import Horas from "@/interfaces/horas";
 import { Usuario } from "@/interfaces/usuario";
 import { horasServices } from "@/services/horasServices";
-import HistPontos, { Ponto } from "@/interfaces/hisPonto";
+import HistPontos, { Ponto } from "@/interfaces/histPonto";
 import { pontoServices } from "@/services/pontoServices";
 import { TipoPonto } from "@/enums/tipoPonto";
 

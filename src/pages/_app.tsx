@@ -35,7 +35,7 @@ function MyApp({ Component, pageProps }: AppProps) {
       <AppSidebar />
       <SidebarInset>
         <Header />
-        <main className="flex flex-1 flex-col gap-4 px-0 md:px-12 py-0">
+        <main className="flex flex-1 flex-col gap-4 px-8 sm:px-12 py-0">
           <Component {...pageProps} />
           <ToastContainer />
         </main>

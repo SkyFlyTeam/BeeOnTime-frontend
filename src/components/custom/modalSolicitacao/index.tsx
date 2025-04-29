@@ -6,6 +6,7 @@ import SolicitacaoInterface from '../../../interfaces/Solicitacao'
 
 // Componente react
 import { ReactNode } from 'react';
+import { useState } from 'react';
 
 interface ModalProps {
   isOpen: boolean
@@ -21,12 +22,23 @@ const Modal: React.FC<ModalProps> = ({
   title 
 }) => {
 
+  const [isModalFeriasOpen, setIsModalFeriasOpen] = useState<any>(true)
+
   const titulos: Record<string, string> = {
     "Ajuste de ponto": "Solicitação de ajuste de ponto",
     "Hora extra": "Solicitação de hora extra",
   }
 
   if (isOpen) {
+    if (title === "Férias") {
+      return(
+        <div>
+          {isModalFeriasOpen && (
+            <ModalFeriasGestor userCod = {solicitacao!.usuarioCod} onClose={() => setIsModalFeriasOpen(null)}/>
+          )}
+        </div>
+      )
+    }
     return (
       <div className={styles.modal_container} onClick={onClick}>
         <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
