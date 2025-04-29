@@ -6,6 +6,7 @@ import SolicitacaoInterface from '../../../interfaces/Solicitacao'
 
 // Componente react
 import { ReactNode } from 'react';
+import { useState } from 'react';
 
 interface ModalProps {
   isOpen: boolean
