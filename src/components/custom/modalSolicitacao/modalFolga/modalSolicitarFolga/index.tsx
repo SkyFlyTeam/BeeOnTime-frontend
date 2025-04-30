@@ -16,10 +16,13 @@ interface SolicitarFolgaModalProps {
   onClose: () => void; // Função para fechar o modal
 }
 
+
+
 const SolicitarFolgaModal: React.FC<SolicitarFolgaModalProps> = ({
   usuarioLogadoCod,
   onClose,
 }) => {
+
   const [solicitacao, setSolicitacao] = useState<SolicitacaoFolgaInterface>({
     bancoDeHoras: 0,
     folDataPeriodo: [],
@@ -120,6 +123,8 @@ const SolicitarFolgaModal: React.FC<SolicitarFolgaModalProps> = ({
       const formattedData = solicitacao.folDataPeriodo.map(date => 
         date instanceof Date ? date.toISOString().split('T')[0] : date
       )
+
+      // const formattedDates = folDataPeriodo.map(date => date.toISOString().split('T')[0]);
 
 
       // Prepara o payload no formato esperado
