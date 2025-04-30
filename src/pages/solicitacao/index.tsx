@@ -387,7 +387,10 @@ const Solicitacao = () => {
           activeTab={toogle ? 'ANÁLISES' : 'MEUS PEDIDOS'}
           onClick={handleClick}
           tabLabels={['ANÁLISES', 'MEUS PEDIDOS']}  
-          pendentesLength={solicitacoesData.pendentes.length}
+          pendentesLength={[
+            solicitacoesData.analisesPendentes!.length, 
+            solicitacoesData.meusPendentes!.length
+          ]}
           showBadge={true}  
           />
           :
@@ -395,7 +398,7 @@ const Solicitacao = () => {
             activeTab={toogle ? 'PENDENTES' : 'HISTÓRICO'}
             onClick={handleClick}
             tabLabels={['PENDENTES', 'HISTÓRICO']}  
-            pendentesLength={solicitacoesData.pendentes.length}
+            pendentesLength={[solicitacoesData.pendentes.length]}
             showBadge={true}  
           />
         }
