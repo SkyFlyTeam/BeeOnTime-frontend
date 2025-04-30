@@ -20,7 +20,6 @@ import { faEye } from "@fortawesome/free-solid-svg-icons";
 
 // Styles
 import 'react-toastify/dist/ReactToastify.css';
-import UsuarioInfo from "@/interfaces/usuarioInfo";
 
 // import styles from '@/styles/Colaboradores.module.css'
 // import CadastroUsuario from "@/components/CadastroUsuario";
@@ -221,14 +220,14 @@ export default function Colaboradores() {
             <table className="min-w-[900px] w-full border-collapse text-sm text-black">
               <tbody>
                 {[
-                  { label: "NOME", render: (usuario: UsuarioInfo) => usuario.usuario_nome },
-                  { label: "CARGO", render: (usuario: UsuarioInfo) => usuario.usuario_cargo },
-                  { label: "SETOR", render: (usuario: UsuarioInfo) => usuario.setor?.setorNome },
-                  { label: "CARGA HORÁRIA DIÁRIA", render: (usuario: UsuarioInfo) => usuario.usuario_cargaHoraria },
-                  { label: "CONTRATO", render: (usuario: UsuarioInfo) => usuario.usuarioTipoContratacao },
-                  { label: "NÍVEL ACESSO", render: (usuario: UsuarioInfo) => usuario.nivelAcesso?.nivelAcesso_nome },
+                  { label: "NOME", render: (usuario: Usuario) => usuario.usuario_nome },
+                  { label: "CARGO", render: (usuario: Usuario) => usuario.usuario_cargo },
+                  { label: "SETOR", render: (usuario: Usuario) => usuario.setor?.setorNome },
+                  { label: "CARGA HORÁRIA DIÁRIA", render: (usuario: Usuario) => usuario.usuario_cargaHoraria },
+                  { label: "CONTRATO", render: (usuario: Usuario) => usuario.usuarioTipoContratacao },
+                  { label: "NÍVEL ACESSO", render: (usuario: Usuario) => usuario.nivelAcesso?.nivelAcesso_nome },
                   {
-                    label: "AÇÕES", render: (usuario: UsuarioInfo) => (<button onClick={() => handleViewUser(usuario.usuario_cod)}
+                    label: "AÇÕES", render: (usuario: Usuario) => (<button onClick={() => handleViewUser(usuario.usuario_cod)}
                       className="bg-[#FFB503] rounded-md p-2 hover:bg-orange-600">
                       <FontAwesomeIcon icon={faEye} className="text-black-600" />
                     </button>)
