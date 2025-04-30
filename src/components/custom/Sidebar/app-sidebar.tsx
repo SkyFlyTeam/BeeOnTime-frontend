@@ -23,6 +23,7 @@ import { NavSecondary } from "./nav-secondary";
 import { getUsuario } from "@/services/authService";
 import { useEffect, useState } from "react";
 import { Usuario } from "@/interfaces/usuario";
+import { empresaServices } from "@/services/empresaService";
 
 // Tipos
 type RoleKey = "Administrador" | "Gestor" | "Funcionário";
@@ -42,13 +43,28 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { state, isMobile, openMobile } = useSidebar();
   const pathname = usePathname();
   const [selectedRole, setSelectedRole] = React.useState<RoleKey>("Administrador");
-  const [enterpriseName, setEnterpriseName] = React.useState<String>("NectoSystems");
+  const [enterpriseName, setEnterpriseName] = React.useState<string | undefined>(undefined);
   const [usuario, setUsuario] = useState<undefined | Usuario>(undefined);
+  
+  
 
   useEffect(() => {
     getUser();
+    getEmpresaName();
   }, []);
 
+  const getEmpresaName = async () => {
+    try {
+      const empresas = await empresaServices.verificarEmpresa();
+      if (empresas instanceof Array && empresas.length > 0) {
+        setEnterpriseName(empresas[0].empNome); 
+      } else {
+        console.warn("Nenhuma empresa encontrada.");
+      }
+    } catch (error) {
+      console.error("Erro ao buscar nome da empresa:", error);
+    }
+  }
   const getUser = async () => {
     const user = await getUsuario();
     const data = user.data;
