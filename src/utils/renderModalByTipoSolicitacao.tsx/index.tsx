@@ -58,8 +58,18 @@ export function renderModalChildren({
       )
 
     case 5:
-      if (solicitacao.solicitacaoStatus == 'PENDENTE' && (nivelAcessoCod === 0 || nivelAcessoCod === 1)) {
+      if (solicitacao.solicitacaoStatus === 'PENDENTE' && usuarioLogadoCod === solicitacao.usuarioCod) {
         return (
+          <ModalSolictarHoraExtra 
+            solicitacao={solicitacao}
+            usuarioCod={solicitacao.usuarioCod} 
+            cargaHoraria={cargaHoraria ?? 0}
+            onClose={onClose}
+            onSolicitacaoUpdate={onSolicitacaoUpdate}
+          />
+        )
+      } else {
+        return(
           <ModalDecisaoHoraExtra
             diaSelecionado={formatarData(solicitacao.solicitacaoDataPeriodo)}
             solicitacaoSelected={solicitacao}
@@ -69,20 +79,20 @@ export function renderModalChildren({
             usuarioCargo={usuarioCargo}
           />
         )
-      } else {
-        return(
-          <ModalSolictarHoraExtra 
-            solicitacao={solicitacao}
-            usuarioCod={solicitacao.usuarioCod} 
-            cargaHoraria={cargaHoraria ?? 0}
-            onClose={onClose}
-            onSolicitacaoUpdate={onSolicitacaoUpdate}
-          />
-        )
       }
       case 6:
-        if (solicitacao.solicitacaoStatus == 'PENDENTE' && (nivelAcessoCod === 0 || nivelAcessoCod === 1)) {
+        if (solicitacao.solicitacaoStatus === 'PENDENTE' && usuarioLogadoCod === solicitacao.usuarioCod) {
           return (
+            <ModalSolictarAusenciaMedica
+              solicitacao={solicitacao}
+              usuarioCod={usuarioLogadoCod}
+              cargaHoraria={cargaHoraria ? cargaHoraria : 0}
+              onClose={onClose}
+              onSolicitacaoUpdate={onSolicitacaoUpdate}
+            />
+          )
+        } else {
+          return(
             <ModalDecisaoAusenciaMedica
               diaSelecionado={formatarData(solicitacao.solicitacaoDataPeriodo)}
               solicitacaoSelected={solicitacao}
@@ -90,16 +100,6 @@ export function renderModalChildren({
               onClose={onClose}
               usuarioLogadoCod={usuarioLogadoCod}
               usuarioCargo={usuarioCargo}
-            />
-          )
-        } else {
-          return(
-            <ModalSolictarAusenciaMedica
-              solicitacao={solicitacao}
-              usuarioCod={usuarioLogadoCod}
-              cargaHoraria={cargaHoraria ? cargaHoraria : 0}
-              onClose={onClose}
-              onSolicitacaoUpdate={onSolicitacaoUpdate}
             />
           )
         }
