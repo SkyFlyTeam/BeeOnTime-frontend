@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ApiException } from '../../config/apiExceptions'
+// import { ApiException } from '../../config/apiExceptions'
 
 // Interfaces
 import { Ponto } from "@/interfaces/marcacaoPonto";

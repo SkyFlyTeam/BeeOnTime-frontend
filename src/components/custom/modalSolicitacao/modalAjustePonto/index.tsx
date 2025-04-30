@@ -131,21 +131,36 @@ const ModalAjustePonto: React.FC<AjusteProps> = ({
   }
 
   const handleDownload = () => {
-    if (!solicitacao?.solicitacaoAnexo || solicitacao.solicitacaoAnexo.length === 0) return
-    const byteArray = new Uint8Array(solicitacao.solicitacaoAnexo)
-    const blob = new Blob([byteArray], {
-      type: 'application/octet-stream',
-    })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = solicitacao.solicitacaoAnexoNome || 'anexo.txt'
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    URL.revokeObjectURL(url)
-  }
-
+    if (!solicitacao?.solicitacaoAnexo || solicitacao.solicitacaoAnexo.length === 0) return;
+    
+    let byteArray;
+    
+    if (typeof solicitacao.solicitacaoAnexo === 'string') {
+      const base64Data = solicitacao.solicitacaoAnexo;
+      const byteCharacters = atob(base64Data); 
+      byteArray = new Uint8Array(byteCharacters.length);
+  
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteArray[i] = byteCharacters.charCodeAt(i);
+      }
+    } else {
+      byteArray = new Uint8Array(solicitacao.solicitacaoAnexo);
+    }
+  
+    const mimeType = solicitacao.solicitacaoAnexoNome?.endsWith('.pdf') ? 'application/pdf' : 'application/octet-stream';
+    const blob = new Blob([byteArray], { type: mimeType });
+  
+    const url = URL.createObjectURL(blob);
+  
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = solicitacao.solicitacaoAnexoNome || 'anexo.pdf'; 
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url); 
+  };
+  
   const openDevolutivaModal = () => {
     setShowDevolutivaModal(true)
   }
