@@ -48,23 +48,29 @@ export default function PointsHistoryPage() {
   // Função para combinar as horas e os pontos
   const fetchHistPontos = async (usuario_cod: number) => {
     try {
+      // Buscar os pontos do usuário
       const pontos = await pontoServices.getPontosByUsuario(usuario_cod) as MarcacaoPonto[];
+      // Buscar as horas do usuário
       const horas = await horasServices.getHorasByUsuario(usuario_cod) as Horas[];
-
-      const combinedData = pontos.map((ponto: any) => {
-        const hora = horas.find((hora: any) => hora.horasCod === ponto.horasCod);
-
+  
+      // Combinar as informações pelo 'horasCod', mas percorrendo as horas primeiro
+      const combinedData = horas.map((hora: any) => {
+        // Encontrar o ponto correspondente baseado no 'horasCod'
+        const ponto = pontos.find((ponto: any) => ponto.horasCod === hora.horasCod);
+  
         return {
-          ...ponto,
+          ...hora, // Spread the Horas data
+          pontos: ponto ? ponto.pontos : [], // Add pontos data if it exists, else empty array
           horasExtras: hora?.horasExtras || 0,
           horasTrabalhadas: hora?.horasTrabalhadas || 0,
           horasNoturnas: hora?.horasNoturnas || 0,
           horasFaltantes: hora?.horasFaltantes || 0,
-          horasData: hora?.horasData || "",
+          horasData: hora?.horasData || '',
           usuarioCod: hora?.usuarioCod || 0,
         };
       });
-
+  
+      // Atualizar o estado com os dados combinados
       setHistPontos(combinedData);
     } catch (error) {
       console.log("Erro ao recuperar histórico de pontos do usuário de id " + usuario_cod);
