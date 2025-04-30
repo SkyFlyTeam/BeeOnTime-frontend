@@ -1,6 +1,6 @@
 // components/custom/modalSolicitacao/modalHoraExtra/SolicitarHoraExtraContent.tsx
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import "react-datepicker/dist/react-datepicker.css";
 import { Paperclip } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -30,6 +30,21 @@ const ModalSolictarHoraExtra = ({ usuarioCod, cargaHoraria, solicitacao, onClose
   const [mensagem, setMensagem] = useState<string>();
   const [horasSolicitadas, setHorasSolicitadas] = useState<number>();
   const [horarioSaidaPrevista, setHorarioSaidaPrevista] = useState<string>();
+  const [file, setFile] = useState<File | null>(null);
+  
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const uploaded = e.target.files?.[0];
+      if (uploaded) {
+        setFile(uploaded);
+      }
+    }
+  
+    const abrirSeletorArquivo = () => {
+      fileInputRef.current?.click();
+    };
 
   const fetchPontoAtual = async () => {
     const today = new Date();
@@ -124,8 +139,6 @@ const ModalSolictarHoraExtra = ({ usuarioCod, cargaHoraria, solicitacao, onClose
         if (!(updated instanceof ApiException) && onSolicitacaoUpdate) {
           onSolicitacaoUpdate(updated);
         }
-        
-      
       } else {
         const created = await solicitacaoServices.createSolicitacao(formData);
         toast.success('Solicitação enviada com sucesso!');
@@ -135,7 +148,6 @@ const ModalSolictarHoraExtra = ({ usuarioCod, cargaHoraria, solicitacao, onClose
         if (!(created instanceof ApiException) && onSolicitacaoUpdate) {
           onSolicitacaoUpdate(created);
         }
-        
       }
       
   
@@ -183,8 +195,17 @@ const ModalSolictarHoraExtra = ({ usuarioCod, cargaHoraria, solicitacao, onClose
               value={mensagem}
               onChange={(e) => setMensagem(e.target.value)}
             />
-            <input type="file" style={{ display: 'none' }} />
-            <Paperclip strokeWidth={1} className={styles.anexo_icon} />
+            {/* <input
+              type='file'
+              ref={fileInputRef}
+              onChange={handleFile}
+              style={{ display: 'none' }}
+            />
+            <Paperclip
+              strokeWidth={1}
+              className={styles.anexo_icon}
+              onClick={abrirSeletorArquivo}
+            /> */}
           </div>
         </div>
       </div>

@@ -18,6 +18,9 @@ import { ApiException } from "@/config/apiExceptions"
 import { FileText } from "lucide-react"
 import clsx from "clsx"
 
+// utils
+import handleDownload from '@/utils/handleDownload'
+
 interface ModalBancoHorasProps {
   diaSelecionado: string
   solicitacaoSelected: SolicitacaoInterface
@@ -81,37 +84,6 @@ const ModalDecisaoAusenciaMedica: React.FC<ModalBancoHorasProps> = ({
         setMensagem(solicitacao.solicitacaoMensagem || ''); 
     }, [solicitacaoSelected]); 
 
-    const handleDownload = () => {
-        if (!solicitacao?.solicitacaoAnexo || solicitacao.solicitacaoAnexo.length === 0) return;
-        
-        let byteArray;
-        
-        if (typeof solicitacao.solicitacaoAnexo === 'string') {
-          const base64Data = solicitacao.solicitacaoAnexo;
-          const byteCharacters = atob(base64Data); 
-          byteArray = new Uint8Array(byteCharacters.length);
-      
-          for (let i = 0; i < byteCharacters.length; i++) {
-            byteArray[i] = byteCharacters.charCodeAt(i);
-          }
-        } else {
-          byteArray = new Uint8Array(solicitacao.solicitacaoAnexo);
-        }
-      
-        const mimeType = solicitacao.solicitacaoAnexoNome?.endsWith('.pdf') ? 'application/pdf' : 'application/octet-stream';
-        const blob = new Blob([byteArray], { type: mimeType });
-      
-        const url = URL.createObjectURL(blob);
-      
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = solicitacao.solicitacaoAnexoNome || 'anexo.pdf'; 
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url); 
-      };
-      console.log(`JUSTIFICATIVA: ${solicitacao?.solicitacaoMensagem}`)
     return(
         <>  
             <p className={styles.colaborador_label}><span>Colaborador: </span>{solicitacao && solicitacao.usuarioNome}</p>
@@ -135,19 +107,19 @@ const ModalDecisaoAusenciaMedica: React.FC<ModalBancoHorasProps> = ({
                             onChange={(e) => setMensagem(e.target.value)} 
                         />
                         {solicitacao?.solicitacaoAnexo && (
-                        <button
-                            type="button"
-                            onClick={handleDownload}
-                            title="Baixar anexo"
-                            style={{
-                            background: 'none',
-                            border: 'none',
-                            padding: 0,
-                            cursor: 'pointer',
-                            }}
-                        >
-                            <FileText strokeWidth={1} />
-                        </button>
+                            <button
+                                type="button"
+                                onClick={() => handleDownload(solicitacao.solicitacaoAnexo, solicitacao.solicitacaoAnexoNome || '')}
+                                title="Baixar anexo"
+                                style={{
+                                background: 'none',
+                                border: 'none',
+                                padding: 0,
+                                cursor: 'pointer',
+                                }}
+                            >
+                                <FileText strokeWidth={1} />
+                            </button>
                         )}
                     </div>
                     </div>

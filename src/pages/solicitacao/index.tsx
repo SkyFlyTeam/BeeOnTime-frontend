@@ -242,32 +242,45 @@ const Solicitacao = () => {
     })
 
     paginateData()
+    await fetchSolicitacoes(usuarioCargo, usuarioCod, nivelAcessoCod, setorCod);
   }
 
   // Atualziar depois de uma exclusão
-  const handleDeleteSolicitacao = (idToDelete: number) => {
-    setSolicitacoesData((prevData) => {
-      const updatedPendentes = prevData.pendentes.filter(
-        (solicitacao) => solicitacao.solicitacaoCod !== idToDelete
-      );
-      const updatedHistorico = prevData.historico.filter(
-        (solicitacao) => solicitacao.solicitacaoCod !== idToDelete
-      );
-      const updatedAll = prevData.all.filter(
-        (solicitacao) => solicitacao.solicitacaoCod !== idToDelete
-      );
-      return {
-        ...prevData,
-        pendentes: updatedPendentes,
-        historico: updatedHistorico,
-        all: updatedAll,
-      };
-    });
-
-    setDisplayedSolicitacoes((prev) =>
-      prev.filter((solicitacao) => solicitacao.solicitacaoCod !== idToDelete)
-    );
+  const handleDeleteSolicitacao = async (idToDelete: number) => {
+    try {
+      // Chama a API para deletar a solicitação
+      const deleted = await solicitacaoServices.deleteSolicitacao(idToDelete);
+  
+      if (!(deleted instanceof ApiException)) {
+        // Atualiza o estado local removendo a solicitação deletada
+        setSolicitacoesData((prevData) => {
+          const updatedPendentes = prevData.pendentes.filter(
+            (solicitacao) => solicitacao.solicitacaoCod !== idToDelete
+          );
+          const updatedHistorico = prevData.historico.filter(
+            (solicitacao) => solicitacao.solicitacaoCod !== idToDelete
+          );
+          const updatedAll = prevData.all.filter(
+            (solicitacao) => solicitacao.solicitacaoCod !== idToDelete
+          );
+          return {
+            ...prevData,
+            pendentes: updatedPendentes,
+            historico: updatedHistorico,
+            all: updatedAll,
+          };
+        });
+  
+        setDisplayedSolicitacoes((prev) =>
+          prev.filter((solicitacao) => solicitacao.solicitacaoCod !== idToDelete)
+        );
+        await fetchSolicitacoes(usuarioCargo, usuarioCod, nivelAcessoCod, setorCod);
+      }
+    } catch (error) {
+      console.error('Erro ao excluir a solicitação:', error);
+    }
   };
+  
 
   // Novo mapeamento de Modal para renderização automática
   {/* ========= Modais de solicitações ========= */}

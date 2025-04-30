@@ -48,17 +48,17 @@ export function renderModalChildren({
     case 4:
       return (
         <ModalJustificativaFalta
-        diaSelecionado={formatarData(solicitacao.solicitacaoDataPeriodo)}
-        solicitacaoSelected={solicitacao}
-        onSolicitacaoUpdate={onSolicitacaoUpdate}
-        onClose={onClose}
-        usuarioLogadoCod={usuarioLogadoCod}
-        usuarioCargo={usuarioCargo}
-      />
+          diaSelecionado={formatarData(solicitacao.solicitacaoDataPeriodo)}
+          solicitacaoSelected={solicitacao}
+          onSolicitacaoUpdate={onSolicitacaoUpdate}
+          onClose={onClose}
+          usuarioLogadoCod={usuarioLogadoCod}
+          usuarioCargo={usuarioCargo}
+        />
       )
 
     case 5:
-      if (solicitacao.solicitacaoStatus !== 'PENDENTE' || nivelAcessoCod === 0 || nivelAcessoCod === 1) {
+      if (solicitacao.solicitacaoStatus == 'PENDENTE' && (nivelAcessoCod === 0 || nivelAcessoCod === 1)) {
         return (
           <ModalDecisaoHoraExtra
             diaSelecionado={formatarData(solicitacao.solicitacaoDataPeriodo)}
@@ -81,7 +81,7 @@ export function renderModalChildren({
         )
       }
       case 6:
-        if (solicitacao.solicitacaoStatus !== 'PENDENTE' || nivelAcessoCod === 0 || nivelAcessoCod === 1) {
+        if (solicitacao.solicitacaoStatus == 'PENDENTE' && (nivelAcessoCod === 0 || nivelAcessoCod === 1)) {
           return (
             <ModalDecisaoAusenciaMedica
               diaSelecionado={formatarData(solicitacao.solicitacaoDataPeriodo)}
