@@ -53,9 +53,23 @@ const formSchema = z.object({
 
 interface EditarFuncionarioFormProps {
   usuarioInfo: Usuario;
+  logadoInfo: {
+    usuario_cod: number;
+    setorCod: number;
+    nivelAcesso_cod: number
+  };
 }
 
-export default function EditarFuncionarioForm({ usuarioInfo }: EditarFuncionarioFormProps) {
+export default function EditarFuncionarioForm({ usuarioInfo, logadoInfo }: EditarFuncionarioFormProps) {
+
+  if (
+    (usuarioInfo.usuario_cod == logadoInfo.usuario_cod) ||
+    (usuarioInfo.nivelAcesso.nivelAcesso_cod < logadoInfo.nivelAcesso_cod) ||
+    (usuarioInfo.setor.setorCod != logadoInfo.setorCod && logadoInfo.nivelAcesso_cod != 0)
+  )
+    return;
+
+
   const [isSaving, setIsSaving] = useState(false);
   const [onlyCLT, setOnlyCLT] = useState(false);
   const [setores, setSetores] = useState<Setor[]>([]);
@@ -65,13 +79,19 @@ export default function EditarFuncionarioForm({ usuarioInfo }: EditarFuncionario
   }
 
   function isFormsUsuarioDefault() {
+    const defaultValues = forms.control._defaultValues;
+    const values = forms.control._formValues;
     return !Object.keys(forms.control._defaultValues).some((field) =>
-      forms.control._defaultValues[field] !== forms.control._formValues[field]
+      defaultValues[field as keyof typeof defaultValues] !== values[field as keyof typeof values]
     );
   }
 
+  function wait(milliseconds: number) {
+    return new Promise(resolve => setTimeout(resolve, milliseconds));
+}
+
   const showSucessToast = () => {
-    toast.success("Colaborador atualizado com sucesso!", {
+    toast.success("Dados de " + usuarioInfo.usuario_nome + " atualizado com sucesso!", {
       position: "top-center",
     });
   };
@@ -104,12 +124,16 @@ export default function EditarFuncionarioForm({ usuarioInfo }: EditarFuncionario
     try {
       const tupla = ["usuarioEmail", "usuario_cpf"]
       const data = await usuarioServices.getAllUsuarios() as Usuario[];
-      Object.keys(data).forEach((user) =>
-        Object.keys(data[user]).forEach((prop) =>
-          tupla.includes(prop) || delete data[user][prop]));
+      Object.keys(data).forEach((user) => {
+        const usuario = data[user as keyof typeof data]
+        Object.keys(usuario).forEach((prop) =>
+          tupla.includes(prop) || delete usuario[prop as keyof typeof usuario]
+        )
+      });
       return data;
     } catch (error) {
-      console.error("Erro ao carregar setores:", error);
+      console.error("Erro ao carregar usuarios:", error);
+      return null
     }
   }
 
@@ -153,6 +177,8 @@ export default function EditarFuncionarioForm({ usuarioInfo }: EditarFuncionario
       values.usuario_cpf != usuarioInfo.usuario_cpf
     ) {
       const usuarios = await retrieveUsuarios()
+      if (!usuarios)
+        return;
 
       if (values.usuarioEmail != usuarioInfo.usuarioEmail)
         if (checkEmail(usuarios, values.usuarioEmail))
@@ -191,6 +217,7 @@ export default function EditarFuncionarioForm({ usuarioInfo }: EditarFuncionario
     showSucessToast();
     //const newUserData = await fetchUsuario(usuarioInfo.usuario_cod)
     // Temporary until a better solution is implemented
+    wait(5000);
     window.location.reload();
     //
     setIsSaving(false);

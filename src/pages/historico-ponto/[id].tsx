@@ -41,10 +41,27 @@ export default function PointsHistoryPage() {
   const router = useRouter();
   const { id } = router.query;
 
-  const handleEdit = (entry: HistPonto) => {
-    // Lógica para editar a entrada (ex.: abrir um modal)
-    console.log("Editar entrada:", entry);
+  const getUser = async () => {
+    const user = await getUsuario();
+    return user.data;
   };
+  const fetchUsuario = async (usuario_cod: number) => {
+    try {
+      const usuario_data = await usuarioServices.getUsuarioById(usuario_cod) as Usuario;
+      //alert(JSON.stringify(usuario_data))
+      setUsuarioInfo(usuario_data);
+      return {
+        usuario_cod: usuario_data.usuario_cod,
+        setorCod: usuario_data.setor.setorCod,
+        nivelAcesso_cod: usuario_data.nivelAcesso.nivelAcesso_cod,
+      };
+    } catch (error) {
+      console.log("Erro ao recuperar usuário de id " + usuario_cod);
+      return null;
+    }
+  };
+
+
 
   // Função para combinar as horas e os pontos
   const fetchHistPontos = async (usuario_cod: number) => {
@@ -53,12 +70,12 @@ export default function PointsHistoryPage() {
       const pontos = await pontoServices.getPontosByUsuario(usuario_cod) as MarcacaoPonto[];
       // Buscar as horas do usuário
       const horas = await horasServices.getHorasByUsuario(usuario_cod) as Horas[];
-  
+
       // Combinar as informações pelo 'horasCod', mas percorrendo as horas primeiro
       const combinedData = horas.map((hora: any) => {
         // Encontrar o ponto correspondente baseado no 'horasCod'
         const ponto = pontos.find((ponto: any) => ponto.horasCod === hora.horasCod);
-  
+
         return {
           ...hora, // Spread the Horas data
           pontos: ponto ? ponto.pontos : [], // Add pontos data if it exists, else empty array
@@ -70,7 +87,6 @@ export default function PointsHistoryPage() {
           usuarioCod: hora?.usuarioCod || 0,
         };
       });
-  
       // Atualizar o estado com os dados combinados
       setHistPontos(combinedData);
     } catch (error) {
@@ -78,42 +94,69 @@ export default function PointsHistoryPage() {
     }
   };
 
-  const fetchUsuario = async (usuario_cod: number) => {
-    try {
-      const usuario_data = await usuarioServices.getUsuarioById(usuario_cod) as Usuario;
-      //alert(JSON.stringify(usuario_data))
-      setUsuarioInfo(usuario_data);
-    } catch (error) {
-      console.log("Erro ao recuperar usuário de id " + usuario_cod);
-    }
-  };
 
-
-  const getUser = async () => {
-    const user = await getUsuario();
-    return user.data;
-  };
 
   useEffect(() => {
     const onMount = async () => {
+      // Verifique se id está disponível antes de continuar
+      if (!id)
+        return;
+
+
       const usuario = await getUser();
       setUsuarioLogado(usuario);
-      // Verifique se id está disponível antes de continuar
-      if (id) {
-        if (usuario.nivelAcesso.nivelAcesso_cod == 2) {
-          fetchHistPontos(usuario.usuario_cod);
-          setUsuarioInfo(usuario);
-        } else {
-          setAccessLevel("ADM");
-          fetchHistPontos(parseInt(id.toString()));
-          fetchUsuario(parseInt(id.toString()));
-        }
+
+
+      if (usuario.nivelAcesso.nivelAcesso_cod == 2) {
+        fetchHistPontos(usuario.usuario_cod);
+        setUsuarioInfo(usuario);
+        return;
       }
-      setIsLoading(false); // Set loading to false after data is fetched
+
+
+      const usuarioId = await fetchUsuario(parseInt(id.toString()));
+      if (!usuarioId)
+        return;
+
+      if (
+        (usuarioId.setorCod != usuario.setor.setorCod && usuario.nivelAcesso.nivelAcesso_cod != 0) ||
+        (usuarioId.nivelAcesso_cod < usuario.nivelAcesso.nivelAcesso_cod)
+      )
+        return;
+
+      setAccessLevel("ADM");
+      fetchHistPontos(parseInt(id.toString()));
     };
 
     onMount();
+    if (id)
+      setIsLoading(false); // Set loading to false after data is fetched
   }, [id]); // Empty dependency array ensures the effect runs once after mount
+
+
+
+  if (!usuarioLogado || !usuarioInfo)
+    return;
+
+  if (
+    (usuarioInfo.setor.setorCod != usuarioLogado.setor.setorCod && usuarioLogado.nivelAcesso.nivelAcesso_cod != 0) ||
+    (usuarioInfo.nivelAcesso.nivelAcesso_cod < usuarioLogado.nivelAcesso.nivelAcesso_cod)
+  )
+    return;
+
+
+
+
+  const handleEdit = (entry: HistPonto) => {
+    // Lógica para editar a entrada (ex.: abrir um modal)
+    console.log("Editar entrada:", entry);
+  };
+
+
+
+
+
+
 
   const SkeletonRow = () => (
     <div className="flex flex-row gap-7 mt-10 justify-between">
@@ -125,7 +168,6 @@ export default function PointsHistoryPage() {
       <Skeleton className="bg-gray-200 w-32 h-10" />
     </div>
   );
-
   return (
     isLoading ? (
       <div className="p-6 md:p-9">
@@ -149,7 +191,17 @@ export default function PointsHistoryPage() {
           {accessLevel === "USER" ? "Meus Pontos" : `Informações de ${usuarioInfo?.usuario_nome}`}
         </h1>
         {accessLevel === "ADM" && usuarioInfo != null ?
-         <EditarFuncionarioForm usuarioInfo={usuarioInfo} /> : null}
+          <EditarFuncionarioForm
+            usuarioInfo={usuarioInfo}
+            logadoInfo={
+              {
+                usuario_cod: usuarioLogado.usuario_cod,
+                setorCod: usuarioLogado.setor.setorCod,
+                nivelAcesso_cod: usuarioLogado.nivelAcesso.nivelAcesso_cod,
+              }
+            }
+
+          /> : null}
         {accessLevel === "ADM" ? <h2 className="text-lg md:text-2xl font-semibold mb-4">Histórico de pontos</h2> : null}
         <PointsHistoryTable
           entries={histPontos}

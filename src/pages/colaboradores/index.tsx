@@ -137,6 +137,8 @@ export default function Colaboradores() {
     return <div>{error}</div>;
   }
 
+  if(!thisUser)
+    return;
   return (
     <div>
       <div className="container mx-auto px-4 flex justify-between">
@@ -172,7 +174,15 @@ export default function Colaboradores() {
               </TableHeader>
               <TableBody>
                 {usuarios.length > 0 ? (
-                  usuarios.map((usuario, index) => ((usuario.usuario_cod !== thisUser?.usuario_cod && usuario.nivelAcesso.nivelAcesso_cod !== 0) ? (
+                  usuarios.map((usuario, index) => (
+                     (
+                      (thisUser.nivelAcesso.nivelAcesso_cod == 0) ||
+                      (
+                        thisUser.nivelAcesso.nivelAcesso_cod == 1 &&
+                        thisUser.setor.setorCod == usuario.setor.setorCod &&
+                        usuario.nivelAcesso.nivelAcesso_cod != 0
+                      )
+                    ) ? (
                     <TableRow
                       key={index}
                       className={index % 2 === 0 ? "bg-[#FFF8E1]" : "bg-[#FFFFFF]"}
@@ -186,14 +196,18 @@ export default function Colaboradores() {
                       <TableCell className="border-r border-gray-300 text-left justify-center flex">
                         <button
                           onClick={() => handleViewUser(usuario.usuario_cod)}
-                          className="bg-[#FFB503] rounded-md p-2 hover:bg-orange-600">
+                          className={"bg-[#FFB503] rounded-md p-2 hover:bg-orange-600 " +
+                            (usuario.usuario_cod == thisUser.usuario_cod ? "invisible" : "")
+                          }
+                          disabled={usuario.usuario_cod == thisUser.usuario_cod}
+                          >
                           <FontAwesomeIcon icon={faEye} className="text-black-600" />
                         </button>
                       </TableCell>
 
                     </TableRow>
-                  ) : null))
-                ) : (
+                  ) : null )
+                )) : (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center">Nenhum colaborador encontrado</TableCell>
                   </TableRow>
