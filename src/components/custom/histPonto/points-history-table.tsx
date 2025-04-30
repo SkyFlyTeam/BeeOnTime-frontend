@@ -28,6 +28,8 @@ interface PointsHistoryTableProps {
 
 const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTableProps>(
   ({ entries, onEdit, userInfo, className, accessLevel }, ref) => {
+    if(!userInfo)
+      return;
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isModalAusenciaOpen, setIsModalAusenciaOpen] = useState(false);
     const [selectedPonto, setSelectedPonto] = useState<HistPontos | null>(null);
@@ -48,8 +50,8 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
         console.error("Error fetching falta data:", error);
       }
     };
-    
-    
+
+
 
     useEffect(() => {
       // Fetch faltas when the component mounts or entries change
@@ -85,8 +87,43 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
       ...(accessLevel === "USER" ? ["AÇÕES"] : []),
     ];
 
+    // Função para calcular carga horária semanal e mensal
+    const calculateCargaHoraria = (horasDiarias: number, diasTrabalhados: number) => {
+      const horasSemana = horasDiarias * diasTrabalhados; // Total de horas na semana
+      const horasMes = horasSemana * 4; // Aproximadamente 4 semanas por mês
+      return { horasSemana, horasMes };
+    };
+
+    const jornadaFormatada = () => {
+      if(userInfo.jornadas.jornada_horarioFlexivel)
+        return "Horário flexível";
+
+      const diasDaSemanaSiglas = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
+      
+      const diasTrabalhados = userInfo.jornadas.jornada_diasSemana
+        .map((trabalha, index) => trabalha ? diasDaSemanaSiglas[index] : null)
+        .filter((dia) => dia !== null);
+
+      return `${diasTrabalhados.join(", ")} das ${userInfo.jornadas.jornada_horarioEntrada.toString().slice(0, 5)} até ${userInfo.jornadas.jornada_horarioSaida.toString().slice(0, 5)}`;
+    };
+
+    const { horasSemana, horasMes } = calculateCargaHoraria(userInfo.usuario_cargaHoraria!, userInfo.jornadas.jornada_diasSemana?.filter(dia => dia).length ?? 0);
+
     return (
       <div ref={ref} className={"p-6 shadow-xl rounded-xl bg-white"}>
+
+        {/* Desktop - Tabela horizontal */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 pb-3 md:py-2">
+          <div className="flex flex-row items-start gap-2 md:gap-4">
+            <h1 className="text-base md:text-lg font-bold">Jornada de Trabalho:</h1>
+            <p className="text-base md:text-lg text-black">{jornadaFormatada()}</p>
+          </div>
+          <div className="flex flex-row items-start gap-2 md:gap-4">
+            <h1 className="text-base md:text-lg font-bold">Carga horária:</h1>
+            <p className="text-base md:text-lg text-black">{horasSemana}h/semana - {horasMes}h/mês</p>
+          </div>
+        </div>
+
         <div className="overflow-x-auto hidden md:block">
           <Table className="min-w-[900px] w-full">
             <TableHeader>
@@ -108,7 +145,7 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
                     <TableCell className="border border-gray-200 text-center text-black text-base p-3">
                       <div className="flex flex-col">
                         {entry.pontos.length > 0 ? (
-                        <div>{entry.pontos.map((ponto: Ponto) => `${ponto.horarioPonto.toString().substring(0, 5)}`).join(" - ")}</div>
+                          <div>{entry.pontos.map((ponto: Ponto) => `${ponto.horarioPonto.toString().substring(0, 5)}`).join(" - ")}</div>
                         ) : (<div>---</div>)}
                       </div>
                     </TableCell>
@@ -119,27 +156,27 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
                       <TableCell className="border border-gray-200 text-center text-black text-base p-3">
                         {!faltas[entry.horasData.toLocaleString()] ? (
                           <div className={styles.relative}>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="relative bg-[#FFC107] hover:bg-[#e0a800] text-white"
-                            onClick={() => handleModalOpen(entry)} // Open modal for the point
-                          >
-                            <PencilLine className="h-4 w-4 text-[#42130F]" />
-                            <span className={styles.tooltip_text}>Solicitar ajuste</span> {/* Tooltip */}
-                          </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="relative bg-[#FFC107] hover:bg-[#e0a800] text-white"
+                              onClick={() => handleModalOpen(entry)} // Open modal for the point
+                            >
+                              <PencilLine className="h-4 w-4 text-[#42130F]" />
+                              <span className={styles.tooltip_text}>Solicitar ajuste</span> {/* Tooltip */}
+                            </Button>
                           </div>
                         ) : (
                           <div className={styles.relative}>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="relative bg-[#FFC107] hover:bg-[#e0a800] text-white"
-                            onClick={() => handleModalAusenciaOpen(faltas[entry.horasData.toLocaleString()])}
-                          >
-                            <PencilLine className="h-4 w-4 text-[#42130F]" />
-                            <span className={styles.tooltip_text}>Justificar ausência</span> {/* Tooltip */}
-                          </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="relative bg-[#FFC107] hover:bg-[#e0a800] text-white"
+                              onClick={() => handleModalAusenciaOpen(faltas[entry.horasData.toLocaleString()])}
+                            >
+                              <PencilLine className="h-4 w-4 text-[#42130F]" />
+                              <span className={styles.tooltip_text}>Justificar ausência</span> {/* Tooltip */}
+                            </Button>
                           </div>
                         )}
                       </TableCell>
