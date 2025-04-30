@@ -144,7 +144,6 @@ const ModalSolictarAusenciaMedica = ({ usuarioCod, cargaHoraria, solicitacao, on
           onSolicitacaoUpdate(updated);
         }
         
-      
       } else {
         const created = await solicitacaoServices.createSolicitacao(formData);
         toast.success('Solicitação enviada com sucesso!');
@@ -154,7 +153,7 @@ const ModalSolictarAusenciaMedica = ({ usuarioCod, cargaHoraria, solicitacao, on
         if (!(created instanceof ApiException) && onSolicitacaoUpdate) {
           onSolicitacaoUpdate(created);
         }
-        
+
       }
       
   
