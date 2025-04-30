@@ -152,28 +152,29 @@ const Solicitacao = () => {
 
 
   const paginateData = () => {
-    let dataToDisplay: SolicitacaoInterface[] = []
-
+    let dataToDisplay: SolicitacaoInterface[] = [];
+  
     if (nivelAcessoCod === 1) {
       dataToDisplay = toogle
         ? [
-          ...(solicitacoesData.analisesPendentes || []),
-          ...(solicitacoesData.analisesHistorico || [])
-        ]
+            ...(solicitacoesData.analisesPendentes || []),
+            ...(solicitacoesData.analisesHistorico || [])
+          ]
         : [
-          ...(solicitacoesData.meusPendentes || []),
-          ...(solicitacoesData.meusHistorico || [])
-        ]
+            ...(solicitacoesData.meusPendentes || []),
+            ...(solicitacoesData.meusHistorico || [])
+          ];
     } else {
       dataToDisplay = toogle
         ? solicitacoesData.pendentes
-        : solicitacoesData.historico
+        : solicitacoesData.historico;
     }
-
-    const start = (currentPage - 1) * itemsPerPage
-    const end = start + itemsPerPage
-    setDisplayedSolicitacoes(dataToDisplay.slice(start, end))
-  }
+  
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    setDisplayedSolicitacoes(dataToDisplay.slice(start, end));
+  };
+  
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -198,11 +199,11 @@ const Solicitacao = () => {
     setOpenDevolutivaModal(status);
   };
 
-  const handleClick = (status: 'pendentes' | 'historico' | 'analises' | 'meus pontos') => {
+  const handleClick = (status: string) => {
     setCurrentPage(1)
-    setToogle(status === 'analises' || status === 'pendentes')
+    setToogle(status === 'PENDENTES' || status === 'ANÁLISES');
 
-    if (status === 'pendentes') {
+    if (status === 'PENDENTES') {
       fecharTodosModais();
     }
   }
@@ -381,13 +382,24 @@ const Solicitacao = () => {
 
         <div className='flex flex-row' style={{ justifyContent: nivelAcessoCod !== 0 ? 'space-between' : 'center' }}>
 
-        <Tab
-          toogle={toogle}
+        {nivelAcessoCod === 1 ?  
+          <Tab
+          activeTab={toogle ? 'ANÁLISES' : 'MEUS PEDIDOS'}
           onClick={handleClick}
-          pendentes_length={nivelAcessoCod === 1 ? solicitacoesData.meusPendentes?.length || 0 : solicitacoesData.pendentes.length}
-          analises_length={nivelAcessoCod === 1 ? solicitacoesData.analisesPendentes?.length || 0 : 0}
-          isGestor={nivelAcessoCod === 1}
-        />
+          tabLabels={['ANÁLISES', 'MEUS PEDIDOS']}  
+          pendentesLength={solicitacoesData.pendentes.length}
+          showBadge={true}  
+          />
+          :
+          <Tab
+            activeTab={toogle ? 'PENDENTES' : 'HISTÓRICO'}
+            onClick={handleClick}
+            tabLabels={['PENDENTES', 'HISTÓRICO']}  
+            pendentesLength={solicitacoesData.pendentes.length}
+            showBadge={true}  
+          />
+        }
+       
 
           {/* Componente do dropdown e modais */}
           {nivelAcessoCod != 0 && (
