@@ -156,7 +156,7 @@ const CardHorasTrabalhadas = ({ usuarioInfo, histPontos }: CardHorasTrabalhadasP
         />
       </div>
       <div className="flex justify-between mt-1">
-        <span className="text-gray-400">{totalHorasTrabalhadas}h</span>
+        <span className="text-gray-400">{totalHorasTrabalhadas.toFixed(0)}h</span>
       </div>
 
       {/* Banco de horas e horas pagas */}
@@ -173,8 +173,8 @@ const CardHorasTrabalhadas = ({ usuarioInfo, histPontos }: CardHorasTrabalhadasP
             />
           </div>
           <div className="flex justify-between mt-1">
-            <span className="text-gray-400">{bancoHoras}h</span>
-            <span className="text-gray-400">{horasExtrasPagas}h</span>
+            <span className="text-gray-400">{bancoHoras.toFixed(0)}h</span>
+            <span className="text-gray-400">{horasExtrasPagas.toFixed(0)}h</span>
           </div>
         </>
       )}
