@@ -91,8 +91,8 @@ const getRelatorioDiarioFunc = async (date: String, usuario: Usuario) => {
 
         // Combina os dados de banco e ponto, agrupando pela data
         const relatorioMensal: bancoHorasDiarioFunc[] = bancoData.map((banco) => {
-            const horas = pontoData.find(p => p.usuarioCod === banco.usuarioCod);
-
+            const horas = pontoData.find(p => p.data === banco.data);
+           
             return {
                 usuarioCod: banco.usuarioCod,
                 data: banco.data,
