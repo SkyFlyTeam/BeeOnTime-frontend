@@ -41,7 +41,11 @@ export const columnsAdmin: ColumnDef<bancoHorasMensalAdmin>[] = [
     header: "Total Horas",
     cell: ({ row }) => {
       let value = row.getValue("totalHoras") as string;
-      return <div className="text-center">{formatStringToHour(value)}</div>
+      if(value){
+        return <div className="text-center">{formatStringToHour(value)}</div>
+      }else{
+        return <div className="text-center">-</div>
+      }
     }
   },
   {

@@ -81,7 +81,7 @@ const getRelatorio6MesesFunc = async (date: String, usuario: Usuario) => {
     }
 }
 
-const getRelatorioDiarioFunc = async (date: String, usuario: Usuario) => {
+const getRelatorioDiarioFunc = async (date: string, usuario: Usuario) => {
     try {
         const bancoResponse = await ApiBancoHoras.get(`/relatorio/diario/${date}/usuario/${usuario.usuario_cod}`);
         const pontoResponse = await ApiPonto.get(`/relatorio/diario/${date}/usuario/${usuario.usuario_cod}`)
