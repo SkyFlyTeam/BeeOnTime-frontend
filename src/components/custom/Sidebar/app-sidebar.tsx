@@ -50,30 +50,36 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   useEffect(() => {
     getUser();
-    getEmpresaName();
   }, []);
-
-  const getEmpresaName = async () => {
+  
+  useEffect(() => {
+    if (usuario?.empCod) {
+      getEmpresaName(usuario.empCod);
+    }
+  }, [usuario]);
+  
+  const getUser = async () => {
+    const user = await getUsuario();
+    const data = user.data;
+    setUsuario(data);
+  
+    const nivel = data.nivelAcesso.nivelAcesso_cod;
+    if (nivel === 0) setSelectedRole("Administrador");
+    else if (nivel === 1) setSelectedRole("Gestor");
+    else if (nivel === 2) setSelectedRole("Funcionário");
+  };
+  
+  const getEmpresaName = async (empCod: number) => {
     try {
-      const empresas = await empresaServices.verificarEmpresa();
-      if (empresas instanceof Array && empresas.length > 0) {
-        setEnterpriseName(empresas[0].empNome); 
+      const empresa = await empresaServices.verificarEmpresaById(empCod);
+      if (empresa) {
+        setEnterpriseName(empresa.empNome);
       } else {
         console.warn("Nenhuma empresa encontrada.");
       }
     } catch (error) {
       console.error("Erro ao buscar nome da empresa:", error);
     }
-  }
-  const getUser = async () => {
-    const user = await getUsuario();
-    const data = user.data;
-    setUsuario(data);
-
-    const nivel = data.nivelAcesso.nivelAcesso_cod;
-    if (nivel === 0) setSelectedRole("Administrador");
-    else if (nivel === 1) setSelectedRole("Gestor");
-    else if (nivel === 2) setSelectedRole("Funcionário");
   };
 
   const rolesData: Record<RoleKey, { navMain: NavItem[]; navSecondary: SubNavItem[] }> = {
