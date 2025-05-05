@@ -8,6 +8,8 @@ interface BotaoDropdownSolicitacaoProps {
   usuarioCargo: string;
   handleSolicitacaoUpdate: (updatedSolicitacao: SolicitacaoInterface) => Promise<void>;
   onOpenModal: (tipo: string) => void; // <- NOVO
+  isContratadoMaisDeUmAno: boolean;
+  numeroSolicitacoesFeriasAbertas: number;
 }
 
 export default function BotaoDropdownSolicitacao({
@@ -15,6 +17,8 @@ export default function BotaoDropdownSolicitacao({
   usuarioCargo,
   handleSolicitacaoUpdate,
   onOpenModal,
+  isContratadoMaisDeUmAno,
+  numeroSolicitacoesFeriasAbertas
 }: BotaoDropdownSolicitacaoProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -35,15 +39,26 @@ export default function BotaoDropdownSolicitacao({
           )}
         </DropdownMenuTrigger>
         <DropdownMenuContent className="bg-white border border-gray-200 mr-[3rem] w-full">
-          {['Hora extra', 'Ausência médica'].map((tipo) => (
+        {['Férias', 'Hora extra', 'Ausência médica'].map((tipo) => {
+          const isFerias = tipo === 'Férias';
+          const desabilitarFerias = isFerias && (!isContratadoMaisDeUmAno || numeroSolicitacoesFeriasAbertas >= 1);
+
+          return (
             <DropdownMenuItem
               key={tipo}
-              onSelect={() => handleDropdownSelect(tipo)}
-              className="font-medium cursor-pointer hover:!bg-[#FFF4D9]"
+              onSelect={() => {
+                if (!desabilitarFerias) handleDropdownSelect(tipo);
+              }}
+              className={`font-medium ${
+                desabilitarFerias
+                  ? 'cursor-not-allowed opacity-50 pointer-events-none'
+                  : 'cursor-pointer hover:!bg-[#FFF4D9]'
+              }`}
             >
               {tipo}
             </DropdownMenuItem>
-          ))}
+          );
+        })}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
