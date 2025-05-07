@@ -17,11 +17,8 @@ const checkLogin = async (credenciais: any): Promise<any | ApiException> => {
 };
 
 const cadastrarUsuarioComJornada = async (usuario: any, jornada: any) => {
-  alert(usuario.usuario_status)
   try {
-    alert(JSON.stringify(usuario))
     const dadosCombinados = { ...usuario, usuario_status: true, ...jornada};
-   alert(JSON.stringify(dadosCombinados))
     const response = await ApiUsuario.post(`/usuario/cadastrar`, dadosCombinados, {
       headers: { "Content-Type": "application/json" },
       timeout: 5000,
