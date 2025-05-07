@@ -5,6 +5,7 @@ import { ApiPonto } from "@/config/apiPonto";
 import { bancoDiarioResponse, bancoHorasDiarioFunc, bancoHorasMensalAdmin, bancoHorasMensalFunc, bancoMensalAdminResponse, horasDiarioResponse, horasMensalAdminResponse } from "@/interfaces/bancoHoras";
 import { Usuario } from "@/interfaces/usuario";
 import { calculateUserCargaMensal } from "@/utils/functions/calculateUserCargaMensal";
+import { verifyWorkDay } from "@/utils/functions/verifyWorkDay";
 
 const getRelatorioMensalAdmin = async (date: String) => {
     try {
@@ -92,12 +93,12 @@ const getRelatorioDiarioFunc = async (date: string, usuario: Usuario) => {
         // Combina os dados de banco e ponto, agrupando pela data
         const relatorioMensal: bancoHorasDiarioFunc[] = bancoData.map((banco) => {
             const horas = pontoData.find(p => p.data === banco.data);
-           
+            let isDiaTrabalhado = verifyWorkDay(usuario, banco.data)
             return {
                 usuarioCod: banco.usuarioCod,
                 data: banco.data,
-                totalHoras: horas ? horas.horasTotal : 0,
-                horasContratuais: usuario.usuario_cargaHoraria,  
+                totalHoras: isDiaTrabalhado ? (horas ? horas.horasTotal : 0) : -1,
+                horasContratuais: isDiaTrabalhado ? usuario.usuario_cargaHoraria : -1,  
                 desconto: horas ? horas.desconto : 0,
                 horasAbonadas: banco.horasAbonadas,
                 extrasPagas: banco.extrasPagas,

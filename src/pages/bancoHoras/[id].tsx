@@ -40,7 +40,15 @@ const BancoHorasDiario = () => {
             const data = await relatorioBancoHorasServices.getRelatorioDiarioFunc(date, usuario!);
             const bancoHorasDiario = data as bancoHorasDiarioFunc[];
             const bancoHorasDiarioOrganizado = bancoHorasDiario
-                .filter((banco) => new Date(banco.data) <= new Date(date))
+                .filter((banco) => {
+                    let bancoData = new Date(banco.data)
+                    bancoData.setDate(bancoData.getDate() + 1);
+                    bancoData.setHours(0, 0, 0, 0);
+                    const dataAtual = new Date();
+                    dataAtual.setHours(0, 0, 0, 0); 
+                    
+                    return bancoData <= dataAtual;
+                })
                 .sort(  
                     (a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()
                 );

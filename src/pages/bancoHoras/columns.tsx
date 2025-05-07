@@ -41,8 +41,9 @@ export const columnsAdmin: ColumnDef<bancoHorasMensalAdmin>[] = [
     header: "Total Horas",
     cell: ({ row }) => {
       let value = row.getValue("totalHoras") as string;
-      if(value){
-        return <div className="text-center">{formatStringToHour(value)}</div>
+      const parsedValue = parseInt(value);
+      if (!isNaN(parsedValue) && parsedValue >= 0) {
+        return <div className="text-center">{formatStringToHour(value)}</div>;
       }else{
         return <div className="text-center">-</div>
       }
@@ -53,7 +54,7 @@ export const columnsAdmin: ColumnDef<bancoHorasMensalAdmin>[] = [
     header: "Horas Contratuais",
     cell: ({ row }) => {
       let value = row.getValue("horasContratuais") as string;
-      if(value){
+      if(value && parseInt(value) >= 0){
         return <div className="text-center">{formatStringToHour(value)}</div>
       }else{
         return <div className="text-center">-</div>
@@ -134,7 +135,12 @@ export const columnsFunc: ColumnDef<bancoHorasMensalFunc>[] = [
     header: "Total Horas",
     cell: ({ row }) => {
       let value = row.getValue("totalHoras") as string;
-      return <div className="text-center">{formatStringToHour(value)}</div>
+      const parsedValue = parseInt(value);
+      if (!isNaN(parsedValue) && parsedValue >= 0) {
+        return <div className="text-center">{formatStringToHour(value)}</div>
+      }else{
+        return <div className="text-center"> - </div>
+      }
     }
   },
   {
@@ -216,7 +222,12 @@ export const columnsDaily: ColumnDef<bancoHorasDiarioFunc>[] = [
     header: "Total Horas",
     cell: ({ row }) => {
       let value = row.getValue("totalHoras") as string;
-      return <div className="text-center">{formatStringToHour(value)}</div>
+      const parsedValue = parseInt(value);
+      if (!isNaN(parsedValue) && parsedValue >= 0) {
+        return <div className="text-center">{formatStringToHour(value)}</div>
+      }else{
+        return <div className="text-center"> - </div>
+      }
     }
   },
   {
@@ -224,12 +235,11 @@ export const columnsDaily: ColumnDef<bancoHorasDiarioFunc>[] = [
     header: "Horas Contratuais",
     cell: ({ row }) => {
       let value = row.getValue("horasContratuais") as string;
-      if(value){
+      if(value && parseInt(value) >= 0){
         return <div className="text-center">{formatStringToHour(value)}</div>
       }else{
         return <div className="text-center">-</div>
       }
-      
     }
   },
   {
