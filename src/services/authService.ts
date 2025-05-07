@@ -11,12 +11,10 @@ export async function setLogIn(creds: AccessPass): Promise<any> {
     const res = await axios.post(`/auth/login`, JSON.stringify(creds), {
       headers: { "Content-Type": "application/json" },
     });
-    // alert("setLogIn " + res.data + " " + res.status);
     return res;
   } catch (error) {
     // Aqui, o erro pode ser tipado como um AxiosError para melhor manipulação
     const res = (error as any).response as any; // ou use AxiosError
-    // alert("setLogIn " + res.data + " " + res.status);
     return res;
   }
 }

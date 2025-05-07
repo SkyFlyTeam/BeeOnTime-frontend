@@ -48,7 +48,6 @@ export default function PointsHistoryPage() {
   const fetchUsuario = async (usuario_cod: number) => {
     try {
       const usuario_data = await usuarioServices.getUsuarioById(usuario_cod) as Usuario;
-      //alert(JSON.stringify(usuario_data))
       setUsuarioInfo(usuario_data);
       return {
         usuario_cod: usuario_data.usuario_cod,
