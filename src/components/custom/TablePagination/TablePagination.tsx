@@ -15,7 +15,7 @@ const generatePaginationLinks = (currentPage: number, totalPages: number, onPage
         <Button
           variant="ghost"
           size="sm"
-          className={`text-black ${i === currentPage ? "font-bold" : ""}`}
+          className={`text-black ${i === currentPage ? "font-bold bg-[#FFB503] rounded" : ""}`}
           onClick={() => onPageChange(i)}
         >
           {i}
@@ -34,6 +34,7 @@ const TablePagination  = ({ currentPage, totalPages, onPageChange, showPreviousN
         {showPreviousNext && totalPages ? (
           <PaginationItem>
             <PaginationPrevious
+              className="bg-transparent border-none cursor-pointer"
               onClick={() => onPageChange(currentPage - 1)}
               isActive={currentPage > totalPages - 1}  
             />
@@ -46,6 +47,7 @@ const TablePagination  = ({ currentPage, totalPages, onPageChange, showPreviousN
         {showPreviousNext && totalPages ? (
           <PaginationItem>
             <PaginationNext
+              className="bg-transparent border-none cursor-pointer"
               onClick={() => onPageChange(currentPage + 1)}
               isActive={currentPage - 1 < 1} 
             />
