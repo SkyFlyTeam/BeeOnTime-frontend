@@ -173,8 +173,8 @@ const CardCargaHoraria = ({ usuarioInfo, histPontos }: CardCargaHorariaProps) =>
         <div className={styles.card_container}>
             <p className={styles.card_title}>Carga diária</p>
             <div className={styles.carga_horaria}>
-                <span>Horas Trabalhadas: {horasTrabalhadas}h</span>
-                <span>Horas Faltantes: {horasFaltantes}h</span>
+                <span>Horas Trabalhadas: {horasTrabalhadas.toFixed(0)}h</span>
+                <span>Horas Faltantes: {horasFaltantes.toFixed(0)}h</span>
             </div>
             <div className={styles.progress_bar_container}>
                 <div className={styles.progress_bar} style={{ width: `${barraProgresso}%` }} />
@@ -186,8 +186,8 @@ const CardCargaHoraria = ({ usuarioInfo, histPontos }: CardCargaHorariaProps) =>
                 {!usuarioInfo.jornadas.jornada_horarioFlexivel &&
                     <span>Jornada de trabalho: {jornadaHorarioEntrada} às {jornadaHorarioSaida}</span>
                 }
-                    { horasExtras > 0 ? (
-                        <span>Horas extras: {horasExtras}h {solicitacaoExtra ? `Planejada: (${solicitacaoExtra.horasSolicitadas}h)` : ''} </span>
+                    { horasExtras > 0 && !solicitacaoExtra ? (
+                        <span>Horas extras: {horasExtras.toFixed(0)}h </span>
                     ) : (
                         solicitacaoExtra ? (<span>Horas extras planejadas: {solicitacaoExtra.horasSolicitadas}h </span>) : (null)
                     )}
