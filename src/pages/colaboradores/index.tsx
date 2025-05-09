@@ -136,7 +136,7 @@ export default function Colaboradores() {
     return <div>{error}</div>;
   }
 
-  if(!thisUser)
+  if (!thisUser)
     return;
   return (
     <div>
@@ -174,39 +174,42 @@ export default function Colaboradores() {
               <TableBody>
                 {usuarios.length > 0 ? (
                   usuarios.map((usuario, index) => (
-                     (
-                      (thisUser.nivelAcesso.nivelAcesso_cod == 0) ||
+                    (
+                      (thisUser.usuario_cod != usuario.usuario_cod) &&
                       (
-                        thisUser.nivelAcesso.nivelAcesso_cod == 1 &&
-                        thisUser.setor.setorCod == usuario.setor.setorCod &&
-                        usuario.nivelAcesso.nivelAcesso_cod != 0
+                        (thisUser.nivelAcesso.nivelAcesso_cod == 0) ||
+                        (
+                          thisUser.nivelAcesso.nivelAcesso_cod == 1 &&
+                          thisUser.setor.setorCod == usuario.setor.setorCod &&
+                          usuario.nivelAcesso.nivelAcesso_cod != 0
+                        )
                       )
                     ) ? (
-                    <TableRow
-                      key={index}
-                      className={index % 2 === 0 ? "bg-[#FFF8E1]" : "bg-[#FFFFFF]"}
-                    >
-                      <TableCell className="border border-gray-200 text-center text-black text-base p-3">{usuario.usuario_nome}</TableCell>
-                      <TableCell className="border border-gray-200 text-center text-black text-base p-3">{usuario.usuario_cargo}</TableCell>
-                      <TableCell className="border border-gray-200 text-center text-black text-base p-3">{usuario.setor?.setorNome}</TableCell>
-                      <TableCell className="border border-gray-200 text-center text-black text-base p-3">{usuario.usuario_cargaHoraria}</TableCell>
-                      <TableCell className="border border-gray-200 text-center text-black text-base p-3">{usuario.usuarioTipoContratacao}</TableCell>
-                      <TableCell className="border border-gray-200 text-center text-black text-base p-3">{usuario.nivelAcesso?.nivelAcesso_nome}</TableCell>
-                      <TableCell className="border-r border-gray-300 text-left justify-center flex">
-                        <button
-                          onClick={() => handleViewUser(usuario.usuario_cod)}
-                          className={"bg-[#FFB503] rounded-md p-2 hover:bg-orange-600 " +
-                            (usuario.usuario_cod == thisUser.usuario_cod ? "invisible" : "")
-                          }
-                          disabled={usuario.usuario_cod == thisUser.usuario_cod}
+                      <TableRow
+                        key={index}
+                        className={index % 2 === 0 ? "bg-[#FFF8E1]" : "bg-[#FFFFFF]"}
+                      >
+                        <TableCell className="border border-gray-200 text-center text-black text-base p-3">{usuario.usuario_nome}</TableCell>
+                        <TableCell className="border border-gray-200 text-center text-black text-base p-3">{usuario.usuario_cargo}</TableCell>
+                        <TableCell className="border border-gray-200 text-center text-black text-base p-3">{usuario.setor?.setorNome}</TableCell>
+                        <TableCell className="border border-gray-200 text-center text-black text-base p-3">{usuario.usuario_cargaHoraria}</TableCell>
+                        <TableCell className="border border-gray-200 text-center text-black text-base p-3">{usuario.usuarioTipoContratacao}</TableCell>
+                        <TableCell className="border border-gray-200 text-center text-black text-base p-3">{usuario.nivelAcesso?.nivelAcesso_nome}</TableCell>
+                        <TableCell className="border-r border-gray-300 text-left justify-center flex">
+                          <button
+                            onClick={() => handleViewUser(usuario.usuario_cod)}
+                            className={"bg-[#FFB503] rounded-md p-2 hover:bg-orange-600 " +
+                              (usuario.usuario_cod == thisUser.usuario_cod ? "invisible" : "")
+                            }
+                            disabled={usuario.usuario_cod == thisUser.usuario_cod}
                           >
-                          <FontAwesomeIcon icon={faEye} className="text-black-600" />
-                        </button>
-                      </TableCell>
+                            <FontAwesomeIcon icon={faEye} className="text-black-600" />
+                          </button>
+                        </TableCell>
 
-                    </TableRow>
-                  ) : null )
-                )) : (
+                      </TableRow>
+                    ) : null)
+                  )) : (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center">Nenhum colaborador encontrado</TableCell>
                   </TableRow>
