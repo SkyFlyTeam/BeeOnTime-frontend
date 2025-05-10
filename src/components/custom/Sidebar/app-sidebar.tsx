@@ -3,6 +3,7 @@ import { usePathname } from "next/navigation";
 import { Users, Building, Home, LogOut, MessageSquare, AlarmClockCheck, UserRound, LucideIcon } from "lucide-react";
 import { LiaBusinessTimeSolid } from "react-icons/lia";
 import { IconType } from "react-icons";
+import { TbClockExclamation } from "react-icons/tb";
 
 // Components
 import {
@@ -95,6 +96,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           title: "RELATÓRIOS",
           items: [
             { title: "Banco de Horas", url: "/bancoHoras", icon: LiaBusinessTimeSolid },
+            { title: "Falhas em Marcações", url: "/falhas_marcacoes", icon: TbClockExclamation},
           ],
         },
         {
@@ -129,6 +131,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           title: "RELATÓRIOS",
           items: [
             { title: "Banco de Horas", url: "/bancoHoras", icon: LiaBusinessTimeSolid },
+            { title: "Falhas em Marcações", url: "/falhas_marcacoes", icon: TbClockExclamation},
           ],
         },
         {
