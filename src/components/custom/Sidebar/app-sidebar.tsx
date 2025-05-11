@@ -106,7 +106,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         },
       ],
       navSecondary: [
-        { title: usuario?.usuario_nome || "Usuário", url: "/administrador", icon: UserRound },
+        { title: usuario?.usuario_nome || "Usuário", url: "/perfil", icon: UserRound },
         { title: "Sair", url: "/logout", icon: LogOut },
       ],
     },
@@ -139,7 +139,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         },
       ],
       navSecondary: [
-        { title: usuario?.usuario_nome || "Usuário", url: "/gestor", icon: UserRound },
+        { title: usuario?.usuario_nome || "Usuário", url: "/perfil", icon: UserRound },
         { title: "Sair", url: "/logout", icon: LogOut },
       ],
     },
@@ -161,7 +161,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         },
       ],
       navSecondary: [
-        { title: usuario?.usuario_nome || "Usuário", url: "/funcionario", icon: UserRound },
+        { title: usuario?.usuario_nome || "Usuário", url: "/perfil", icon: UserRound },
         { title: "Sair", url: "/logout", icon: LogOut },
       ],
     },
