@@ -58,40 +58,43 @@ export default function TabelaFalhas({ atrasos }: TabelaFalhas) {
         <div className="overflow-x-auto block md:hidden">
             <Table className="w-full">
                 <TableBody>
-                    {["Nome", "Data", "Horário Esperado", "Horário de Entrada", "Contagem de Atraso"].map((atributo, idx) => (
-                        <TableRow key={idx} className={idx % 2 === 0 ? "bg-[#FFF8E1]" : "bg-[#FFFFFF]"}>
-                            <TableCell className="border border-gray-200 text-left text-black text-base p-3 font-bold">
-                                {atributo}
+                {["Nome", "Data", "Horário Esperado", "Horário de Entrada", "Contagem de Atraso"].map((atributo, idx) => (
+                    <TableRow key={idx}>
+                    <TableCell className="border border-gray-200 text-left text-black text-base p-3 font-bold">
+                        {atributo}
+                    </TableCell>
+                    {atrasos.map((atraso, index) => {
+                        let valor;
+                        switch (atributo) {
+                        case "Nome":
+                            valor = atraso.horas.usuarioNome;
+                            break;
+                        case "Data":
+                            valor = formatarData(atraso.horas.horasData);
+                            break;
+                        case "Horário Esperado":
+                            valor = formatarHoras(atraso.horas.horarioBatida);
+                            break;
+                        case "Horário de Entrada":
+                            valor = formatarHoras(atraso.horas.jornada_horarioEntrada);
+                            break;
+                        case "Contagem de Atraso":
+                            valor = converterAtrasoParaHorasMinutos(atraso.atrasoTempo);
+                            break;
+                        default:
+                            valor = "";
+                        }
+                        return (
+                        <TableCell
+                            key={index}
+                            className={`${index % 2 === 0 ? "bg-[#FFF8E1]" : "bg-[#FFFFFF]"} border border-gray-200 text-left text-black text-base p-3`}
+                            >
+                                {valor}
                             </TableCell>
-                            {atrasos.map((atraso, index) => {
-                                let valor;
-                                switch (atributo) {
-                                    case "Nome":
-                                        valor = atraso.horas.usuarioNome;
-                                        break;
-                                    case "Data":
-                                        valor = formatarData(atraso.horas.horasData);
-                                        break;
-                                    case "Horário Esperado":
-                                        valor = formatarHoras(atraso.horas.horarioBatida);
-                                        break;
-                                    case "Horário de Entrada":
-                                        valor = formatarHoras(atraso.horas.jornada_horarioEntrada);
-                                        break;
-                                    case "Contagem de Atraso":
-                                        valor = converterAtrasoParaHorasMinutos(atraso.atrasoTempo);
-                                        break;
-                                    default:
-                                        valor = "";
-                                }
-                                return (
-                                    <TableCell key={index} className="border border-gray-200 text-left text-black text-base p-3">
-                                        {valor}
-                                    </TableCell>
-                                );
-                            })}
-                        </TableRow>
-                    ))}
+                        );
+                    })}
+                    </TableRow>
+                ))}
                 </TableBody>
             </Table>
         </div>

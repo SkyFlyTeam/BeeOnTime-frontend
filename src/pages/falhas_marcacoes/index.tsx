@@ -160,7 +160,7 @@ export default function FalhasMarcacoes() {
             {atrasosFiltrados && (
                 <div className="container mx-auto p-4 bg-white rounded-lg shadow-lg mt-5">
                     <div className="container mx-auto flex justify-between items-center mb-4">
-                        <div className="flex space-x-4">
+                        <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
                             <div className="flex items-center space-x-2">
                                 <Label className={styles.dateLabel}>De</Label>
                                 <BiCalendar className="text-500 cursor-pointer" onClick={abrirCalendarioInicio} />
