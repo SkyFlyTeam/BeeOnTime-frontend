@@ -7,7 +7,7 @@ const getPontos = async (): Promise<Atraso[]> => {
 }
 
 const getPontosBySetor = async (setorCod: number): Promise<Atraso[]> => {
-    const { data } = await ApiPonto.get(`/atrasos/setor/${setorCod}`)
+    const { data } = await ApiPonto.get(`/atraso/atrasos/setor/${setorCod}`)
     return data as Atraso[]
 }
 
