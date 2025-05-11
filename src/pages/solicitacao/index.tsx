@@ -108,11 +108,19 @@ const Solicitacao = () => {
 
         setSolicitacoesData({
           all: ordenar([...minhas, ...analises]),
-          pendentes: [],
+          pendentes: [], // usado apenas para admins e funcionários
           historico: [],
-          analisesPendentes: ordenar(analises.filter(s => s.solicitacaoStatus === 'PENDENTE')),
+
+          analisesPendentes: filtrarPrimeirasSolicitacoesFeriasPendentes(
+            ordenar(analises.filter(s => s.solicitacaoStatus === 'PENDENTE'))
+          ),
+
           analisesHistorico: ordenar(analises.filter(s => s.solicitacaoStatus !== 'PENDENTE')),
-          meusPendentes: ordenar(minhas.filter(s => s.solicitacaoStatus === 'PENDENTE')),
+
+          meusPendentes: filtrarPrimeirasSolicitacoesFeriasPendentes(
+            ordenar(minhas.filter(s => s.solicitacaoStatus === 'PENDENTE'))
+          ),
+
           meusHistorico: ordenar(minhas.filter(s => s.solicitacaoStatus !== 'PENDENTE')),
         })
       
