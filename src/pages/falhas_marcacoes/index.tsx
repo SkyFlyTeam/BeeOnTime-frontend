@@ -15,6 +15,7 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 // interfaces
 import { Usuario } from "@/interfaces/usuario";
 import Atraso from "@/interfaces/atraso";
+import GraficoFalhas from "@/components/custom/GraficoFalhas";
 
 export default function FalhasMarcacoes() {
     const [usuario, setUsuario] = useState<Usuario>();
@@ -186,7 +187,9 @@ export default function FalhasMarcacoes() {
                             </div>
                         </div>
                     </div>
+
                     <TabelaFalhas atrasos={paginatedData} />
+
                     <div className="container mx-auto flex justify-end w-full mt-4">
                         <Pagination className="w-full flex justify-end">
                             <PaginationPrevious 
@@ -213,6 +216,10 @@ export default function FalhasMarcacoes() {
                     </div>
                 </div>
             )}
+
+            <div className="container mx-auto p-4 bg-white rounded-lg shadow-lg mt-5">
+                <GraficoFalhas />
+            </div>
         </div>
     );
 }
