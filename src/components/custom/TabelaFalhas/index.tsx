@@ -7,12 +7,18 @@ interface TabelaFalhas {
 
 export default function TabelaFalhas({ atrasos }: TabelaFalhas) {
   const formatarData = (data: any) => {
+    if (!data) {
+        return ''
+    }
     let partesData = data.split("-");
     let dataFormatada = partesData[2] + "/" + partesData[1] + "/" + partesData[0];
     return dataFormatada;
   };
 
   const formatarHoras = (horas: any) => {
+    if (!horas) {
+        return ''
+    }
     let partesHoras = horas.split(":");
     let horasFormatada = `${partesHoras[0]}:${partesHoras[1]}`;
     return horasFormatada;

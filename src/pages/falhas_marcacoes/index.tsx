@@ -16,13 +16,31 @@ import { Pagination, PaginationContent, PaginationItem, PaginationLink, Paginati
 import { Usuario } from "@/interfaces/usuario";
 import Atraso from "@/interfaces/atraso";
 import GraficoFalhas from "@/components/custom/GraficoFalhas";
+import { HorasDTO } from "@/interfaces/horas";
+import { horasServices } from "@/services/horasServices";
+import { ApiException } from "@/config/apiExceptions";
+import { pontoServices } from "@/services/pontoServices";
+import HistPonto, { Ponto } from "@/interfaces/histPonto";
+import { solicitacaoServices } from "@/services/solicitacaoServices";
+import SolicitacaoInterface from "@/interfaces/Solicitacao";
 
 export default function FalhasMarcacoes() {
     const [usuario, setUsuario] = useState<Usuario>();
     const [atrasos, setAtrasos] = useState<Atraso[]>([]);
     const [atrasosFiltrados, setAtrasosFiltrados] = useState<Atraso[]>([]);
+
+    const [pontuais, setPontuais] = useState<HorasDTO[]>([])
+    const [pontuaisFiltrados, setPontuaisFiltrados] = useState<HorasDTO[]>([])
+
     const [dataInicio, setDataInicio] = useState<string>("");
     const [dataFim, setDataFim] = useState<string>("");
+
+    const [marcacoesCorretas, setMarcacoesCorretas] = useState<HistPonto[]>([])
+    const [marcacoesCorretasFiltrados, setMarcacoesCorretasFiltrados] = useState<HistPonto[]>([])
+
+    const [solicitacoesAjustes, setSolicitacoesAjustes] = useState<SolicitacaoInterface[]>([])
+    const [solicitacoesAjustesFiltrados, setSolicitacoesAjustesFiltrados] = useState<SolicitacaoInterface[]>([])
+
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string>("");
     const [currentPage, setCurrentPage] = useState(1);  // Página atual
@@ -52,8 +70,14 @@ export default function FalhasMarcacoes() {
     const filterData = () => {
         if(!dataFim && !dataInicio){
             setAtrasosFiltrados(atrasos)
+            setPontuaisFiltrados(pontuais)
+            setMarcacoesCorretasFiltrados(marcacoesCorretas)
+            setSolicitacoesAjustesFiltrados(solicitacoesAjustes)
         }
-        let filteredAtrasos = atrasos;
+        let filteredAtrasos = atrasos
+        let filteredPontuais = pontuais
+        let filteredMarcacoes = marcacoesCorretas
+        let filteredSolicitacoes = solicitacoesAjustes
 
         if (dataInicio && dataFim) {
             filteredAtrasos = atrasos.filter((atraso) => {
@@ -61,22 +85,75 @@ export default function FalhasMarcacoes() {
                 const inicio = new Date(dataInicio);
                 const fim = new Date(dataFim);
                 return dataAtraso >= inicio && dataAtraso <= fim;
-            });
+            })
+            filteredPontuais = pontuais.filter((ponto) => {
+                const dataPonto = new Date(ponto.horasData);
+                const inicio = new Date(dataInicio);
+                const fim = new Date(dataFim);
+                return dataPonto >= inicio && dataPonto <= fim;
+            })
+            filteredMarcacoes = marcacoesCorretas.filter((marcacao) => {
+                const datamarcacao = new Date(marcacao.data);
+                const inicio = new Date(dataInicio);
+                const fim = new Date(dataFim);
+                return datamarcacao >= inicio && datamarcacao <= fim;
+            })
+            filteredSolicitacoes = solicitacoesAjustes.filter((solicitacao) => {
+                const solicitacaoData = new Date(solicitacao.solicitacaoDataPeriodo)
+                const inicio = new Date(dataInicio)
+                const fim = new Date(dataFim)
+                return solicitacaoData >= inicio && solicitacaoData <= fim
+            })
+
         } else if (dataInicio && !dataFim) {
             filteredAtrasos = atrasos.filter((atraso) => {
-                const dataAtraso = new Date(atraso.horas.horasData);
+                const dataAtraso = new Date(atraso.horas.horasData)
+                const inicio = new Date(dataInicio)
+                return dataAtraso >= inicio
+            })
+            filteredPontuais = pontuais.filter((ponto) => {
+                const dataPonto = new Date(ponto.horasData)
+                const inicio = new Date(dataInicio)
+                return dataPonto >= inicio 
+            })
+             filteredMarcacoes = marcacoesCorretas.filter((marcacao) => {
+                const datamarcacao = new Date(marcacao.data)
+                const inicio = new Date(dataInicio)
+                return datamarcacao >= inicio 
+            })
+            filteredSolicitacoes = solicitacoesAjustes.filter((solicitacao) => {
+                const solicitacaoData = new Date(solicitacao.solicitacaoDataPeriodo);
                 const inicio = new Date(dataInicio);
-                return dataAtraso >= inicio;
-            });
+                return solicitacaoData >= inicio 
+            })
+
         } else if (!dataInicio && dataFim) {
             filteredAtrasos = atrasos.filter((atraso) => {
                 const dataAtraso = new Date(atraso.horas.horasData);
-                const fim = new Date(dataFim);
-                return dataAtraso <= fim;
-            });
+                const fim = new Date(dataFim)
+                return dataAtraso <= fim
+            })
+            filteredPontuais = pontuais.filter((ponto) => {
+                const dataPonto = new Date(ponto.horasData);
+                const fim = new Date(dataFim)
+                return dataPonto <= fim
+            })
+             filteredMarcacoes = marcacoesCorretas.filter((marcacao) => {
+                const datamarcacao = new Date(marcacao.data)
+                const fim = new Date(dataFim)
+                return datamarcacao <= fim
+            })
+            filteredSolicitacoes = solicitacoesAjustes.filter((solicitacao) => {
+                const solicitacaoData = new Date(solicitacao.solicitacaoDataPeriodo)
+                const fim = new Date(dataFim)
+                return solicitacaoData <= fim
+            })
         }
 
-        setAtrasosFiltrados(filteredAtrasos);
+        setAtrasosFiltrados(filteredAtrasos)
+        setPontuaisFiltrados(filteredPontuais)
+        setMarcacoesCorretasFiltrados(filteredMarcacoes)
+        setSolicitacoesAjustesFiltrados(filteredSolicitacoes)
     };
 
     // Função para buscar os atrasos
@@ -86,30 +163,85 @@ export default function FalhasMarcacoes() {
             setUsuario(usuarioLogado);
 
             if (usuarioLogado) {
-                let pontos;
+                let pontosFounded;
                 if (usuarioLogado.nivelAcesso.nivelAcesso_cod === 0) {
-                    pontos = await atrasoServices.getPontos();
+                    pontosFounded = await atrasoServices.getPontos();
                 } else {
-                    pontos = await atrasoServices.getPontosBySetor(usuarioLogado.setor.setorCod);
+                    pontosFounded = await atrasoServices.getPontosBySetor(usuarioLogado.setor.setorCod);
                 }
 
-                setAtrasos(pontos);
-                setAtrasosFiltrados(pontos);
+                setAtrasos(pontosFounded);
+                setAtrasosFiltrados(pontosFounded);
             }
         } catch (err) {
-            setError("Erro ao carregar os usuários.");
+            setError("Erro ao carregar os atrasos.");
         } finally {
             setLoading(false);
         }
     };
 
+    const fetchPontuais = async () => {
+        try {
+            const pontosFounded = await horasServices.getPontuais()
+
+            if (pontosFounded instanceof ApiException) {
+                setError(pontosFounded.message);
+            } else {
+                setPontuais(pontosFounded);
+                setPontuaisFiltrados(pontosFounded)
+            }
+
+        } catch (err) {
+            setError("Erro ao carregar os pontos pontuais.");
+        } 
+    }
+
+    const fetchPontos = async () => {
+        try {
+            const pontosFounded = await pontoServices.getAll()
+            if(pontosFounded instanceof ApiException) {
+                setError(pontosFounded.message)
+            } else {
+                const pontosSemAjuste = pontosFounded.filter(ponto => 
+                    !solicitacoesAjustes.some(sol =>
+                        sol.tipoSolicitacaoCod.tipoSolicitacaoCod === 1 &&
+                        sol.solicitacaoDataPeriodo === ponto.data &&
+                        sol.usuarioCod === ponto.usuarioCod
+                    )
+                    )
+                setMarcacoesCorretas(pontosFounded)
+                setMarcacoesCorretasFiltrados(pontosFounded)
+            }
+        } catch (err) {
+            setError("Erro ao carregar os pontos.");
+        } 
+    }
+
+    const fetchSolicitacoes = async () => {
+        try {
+            const solicitacoes = await solicitacaoServices.getAllSolicitacao()
+            if(!(solicitacoes instanceof ApiException)){
+                const solicitacoesFilteres = solicitacoes.filter((solicitacao: SolicitacaoInterface) => {
+                    solicitacao.tipoSolicitacaoCod.tipoSolicitacaoCod === 1;
+                })
+                setSolicitacoesAjustes(solicitacoesFilteres)
+                setSolicitacoesAjustesFiltrados(solicitacoesFilteres)
+            }
+        } catch (err) {
+            setError("Erro ao carregar solicitações.");
+        } 
+    }
+
     useEffect(() => {
-        fetchAtrasos();
+        fetchAtrasos()
+        fetchPontuais()
+        fetchSolicitacoes()
+        fetchPontos()
     }, []);
 
     useEffect(() => {
         filterData();  
-    }, [dataInicio, dataFim, atrasos]);  // Chamando a função filterData quando os filtros ou os dados mudam.
+    }, [dataInicio, dataFim, atrasos, pontuais, marcacoesCorretas, solicitacoesAjustes])
 
     // Função de Paginação
     const paginate = (items: Atraso[], currentPage: number, itemsPerPage: number) => {
@@ -218,8 +350,13 @@ export default function FalhasMarcacoes() {
             )}
 
             <div className="container mx-auto p-4 bg-white rounded-lg shadow-lg mt-5">
-                <GraficoFalhas />
+                <GraficoFalhas 
+                    atrasos={atrasosFiltrados.length} 
+                    pontuais={pontuaisFiltrados.length} 
+                    solicitacoesAjustes={solicitacoesAjustesFiltrados.length} 
+                    marcacoesCorretas={marcacoesCorretasFiltrados.length}               
+                />
             </div>
         </div>
-    );
+    )
 }

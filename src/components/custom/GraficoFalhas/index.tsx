@@ -9,69 +9,88 @@ import {
     CategoryScale,
     LinearScale,
 } from 'chart.js';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 
-ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale, LinearScale);
+ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale, LinearScale, ChartDataLabels)
 
-const mockAtraso = 2100;
-const mockPontuais = 5950;
-const mockSolicitacoesAjustes = 950;
-const mockCorretas = 5938;
+interface GraficoAtraso {
+    atrasos: number
+    pontuais: number
+    solicitacoesAjustes: number
+    marcacoesCorretas: number
+}
 
-// Dados para os gráficos
-const dataAtrasos = {
-    labels: ['Atrasos', 'Pontuais'],
-    datasets: [
-        {
-            data: [mockAtraso, mockPontuais],
-            backgroundColor: ['#FFB84D', '#FF8C1A'],
-        },
-    ],
-};
+export default function GraficoFalhas({atrasos, pontuais, solicitacoesAjustes, marcacoesCorretas}: GraficoAtraso) {
+    const percAtrasos = (atrasos / (atrasos + pontuais)) * 100
+    const percPontuais = (pontuais / (atrasos + pontuais)) * 100
+    const percSolicitacoes = (solicitacoesAjustes / (marcacoesCorretas + solicitacoesAjustes)) * 100
+    const percCorretas = (marcacoesCorretas / (marcacoesCorretas + solicitacoesAjustes)) * 100
 
-const dataSolicitacoes = {
-    labels: ['Solicitações de ajuste', 'Marcações corretas'],
-    datasets: [
-        {
-            data: [mockSolicitacoesAjustes, mockCorretas],
-            backgroundColor: ['#FFB84D', '#FF8C1A'],
-        },
-    ],
-};
+    const primary = '#FF8C1A'
+    const secondary = '#FFB84D'
 
-export default function GraficoFalhas() {
-    const options = {
-        plugins: {
-            legend: {
-                display: false,
+    const dataAtrasos = {
+        labels: [`Atrasos\n${percAtrasos.toFixed(1)}%`, `Pontuais\n${percPontuais.toFixed(1)}%`],
+        datasets: [
+            {
+                data: [atrasos, pontuais],
+                backgroundColor: [secondary, primary],
             },
-            tooltip: {
-                enabled: true, 
-            },
-        },
+        ],
     };
 
-    const percAtrasos = (mockAtraso / (mockAtraso + mockPontuais)) * 100
-    const percPontuais = (mockPontuais / (mockAtraso + mockPontuais)) * 100
-    const percSolicitacoes = (mockSolicitacoesAjustes / (mockCorretas + mockSolicitacoesAjustes)) * 100
-    const percCorretas = (mockCorretas / (mockCorretas + mockSolicitacoesAjustes)) * 100
+    const dataSolicitacoes = {
+        labels: [`Solicitações\nde ajuste\n${percSolicitacoes.toFixed(1)}%`, `Marcações\ncorretas\n${percCorretas.toFixed(1)}%`],
+        datasets: [
+            {
+                data: [solicitacoesAjustes, marcacoesCorretas],
+                backgroundColor: [secondary, primary],
+            },
+        ],
+    }
+
+    const options = {
+        plugins: {
+            legend: { display: false },
+            tooltip: { enabled: false },
+            datalabels: {
+            color: '#000',             
+            font: {                     
+                weight: 'bold',
+                size: 14,
+            },
+            anchor: 'end',             
+            align: 'end',      
+            formatter: (value: any, ctx: any) => {
+                const data = ctx.chart.data.datasets![0].data as number[];
+                const total = data.reduce((a, b) => a + b, 0);
+                const pct  = (value as number) / total * 100;
+                const label = ctx.chart.data.labels[ctx.dataIndex];
+                return `${value}\n${label}`;
+            },
+            },
+        },
+        layout: {
+            padding: {
+            top: 80,   
+            bottom: 80, 
+            left: 55,   
+            right: 55,  
+            },
+        },
+        cutoutPercentage: 80,
+        aspectRatio: 1.5
+    };
 
     return (
-        <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>
-            <div style={{ width: '20%', textAlign: 'center' }}>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>Resumo de Marcação</h3>
-                <p>{mockAtraso} Atrasos {percAtrasos.toFixed(1)}%</p>
+        <div className="flex flex-col lg:flex-row justify-around items-center">
+            <div className="w-full lg:w-1/2 text-center mb-6 lg:mb-0">
+                <h3 className="text-lg font-bold">Resumo de Marcação</h3>
                 <Pie data={dataAtrasos} options={options} />
-                <div style={{ marginTop: '10px' }}>
-                    <p>{mockPontuais} Pontuais {percPontuais.toFixed(1)}%</p>
-                </div>
             </div>
-            <div style={{ width: '20%', textAlign: 'center' }}>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>Solicitações de ajuste de ponto</h3>
-                <p>{mockSolicitacoesAjustes} Solicitações de ajuste {percSolicitacoes.toFixed(1)}%</p>
+            <div className="w-full lg:w-1/2 text-center">
+                <h3 className="text-lg font-bold">Solicitações de ajuste de ponto</h3>
                 <Pie data={dataSolicitacoes} options={options} />
-                <div style={{ marginTop: '10px' }}>
-                    <p>{mockCorretas} Marcações corretas {percCorretas.toFixed(1)}%</p>
-                </div>
             </div>
         </div>
     );
