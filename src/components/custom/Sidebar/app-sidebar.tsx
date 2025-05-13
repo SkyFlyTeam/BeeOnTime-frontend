@@ -1,6 +1,6 @@
 import * as React from "react";
 import { usePathname } from "next/navigation";
-import { Users, Building, Home, LogOut, MessageSquare, AlarmClockCheck, UserRound, LucideIcon } from "lucide-react";
+import { Users, Building, Home, LogOut, MessageSquare, AlarmClockCheck, UserRound, LucideIcon, CalendarDays } from "lucide-react";
 import { LiaBusinessTimeSolid } from "react-icons/lia";
 import { IconType } from "react-icons";
 
@@ -102,6 +102,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           items: [
             { title: "Empresa", url: "/empresa", icon: Building },
             { title: "Colaboradores", url: "/colaboradores", icon: Users },
+            { title: "Calendário", url: "/calendario", icon: CalendarDays },
           ],
         },
       ],
@@ -150,6 +151,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           items: [
             { title: "Início", url: "/inicio", icon: Home },
             { title: "Solicitações", url: "/solicitacao", icon: MessageSquare },
+            { title: "Calendário", url: "/calendario", icon: CalendarDays },
           ],
         },
         {

@@ -1,0 +1,36 @@
+.modal_container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000; 
+  background-color: rgba(0, 0, 0, 0.5); 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+  
+.modal {
+  background-color: var(--white-bg);
+  border-radius: .5rem;
+  height: fit-content;
+  width: 25rem;
+  display: flex;
+  flex-direction: column;
+  row-gap: 1.5rem;
+  padding: 2rem;
+}
+
+.modalTitle {
+  font-weight: bold;
+  font-size: 1.5rem;
+}
+
+.flagFacultativo{
+    background-color: #FDE69B;
+    color: var(--yellow);
+    padding: .3rem .4rem;
+    border-radius: .5rem;
+    width: fit-content;
+}
