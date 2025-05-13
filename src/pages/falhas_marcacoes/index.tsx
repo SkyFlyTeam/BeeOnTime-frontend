@@ -49,6 +49,8 @@ export default function FalhasMarcacoes() {
     const dataInicioRef = useRef<HTMLInputElement>(null);
     const dataFimRef = useRef<HTMLInputElement>(null);
 
+    const [today, setToday] = useState("")
+
     const abrirCalendarioInicio = () => {
         if (dataInicioRef.current) {
             dataInicioRef.current.showPicker(); 
@@ -237,6 +239,8 @@ export default function FalhasMarcacoes() {
         fetchPontuais()
         fetchSolicitacoes()
         fetchPontos()
+        const currentDate = new Date().toISOString().split("T")[0]
+        setToday(currentDate)
     }, []);
 
     useEffect(() => {
@@ -284,79 +288,108 @@ export default function FalhasMarcacoes() {
         );
     }
 
+    const showTabela = atrasosFiltrados.length > 0
+    const showGraficos = atrasosFiltrados.length > 0 || pontuaisFiltrados.length > 0 || solicitacoesAjustesFiltrados.length > 0 || marcacoesCorretasFiltrados.length > 0
+
     return (
         <div>
             <div className="container mx-auto px-4 flex justify-between">
                 <h1 className="text-3xl font-bold text-left">Falhas em Marcações</h1>
             </div>
 
-            {atrasosFiltrados && (
-                <div className="container mx-auto p-4 bg-white rounded-lg shadow-lg mt-5">
-                    <div className="container mx-auto flex justify-between items-center mb-4">
-                        <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
-                            <div className="flex items-center space-x-2">
-                                <Label className={styles.dateLabel}>De</Label>
-                                <BiCalendar className="text-500 cursor-pointer" onClick={abrirCalendarioInicio} />
-                                <input
-                                    type="date"
-                                    value={dataInicio}
-                                    onChange={(e) => setDataInicio(e.target.value)}
-                                    className={`${styles.dateInput}`}
-                                    ref={dataInicioRef}
-                                />
-                            </div>
+            <div className="container mx-auto p-4 bg-white rounded-lg shadow-lg mt-5">
+                <div className="container mx-auto flex justify-between items-center mb-4">
+                    <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
+                        <div className="flex items-center space-x-2">
+                            <Label className={styles.dateLabel}>De</Label>
+                            <BiCalendar className="text-500 cursor-pointer" onClick={abrirCalendarioInicio} />
+                            <input
+                                type="date"
+                                value={dataInicio}
+                                onChange={(e) => setDataInicio(e.target.value)}
+                                className={`${styles.dateInput}`}
+                                ref={dataInicioRef}
+                                max={today}
+                            />
+                        </div>
 
-                            <div className="flex items-center space-x-2">
-                                <Label className={styles.dateLabel}>Até</Label>
-                                <BiCalendar className="text-500 cursor-pointer" onClick={abrirCalendarioFim} />
-                                <input
-                                    type="date"
-                                    value={dataFim}
-                                    onChange={(e) => setDataFim(e.target.value)}
-                                    className={`${styles.dateInput}`}
-                                    ref={dataFimRef}
-                                />
-                            </div>
+                        <div className="flex items-center space-x-2">
+                            <Label className={styles.dateLabel}>Até</Label>
+                            <BiCalendar className="text-500 cursor-pointer" onClick={abrirCalendarioFim} />
+                            <input
+                                type="date"
+                                value={dataFim}
+                                onChange={(e) => setDataFim(e.target.value)}
+                                className={`${styles.dateInput}`}
+                                ref={dataFimRef}
+                                max={today}
+                            />
                         </div>
                     </div>
+                </div>
 
-                    <TabelaFalhas atrasos={paginatedData} />
+                {showTabela &&  (
+                    <>
+                        <TabelaFalhas atrasos={paginatedData} />
 
-                    <div className="container mx-auto flex justify-end w-full mt-4">
-                        <Pagination className="w-full flex justify-end">
-                            <PaginationPrevious 
-                                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                                className={currentPage === 1 ? "cursor-not-allowed" : ""} 
-                            />
-                            <PaginationContent>
-                                {Array.from({ length: Math.ceil(atrasosFiltrados.length / itemsPerPage) }, (_, idx) => (
-                                    <PaginationItem key={idx}>
-                                        <PaginationLink
-                                            isActive={currentPage === idx + 1}
-                                            onClick={() => setCurrentPage(idx + 1)}
-                                        >
-                                            {idx + 1}
-                                        </PaginationLink>
-                                    </PaginationItem>
-                                ))}
-                            </PaginationContent>
-                            <PaginationNext 
-                                onClick={() => setCurrentPage(prev => prev + 1)}
-                                className={currentPage === Math.ceil(atrasosFiltrados.length / itemsPerPage) ? "cursor-not-allowed" : ""} 
-                            />
-                        </Pagination>
+                        <div className="container mx-auto flex justify-end w-full mt-4">
+                            <Pagination className="w-full flex justify-end">
+                                <PaginationPrevious 
+                                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                    className={currentPage === 1 ? "cursor-not-allowed" : ""} 
+                                />
+                                <PaginationContent>
+                                    {Array.from({ length: Math.ceil(atrasosFiltrados.length / itemsPerPage) }, (_, idx) => (
+                                        <PaginationItem key={idx}>
+                                            <PaginationLink
+                                                isActive={currentPage === idx + 1}
+                                                onClick={() => setCurrentPage(idx + 1)}
+                                            >
+                                                {idx + 1}
+                                            </PaginationLink>
+                                        </PaginationItem>
+                                    ))}
+                                </PaginationContent>
+                                <PaginationNext 
+                                    onClick={() => setCurrentPage(prev => prev + 1)}
+                                    className={currentPage === Math.ceil(atrasosFiltrados.length / itemsPerPage) ? "cursor-not-allowed" : ""} 
+                                />
+                            </Pagination>
+                        </div>
+                    </>
+                )}
+
+                {showGraficos && !showTabela && (
+                    <GraficoFalhas 
+                        atrasos={atrasosFiltrados.length} 
+                        pontuais={pontuaisFiltrados.length} 
+                        solicitacoesAjustes={solicitacoesAjustesFiltrados.length} 
+                        marcacoesCorretas={marcacoesCorretasFiltrados.length}               
+                    />
+                )}
+
+                {!showTabela && !showGraficos && (
+                    <div className="container mx-auto px-4 py-10 flex flex-col items-center max-w-8xl">
+                        <img 
+                            src="/images/sem_conteudo.svg" 
+                            alt="No data" 
+                            className="w-90 h-90 object-contain"  
+                        />
+                        <p className="text-md font-semibold mt-4">Ops! Parece que não tem nada aqui!</p>
                     </div>
+                )}
+            </div>
+
+            {showGraficos && showTabela && (
+                <div className="container mx-auto p-4 bg-white rounded-lg shadow-lg mt-5">
+                    <GraficoFalhas 
+                        atrasos={atrasosFiltrados.length} 
+                        pontuais={pontuaisFiltrados.length} 
+                        solicitacoesAjustes={solicitacoesAjustesFiltrados.length} 
+                        marcacoesCorretas={marcacoesCorretasFiltrados.length}               
+                    />
                 </div>
             )}
-
-            <div className="container mx-auto p-4 bg-white rounded-lg shadow-lg mt-5">
-                <GraficoFalhas 
-                    atrasos={atrasosFiltrados.length} 
-                    pontuais={pontuaisFiltrados.length} 
-                    solicitacoesAjustes={solicitacoesAjustesFiltrados.length} 
-                    marcacoesCorretas={marcacoesCorretasFiltrados.length}               
-                />
-            </div>
         </div>
     )
 }
