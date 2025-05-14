@@ -309,7 +309,7 @@ export default function FalhasMarcacoes() {
                                 onChange={(e) => setDataInicio(e.target.value)}
                                 className={`${styles.dateInput}`}
                                 ref={dataInicioRef}
-                                max={today}
+                                max={dataFim ? dataFim : today}
                             />
                         </div>
 
@@ -322,6 +322,7 @@ export default function FalhasMarcacoes() {
                                 onChange={(e) => setDataFim(e.target.value)}
                                 className={`${styles.dateInput}`}
                                 ref={dataFimRef}
+                                min={dataInicio ? dataInicio : undefined}
                                 max={today}
                             />
                         </div>

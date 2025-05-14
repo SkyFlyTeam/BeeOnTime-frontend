@@ -65,6 +65,7 @@ export default function GraficoFalhas({ atrasos, pontuais, solicitacoesAjustes, 
                 },
                 anchor: 'end',
                 align: 'end',
+                textAlign: 'center',
                 formatter: (value: any, ctx: any) => {
                     const data = ctx.chart.data.datasets![0].data as number[];
                     const total = data.reduce((a, b) => a + b, 0);
