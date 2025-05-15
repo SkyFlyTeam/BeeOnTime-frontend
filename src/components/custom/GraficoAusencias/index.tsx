@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Pie } from 'react-chartjs-2';
 import {
     Chart as ChartJS,
@@ -11,39 +11,65 @@ import {
 } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
-ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale, LinearScale, ChartDataLabels)
+ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale, LinearScale, ChartDataLabels);
 
 interface GraficoAtraso {
-    folgas: number
-    licencasMedicas: number
-    ferias: number
-    ausenciasJustificadas: number
-    ausenciasNaoJustificadas: number
+    folgas: number;
+    licencasMedicas: number;
+    ferias: number;
+    ausenciasJustificadas: number;
+    ausenciasNaoJustificadas: number;
+    onSliceClick?: (label: string) => void;  // callback de clique
 }
 
-export default function GraficoAusencias({ folgas, licencasMedicas, ferias, ausenciasJustificadas, ausenciasNaoJustificadas }: GraficoAtraso) {
-    const values = [folgas, licencasMedicas, ferias, ausenciasJustificadas, ausenciasNaoJustificadas];
-    
-    const filteredValues = values.filter(value => value !== 0);
+export default function GraficoAusencias({
+    folgas,
+    licencasMedicas,
+    ferias,
+    ausenciasJustificadas,
+    ausenciasNaoJustificadas,
+    onSliceClick,
+}: GraficoAtraso) {
+    const chartRef = useRef<any>(null);
 
-    const filteredLabels = [
-        `Folga\n${(folgas / values.reduce((a, b) => a + b, 0) * 100).toFixed(1)}%`,
-        `Licença médica\n${(licencasMedicas / values.reduce((a, b) => a + b, 0) * 100).toFixed(1)}%`,
-        `Férias\n${(ferias / values.reduce((a, b) => a + b, 0) * 100).toFixed(1)}%`,
-        `Ausências com\njustificativa\n${(ausenciasJustificadas / values.reduce((a, b) => a + b, 0) * 100).toFixed(1)}%`,
-        `Ausências sem\njustificativa\n${(ausenciasNaoJustificadas / values.reduce((a, b) => a + b, 0) * 100).toFixed(1)}%`
+    const values = [folgas, licencasMedicas, ferias, ausenciasJustificadas, ausenciasNaoJustificadas];
+    const total = values.reduce((a, b) => a + b, 0);
+
+    // Labels puros, para uso no clique e lógica
+    const pureLabels = [
+        'Folga',
+        'Licença médica',
+        'Férias',
+        'Ausências com justificativa',
+        'Ausências sem justificativa',
     ];
 
-    const total = filteredValues.reduce((a, b) => a + b, 0);
+    const labelsToDisplay = [
+        'Folga',
+        'Licença médica',
+        'Férias',
+        'Ausências\ncom justificativa',
+        'Ausências\nsem justificativa',
+    ];
+
+    // Labels com quebra de linha para exibição no gráfico
+    const displayLabels = labelsToDisplay.map((label, i) =>
+        `${label}\n${((values[i] / total) * 100).toFixed(1)}%`
+    );
+
+    // Filtra só as fatias com valor > 0
+    const filteredData = pureLabels
+        .map((label, i) => ({ label, displayLabel: displayLabels[i], value: values[i] }))
+        .filter((item) => item.value > 0);
 
     const dataAusencias = {
-        labels: filteredLabels.filter((_, index) => values[index] !== 0),
+        labels: filteredData.map(item => item.displayLabel),
         datasets: [
             {
-                data: filteredValues,
-                backgroundColor: ['#FFB503', '#42130F', '#744A26', '#F79522', '#FFCB50']
-            }
-        ]
+                data: filteredData.map(item => item.value),
+                backgroundColor: ['#FFB503', '#42130F', '#744A26', '#F79522', '#FFCB50'],
+            },
+        ],
     };
 
     const options = {
@@ -52,10 +78,7 @@ export default function GraficoAusencias({ folgas, licencasMedicas, ferias, ause
             tooltip: { enabled: false },
             datalabels: {
                 color: '#000',
-                font: {
-                    weight: 'bold',
-                    size: 14,
-                },
+                font: { weight: 'bold', size: 14 },
                 anchor: 'end',
                 align: 'end',
                 textAlign: 'center',
@@ -68,22 +91,28 @@ export default function GraficoAusencias({ folgas, licencasMedicas, ferias, ause
             },
         },
         layout: {
-            padding: {
-                top: 80,
-                bottom: 80,
-                left: 55,
-                right: 55,
-            }
+            padding: { top: 80, bottom: 80, left: 55, right: 55 },
         },
         cutoutPercentage: 80,
         aspectRatio: 1.5,
     };
 
-    return(
-        <div className="flex flex-col lg:flex-row justify-around items-center">
-            <div className="w-full lg:w-1/2 text-center">
-                <Pie data={dataAusencias} options={options} />
-            </div>
-        </div>
+    // Handler do clique
+    const handleClick = (event: any) => {
+        if (!chartRef.current) return;
+
+        const chart = chartRef.current;
+
+        const elements = chart.getElementsAtEventForMode(event.nativeEvent, 'nearest', { intersect: true }, false);
+
+        if (elements.length > 0) {
+            const idx = elements[0].index;
+            const label = filteredData[idx].label; // pega o label puro, sem \n
+            if (onSliceClick) onSliceClick(label);
+        }
+    };
+
+    return (
+        <Pie ref={chartRef} data={dataAusencias} options={options} onClick={handleClick} />
     );
 }

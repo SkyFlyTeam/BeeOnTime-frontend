@@ -12,6 +12,8 @@ import { solicitacaoServices } from "@/services/solicitacaoServices";
 import SolicitacaoInterface from "@/interfaces/Solicitacao";
 import { Usuario } from "@/interfaces/usuario";
 import { usuarioServices } from "@/services/usuarioServices";
+import TabelaAusencia from "@/components/custom/TabelaAusencia";
+import TablePagination from "@/components/custom/TablePagination/TablePagination";
 
 export default function Ausencias() {
     const [folgas, setFolgas] = useState({
@@ -35,13 +37,22 @@ export default function Ausencias() {
         filtradas: [] as Faltas[]
     })
 
+    const [funcionarios, setFuncionarios] = useState<Usuario[]>([])
+    // estrutura de dados para serem enviados para a tabela
+    const [qtdAusencia, setQtdAusencias] = useState<Record<string, number>>()
+    // ausência selecionada para filtro
+    const [ausenciaSelecionada, setAusenciaSelecionada] = useState<string>("Ausências Totais");
+    // componentes de referências para calendário
+    const dataInicioRef = useRef<HTMLInputElement>(null)
+    const dataFimRef = useRef<HTMLInputElement>(null)
+    // valores das datas
     const [dataInicio, setDataInicio] = useState<string>("");
     const [dataFim, setDataFim] = useState<string>("");
     const [hoje, setHoje] = useState("")
-    const [funcionarios, setFuncionarios] = useState<Usuario[]>([])
+    // paginação
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 5;
 
-    const dataInicioRef = useRef<HTMLInputElement>(null)
-    const dataFimRef = useRef<HTMLInputElement>(null)
 
     const abrirCalendarioInicio = () => {
         if (dataInicioRef.current) {
@@ -94,6 +105,8 @@ export default function Ausencias() {
 
     const filterData = () => {
         if (!dataInicio && !dataFim) {
+            setAusenciaSelecionada('Ausências Totais')
+            quantidadeAusenciasFuncionario()
             return { 
                 ausenciasJustificadas: ausenciasJustificadas.ausensiasJustificadas, 
                 ausenciasNaoJustificadas: ausenciasNaoJustificadas.ausensiasNaoJustificadas, 
@@ -120,6 +133,66 @@ export default function Ausencias() {
         }
     }
 
+    const quantidadeAusenciasFuncionario = () => {
+        const ausenciaData: Record<string, number> = {}
+        
+        funcionarios.forEach((funcionario) => {
+            switch (ausenciaSelecionada) {
+                // case 'Folga':
+                //     ausenciaData[funcionario.usuario_nome] = folgas.filtradas.filter(f => f.usuarioCod === funcionario.usuario_cod).length;
+                //     break;
+                // case 'Férias':
+                //     ausenciaData[funcionario.usuario_nome] = ferias.filtradas.filter(f => f.usuarioCod === funcionario.usuario_cod).length;
+                //     break;
+                case 'Licença médica':
+                    const totalLicenca = licencasMedicas.filtradas.filter(l => l.usuarioCod === funcionario.usuario_cod).length
+                    if (totalLicenca == 0) {
+                        break
+                    }
+                    ausenciaData[funcionario.usuario_nome] = totalLicenca
+                    break;
+                case 'Ausências com justificativa':
+                    const totalAusencia = ausenciasJustificadas.filtradas.filter(a => a.usuarioCod === funcionario.usuario_cod).length
+                    if (totalAusencia == 0) {
+                        break
+                    }
+                    ausenciaData[funcionario.usuario_nome] = totalAusencia
+                    break;
+                case 'Ausências sem justificativa':
+                    const totalAusenciaNao = ausenciasNaoJustificadas.filtradas.filter(a => a.usuarioCod === funcionario.usuario_cod).length
+                    if (totalAusenciaNao == 0) {
+                        break
+                    }
+                    ausenciaData[funcionario.usuario_nome] = totalAusenciaNao
+                    break;
+                case 'Ausências Totais':
+                    const qtdAusenciasJustificadas = ausenciasJustificadas.filtradas.filter(ausencia => ausencia.usuarioCod === funcionario.usuario_cod);
+                    const qtdAusenciasNaoJustificadas = ausenciasNaoJustificadas.filtradas.filter(ausencia => ausencia.usuarioCod === funcionario.usuario_cod);
+                    const qtdLicencas = licencasMedicas.filtradas.filter(licenca => licenca.usuarioCod === funcionario.usuario_cod);
+                    const total = qtdAusenciasJustificadas.length + qtdAusenciasNaoJustificadas.length + qtdLicencas.length;
+                    ausenciaData[funcionario.usuario_nome] = total;
+                    break;
+            }
+        })
+
+        const sortedEntries = Object.entries(ausenciaData).sort((a, b) => b[1] - a[1])
+        const sortedAusenciaData = Object.fromEntries(sortedEntries)
+        setQtdAusencias(sortedAusenciaData)
+    }
+
+    const paginatedData = useMemo(() => {
+        if (!qtdAusencia) return {};
+
+        const entries = Object.entries(qtdAusencia);
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const pageEntries = entries.slice(startIndex, endIndex);
+
+        return Object.fromEntries(pageEntries);
+    }, [qtdAusencia, currentPage]);
+
+    const totalPages = qtdAusencia ? Math.ceil(Object.keys(qtdAusencia).length / itemsPerPage) : 0;
+
     useEffect(() => {
         fetchUsuarios()
         fetchFaltas()
@@ -137,6 +210,11 @@ export default function Ausencias() {
         setAusenciasNaoJustificadas(prevState => ({ ...prevState, filtradas: filteredData.ausenciasNaoJustificadas }))
         setLicencasMedicas(prevState => ({ ...prevState, filtradas: filteredData.licencasMedicas }))
     }, [filteredData])
+
+    useEffect(() => {
+        quantidadeAusenciasFuncionario();
+        setCurrentPage(1);
+    }, [funcionarios, ausenciasJustificadas.filtradas, ausenciasNaoJustificadas.filtradas, licencasMedicas.filtradas, folgas.filtradas, ferias.filtradas, ausenciaSelecionada]);
     
     const showGrafico = folgas.filtradas.length > 0 || licencasMedicas.filtradas.length > 0 || ferias.filtradas.length > 0 || ausenciasJustificadas.filtradas.length > 0 || ausenciasNaoJustificadas.filtradas.length > 0
     
@@ -171,22 +249,41 @@ export default function Ausencias() {
                                 onChange={(e) => setDataFim(e.target.value)}
                                 className={`${styles.dateInput}`}
                                 ref={dataFimRef}
+                                min={dataInicio ? dataInicio : undefined}
                                 max={hoje}
-                                min={dataInicio}
                             />
                         </div>
                     </div>
                 </div>
 
                 {showGrafico && (
-                    <div>
-                        < GraficoAusencias 
-                            folgas={folgas.filtradas.length} 
-                            licencasMedicas={licencasMedicas.filtradas.length} 
-                            ferias={ferias.filtradas.length} 
-                            ausenciasJustificadas={ausenciasJustificadas.filtradas.length} 
-                            ausenciasNaoJustificadas={ausenciasNaoJustificadas.filtradas.length} 
-                        />
+                    <div className="flex flex-col lg:flex-row gap-6">
+                        <div className="w-full lg:w-[70%]">
+                            <GraficoAusencias
+                            folgas={folgas.filtradas.length}
+                            licencasMedicas={licencasMedicas.filtradas.length}
+                            ferias={ferias.filtradas.length}
+                            ausenciasJustificadas={ausenciasJustificadas.filtradas.length}
+                            ausenciasNaoJustificadas={ausenciasNaoJustificadas.filtradas.length}
+                            onSliceClick={setAusenciaSelecionada}
+                            />
+                        </div>
+
+                        <div className="w-full lg:w-[30%]">
+                            {qtdAusencia && (
+                                <>
+                                    <TabelaAusencia
+                                        ausenciaDado={paginatedData}
+                                        titulo={ausenciaSelecionada || 'Ausências Totais'}
+                                    />
+                                    <TablePagination
+                                        currentPage={currentPage}
+                                        totalPages={totalPages}
+                                        onPageChange={setCurrentPage}
+                                    />
+                                </>
+                            )}
+                        </div>
                     </div>
                 )}
 
