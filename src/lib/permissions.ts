@@ -20,6 +20,7 @@ const accessRoutes = {
         "/perfil",
         "/historico-ponto",
         "/Colaboradores",
+        "/pontosDiarios",
         "/notFound"
     ],
     GESTOR: [
@@ -36,6 +37,7 @@ const accessRoutes = {
         "/inicioFuncionario",
         "/historico-ponto",
         "/Colaboradores",
+        "/pontosDiarios",
         "/notFound"
     ],
     FUNCIONARIO: [
