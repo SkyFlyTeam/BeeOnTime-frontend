@@ -392,8 +392,9 @@ const Solicitacao = () => {
     return (
       <div className={styles.solicitacao_container}>
         <div className={styles.card_container}>
+          
           <h1 className='font-bold text-4xl'>Solicitações</h1>
-
+          
           <div className=' flex items-center justify-center mt-7'>
             <Skeleton className='h-12 w-[16rem] bg-gray-200 ' />
           </div>

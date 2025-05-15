@@ -4,9 +4,10 @@ import { useState } from 'react';
 
 interface ModalFeriasProps {
   onClose: () => void;
+  isEdicao?: boolean;
 }
 
-const ModalFerias: React.FC<ModalFeriasProps> = ({ onClose }) => {
+const ModalFerias: React.FC<ModalFeriasProps> = ({ onClose, isEdicao }) => {
   const [selectedPeriodo, setSelectedPeriodo] = useState<string>("30 Dias");
 
   const periodos = ["30 Dias", "15 e 15 Dias", "20 e 10 Dias", "10, 15 e 5 Dias"];
@@ -18,9 +19,14 @@ const ModalFerias: React.FC<ModalFeriasProps> = ({ onClose }) => {
         <button onClick={onClose} className={styles.modal_close_button}>
           X
         </button>
-        <p className={styles.modal_title}>Solicitação de Férias</p>
+        {isEdicao ? (
+          <p className={styles.modal_title}>Edição de Solicitação de Férias</p>
+        ) : (
+          <p className={styles.modal_title}>Solicitação de Férias</p>
+        )}
+
         <div>
-          <CalendarFerias />
+          <CalendarFerias isEdicao={isEdicao}/>
         </div>
       </div>
     </div>

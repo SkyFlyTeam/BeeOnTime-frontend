@@ -196,6 +196,7 @@ const CalendarFeriasGestor = ({userPedido}: CalendarFeriasGestorProps) => {
           ))}
         </div>
       ))}
+
       <div className={styles.calendar}>
         <div className={styles.header}>
           <button onClick={handlePrevMonth}>{"<"}</button>

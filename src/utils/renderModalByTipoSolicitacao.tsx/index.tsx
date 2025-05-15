@@ -48,9 +48,11 @@ export function renderModalChildren({
       )
 
     case 2: 
-    return usuarioCargo === "Funcionário" ? (
-      <ModalFeriasGestor userCod={2} onClose={onClose}/>
-    ) : (<p>Funcionários não podem aprovar ou recusar solicitações</p>);
+      return nivelAcessoCod === 0 || nivelAcessoCod === 1 ? (
+        <ModalFeriasGestor userCod={solicitacao.usuarioCod} onClose={onClose} />
+      ) : (
+        <ModalFerias onClose={onClose} isEdicao={true}/>
+      );
     
     case 4:
       return (
