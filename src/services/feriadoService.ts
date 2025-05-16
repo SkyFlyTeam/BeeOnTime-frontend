@@ -1,3 +1,4 @@
+import axios from "axios";
 import { ApiException } from "@/config/apiExceptions";
 import { ApiUsuario } from "@/config/apiUsuario";
 import { Feriado, FeriadoAPIResponse } from "@/interfaces/feriado";
@@ -19,7 +20,7 @@ const getAllFeriadoFromAPI = async (estado: string, municipio: string, ano: stri
     method: 'GET',
     url: 'https://feriados-brasileiros1.p.rapidapi.com/read_uf',
     params: {
-      estado: municipio,
+      estado: estado,
       ano: ano
     },
     headers: {
@@ -44,7 +45,13 @@ const getAllFeriadoFromAPI = async (estado: string, municipio: string, ano: stri
 
   try {
     const feriadosEstaduaisResponse = await axios.request(estaduaisOptions);
-    return feriadosEstaduaisResponse.data as FeriadoAPIResponse[];
+    const feriadosMunicipaisResponse = await axios.request(municipaisOptions);
+    console.log('feriadosEstaduais', feriadosEstaduaisResponse)
+    console.log('feriadosMunicipais', feriadosMunicipaisResponse)
+    const feriadosEstaduais = feriadosEstaduaisResponse.data as FeriadoAPIResponse[];
+    const feriadosMunicipais = feriadosMunicipaisResponse.data as FeriadoAPIResponse[];
+
+    return [...feriadosEstaduais, ...feriadosMunicipais]
   } catch (error) {
     if (error instanceof Error) {
       return new ApiException(error.message || "Erro ao consultar a API.");
@@ -94,9 +101,10 @@ const cadastrarFeriados = async (feriados: Feriado[]): Promise<Feriado[] | ApiEx
 
 
 
-export const setorServices = {
+export const feriadoServices = {
   getAllFeriado,
   getAllFeriadoByEmpresa,
+  getAllFeriadoFromAPI,
   getFeriadoByCod,
   cadastrarFeriados
 }; 

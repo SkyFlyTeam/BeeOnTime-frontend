@@ -9,13 +9,15 @@ import { getUsuario } from "@/services/authService";
 // Components
 import { Button } from "@/components/ui/button";
 import ModalDefinirFeriado from "@/components/custom/ModaisCalendario/ModalDefinirFeriado";
+import { EmpresaAPI } from "@/interfaces/empresa";
+import { empresaServices } from "@/services/empresaService";
 
 export default function Calendario() {
     const [usuario, setUsuario] = useState<Usuario | null>(null);
+    const [empresa, setEmpresa] = useState<EmpresaAPI | null>(null);
     const [acessoCod, setAcessoCod] = useState<number | null>(null);
 
     const [showModalDefinirFeriado, setShowModalDefinirFeriado] = useState(false);
-
 
     const getUser = async () => {
         try {
@@ -28,9 +30,24 @@ export default function Calendario() {
         }
     };
 
+    const fetchEmpresa = async (empCod: number) => {
+        try {
+            const empresa_data = await empresaServices.verificarEmpresaById(empCod);
+            setEmpresa(empresa_data);
+        } catch (error) {
+            console.error("Error fetching user data", error);
+        }
+    };
+
     useEffect(() => {
         getUser();
     }, [])
+
+    useEffect(() => {
+        if(usuario?.empCod){
+            fetchEmpresa(usuario!.empCod);
+        }
+    }, [usuario])
 
     return(
         <>
@@ -48,7 +65,7 @@ export default function Calendario() {
                             onClick={() => setShowModalDefinirFeriado(true)}
                             size='sm'
                         >
-                            Definir Feriado
+                            Definir Feriados
                         </Button>
                     }
                 </div>
@@ -56,7 +73,7 @@ export default function Calendario() {
 
             {showModalDefinirFeriado &&
                 <ModalDefinirFeriado 
-                    empCod={usuario?.empCod}
+                    empresa={empresa!}
                     onClose={() => setShowModalDefinirFeriado(false)}
                     onClick={() => setShowModalDefinirFeriado(false)}
                 />

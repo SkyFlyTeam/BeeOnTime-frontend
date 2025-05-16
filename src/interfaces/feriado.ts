@@ -1,5 +1,5 @@
 export interface Feriado {
-    feriadoCod: number;
+    feriadoCod?: number;
     feriadoData: string | Date;
     feriadoNome: string;
     empCod: number;
