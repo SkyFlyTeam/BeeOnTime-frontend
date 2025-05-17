@@ -14,19 +14,21 @@ import { Usuario } from "@/interfaces/usuario";
 import { usuarioServices } from "@/services/usuarioServices";
 import TabelaAusencia from "@/components/custom/TabelaAusencia";
 import TablePagination from "@/components/custom/TablePagination/TablePagination";
+import { folgaService } from "@/services/folgaService";
+import Folgas from "@/interfaces/folga";
 
 export default function Ausencias() {
     const [folgas, setFolgas] = useState({
-        folgas: [],
-        filtradas: []
+        folgas: [] as Folgas[],
+        filtradas: [] as Folgas[]
     })
     const [licencasMedicas, setLicencasMedicas] = useState({
         licencasMedicas: [] as SolicitacaoInterface[],
         filtradas: [] as SolicitacaoInterface[]
     })
     const [ferias, setFerias] = useState({
-        ferias: [],
-        filtradas: []
+        ferias: [] as Folgas[], 
+        filtradas: [] as Folgas[]
     })
     const [ausenciasJustificadas, setAusenciasJustificadas] = useState({
         ausensiasJustificadas: [] as Faltas[],
@@ -51,7 +53,7 @@ export default function Ausencias() {
     const [hoje, setHoje] = useState("")
     // paginação
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 5;
+    const itemsPerPage = 6;
 
 
     const abrirCalendarioInicio = () => {
@@ -102,6 +104,20 @@ export default function Ausencias() {
         }
     }
 
+    const fetchFolgas = async () => {
+        try {
+            const folgasFounded = await folgaService.getAll()
+            if(!(folgasFounded instanceof ApiException) && folgasFounded) {
+                const folgaFiltrada = folgasFounded.filter((folga) => folga.folgaTipo.tipoFolgaCod === 1)
+                const feriasFiltrada = folgasFounded.filter((folga) => folga.folgaTipo.tipoFolgaCod === 2)
+                setFolgas({folgas: folgaFiltrada, filtradas: folgaFiltrada})
+                setFerias({ferias: feriasFiltrada, filtradas: feriasFiltrada})
+            }
+            console.log(folgasFounded)
+        } catch (error) {
+            throw error
+        }
+    }
 
     const filterData = () => {
         if (!dataInicio && !dataFim) {
@@ -110,10 +126,37 @@ export default function Ausencias() {
             return { 
                 ausenciasJustificadas: ausenciasJustificadas.ausensiasJustificadas, 
                 ausenciasNaoJustificadas: ausenciasNaoJustificadas.ausensiasNaoJustificadas, 
-                licencasMedicas: licencasMedicas.licencasMedicas
+                licencasMedicas: licencasMedicas.licencasMedicas,
+                ferias: ferias.ferias,
+                folgas: folgas.folgas
             }
         }
-        
+
+        const dataInicioDate = dataInicio ? new Date(dataInicio) : null;
+const dataFimDate = dataFim ? new Date(dataFim) : null;
+
+const filterPeriodArray = (periodArray: (string | Date)[]) => {
+    if (periodArray.length === 0) return false;
+
+    const dates = periodArray.map(dateItem => (dateItem instanceof Date) ? dateItem : new Date(dateItem));
+    const minDate = new Date(Math.min(...dates.map(d => d.getTime())));
+    const maxDate = new Date(Math.max(...dates.map(d => d.getTime())));
+
+    console.log("Periodo minDate:", minDate);
+    console.log("Periodo maxDate:", maxDate);
+    console.log("Filtro dataInicio:", dataInicioDate);
+    console.log("Filtro dataFim:", dataFimDate);
+
+    const startsBeforeEnd = !dataFimDate || minDate <= dataFimDate;
+    const endsAfterStart = !dataInicioDate || maxDate >= dataInicioDate;
+
+    console.log("startsBeforeEnd:", startsBeforeEnd);
+    console.log("endsAfterStart:", endsAfterStart);
+
+    return startsBeforeEnd && endsAfterStart;
+}
+
+
         return {
             ausenciasJustificadas: ausenciasJustificadas.ausensiasJustificadas.filter(falta => {
                 const faltaDate = new Date(falta.faltaDia)
@@ -129,7 +172,9 @@ export default function Ausencias() {
                 const solicitacaoDate = new Date(solicitacao.solicitacaoDataPeriodo)
                 return (!dataInicio || solicitacaoDate >= new Date(dataInicio)) &&
                     (!dataFim || solicitacaoDate <= new Date(dataFim))
-            })
+            }),
+            folgas: folgas.folgas.filter(folga => filterPeriodArray(folga.folgaDataPeriodo)),
+            ferias: ferias.ferias.filter(feria => filterPeriodArray(feria.folgaDataPeriodo))
         }
     }
 
@@ -138,12 +183,20 @@ export default function Ausencias() {
         
         funcionarios.forEach((funcionario) => {
             switch (ausenciaSelecionada) {
-                // case 'Folga':
-                //     ausenciaData[funcionario.usuario_nome] = folgas.filtradas.filter(f => f.usuarioCod === funcionario.usuario_cod).length;
-                //     break;
-                // case 'Férias':
-                //     ausenciaData[funcionario.usuario_nome] = ferias.filtradas.filter(f => f.usuarioCod === funcionario.usuario_cod).length;
-                //     break;
+                case 'Folga':
+                    const totalFolgas = folgas.filtradas.filter(f => f.usuarioCod === funcionario.usuario_cod).length
+                    if(totalFolgas == 0){
+                        break
+                    }
+                    ausenciaData[funcionario.usuario_nome] = totalFolgas
+                    break;
+                case 'Férias':
+                    const totalFerias = ferias.filtradas.filter(f => f.usuarioCod === funcionario.usuario_cod).length
+                    if(totalFerias == 0) {
+                        break
+                    }
+                    ausenciaData[funcionario.usuario_nome] = totalFerias
+                    break;
                 case 'Licença médica':
                     const totalLicenca = licencasMedicas.filtradas.filter(l => l.usuarioCod === funcionario.usuario_cod).length
                     if (totalLicenca == 0) {
@@ -197,6 +250,7 @@ export default function Ausencias() {
         fetchUsuarios()
         fetchFaltas()
         fetchSolicitacoes()
+        fetchFolgas()
         const currentDate = new Date().toISOString().split("T")[0]
         setHoje(currentDate)
     }, [])
@@ -206,9 +260,11 @@ export default function Ausencias() {
     }, [dataInicio, dataFim])
 
     useEffect(() => {
-        setAusenciasJustificadas(prevState => ({ ...prevState, filtradas: filteredData.ausenciasJustificadas }))
-        setAusenciasNaoJustificadas(prevState => ({ ...prevState, filtradas: filteredData.ausenciasNaoJustificadas }))
-        setLicencasMedicas(prevState => ({ ...prevState, filtradas: filteredData.licencasMedicas }))
+        setAusenciasJustificadas(prevState => ({ ...prevState, filtradas: filteredData.ausenciasJustificadas }));
+        setAusenciasNaoJustificadas(prevState => ({ ...prevState, filtradas: filteredData.ausenciasNaoJustificadas }));
+        setLicencasMedicas(prevState => ({ ...prevState, filtradas: filteredData.licencasMedicas }));
+        setFolgas(prevState => ({ ...prevState, filtradas: filteredData.folgas }));
+        setFerias(prevState => ({ ...prevState, filtradas: filteredData.ferias }));
     }, [filteredData])
 
     useEffect(() => {
@@ -269,18 +325,22 @@ export default function Ausencias() {
                             />
                         </div>
 
-                        <div className="w-full lg:w-[30%]">
+                        <div className="w-full lg:w-[30%] h-[450px] flex flex-col min-w-0 items-center">
                             {qtdAusencia && (
                                 <>
-                                    <TabelaAusencia
+                                    <div className="flex-1 overflow-y-auto overflow-x-auto w-full min-w-0 flex flex-col items-center pt-6">
+                                        <TabelaAusencia
                                         ausenciaDado={paginatedData}
                                         titulo={ausenciaSelecionada || 'Ausências Totais'}
-                                    />
-                                    <TablePagination
+                                        />
+                                    </div>
+                                    <div className="mt-auto pr-4">
+                                        <TablePagination
                                         currentPage={currentPage}
                                         totalPages={totalPages}
                                         onPageChange={setCurrentPage}
-                                    />
+                                        />
+                                    </div>
                                 </>
                             )}
                         </div>
