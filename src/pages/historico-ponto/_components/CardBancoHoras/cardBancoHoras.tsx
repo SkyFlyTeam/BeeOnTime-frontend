@@ -201,6 +201,9 @@ export const CardBancoHoras = ({ usuarioCod }: CardBancoHorasProps) => {
         showToast(true);
         setShowChangeBanco(false);
         setValorAdicional(0);
+
+        fetchBancoHoras(dataFormatada, usuarioCod);
+        fetchExtrasPaga(dataFormatada, usuarioCod);
     }
 
       const showToast = (success: boolean) => {
