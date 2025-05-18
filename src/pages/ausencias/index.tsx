@@ -16,6 +16,7 @@ import TabelaAusencia from "@/components/custom/TabelaAusencia";
 import TablePagination from "@/components/custom/TablePagination/TablePagination";
 import { folgaService } from "@/services/folgaService";
 import Folgas from "@/interfaces/folga";
+import { getUsuario } from "@/services/authService";
 
 export default function Ausencias() {
     const [folgas, setFolgas] = useState({
@@ -38,6 +39,8 @@ export default function Ausencias() {
         ausensiasNaoJustificadas: [] as Faltas[],
         filtradas: [] as Faltas[]
     })
+
+    const [usuario, setUsuario] = useState<Usuario>()
 
     const [funcionarios, setFuncionarios] = useState<Usuario[]>([])
     // estrutura de dados para serem enviados para a tabela
@@ -70,12 +73,18 @@ export default function Ausencias() {
 
     const fetchFaltas = async () => {
         try {
-            const faltasFounded = await faltaServices.getAll()
+            let faltasFounded = undefined
+            if(usuario && usuario?.nivelAcesso.nivelAcesso_cod == 1){
+                faltasFounded = await faltaServices.getBySetor(usuario.setor.setorCod)
+            } else {
+                faltasFounded = await faltaServices.getAll()
+            }
             if (!(faltasFounded instanceof ApiException) && faltasFounded){
-                const faltasJustificadas = faltasFounded.filter(falta => falta.faltaJustificativa != null)
-                const faltasNaoJustificadas = faltasFounded.filter(falta => falta.faltaJustificativa == null)
-                setAusenciasJustificadas({ausensiasJustificadas: faltasJustificadas, filtradas: faltasJustificadas})
-                setAusenciasNaoJustificadas({ausensiasNaoJustificadas: faltasNaoJustificadas, filtradas: faltasNaoJustificadas})
+                const faltasArray = Array.isArray(faltasFounded) ? faltasFounded : [faltasFounded];
+                const faltasJustificadas = faltasArray.filter((falta: Faltas) => falta.faltaJustificativa != null);
+                const faltasNaoJustificadas = faltasArray.filter((falta: Faltas) => falta.faltaJustificativa == null);
+                setAusenciasJustificadas({ausensiasJustificadas: faltasJustificadas, filtradas: faltasJustificadas});
+                setAusenciasNaoJustificadas({ausensiasNaoJustificadas: faltasNaoJustificadas, filtradas: faltasNaoJustificadas});
             }
         } catch (err) {
             throw err
@@ -84,9 +93,16 @@ export default function Ausencias() {
 
     const fetchSolicitacoes = async () => {
         try {
-            const solicitacoesFounded = await solicitacaoServices.getSolicitacaoByTipo(6)
+            let solicitacoesFounded = undefined
+            if(usuario && usuario?.nivelAcesso.nivelAcesso_cod == 1){
+                solicitacoesFounded = await solicitacaoServices.getAllSolicitacaoBySetorTipo(6, usuario.setor.setorCod)
+            } else {
+                solicitacoesFounded = await solicitacaoServices.getSolicitacaoByTipo(6)
+            }
             if(!(solicitacoesFounded instanceof ApiException) && solicitacoesFounded){
-                setLicencasMedicas({licencasMedicas: solicitacoesFounded, filtradas: solicitacoesFounded})
+                const solicitacaoArray = Array.isArray(solicitacoesFounded) ? solicitacoesFounded : [solicitacoesFounded]
+                const solicitacoesAprovadas = solicitacaoArray.filter((solicitacao: SolicitacaoInterface) => solicitacao.solicitacaoStatus.toLowerCase() == "aprovada".toLowerCase())
+                setLicencasMedicas({licencasMedicas: solicitacoesAprovadas, filtradas: solicitacoesAprovadas})
             }
         } catch (err) {
             throw err
@@ -106,14 +122,18 @@ export default function Ausencias() {
 
     const fetchFolgas = async () => {
         try {
-            const folgasFounded = await folgaService.getAll()
+            let folgasFounded = undefined
+            if(usuario && usuario?.nivelAcesso.nivelAcesso_cod == 1){
+                folgasFounded = await folgaService.getBySetor(usuario.setor.setorCod)
+            } else {
+                folgasFounded = await folgaService.getAll()
+            }
             if(!(folgasFounded instanceof ApiException) && folgasFounded) {
                 const folgaFiltrada = folgasFounded.filter((folga) => folga.folgaTipo.tipoFolgaCod === 1)
                 const feriasFiltrada = folgasFounded.filter((folga) => folga.folgaTipo.tipoFolgaCod === 2)
                 setFolgas({folgas: folgaFiltrada, filtradas: folgaFiltrada})
                 setFerias({ferias: feriasFiltrada, filtradas: feriasFiltrada})
             }
-            console.log(folgasFounded)
         } catch (error) {
             throw error
         }
@@ -133,28 +153,20 @@ export default function Ausencias() {
         }
 
         const dataInicioDate = dataInicio ? new Date(dataInicio) : null;
-const dataFimDate = dataFim ? new Date(dataFim) : null;
+        const dataFimDate = dataFim ? new Date(dataFim) : null;
 
-const filterPeriodArray = (periodArray: (string | Date)[]) => {
-    if (periodArray.length === 0) return false;
+        const filterPeriodArray = (periodArray: (string | Date)[]) => {
+            if (periodArray.length === 0) return false;
 
-    const dates = periodArray.map(dateItem => (dateItem instanceof Date) ? dateItem : new Date(dateItem));
-    const minDate = new Date(Math.min(...dates.map(d => d.getTime())));
-    const maxDate = new Date(Math.max(...dates.map(d => d.getTime())));
+            const dates = periodArray.map(dateItem => (dateItem instanceof Date) ? dateItem : new Date(dateItem));
+            const minDate = new Date(Math.min(...dates.map(d => d.getTime())));
+            const maxDate = new Date(Math.max(...dates.map(d => d.getTime())));
 
-    console.log("Periodo minDate:", minDate);
-    console.log("Periodo maxDate:", maxDate);
-    console.log("Filtro dataInicio:", dataInicioDate);
-    console.log("Filtro dataFim:", dataFimDate);
+            const startsBeforeEnd = !dataFimDate || minDate <= dataFimDate;
+            const endsAfterStart = !dataInicioDate || maxDate >= dataInicioDate;
 
-    const startsBeforeEnd = !dataFimDate || minDate <= dataFimDate;
-    const endsAfterStart = !dataInicioDate || maxDate >= dataInicioDate;
-
-    console.log("startsBeforeEnd:", startsBeforeEnd);
-    console.log("endsAfterStart:", endsAfterStart);
-
-    return startsBeforeEnd && endsAfterStart;
-}
+            return startsBeforeEnd && endsAfterStart;
+        }
 
 
         return {
@@ -180,58 +192,66 @@ const filterPeriodArray = (periodArray: (string | Date)[]) => {
 
     const quantidadeAusenciasFuncionario = () => {
         const ausenciaData: Record<string, number> = {}
-        
-        funcionarios.forEach((funcionario) => {
-            switch (ausenciaSelecionada) {
-                case 'Folga':
-                    const totalFolgas = folgas.filtradas.filter(f => f.usuarioCod === funcionario.usuario_cod).length
-                    if(totalFolgas == 0){
-                        break
-                    }
-                    ausenciaData[funcionario.usuario_nome] = totalFolgas
-                    break;
-                case 'Férias':
-                    const totalFerias = ferias.filtradas.filter(f => f.usuarioCod === funcionario.usuario_cod).length
-                    if(totalFerias == 0) {
-                        break
-                    }
-                    ausenciaData[funcionario.usuario_nome] = totalFerias
-                    break;
-                case 'Licença médica':
-                    const totalLicenca = licencasMedicas.filtradas.filter(l => l.usuarioCod === funcionario.usuario_cod).length
-                    if (totalLicenca == 0) {
-                        break
-                    }
-                    ausenciaData[funcionario.usuario_nome] = totalLicenca
-                    break;
-                case 'Ausências com justificativa':
-                    const totalAusencia = ausenciasJustificadas.filtradas.filter(a => a.usuarioCod === funcionario.usuario_cod).length
-                    if (totalAusencia == 0) {
-                        break
-                    }
-                    ausenciaData[funcionario.usuario_nome] = totalAusencia
-                    break;
-                case 'Ausências sem justificativa':
-                    const totalAusenciaNao = ausenciasNaoJustificadas.filtradas.filter(a => a.usuarioCod === funcionario.usuario_cod).length
-                    if (totalAusenciaNao == 0) {
-                        break
-                    }
-                    ausenciaData[funcionario.usuario_nome] = totalAusenciaNao
-                    break;
-                case 'Ausências Totais':
-                    const qtdAusenciasJustificadas = ausenciasJustificadas.filtradas.filter(ausencia => ausencia.usuarioCod === funcionario.usuario_cod);
-                    const qtdAusenciasNaoJustificadas = ausenciasNaoJustificadas.filtradas.filter(ausencia => ausencia.usuarioCod === funcionario.usuario_cod);
-                    const qtdLicencas = licencasMedicas.filtradas.filter(licenca => licenca.usuarioCod === funcionario.usuario_cod);
-                    const total = qtdAusenciasJustificadas.length + qtdAusenciasNaoJustificadas.length + qtdLicencas.length;
-                    ausenciaData[funcionario.usuario_nome] = total;
-                    break;
-            }
-        })
 
-        const sortedEntries = Object.entries(ausenciaData).sort((a, b) => b[1] - a[1])
-        const sortedAusenciaData = Object.fromEntries(sortedEntries)
-        setQtdAusencias(sortedAusenciaData)
+        funcionarios.forEach((funcionario) => {
+            let count = 0;
+
+            switch (ausenciaSelecionada) {
+            case 'Folga':
+                count = folgas.filtradas.filter(f => f.usuarioCod === funcionario.usuario_cod).length;
+                break;
+
+            case 'Férias':
+                count = ferias.filtradas.filter(f => f.usuarioCod === funcionario.usuario_cod).length;
+                break;
+
+            case 'Licença médica':
+                count = licencasMedicas.filtradas.filter(l => l.usuarioCod === funcionario.usuario_cod).length;
+                break;
+
+            case 'Ausências com justificativa':
+                count = ausenciasJustificadas.filtradas
+                .filter(a => a.usuarioCod === funcionario.usuario_cod).length;
+                break;
+
+            case 'Ausências sem justificativa':
+                count = ausenciasNaoJustificadas.filtradas
+                .filter(a => a.usuarioCod === funcionario.usuario_cod).length;
+                break;
+
+            case 'Ausências Totais':
+            default:
+                // aqui somamos **todas** as 5 categorias
+                const qtdFolgas   = folgas.filtradas
+                .filter(f => f.usuarioCod === funcionario.usuario_cod).length;
+                const qtdFerias   = ferias.filtradas
+                .filter(f => f.usuarioCod === funcionario.usuario_cod).length;
+                const qtdLicenca  = licencasMedicas.filtradas
+                .filter(l => l.usuarioCod === funcionario.usuario_cod).length;
+                const qtdJust     = ausenciasJustificadas.filtradas
+                .filter(a => a.usuarioCod === funcionario.usuario_cod).length;
+                const qtdNaoJust  = ausenciasNaoJustificadas.filtradas
+                .filter(a => a.usuarioCod === funcionario.usuario_cod).length;
+
+                count = qtdFolgas + qtdFerias + qtdLicenca + qtdJust + qtdNaoJust;
+                break;
+            }
+
+            // só inclui usuário com count > 0 (igual ao que você já fazia)
+            if (count > 0) {
+            ausenciaData[funcionario.usuario_nome] = count;
+            }
+        });
+
+        // ordena do maior para o menor
+        const sorted = Object.fromEntries(
+            Object.entries(ausenciaData)
+            .sort(([, a], [, b]) => b - a)
+        );
+
+        setQtdAusencias(sorted);
     }
+
 
     const paginatedData = useMemo(() => {
         if (!qtdAusencia) return {};
@@ -246,11 +266,26 @@ const filterPeriodArray = (periodArray: (string | Date)[]) => {
 
     const totalPages = qtdAusencia ? Math.ceil(Object.keys(qtdAusencia).length / itemsPerPage) : 0;
 
+    const getUser = async () => {
+        try {
+            const { data } = await getUsuario()
+            setUsuario(data)
+        } catch (err) {
+            throw err
+        }
+    }
+
     useEffect(() => {
+        if (!usuario) return;
+
         fetchUsuarios()
         fetchFaltas()
         fetchSolicitacoes()
         fetchFolgas()
+    }, [usuario])
+
+    useEffect(() => {
+        getUser()
         const currentDate = new Date().toISOString().split("T")[0]
         setHoje(currentDate)
     }, [])
@@ -330,15 +365,15 @@ const filterPeriodArray = (periodArray: (string | Date)[]) => {
                                 <>
                                     <div className="flex-1 overflow-y-auto overflow-x-auto w-full min-w-0 flex flex-col items-center pt-6">
                                         <TabelaAusencia
-                                        ausenciaDado={paginatedData}
-                                        titulo={ausenciaSelecionada || 'Ausências Totais'}
+                                            ausenciaDado={paginatedData}
+                                            titulo={ausenciaSelecionada}
                                         />
                                     </div>
                                     <div className="mt-auto pr-4">
                                         <TablePagination
-                                        currentPage={currentPage}
-                                        totalPages={totalPages}
-                                        onPageChange={setCurrentPage}
+                                            currentPage={currentPage}
+                                            totalPages={totalPages}
+                                            onPageChange={setCurrentPage}
                                         />
                                     </div>
                                 </>

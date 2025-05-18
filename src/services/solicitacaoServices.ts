@@ -46,6 +46,20 @@ const getAllSolicitacaoBySetor = async (id: number) => {
   }
 }
 
+const getAllSolicitacaoBySetorTipo = async (tipoSolicitacaoCod: number, setorCod: number) => {
+  try {
+    const { data } = await ApiSolicitacao.get(`/solicitacao/tipo/${tipoSolicitacaoCod}/setor/${setorCod}`);
+    return data;
+
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return new ApiException(error.message || "Erro ao consultar a API.");
+    }
+
+    return new ApiException("Erro desconhecido.");
+  }
+}
+
 const getSolicitacaoById = async (id: number): Promise<SolicitacaoInterface | ApiException> => {
   try {
     const { data } = await ApiSolicitacao.get(`/solicitacao/${id}`);
@@ -72,8 +86,6 @@ const createSolicitacao = async (formData: FormData): Promise<SolicitacaoInterfa
     throw new ApiException(error?.message || "Erro ao cadastrar solicitação.");
   }
 };
-
-
 
 const updateSolicitacao = async (solicitacao: SolicitacaoInterface): Promise<SolicitacaoInterface | ApiException> => {
   try {
@@ -148,5 +160,6 @@ export const solicitacaoServices = {
   createSolicitacao,
   getAllSolicitacaoByUsuario,
   getAllSolicitacaoBySetor,
-  getSolicitacaoByTipo
+  getSolicitacaoByTipo,
+  getAllSolicitacaoBySetorTipo
 };

@@ -57,6 +57,14 @@ export default function GraficoAusencias({
         `${label}\n${((values[i] / total) * 100).toFixed(1)}%`
     );
 
+    const colorMap: Record<string,string> = {
+    'Folga':                       '#FFB503',
+    'Licença médica':              '#42130F',
+    'Férias':                      '#744A26',
+    'Ausências com justificativa': '#F79522',
+    'Ausências sem justificativa': '#FFCB50',
+    };
+
     // Filtra só as fatias com valor > 0
     const filteredData = pureLabels
         .map((label, i) => ({ label, displayLabel: displayLabels[i], value: values[i] }))
@@ -64,13 +72,12 @@ export default function GraficoAusencias({
 
     const dataAusencias = {
         labels: filteredData.map(item => item.displayLabel),
-        datasets: [
-            {
-                data: filteredData.map(item => item.value),
-                backgroundColor: ['#FFB503', '#42130F', '#744A26', '#F79522', '#FFCB50'],
-            },
-        ],
+        datasets: [{
+            data:    filteredData.map(item => item.value),
+            backgroundColor: filteredData.map(item => colorMap[item.label]),
+        }],
     };
+
 
     const options = {
         plugins: {

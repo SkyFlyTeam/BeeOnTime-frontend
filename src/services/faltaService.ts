@@ -26,6 +26,18 @@ const getFaltabyUsuarioCodAndDate = async (usuario_cod: number, date: string) =>
     }
 }
 
+const getBySetor = async (setorCod: number) => {
+    try {
+        const { data } = await ApiPonto.get(`/faltas/setor/${setorCod}`)
+        return data as Faltas
+    } catch (error) {
+        if (error instanceof Error) {
+            return new ApiException(error.message || "Erro ao consultar horas do usuário.");
+        }
+        return new ApiException("Erro desconhecido.");
+    }
+}
+
 const updateFalta = async(faltaCod: number, justificativa: string) => {
     try {
         const { data } = await ApiPonto.put(`/faltas/atualizar`, {
@@ -44,5 +56,6 @@ const updateFalta = async(faltaCod: number, justificativa: string) => {
 export const faltaServices = {
     getAll,
     getFaltabyUsuarioCodAndDate,
-    updateFalta
+    updateFalta,
+    getBySetor
 }
