@@ -5,7 +5,7 @@ export default interface SolicitacaoInterface {
   solicitacaoAnexoNome?: string
   solicitacaoMensagem: string;
   solicitacaoDevolutiva: string;
-  solicitacaoDataPeriodo: string;
+  solicitacaoDataPeriodo: Date[];
   solicitacaoStatus: string
   horasSolicitadas: number | null
   tipoSolicitacaoCod: {

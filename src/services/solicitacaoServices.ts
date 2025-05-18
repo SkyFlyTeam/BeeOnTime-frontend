@@ -6,17 +6,25 @@ import SolicitacaoInterface, { CriarSolicitacaoInterface } from "../interfaces/S
 
 const getAllSolicitacao = async (): Promise<SolicitacaoInterface[] | ApiException> => {
   try {
-    const { data } = await ApiSolicitacao.get("/solicitacao");
-    return data as SolicitacaoInterface[];
+    const resp = await ApiSolicitacao.get<SolicitacaoInterface[]>("/solicitacao");
+    const rawList = resp.data;
 
+    const data: SolicitacaoInterface[] = rawList.map(item => ({
+      ...item,
+      solicitacaoDataPeriodo: Array.isArray(item.solicitacaoDataPeriodo)
+        ? item.solicitacaoDataPeriodo.map(str => new Date(str))
+        : []
+    }));
+
+    return data;
   } catch (error: unknown) {
     if (error instanceof Error) {
       return new ApiException(error.message || "Erro ao consultar a API.");
     }
-
     return new ApiException("Erro desconhecido.");
   }
 };
+
 
 const getAllSolicitacaoByUsuario = async (id: number) => {
   try {

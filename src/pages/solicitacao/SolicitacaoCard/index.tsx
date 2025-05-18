@@ -44,13 +44,25 @@ const SolicitacaoCard = ({
   usuarioLogadoCod,
   onDelete, // Adicionando função onDelete
 }: SolicitacaoCard) => {
+
+  // antes do return do seu componente:
+  const datas = Array.isArray(solicitacao.solicitacaoDataPeriodo)
+    ? solicitacao.solicitacaoDataPeriodo
+    : []
+
+  const formatado = datas.map(item => {
+    const d = item instanceof Date ? item : new Date(item)
+    return d.toLocaleDateString('pt-BR')
+  })
+
   const dataFormatada =
-    solicitacao && solicitacao.solicitacaoDataPeriodo
-      ? (() => {
-          const [ano, mes, dia] = solicitacao.solicitacaoDataPeriodo.split('-')
-          return `${String(dia).padStart(2, '0')}/${String(mes).padStart(2, '0')}/${ano}`
-        })()
-      : ''
+    formatado.length === 0
+      ? ''
+      : formatado.length === 1
+      ? formatado[0]
+      : `${formatado[0]} – ${formatado[formatado.length - 1]}`
+
+
 
   const isOwnSolicitacao = solicitacao && solicitacao.usuarioCod === usuarioLogadoCod
 
