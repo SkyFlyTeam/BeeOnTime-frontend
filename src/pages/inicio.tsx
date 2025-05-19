@@ -63,14 +63,11 @@ export default function Home() {
     <>
       <div className='flex flex-col gap-10'>
         <h1 className='text-4xl font-semibold'>Olá, {usuarioNome}!</h1>
-        {acessoCod === 0 ? null :
           <div>
-            {acessoCod === 0 ? null : <InicioFuncionario />}
+            {acessoCod === 0 ? <PontosDiarios /> : <InicioFuncionario />}
          </div>
-}
-        <div className='mb-10'>
-          {acessoCod === 2 && 1 ? null : <PontosDiarios />}
-        </div>
+
+
         
       </div>
     </>

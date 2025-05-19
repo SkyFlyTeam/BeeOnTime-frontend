@@ -40,11 +40,6 @@ export const columnsPontoDiario: ColumnDef<PontoDiario>[] = [
         cell: ({ row }) => row.getValue("entrada") || "-"
     },
     {
-        accessorKey: "saida",
-        header: "SAÍDA",
-        cell: ({ row }) => row.getValue("saida") || "-"
-    },
-    {
       id: "intervalo",
         header: "INTERVALO",
         cell: ({ row }) => {
@@ -57,5 +52,11 @@ export const columnsPontoDiario: ColumnDef<PontoDiario>[] = [
 
             return `${inicio} - ${volta}`;
         }
-    }
+    },
+    {
+        accessorKey: "saida",
+        header: "SAÍDA",
+        cell: ({ row }) => row.getValue("saida") || "-"
+    },
+    
 ];

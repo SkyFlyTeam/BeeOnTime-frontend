@@ -24,18 +24,18 @@
 }
 
 .presente {
-    background-color: #a7fbcf;
-    color: #66b98a;
+    background-color: #A4FF9F;
+    color: #2A7926;
 }
 
 .ausencia {
-    background-color: #b4c8fb;
-    color: #6d7ca7;
+    background-color: #FFAAAA;
+    color: #D61818;
 }
 
 .ausencia_medica {
-    background-color: #b4c8fb;
-    color: #6d7ca7;
+    background-color: #FFAAAA;
+    color: #D61818;
 }
 
 @media (max-width: 426px) {
