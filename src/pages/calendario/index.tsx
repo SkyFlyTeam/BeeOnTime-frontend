@@ -11,11 +11,25 @@ import { Button } from "@/components/ui/button";
 import ModalDefinirFeriado from "@/components/custom/ModaisCalendario/ModalDefinirFeriado";
 import { EmpresaAPI } from "@/interfaces/empresa";
 import { empresaServices } from "@/services/empresaService";
+import { CardCalendario } from "./components/CardCalendario";
+import { feriadoServices } from "@/services/feriadoService";
+import { Feriado } from "@/interfaces/feriado";
+import { faltaServices } from "@/services/faltaService";
+import { CardResumoMensal } from "./components/ResumoMensal";
+import { CardLegenda } from "./components/CardLegenda";
+import Tab from "@/components/custom/tab";
 
 export default function Calendario() {
     const [usuario, setUsuario] = useState<Usuario | null>(null);
     const [empresa, setEmpresa] = useState<EmpresaAPI | null>(null);
     const [acessoCod, setAcessoCod] = useState<number | null>(null);
+
+    const [activeTab, setActiveTab] = useState<"SETOR" | "MEUS DADOS">("SETOR");
+    const [cardMensalAcesso, setCardMensalAcesso] = useState<'adm' | 'func' | 'jornada' | null>(null);
+
+    const [feriados, setFeriados] = useState<Feriado[] | null>(null);
+
+    const [loading, setLoading] = useState(true);
 
     const [showModalDefinirFeriado, setShowModalDefinirFeriado] = useState(false);
 
@@ -25,6 +39,12 @@ export default function Calendario() {
             const usuario = user.data;
             setUsuario(usuario);
             setAcessoCod(usuario.nivelAcesso.nivelAcesso_cod);
+            if(acessoCod === 2){
+                setCardMensalAcesso("func")
+            }else{
+                setCardMensalAcesso("adm")
+            }
+
         } catch (error) {
             console.error("Error fetching user data", error);
         }
@@ -34,10 +54,22 @@ export default function Calendario() {
         try {
             const empresa_data = await empresaServices.verificarEmpresaById(empCod);
             setEmpresa(empresa_data);
+            
+            setLoading(false)
         } catch (error) {
             console.error("Error fetching user data", error);
         }
     };
+
+    const fetchFeriados = async (empCod: number) => {
+        try {
+            const feriado_data = await feriadoServices.getAllFeriadoByEmpresa(empCod);
+            setFeriados(feriado_data);
+        } catch (error) {
+            console.error("Error fetching user data", error);
+        }
+    };
+
 
     useEffect(() => {
         getUser();
@@ -49,8 +81,29 @@ export default function Calendario() {
         }
     }, [usuario])
 
+    useEffect(() => {
+        if(empresa){
+
+        }
+    }, [empresa])
+
+    useEffect(() => {
+        if((acessoCod === 2 || acessoCod === 1 && activeTab === 'MEUS DADOS') && usuario){
+            setCardMensalAcesso('func')
+        } else if(acessoCod === 0 || (acessoCod === 1 && activeTab === 'SETOR')) {
+            setCardMensalAcesso('adm')
+        }
+    }, [acessoCod, usuario, activeTab])
+
+    const handleChangeTab = (status: string) => {
+        setActiveTab(status ==  'SETOR' ? "SETOR" : "MEUS DADOS")
+    }
+
     return(
-        <>
+        loading ? (
+            <></>
+        ) : (
+            <>
             <div className="flex w-full justify-start items-center mb-4">
                 <h1 className="text-xl md:text-3xl font-semibold">
                     {acessoCod === 0 ? 'Calendário da Empresa' : 'Meu Calendário'}
@@ -68,6 +121,23 @@ export default function Calendario() {
                             Definir Feriados
                         </Button>
                     }
+                    {acessoCod === 1 &&          
+                        <Tab
+                            activeTab={activeTab}
+                            onClick={handleChangeTab}
+                            tabLabels={['SETOR', 'MEUS DADOS']} 
+                            showBadge={false}  
+                        />
+                    }
+                </div>
+                <div className="flex w-full items-center md:gap-16 gap-8 flex-wrap">
+                    <div className="flex flex-1">
+                        <CardCalendario funcCalendar={cardMensalAcesso == 'func'} />
+                    </div>
+                    <div className="flex flex-[2.5] md:flex-col md:gap-16 gap-8 h-full md:justify-start justify-end flex-col-reverse">
+                        <CardResumoMensal acesso={cardMensalAcesso!} />
+                        <CardLegenda />
+                    </div>
                 </div>
             </div>
 
@@ -78,7 +148,7 @@ export default function Calendario() {
                     onClick={() => setShowModalDefinirFeriado(false)}
                 />
             }
-
-        </>
+            </>
+        )
     )
 }

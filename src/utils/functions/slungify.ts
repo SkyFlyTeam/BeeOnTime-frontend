@@ -1,4 +1,8 @@
 export const slugify = (str: string) => {
+  /*
+    Transforma uma string no padrão de snake case retirando caracteres especiais 
+    -> Ex: 'São jose dos campos" - sao_jose_dos_campos
+  */
   return str
     // 1. Decompõe acentos: transforma 'ã' em 'a' + '~', etc.
     .normalize('NFD')

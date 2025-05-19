@@ -136,6 +136,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           title: "GESTÃO DA EMPRESA",
           items: [
             { title: "Colaboradores", url: "/colaboradores", icon: Building },
+            { title: "Calendário", url: "/calendario", icon: CalendarDays },
           ],
         },
       ],

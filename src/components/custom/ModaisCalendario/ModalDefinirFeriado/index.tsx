@@ -4,12 +4,15 @@ interface DefinirFeriadoProps {
     onClick: () => void;
 }
 
+import { useEffect, useState } from "react";
+
 // Components
 import { Checkbox } from "@/components/ui/checkbox";
+import { toast, ToastContainer } from "react-toastify";
 
 // Styles
-import styles from "./style.module.css";
-import { useEffect, useState } from "react";
+import styles from "../style.module.css";
+
 import { Feriado, FeriadoAPIResponse } from "@/interfaces/feriado";
 import { feriadoServices } from "@/services/feriadoService";
 import { Empresa, EmpresaAPI } from "@/interfaces/empresa";
@@ -128,8 +131,10 @@ const ModalDefinirFeriado: React.FC<DefinirFeriadoProps> = ({
                 return mapped_feriado
             })
             const feriados_response = await feriadoServices.cadastrarFeriados(mapped_feriados);
+            showToast(true);
         }catch (err) {
            console.error("Erro ao salvar feriados.");
+            showToast(false);
         }
     }
 
@@ -161,6 +166,22 @@ const ModalDefinirFeriado: React.FC<DefinirFeriadoProps> = ({
         const [day, month, year] = brDate.split('/');
         return `${year}-${month}-${day}`;
     }
+
+    const showToast = (success: boolean) => {
+        success ? showSucessToast() : showErrorToast();
+    }
+
+    const showSucessToast = () => {
+        toast.success("Feriados salvos com sucesso!", {
+            position: "top-center",
+        });
+    };
+
+    const showErrorToast = () => {
+        toast.error("Erro salvar feriados.", {
+            position: "top-center",
+        });
+    };
 
     return (
         <>
@@ -202,6 +223,7 @@ const ModalDefinirFeriado: React.FC<DefinirFeriadoProps> = ({
                 </Button>
             </div>
         </div>
+        <ToastContainer position="top-center" autoClose={3000} />
         </>
     );
 };
