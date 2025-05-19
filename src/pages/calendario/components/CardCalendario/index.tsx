@@ -16,6 +16,7 @@ import ModalDefinirFolgaCalendario from "@/components/custom/ModaisCalendario/Mo
 
 interface CardCalendarioProps {
     funcCalendar: boolean;
+    empCod: number;
 }
 
 const eventColorClasses: Record<string, string> = {
@@ -28,7 +29,7 @@ type MarkedDay =
   | { day: number; events: { tipo: string; contagem: number }[] } // usado quando `!funcCalendar`
   | { day: number; event: string }; // usado quando `funcCalendar`
 
-export const CardCalendario = ({ funcCalendar }: CardCalendarioProps) => {
+export const CardCalendario = ({ funcCalendar, empCod }: CardCalendarioProps) => {
     const [selectedDate, setSelectedDate] = useState(new Date());
 
     // Modais
@@ -170,6 +171,7 @@ export const CardCalendario = ({ funcCalendar }: CardCalendarioProps) => {
                         diaSelecionado={selectedDate}
                         onClose={() => setShowModalDefinirFolga(false)}
                         onClick={() => setShowModalDefinirFolga(false)}
+                        empCod={empCod}
                     />
                 }
             </>

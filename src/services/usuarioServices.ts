@@ -67,6 +67,18 @@ const getAllUsuarios = async () => {
   }
 };
 
+const getUsariosByEmpresa = async (empCod: number) => {
+  try {
+    const response = await ApiUsuario.get(`/usuario/empresa/${empCod}`);
+    return response.data as Usuario[];
+  } catch (error) {
+    if (error instanceof Error) {
+      return new ApiException(error.message || "Erro ao consultar a API.");
+    }
+    return new ApiException("Erro desconhecido.");
+  }
+};
+
 const obterUsuarioPorId = async (id: number) => {
   try {
     const response = await ApiUsuario.get(`/usuario/${id}`);
@@ -112,6 +124,7 @@ export const usuarioServices = {
   cadastrarUsuarioComJornada,
   getUsuarioById,
   getAllUsuarios,
+  getUsariosByEmpresa,
   obterUsuarioPorId,
   atualizarUsuario,
   excluirUsuario

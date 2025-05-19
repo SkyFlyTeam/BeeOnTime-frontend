@@ -132,7 +132,7 @@ export default function Calendario() {
                 </div>
                 <div className="flex w-full items-center md:gap-16 gap-8 flex-wrap">
                     <div className="flex flex-1">
-                        <CardCalendario funcCalendar={cardMensalAcesso == 'func'} />
+                        <CardCalendario funcCalendar={cardMensalAcesso == 'func'} empCod={usuario!.empCod} />
                     </div>
                     <div className="flex flex-[2.5] md:flex-col md:gap-16 gap-8 h-full md:justify-start justify-end flex-col-reverse">
                         <CardResumoMensal acesso={cardMensalAcesso!} />

@@ -47,6 +47,7 @@ const accessRoutes = {
         "/pendencias",
         "/inicioFuncionario",
         "/historico-ponto",
+        "/calendario",
         "/notFound"
     ]
 }
