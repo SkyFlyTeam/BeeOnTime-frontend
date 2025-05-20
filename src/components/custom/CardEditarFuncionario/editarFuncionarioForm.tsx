@@ -153,7 +153,6 @@ export default function EditarFuncionarioForm({ usuarioInfo, logadoInfo }: Edita
       usuario_status: usuarioInfo.usuario_status == null ? true : usuarioInfo.usuario_status,
     },
   });
-  //alert(JSON.stringify(forms.formState.errors))
   useEffect(() => {
     fetchSetores();
   }, []);

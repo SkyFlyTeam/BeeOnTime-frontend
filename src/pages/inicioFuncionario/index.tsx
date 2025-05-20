@@ -73,6 +73,7 @@ export default function InicioFuncionario() {
                 <CardHorasTrabalhadas usuarioInfo={usuarioInfo} histPontos={histPontos!} />
                 {/* <TimeClock /> */}
             </div>
+            
         </div>
     );
 }
