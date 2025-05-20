@@ -26,6 +26,7 @@ export default function Calendario() {
 
     const [activeTab, setActiveTab] = useState<"SETOR" | "MEUS DADOS">("SETOR");
     const [cardMensalAcesso, setCardMensalAcesso] = useState<'adm' | 'func' | 'jornada' | null>(null);
+    const [currentDate, setCurrentDate] = useState(new Date());
 
     const [feriados, setFeriados] = useState<Feriado[] | null>(null);
 
@@ -54,8 +55,6 @@ export default function Calendario() {
         try {
             const empresa_data = await empresaServices.verificarEmpresaById(empCod);
             setEmpresa(empresa_data);
-            
-            setLoading(false)
         } catch (error) {
             console.error("Error fetching user data", error);
         }
@@ -65,6 +64,7 @@ export default function Calendario() {
         try {
             const feriado_data = await feriadoServices.getAllFeriadoByEmpresa(empCod);
             setFeriados(feriado_data);
+            setLoading(false);
         } catch (error) {
             console.error("Error fetching user data", error);
         }
@@ -83,7 +83,7 @@ export default function Calendario() {
 
     useEffect(() => {
         if(empresa){
-
+            fetchFeriados(empresa.empCod);
         }
     }, [empresa])
 
@@ -132,10 +132,17 @@ export default function Calendario() {
                 </div>
                 <div className="flex w-full items-center md:gap-16 gap-8 flex-wrap">
                     <div className="flex flex-1">
-                        <CardCalendario funcCalendar={cardMensalAcesso == 'func'} empCod={usuario!.empCod} />
+                        <CardCalendario 
+                            funcCalendar={cardMensalAcesso == 'func'} 
+                            empCod={usuario!.empCod} 
+                            usuarioCod={usuario!.usuario_cod}
+                            feriados={feriados!}
+                            setCurrentDate={setCurrentDate}
+                            currentDate={currentDate}
+                        />
                     </div>
                     <div className="flex flex-[2.5] md:flex-col md:gap-16 gap-8 h-full md:justify-start justify-end flex-col-reverse">
-                        <CardResumoMensal acesso={cardMensalAcesso!} />
+                        <CardResumoMensal acesso={cardMensalAcesso!} feriados={feriados!} dataCalendario={currentDate} />
                         <CardLegenda />
                     </div>
                 </div>

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { SetStateAction, useEffect, useMemo, useRef, useState } from "react";
 
 import { Calendar } from "@/components/ui/calendar";
 
@@ -11,12 +11,17 @@ import { Arrow } from "@radix-ui/react-tooltip";
 import ModalResumoDia from "@/components/custom/ModaisCalendario/ModalResumoDia";
 
 import { isBefore, isSameDay, startOfDay } from 'date-fns';
-import ModalDefinirFolgaCalendario from "@/components/custom/ModaisCalendario/ModalDefinirFolga";
+import ModalDefinirFolgaGeral from "@/components/custom/ModaisCalendario/ModalDefinirFolgaGeral";
+import { Feriado } from "@/interfaces/feriado";
 
 
 interface CardCalendarioProps {
     funcCalendar: boolean;
     empCod: number;
+    usuarioCod: number;
+    feriados: Feriado[];
+    setCurrentDate: React.Dispatch<React.SetStateAction<Date>>;
+    currentDate: Date;
 }
 
 const eventColorClasses: Record<string, string> = {
@@ -29,15 +34,17 @@ type MarkedDay =
   | { day: number; events: { tipo: string; contagem: number }[] } // usado quando `!funcCalendar`
   | { day: number; event: string }; // usado quando `funcCalendar`
 
-export const CardCalendario = ({ funcCalendar, empCod }: CardCalendarioProps) => {
+export const CardCalendario = ({ funcCalendar, empCod, usuarioCod, feriados, currentDate, setCurrentDate }: CardCalendarioProps) => {
+    const [formattedFeriados, setFormattedFeriados] = useState<Date[] | undefined>(undefined);
+    
     const [selectedDate, setSelectedDate] = useState(new Date());
+    const dataHoje = new Date();
 
     // Modais
     const [showModalResumoDia, setShowModalResumoDia] = useState(false);
     const [showModalDefinirFolga, setShowModalDefinirFolga] = useState(false);
 
     const [loading, setLoading] = useState(false);
-    const currentData = new Date();
 
     const markedDays: MarkedDay[] = funcCalendar
     ? [
@@ -50,16 +57,20 @@ export const CardCalendario = ({ funcCalendar, empCod }: CardCalendarioProps) =>
         { day: 15, events: [{ tipo: 'folga', contagem: 5 }] },
         { day: 20, events: [{ tipo: 'folga', contagem: 1 }, { tipo: 'ferias', contagem: 3 }, { tipo: 'ausencia', contagem: 12 }] }
         ];
-
-    const holidays = [
-       new Date('2025-05-26')
-    ];
+    
+    useMemo(() => {
+        const formatted_feriados = feriados.map((feriado) => {
+            const [anoString, mesString, diaString] = (feriado.feriadoData as string).split('-');
+            return new Date(Number(anoString), Number(mesString) - 1, Number(diaString));
+        })
+        setFormattedFeriados(formatted_feriados);
+    }, [feriados])
 
     useEffect(() => {
         if(!funcCalendar){
-            if(isBefore(startOfDay(selectedDate), startOfDay(currentData))){
+            if(isBefore(startOfDay(selectedDate), startOfDay(dataHoje))){
                 setShowModalResumoDia(true)
-            }else if(!isSameDay(selectedDate, currentData)){
+            }else if(!isSameDay(selectedDate, dataHoje)){
                 setShowModalDefinirFolga(true)
             }
         }
@@ -78,7 +89,7 @@ export const CardCalendario = ({ funcCalendar, empCod }: CardCalendarioProps) =>
 
         return (
         <div className="flex flex-col items-center gap-1 w-full h-full">
-            {props.date > currentData && !funcCalendar
+            {props.date > dataHoje && !funcCalendar
                 ? (
                     <TooltipProvider>
                         <Tooltip>
@@ -119,7 +130,7 @@ export const CardCalendario = ({ funcCalendar, empCod }: CardCalendarioProps) =>
                     {event.events?.map((e) => {
                         const colorClass = eventColorClasses[e.tipo] ?? "bg-gray-500"; 
                         return (
-                        <div className={`flex justify-center md:pt-0.5 pt-0 items-center md:text-xs text-[0.5rem] rounded-full md:w-5 md:h-5 w-3 h-3 ${colorClass}`} >
+                        <div className={`flex justify-center md:pt-0.4 pt-0 items-center md:text-xs text-[0.5rem] rounded-full md:w-5 md:h-5 w-3 h-3 ${colorClass}`} >
                             {e.contagem}
                         </div>
                     )})}
@@ -137,7 +148,10 @@ export const CardCalendario = ({ funcCalendar, empCod }: CardCalendarioProps) =>
                 <div className="flex w-full flex-col items-center justify-center gap-6 bg-white shadow-[4px_4px_19px_0px_rgba(0,0,0,0.05)] rounded-xl md:p-4 p-0">
                     <Calendar 
                         fromDate={undefined}
-                        today={currentData}
+                        onMonthChange={(date: Date) => {
+                            setCurrentDate(date); 
+                        }}
+                        today={dataHoje}
                         onDayClick={(date: Date) => {setSelectedDate(date);}}
                         classNames={{
                             caption_label: "md:text-[1.5rem] text-[1rem] capitalize", 
@@ -150,13 +164,13 @@ export const CardCalendario = ({ funcCalendar, empCod }: CardCalendarioProps) =>
                             day_today: "bg-[#FFB503] text-white",
                         }}
                         modifiers={{
-                            today: [currentData],
+                            today: [dataHoje],
                             selected: [selectedDate],
                         }}
                         components={{
                             Day: CustomDay, 
                         }}
-                        holidays={holidays}
+                        holidays={formattedFeriados}
                     />
                 </div>
                 {showModalResumoDia &&
@@ -167,11 +181,12 @@ export const CardCalendario = ({ funcCalendar, empCod }: CardCalendarioProps) =>
                     />
                 }
                 {showModalDefinirFolga &&
-                    <ModalDefinirFolgaCalendario
+                    <ModalDefinirFolgaGeral
                         diaSelecionado={selectedDate}
                         onClose={() => setShowModalDefinirFolga(false)}
                         onClick={() => setShowModalDefinirFolga(false)}
                         empCod={empCod}
+                        usuarioCod={usuarioCod}
                     />
                 }
             </>
