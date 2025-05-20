@@ -13,7 +13,6 @@ import { toast } from "react-toastify"
 import { solicitacaoServices } from "@/services/solicitacaoServices"
 import { bancoHorasServices } from "@/services/bancoHorasService"
 import { extrasPagasServices } from "@/services/extraPagaService"
-import { horasServices } from "@/services/horasService"
 import { ApiException } from "@/config/apiExceptions"
 
 interface ModalBancoHorasProps {
@@ -35,10 +34,16 @@ const ModalDecisaoHoraExtra: React.FC<ModalBancoHorasProps> = ({
 }) => {
     const [solicitacao, setSolicitacao] = useState<SolicitacaoInterface>()
 
+    // Extrai horas e minutos da string de horas solicitadas
     const horasToString = solicitacao && solicitacao.horasSolicitadas ? solicitacao.horasSolicitadas.toString() : ''
     let [horas, min] = horasToString.split('.')
     const minutos = min ? Math.round(Number('0.' + min) * 60) : 0
-    
+
+    // Formata a primeira data do array para "YYYY-MM-DD"
+    const primeiraDataISO = solicitacao?.solicitacaoDataPeriodo && solicitacao.solicitacaoDataPeriodo.length > 0
+      ? new Date(solicitacao.solicitacaoDataPeriodo[0]).toISOString().slice(0, 10)
+      : undefined
+
     const handleSubmit = async (status: string, toastMensagem: string, tipo: string) => {
         if(!solicitacao) return 
 
@@ -49,18 +54,18 @@ const ModalDecisaoHoraExtra: React.FC<ModalBancoHorasProps> = ({
 
         await solicitacaoServices.updateSolicitacao(updatedSolicitacao)
 
-        if(status == 'APROVADA') {
-            if(tipo == 'Banco horas'){
+        if(status === 'APROVADA') {
+            if(tipo === 'Banco horas'){
                 const bancoHoras = {
                     bancoHorasSaldoAtual: solicitacao.horasSolicitadas,
-                    bancoHorasData: solicitacao.solicitacaoDataPeriodo,
+                    bancoHorasData: primeiraDataISO,
                     usuarioCod: solicitacao.usuarioCod
                 }
                 await bancoHorasServices.createBancoHoras(bancoHoras)
-            } else {
+            } else if(tipo === 'Extra paga') {
                 const extraPaga = {
                     extrasPagasSaldoAtual: solicitacao.horasSolicitadas,
-                    extrasPagasData: solicitacao.solicitacaoDataPeriodo,
+                    extrasPagasData: primeiraDataISO,
                     usuarioCod: solicitacao.usuarioCod
                 }
                 await extrasPagasServices.createExtraspagas(extraPaga)
@@ -97,13 +102,14 @@ const ModalDecisaoHoraExtra: React.FC<ModalBancoHorasProps> = ({
     }
 
     useEffect(() => {
+        // Copia o objeto para estado local
         const solicitacaoSelecionada = {...solicitacaoSelected}
         setSolicitacao(solicitacaoSelecionada)
-    }, [])
+    }, [solicitacaoSelected])
 
     return(
         <>  
-            <p className={styles.colaborador_label}><span>Colaborador: </span>{solicitacao && solicitacao.usuarioNome}</p>
+            <p className={styles.colaborador_label}><span>Colaborador: </span>{solicitacao?.usuarioNome}</p>
             <form className={styles.form_container}>
                 <div>
                     <span className={styles.data_span}>Dia(s) selecionado(s): </span>{diaSelecionado}
@@ -117,7 +123,7 @@ const ModalDecisaoHoraExtra: React.FC<ModalBancoHorasProps> = ({
                     value={solicitacao?.solicitacaoMensagem}
                     readOnly />
                 </div>
-                {solicitacao && usuarioLogadoCod != solicitacao.usuarioCod  && solicitacao.solicitacaoStatus == "PENDENTE" && (
+                {solicitacao && usuarioLogadoCod !== solicitacao.usuarioCod && solicitacao.solicitacaoStatus === "PENDENTE" && (
                     <div className={styles.button_container}>
                         <Button
                             variant={"outline-danger"}

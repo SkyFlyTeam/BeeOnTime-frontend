@@ -23,7 +23,6 @@ import styles from './style.module.css'
 // Utils
 import handleDownload from '@/utils/handleDownload'
 
-
 interface AjusteProps {
   diaSelecionado: string
   solicitacaoSelected: SolicitacaoInterface
@@ -81,9 +80,7 @@ const ModalAjustePonto: React.FC<AjusteProps> = ({
         
     
         if (tipoSaida) setSaida(tipoSaida.horarioPonto as string);
-    }
-    
-      
+      }
     } catch (error) {
       console.error(error);
     }
@@ -96,6 +93,8 @@ const ModalAjustePonto: React.FC<AjusteProps> = ({
   }, [solicitacaoSelected])
 
   const handleSolicitacao = async (status: string, message?: string) => {
+    if (!solicitacao) return;
+
     const updatedSolicitacao = {
       ...solicitacao,
       solicitacaoStatus: status,
@@ -104,6 +103,7 @@ const ModalAjustePonto: React.FC<AjusteProps> = ({
 
     // Atualiza a solicitação no banco de dados
     await solicitacaoServices.updateSolicitacao(updatedSolicitacao)
+    
     if (ponto && status === 'APROVADA') {
       const solicitacaoPonto: AprovarPonto = {
         id: idApproved,
@@ -111,10 +111,11 @@ const ModalAjustePonto: React.FC<AjusteProps> = ({
       await pontoServices.aproveSolicitacaoPonto(solicitacaoPonto, solicitacao.solicitacaoCod)
     }
 
-    // Chama a função de atualização após a solicitação ser aprovada ou recusada
+    // Atualiza estado externo e fecha modal
     onSolicitacaoUpdate(updatedSolicitacao)
     onClose()
 
+    // Notificações
     if (status === 'APROVADA') {
       toast.success('Solicitação aprovada com sucesso!', {
         position: "top-right",

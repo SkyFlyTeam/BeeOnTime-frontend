@@ -3,30 +3,20 @@ import { useState, useRef, useEffect } from 'react'
 
 // Services
 import { solicitacaoServices } from '../../../../services/solicitacaoServices'
-import { pontoServices } from '../../../../services/pontoServices'
 
 // Interfaces
-import PontoProv from '../../../../interfaces/pontoProv'
+import Faltas from '@/interfaces/faltas'
 
 // Components
 import { Button } from '@/components/ui/button'
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css'; // Importe o CSS do react-toastify
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Styles
 import styles from './styles.module.css'
 
 // Icons
 import { Paperclip } from 'lucide-react'
-import Faltas from '@/interfaces/faltas'
-
-interface Ponto {
-  id: string;
-  usuarioCod: number;
-  horasCod: number;
-  data: string | Date;
-  pontos: { horarioPonto: string | Date; tipoPonto: number }[];
-}
 
 interface ModalCriarSolicitacaoProps {
   isOpen: boolean;
@@ -37,10 +27,6 @@ interface ModalCriarSolicitacaoProps {
 const ModalCriarSolicitacaoFalta = ({ isOpen, onClose, falta }: ModalCriarSolicitacaoProps) => {
   const [mensagem, setMensagem] = useState('');
   const [file, setFile] = useState<File | null>(null);
-  const [entrada, setEntrada] = useState<string | null>(null); 
-  const [inicioAlmoco, setInicioAlmoco] = useState<string | null>(null); 
-  const [fimAlmoco, setFimAlmoco] = useState<string | null>(null);  
-  const [saida, setSaida] = useState<string | null>(null);  
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -51,12 +37,21 @@ const ModalCriarSolicitacaoFalta = ({ isOpen, onClose, falta }: ModalCriarSolici
     }
   }
 
+  const formatDateToISO = (date: string | Date): string => {
+    if (typeof date === 'string') {
+      return date.slice(0, 10);
+    }
+    return date.toISOString().slice(0, 10);
+  }
+
   const handleSubmit = async () => {
     try {
+      const dataFormatada = formatDateToISO(falta.faltaDia);
+
       const solicitacaoJson = {
         solicitacaoMensagem: mensagem,
         usuarioCod: falta.usuarioCod,
-        solicitacaoDataPeriodo: falta.faltaDia,
+        solicitacaoDataPeriodo: [dataFormatada], 
         tipoSolicitacaoCod: {
           tipoSolicitacaoCod: 4
         }
@@ -68,36 +63,32 @@ const ModalCriarSolicitacaoFalta = ({ isOpen, onClose, falta }: ModalCriarSolici
         formData.append("solicitacaoAnexo", file);
       }
 
-      const result = await solicitacaoServices.createSolicitacao(formData);
+      await solicitacaoServices.createSolicitacao(formData);
+
       toast.success('Solicitação enviada com sucesso!', {
         position: "top-right",
         autoClose: 3000,
-      })
+      });
       onClose();
     } catch (error: any) {
       console.error("Erro ao enviar solicitação:", error.message);
       toast.error('Erro ao enviar solicitação!', {
         position: "top-right",
         autoClose: 3000,
-      })
+      });
     }
   };
 
+  // Formatando a data para exibir no modal no formato DD/MM/YYYY
   const [ano, mes, dia] = typeof falta.faltaDia === 'string'
     ? falta.faltaDia.split("-")
     : new Date(falta.faltaDia).toISOString().split("T")[0].split("-");
 
-  const dataFormatada = `${String(dia).padStart(2, '0')}/${String(mes).padStart(2, '0')}/${ano}`;
+  const dataFormatadaExibicao = `${String(dia).padStart(2, '0')}/${String(mes).padStart(2, '0')}/${ano}`;
 
   const abrirSeletorArquivo = () => {
     fileInputRef.current?.click();
   };
-
-  useEffect(() => {
-    if (isOpen) {
-      
-    }
-  }, [isOpen, falta]); 
 
   if (!isOpen) return null;
 
@@ -105,7 +96,7 @@ const ModalCriarSolicitacaoFalta = ({ isOpen, onClose, falta }: ModalCriarSolici
     <div className={styles.modal_container} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <p className={styles.modal_title}>Nova Solicitação de justificativa de ausências</p>
-        <p><span className={styles.data_span}>Dia da ausência: </span>{dataFormatada}</p>
+        <p><span className={styles.data_span}>Dia da ausência: </span>{dataFormatadaExibicao}</p>
 
         <form className={styles.form_container}>
           <div className={styles.justificativa_group}>
@@ -113,6 +104,7 @@ const ModalCriarSolicitacaoFalta = ({ isOpen, onClose, falta }: ModalCriarSolici
             <div className={styles.justificativa_content}>
               <input
                 type='text'
+                value={mensagem}
                 onChange={(e) => setMensagem(e.target.value)}
               />
               <input
@@ -134,6 +126,7 @@ const ModalCriarSolicitacaoFalta = ({ isOpen, onClose, falta }: ModalCriarSolici
               variant='warning'
               onClick={handleSubmit}
               size='sm'
+              disabled={!mensagem.trim()}
             >
               Enviar
             </Button>

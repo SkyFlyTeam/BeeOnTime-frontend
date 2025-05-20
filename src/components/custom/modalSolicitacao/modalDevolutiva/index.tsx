@@ -1,5 +1,5 @@
 // General  
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 // Components
 import { Button } from '@/components/ui/button'
@@ -21,6 +21,11 @@ const ModalDevolutiva: React.FC<ModalDevolutivaProps> = ({
   onConfirmReject
 }) => {
   const [devolutiva, setDevolutiva] = useState(solicitacaoDevolutiva)
+
+  // Sincroniza o estado interno sempre que a prop mudar (útil para reabrir modal com diferentes textos)
+  useEffect(() => {
+    setDevolutiva(solicitacaoDevolutiva)
+  }, [solicitacaoDevolutiva])
 
   if (!isOpen) return null
 
