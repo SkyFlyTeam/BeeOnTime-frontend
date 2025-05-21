@@ -77,6 +77,7 @@ export default function InicioFuncionario() {
             <div className='flex mt-8 flex-wrap flex-row gap-8'>
                 <CardFeriado />
             </div>
+            
         </div>
     );
 }
