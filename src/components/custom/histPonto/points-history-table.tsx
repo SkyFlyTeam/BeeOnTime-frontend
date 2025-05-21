@@ -25,6 +25,7 @@ import TablePagination from "../TablePagination/TablePagination";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
+import Link from "next/link";
 
 interface PointsHistoryTableProps {
   entries: HistPontos[] | null;
@@ -140,9 +141,15 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
 
         {/* Desktop - Tabela horizontal */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 pb-3 md:py-2">
-          <div className="flex flex-row items-start gap-2 md:gap-4">
+          <div className="flex flex-row items-center gap-2 md:gap-4">
             <h1 className="text-base md:text-lg font-bold">Jornada de Trabalho:</h1>
             <p className="text-base md:text-lg text-black">{jornadaFormatada()}</p>
+            {accessLevel === "ADM" && (
+              <Button asChild className="text-base md:text-md text-black">
+                <Link  href={"/jornada/" + userInfo.usuario_cod}>Editar <PencilLine></PencilLine>
+                </Link>
+              </Button>
+            )}
           </div>
           <div className="flex flex-row items-start gap-2 md:gap-4">
             <h1 className="text-base md:text-lg font-bold">Carga horária:</h1>

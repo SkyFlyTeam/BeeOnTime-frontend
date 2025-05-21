@@ -86,7 +86,7 @@ export default function EditarFuncionarioForm({ usuarioInfo, logadoInfo }: Edita
     );
   }
 
-  function wait(milliseconds: number) {
+  async function wait(milliseconds: number) {
     return new Promise(resolve => setTimeout(resolve, milliseconds));
 }
 
@@ -216,7 +216,7 @@ export default function EditarFuncionarioForm({ usuarioInfo, logadoInfo }: Edita
     showSucessToast();
     //const newUserData = await fetchUsuario(usuarioInfo.usuario_cod)
     // Temporary until a better solution is implemented
-    wait(5000);
+    await wait(4000);
     window.location.reload();
     //
     setIsSaving(false);
