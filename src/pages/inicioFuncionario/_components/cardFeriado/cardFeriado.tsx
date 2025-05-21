@@ -1,16 +1,16 @@
+import { Feriado } from "@/interfaces/feriado";
 import FeriadoItem from "./feriadoItem";
+import { useEffect, useState } from "react";
+import { feriadoServices } from "@/services/feriadoService";
+import dayjs from "dayjs";
 
-const feriados = [
-  { nome: "Sexta-Feira Santa", data: "2025-04-18" },
-  { nome: "Tiradentes", data: "2025-04-21" },
-  { nome: "Dia Do Trabalhador", data: "2025-05-01" },
-];
+dayjs.locale("pt-br");
 
-function calcularDiasRestantes(data: string): number {
-  const hoje = new Date();
-  const feriado = new Date(data);
-  const diff = feriado.getTime() - hoje.getTime();
-  return Math.ceil(diff / (1000 * 60 * 60 * 24));
+
+function calcularDiasRestantes(data: string | Date): number {
+  const hoje = dayjs();
+  const feriado = dayjs(data);
+  return feriado.diff(hoje, "day");
 }
 
 function formatarData(data: string) {
@@ -21,6 +21,26 @@ function formatarData(data: string) {
 }
 
 export default function CardFeriado() {
+  const [feriados, setFeriados] = useState<Feriado[]>([])
+
+  useEffect(() => {
+
+    const fetchFeriados = async () => {
+      const response = await feriadoServices.getAllFeriado();
+      if (Array.isArray(response)) {
+        const hoje = new Date();
+        const proximosFeriados = response
+          .filter((feriado) => new Date(feriado.feriadoData) >= hoje)
+          .sort((a, b) => new Date(a.feriadoData).getTime() - new Date(b.feriadoData).getTime())
+          .slice(0, 6);
+        setFeriados(proximosFeriados);
+      } else {
+        console.error("Erro ao buscar feriados:", response.message);
+      }
+    };
+
+    fetchFeriados();
+  }, []);
   return (
     <div className="flex flex-col justify-between bg-white shadow-md p-6 rounded-xl w-[768px] min-w-fit max-[565px]:w-[90%]">
       <div className="relative flex items-center">
@@ -29,14 +49,14 @@ export default function CardFeriado() {
 
       <div className="grid grid-cols-2 gap-y-6 gap-x-6 mt-6">
         {feriados.map((feriado) => {
-          const { dia, mes } = formatarData(feriado.data);
-          const diasRestantes = calcularDiasRestantes(feriado.data);
+          const { dia, mes } = formatarData(String(feriado.feriadoData));
+          const diasRestantes = calcularDiasRestantes(String(feriado.feriadoData));
           return (
             <FeriadoItem
-              key={feriado.nome}
+              key={feriado.feriadoNome}
               dia={dia}
               mes={mes}
-              nome={feriado.nome}
+              nome={feriado.feriadoNome}
               diasRestantes={diasRestantes}
             />
           );

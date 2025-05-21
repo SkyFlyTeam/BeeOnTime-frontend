@@ -1,4 +1,5 @@
 export default function FeriadoItem({dia, mes, nome, diasRestantes} : FeriadotemProps) {
+    const textoDias = diasRestantes === 0 ? "Hoje" : diasRestantes === 1 ? "Amanhã" : `Em ${diasRestantes} dias`;
     return (
         <div className="flex items-center gap-4">
             <div className="flex flex-col items-center  rounded-[16px] border-2 border-gray-300  w-12 h-12  overflow-hidden shadow-sm">
@@ -11,7 +12,7 @@ export default function FeriadoItem({dia, mes, nome, diasRestantes} : Feriadotem
             </div>
             <div className="flex flex-col">
                 <span className="font-semibold">{nome}</span>
-                <span className="text-gray-500 text-sm"> Em {diasRestantes} dias</span>
+                <span className="text-gray-500 text-sm"> {textoDias}</span>
             </div>
         </div>
     )
