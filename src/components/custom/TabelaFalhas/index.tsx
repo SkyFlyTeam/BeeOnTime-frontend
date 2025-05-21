@@ -51,7 +51,7 @@ export default function TabelaFalhas({ atrasos }: TabelaFalhas) {
                         <TableRow key={index} className={index % 2 === 0 ? "bg-[#FFF8E1]" : "bg-[#FFFFFF]"}>
                         <TableCell className="border border-gray-200 text-center text-black text-base p-3">{atraso.horas.usuarioNome}</TableCell>
                         <TableCell className="border border-gray-200 text-center text-black text-base p-3">{formatarData(atraso.horas.horasData)}</TableCell>
-                        <TableCell className="border border-gray-200 text-center text-black text-base p-3">{formatarHoras(atraso.horas.horarioBatida)}</TableCell>
+                        <TableCell className="border border-gray-200 text-center text-black text-base p-3">{formatarHoras(atraso.horas.horarioBatida) || '-'}</TableCell>
                         <TableCell className="border border-gray-200 text-center text-black text-base p-3">{formatarHoras(atraso.horas.jornada_horarioEntrada)}</TableCell>
                         <TableCell className="border border-gray-200 text-center text-black text-base p-3">{converterAtrasoParaHorasMinutos(atraso.atrasoTempo)}</TableCell>
                         </TableRow>

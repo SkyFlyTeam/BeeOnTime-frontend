@@ -196,7 +196,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                           style={{
                             backgroundColor: isActive ? "#FFF4D9" : undefined,
                             color: isActive ? "#FFB503" : "black",
-                            fontSize: "18px"
+                            fontSize: item.title === "Falhas em Marcações" ? "16px" : "18px"
                           }}
                         >
                           <Icon className="!w-[1.5rem] !h-[1.5rem]" style={{ color: isActive ? "#FFB503" : "#6b7280" }} />
