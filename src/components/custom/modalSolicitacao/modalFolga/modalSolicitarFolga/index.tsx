@@ -28,7 +28,7 @@ const SolicitarFolgaModal: React.FC<SolicitarFolgaModalProps> = ({
     folDataPeriodo: [],
     folObservacao: "",
     documento: null,
-    folgaTipo: { folTipoCod: 5 },
+    folgaTipo: { folTipoCod: 1 },
     usuarioCod: usuarioLogadoCod, // Verifique se o valor está sendo passado corretamente
     onClose,
   });
@@ -138,16 +138,12 @@ const SolicitarFolgaModal: React.FC<SolicitarFolgaModalProps> = ({
       }));
 
       // Se houver um documento, anexa ao FormData
-      if (solicitacao.documento) {
-        formData.append("solicitacaoAnexo", solicitacao.documento);
+      if (file) {
+        formData.append("solicitacaoAnexo", file);
       }
 
       // Faz a requisição POST
-      const response = await ApiUsuario.post("/folgas/cadastrar", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const response = await ApiUsuario.post("/folgas/cadastrar", formData);
 
       if (response.status === 201) {
         toast.success("Solicitação de folga enviada com sucesso!");
@@ -217,9 +213,9 @@ const SolicitarFolgaModal: React.FC<SolicitarFolgaModalProps> = ({
       </div>
 
       <div className={style.sendButtonWrapper}>
-        {/* Validação para o usuário logado poder enviar apenas suas próprias solicitações */}(
+        {/* Validação para o usuário logado poder enviar apenas suas próprias solicitações */}
           <Button onClick={handleSubmit}>Enviar</Button>
-        )
+        
       </div>
     </div>
   );
