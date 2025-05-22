@@ -32,8 +32,8 @@ export default function FalhasMarcacoes() {
     const [pontuais, setPontuais] = useState<HorasDTO[]>([])
     const [pontuaisFiltrados, setPontuaisFiltrados] = useState<HorasDTO[]>([])
 
-    const [dataInicio, setDataInicio] = useState<string>("");
-    const [dataFim, setDataFim] = useState<string>("");
+    const [dataInicio, setDataInicio] = useState<string>();
+    const [dataFim, setDataFim] = useState<string>();
 
     const [marcacoesCorretas, setMarcacoesCorretas] = useState<HistPonto[]>([])
     const [marcacoesCorretasFiltrados, setMarcacoesCorretasFiltrados] = useState<HistPonto[]>([])
@@ -246,6 +246,14 @@ export default function FalhasMarcacoes() {
     useEffect(() => {
         filterData();  
     }, [dataInicio, dataFim, atrasos, pontuais, marcacoesCorretas, solicitacoesAjustes])
+
+    useEffect(() => {
+        const hoje = new Date();
+        const dataInicioPadrao = new Date(hoje);
+        dataInicioPadrao.setDate(hoje.getDate() - 90);
+
+        setDataInicio(dataInicioPadrao.toISOString().split("T")[0]);
+    }, []);
 
     // Função de Paginação
     const paginate = (items: Atraso[], currentPage: number, itemsPerPage: number) => {

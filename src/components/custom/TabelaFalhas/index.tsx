@@ -6,6 +6,28 @@ interface TabelaFalhas {
 }
 
 export default function TabelaFalhas({ atrasos }: TabelaFalhas) {
+    const calcularHoraLimiteFlexivel = (horasTrabalhadas: number, horasFaltantes: number) => {
+        const cargaHorariaTotal = horasTrabalhadas + horasFaltantes;
+        // cargaHorariaTotal está em horas
+
+        // Hora limite: 21:59
+        const horaLimite = new Date();
+        horaLimite.setHours(21);
+        horaLimite.setMinutes(59);
+        horaLimite.setSeconds(0);
+        horaLimite.setMilliseconds(0);
+
+        // Subtrai cargaHorariaTotal + 1h (60 minutos) para ajuste
+        const minutosParaSubtrair = cargaHorariaTotal * 60 + 60;
+        horaLimite.setMinutes(horaLimite.getMinutes() - minutosParaSubtrair);
+
+        // Retorna string formatada HH:mm
+        const hh = horaLimite.getHours().toString().padStart(2, '0');
+        const mm = horaLimite.getMinutes().toString().padStart(2, '0');
+        return `${hh}:${mm}`;
+    }
+
+
   const formatarData = (data: any) => {
     if (!data) {
         return ''
@@ -51,7 +73,12 @@ export default function TabelaFalhas({ atrasos }: TabelaFalhas) {
                         <TableRow key={index} className={index % 2 === 0 ? "bg-[#FFF8E1]" : "bg-[#FFFFFF]"}>
                         <TableCell className="border border-gray-200 text-center text-black text-base p-3">{atraso.horas.usuarioNome}</TableCell>
                         <TableCell className="border border-gray-200 text-center text-black text-base p-3">{formatarData(atraso.horas.horasData)}</TableCell>
-                        <TableCell className="border border-gray-200 text-center text-black text-base p-3">{formatarHoras(atraso.horas.horarioBatida) || '-'}</TableCell>
+                        <TableCell className="border border-gray-200 text-center text-black text-base p-3">
+                            {atraso.horas.horarioBatida
+                                ? formatarHoras(atraso.horas.horarioBatida)
+                                : calcularHoraLimiteFlexivel(atraso.horas.horasTrabalhadas, atraso.horas.horasFaltantes)
+                            }
+                        </TableCell>
                         <TableCell className="border border-gray-200 text-center text-black text-base p-3">{formatarHoras(atraso.horas.jornada_horarioEntrada)}</TableCell>
                         <TableCell className="border border-gray-200 text-center text-black text-base p-3">{converterAtrasoParaHorasMinutos(atraso.atrasoTempo)}</TableCell>
                         </TableRow>
