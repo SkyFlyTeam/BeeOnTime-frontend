@@ -54,13 +54,10 @@ const PaginationLink = ({
       }),
       className
     )}
-    style={isActive ? { backgroundColor: "#FFB503", color: "black" } : {}}
     {...props}
   />
 )
 PaginationLink.displayName = "PaginationLink"
-
-
 
 const PaginationPrevious = ({
   className,

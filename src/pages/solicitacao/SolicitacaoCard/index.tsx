@@ -56,17 +56,16 @@ const SolicitacaoCard = ({
 
   const handleDelete = async (idToDelete: number) => {
     try {
-      const deleted = await solicitacaoServices.deleteSolicitacao(idToDelete);
-  
+      const deleted = await solicitacaoServices.deleteSolicitacao(idToDelete)
+
       if (!(deleted instanceof ApiException)) {
-        // Chama a função onDelete para remover a solicitação na página principal
-        onDelete(idToDelete);
+        // Chama a função passada como prop para atualizar o estado na página principal
+        onDelete(idToDelete)
       }
     } catch (error) {
-      console.error('Erro ao excluir a solicitação:', error);
+      console.error('Erro ao excluir a solicitação:', error)
     }
-  };
-  
+  }
 
   const showName = usuarioLogadoCargo !== 'Funcionário' && solicitacao?.usuarioCod !== usuarioLogadoCod
 

@@ -3,7 +3,7 @@ import { NivelAcesso } from "./nivelAcesso";
 import { Setor } from "./setor";
 
 export interface Usuario {
-  [key: string]: boolean | string | number | undefined | null | Date | Jornada | Setor | NivelAcesso;
+  [key: string]: string | number | undefined | null | Date | Jornada | Setor | NivelAcesso;
   usuario_cod: number;
   usuario_nome: string;
   usuario_cpf: string;
@@ -20,6 +20,5 @@ export interface Usuario {
   setor: Setor;
   empCod: number;
   nivelAcesso: NivelAcesso;
-  usuario_status: boolean;
   }
   

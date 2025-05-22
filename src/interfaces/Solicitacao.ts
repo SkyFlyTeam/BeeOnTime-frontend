@@ -1,5 +1,4 @@
 export default interface SolicitacaoInterface {
-  dataCriacao: string | number | Date;
   solicitacaoCod: number;
   solicitacaoAnexo: number[] | null
   solicitacaoAnexoNome?: string
