@@ -42,6 +42,7 @@ export default function PointsHistoryPage() {
     try {
       // Buscar os pontos do usuário
       const pontos = await pontoServices.getPontosByUsuario(usuario_cod) as MarcacaoPonto[];
+
       // Buscar as horas do usuário
       const horas = await horasServices.getHorasByUsuario(usuario_cod) as Horas[];
   
@@ -64,6 +65,7 @@ export default function PointsHistoryPage() {
   
       // Atualizar o estado com os dados combinados
       setHistPontos(combinedData);
+
     } catch (error) {
       console.log("Erro ao recuperar histórico de pontos do usuário de id " + usuario_cod);
     }
@@ -115,7 +117,6 @@ export default function PointsHistoryPage() {
     }
 
     onMount()
-
   }, []);
 
   if (loading) {
