@@ -3,6 +3,7 @@ import { usePathname } from "next/navigation";
 import { Users, Building, Home, LogOut, MessageSquare, AlarmClockCheck, UserRound, LucideIcon, MapPin, UserRoundCheckIcon, House, HouseIcon } from "lucide-react";
 import { LiaBusinessTimeSolid } from "react-icons/lia";
 import { IconType } from "react-icons";
+import { TbClockExclamation } from "react-icons/tb";
 
 // Components
 import {
@@ -96,6 +97,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           title: "RELATÓRIOS",
           items: [
             { title: "Banco de Horas", url: "/bancoHoras", icon: LiaBusinessTimeSolid },
+            { title: "Falhas em Marcações", url: "/falhas_marcacoes", icon: TbClockExclamation},
           ],
         },
         {
@@ -131,6 +133,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           items: [
             { title: "Pontos Diários", url: "/pontosDiarios", icon: MapPin},
             { title: "Banco de Horas", url: "/bancoHoras", icon: LiaBusinessTimeSolid },
+            { title: "Falhas em Marcações", url: "/falhas_marcacoes", icon: TbClockExclamation},
           ],
         },
         {
@@ -195,7 +198,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                           style={{
                             backgroundColor: isActive ? "#FFF4D9" : undefined,
                             color: isActive ? "#FFB503" : "black",
-                            fontSize: "18px"
+                            fontSize: item.title === "Falhas em Marcações" ? "16px" : "18px"
                           }}
                         >
                           <Icon className="!w-[1.5rem] !h-[1.5rem]" style={{ color: isActive ? "#FFB503" : "#6b7280" }} />
