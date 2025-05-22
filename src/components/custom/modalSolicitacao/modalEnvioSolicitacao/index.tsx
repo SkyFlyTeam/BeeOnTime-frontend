@@ -10,8 +10,8 @@ import PontoProv from '../../../../interfaces/pontoProv'
 
 // Components
 import { Button } from '@/components/ui/button'
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css'; // Importe o CSS do react-toastify
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Styles
 import styles from './styles.module.css'
@@ -36,10 +36,10 @@ interface ModalCriarSolicitacaoProps {
 const ModalCriarSolicitacao = ({ isOpen, onClose, ponto }: ModalCriarSolicitacaoProps) => {
   const [mensagem, setMensagem] = useState('');
   const [file, setFile] = useState<File | null>(null);
-  const [entrada, setEntrada] = useState<string | null>(null); 
-  const [inicioAlmoco, setInicioAlmoco] = useState<string | null>(null); 
-  const [fimAlmoco, setFimAlmoco] = useState<string | null>(null);  
-  const [saida, setSaida] = useState<string | null>(null);  
+  const [entrada, setEntrada] = useState<string>('');
+  const [inicioAlmoco, setInicioAlmoco] = useState<string>('');
+  const [fimAlmoco, setFimAlmoco] = useState<string>('');
+  const [saida, setSaida] = useState<string>('');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -50,12 +50,22 @@ const ModalCriarSolicitacao = ({ isOpen, onClose, ponto }: ModalCriarSolicitacao
     }
   }
 
+  // Função para formatar a data no formato 'YYYY-MM-DD'
+  const formatDateToISO = (date: string | Date): string => {
+    if (typeof date === 'string') {
+      return date.slice(0, 10);
+    }
+    return date.toISOString().slice(0, 10);
+  }
+
   const handleSubmit = async () => {
     try {
+      const dataFormatada = formatDateToISO(ponto.horasData);
+
       const solicitacaoJson = {
         solicitacaoMensagem: mensagem,
         usuarioCod: ponto.usuarioCod,
-        solicitacaoDataPeriodo: ponto.horasData,
+        solicitacaoDataPeriodo: [dataFormatada], // Array de strings no formato esperado
         tipoSolicitacaoCod: {
           tipoSolicitacaoCod: 1
         }
@@ -68,6 +78,7 @@ const ModalCriarSolicitacao = ({ isOpen, onClose, ponto }: ModalCriarSolicitacao
       }
 
       const result = await solicitacaoServices.createSolicitacao(formData);
+      
       const solicitacaoPonto: PontoProv = {
         id: ponto.id,
         usuarioCod: ponto.usuarioCod,
@@ -75,24 +86,26 @@ const ModalCriarSolicitacao = ({ isOpen, onClose, ponto }: ModalCriarSolicitacao
         horasCod: ponto.horasCod,
         data: ponto.horasData,
         pontos: [
-          { horarioPonto: entrada as string, tipoPonto: 0 },
-          { horarioPonto: inicioAlmoco as string, tipoPonto: 2 },
-          { horarioPonto: fimAlmoco as string, tipoPonto: 2 },
-          { horarioPonto: saida as string, tipoPonto: 1 }
+          { horarioPonto: entrada, tipoPonto: 0 },
+          { horarioPonto: inicioAlmoco, tipoPonto: 2 },
+          { horarioPonto: fimAlmoco, tipoPonto: 2 },
+          { horarioPonto: saida, tipoPonto: 1 }
         ]
       }
-      const resultPonto = await pontoServices.createSolicitacaoPonto(solicitacaoPonto)
+      
+      await pontoServices.createSolicitacaoPonto(solicitacaoPonto)
+
       toast.success('Solicitação enviada com sucesso!', {
         position: "top-right",
         autoClose: 3000,
-      })
+      });
       onClose();
     } catch (error: any) {
       console.error("Erro ao enviar solicitação:", error.message);
       toast.error('Erro ao enviar solicitação!', {
         position: "top-right",
         autoClose: 3000,
-      })
+      });
     }
   };
 
@@ -101,18 +114,18 @@ const ModalCriarSolicitacao = ({ isOpen, onClose, ponto }: ModalCriarSolicitacao
     const tipoAlmoco = ponto.pontos.filter(p => p.tipoPonto === 2);
     const tipoSaida = ponto.pontos.find(p => p.tipoPonto === 1);
 
-    if (tipoEntrada) setEntrada(tipoEntrada.horarioPonto as string); 
+    if (tipoEntrada) setEntrada(tipoEntrada.horarioPonto as string);
     if (tipoAlmoco.length > 1) {
       const [almoco1, almoco2] = tipoAlmoco;
       const [almocoInicio, almocoFim] = almoco1.horarioPonto < almoco2.horarioPonto ? [almoco1.horarioPonto, almoco2.horarioPonto] : [almoco2.horarioPonto, almoco1.horarioPonto];
       
-      setInicioAlmoco(almocoInicio as string);  
-      setFimAlmoco(almocoFim as string);  
+      setInicioAlmoco(almocoInicio as string);
+      setFimAlmoco(almocoFim as string);
     }
-
-    if (tipoSaida) setSaida(tipoSaida.horarioPonto as string);  
+    if (tipoSaida) setSaida(tipoSaida.horarioPonto as string);
   };
 
+  // Formata a data para exibição DD/MM/YYYY
   const [ano, mes, dia] = typeof ponto.horasData === 'string'
     ? ponto.horasData.split("-")
     : new Date(ponto.horasData).toISOString().split("T")[0].split("-");
@@ -125,9 +138,9 @@ const ModalCriarSolicitacao = ({ isOpen, onClose, ponto }: ModalCriarSolicitacao
 
   useEffect(() => {
     if (isOpen) {
-      organizarHorarios(); 
+      organizarHorarios();
     }
-  }, [isOpen, ponto]); 
+  }, [isOpen, ponto]);
 
   if (!isOpen) return null;
 
@@ -145,7 +158,7 @@ const ModalCriarSolicitacao = ({ isOpen, onClose, ponto }: ModalCriarSolicitacao
                 type='time'
                 className={styles.inputTime}
                 id='entrada'
-                value={entrada || ''}
+                value={entrada}
                 onChange={(e) => setEntrada(e.target.value)}
               />
             </span>
@@ -155,7 +168,7 @@ const ModalCriarSolicitacao = ({ isOpen, onClose, ponto }: ModalCriarSolicitacao
                 type='time'
                 className={styles.inputTime}
                 id='inicio_almoco'
-                value={inicioAlmoco || ''}
+                value={inicioAlmoco}
                 onChange={(e) => setInicioAlmoco(e.target.value)}
               />
             </span>
@@ -168,7 +181,7 @@ const ModalCriarSolicitacao = ({ isOpen, onClose, ponto }: ModalCriarSolicitacao
                 type='time'
                 className={styles.inputTime}
                 id='fim_almoco'
-                value={fimAlmoco || ''}
+                value={fimAlmoco}
                 onChange={(e) => setFimAlmoco(e.target.value)}
               />
             </span>
@@ -178,7 +191,7 @@ const ModalCriarSolicitacao = ({ isOpen, onClose, ponto }: ModalCriarSolicitacao
                 type='time'
                 className={styles.inputTime}
                 id='saida'
-                value={saida || ''}
+                value={saida}
                 onChange={(e) => setSaida(e.target.value)}
               />
             </span>
@@ -189,6 +202,7 @@ const ModalCriarSolicitacao = ({ isOpen, onClose, ponto }: ModalCriarSolicitacao
             <div className={styles.justificativa_content}>
               <input
                 type='text'
+                value={mensagem}
                 onChange={(e) => setMensagem(e.target.value)}
               />
               <input
@@ -210,6 +224,7 @@ const ModalCriarSolicitacao = ({ isOpen, onClose, ponto }: ModalCriarSolicitacao
               variant='warning'
               onClick={handleSubmit}
               size='sm'
+              disabled={!mensagem.trim()}
             >
               Enviar
             </Button>

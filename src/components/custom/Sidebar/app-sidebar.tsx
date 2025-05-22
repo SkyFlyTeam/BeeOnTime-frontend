@@ -1,7 +1,7 @@
 import * as React from "react";
 import { usePathname } from "next/navigation";
+import { LiaBusinessTimeSolid, LiaUserTimesSolid  } from "react-icons/lia";
 import { Users, Building, Home, LogOut, MessageSquare, AlarmClockCheck, UserRound, LucideIcon, MapPin, UserRoundCheckIcon, House, HouseIcon } from "lucide-react";
-import { LiaBusinessTimeSolid } from "react-icons/lia";
 import { IconType } from "react-icons";
 import { TbClockExclamation } from "react-icons/tb";
 
@@ -97,6 +97,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           title: "RELATÓRIOS",
           items: [
             { title: "Banco de Horas", url: "/bancoHoras", icon: LiaBusinessTimeSolid },
+            { title: "Ausências", url: "/ausencias", icon: LiaUserTimesSolid },
             { title: "Falhas em Marcações", url: "/falhas_marcacoes", icon: TbClockExclamation},
           ],
         },
@@ -133,6 +134,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           items: [
             { title: "Pontos Diários", url: "/pontosDiarios", icon: MapPin},
             { title: "Banco de Horas", url: "/bancoHoras", icon: LiaBusinessTimeSolid },
+            { title: "Ausências", url: "/ausencias", icon: LiaUserTimesSolid },
             { title: "Falhas em Marcações", url: "/falhas_marcacoes", icon: TbClockExclamation},
           ],
         },

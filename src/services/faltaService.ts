@@ -2,9 +2,33 @@ import { ApiException } from "@/config/apiExceptions";
 import { ApiPonto } from "@/config/apiPonto";
 import Faltas from "@/interfaces/faltas";
 
+const getAll = async(): Promise<Faltas[] | ApiException> => {
+    try {
+        const { data } = await ApiPonto.get('/faltas/')
+        return data as Faltas[]
+    } catch (error) {
+        if (error instanceof Error) {
+            return new ApiException(error.message || "Erro ao consultar faltas do usuário.");
+        }
+        return new ApiException("Erro desconhecido.");
+    }
+}
+
 const getFaltabyUsuarioCodAndDate = async (usuario_cod: number, date: string) => {
     try {
         const { data } = await ApiPonto.get(`/faltas/${usuario_cod}/dia?data=${date}`)
+        return data as Faltas
+    } catch (error) {
+        if (error instanceof Error) {
+            return new ApiException(error.message || "Erro ao consultar horas do usuário.");
+        }
+        return new ApiException("Erro desconhecido.");
+    }
+}
+
+const getBySetor = async (setorCod: number) => {
+    try {
+        const { data } = await ApiPonto.get(`/faltas/setor/${setorCod}`)
         return data as Faltas
     } catch (error) {
         if (error instanceof Error) {
@@ -30,6 +54,8 @@ const updateFalta = async(faltaCod: number, justificativa: string) => {
 }
 
 export const faltaServices = {
+    getAll,
     getFaltabyUsuarioCodAndDate,
-    updateFalta
+    updateFalta,
+    getBySetor
 }

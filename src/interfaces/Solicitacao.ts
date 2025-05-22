@@ -5,7 +5,7 @@ export default interface SolicitacaoInterface {
   solicitacaoAnexoNome?: string
   solicitacaoMensagem: string;
   solicitacaoDevolutiva: string;
-  solicitacaoDataPeriodo: string;
+  solicitacaoDataPeriodo: Date[];
   solicitacaoStatus: string
   horasSolicitadas: number | null
   tipoSolicitacaoCod: {
@@ -24,4 +24,23 @@ export interface CriarSolicitacaoInterface {
       tipoSolicitacaoCod: number
   },
   usuarioCod: number
+}
+
+export interface SolicitacaoParaEnvio {
+  solicitacaoStatus?: string | number;
+  solicitacaoDevolutiva?: string;
+  solicitacaoDataPeriodo: string[];
+  dataCriacao?: string | number | Date;
+  solicitacaoCod?: number;
+  solicitacaoAnexo?: number[] | null;
+  solicitacaoAnexoNome?: string;
+  solicitacaoMensagem: string;
+  horasSolicitadas?: number | null;
+  tipoSolicitacaoCod: {
+    tipoSolicitacaoCod: number;
+    tipoSolicitacaoNome?: string;
+  };
+  usuarioCod: number;
+  usuarioNome?: string;
+  usuarioCargo?: string;
 }

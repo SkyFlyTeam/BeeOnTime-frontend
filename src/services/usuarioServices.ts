@@ -55,7 +55,7 @@ const getUsuarioById = async (usuario_cod: number) => {
 const getAllUsuarios = async () => {
   try {
     const response = await ApiUsuario.get(`/usuario/usuarios`);
-    return response.data;
+    return response.data as Usuario[];
   } catch (error) {
     if (error instanceof Error) {
       return new ApiException(error.message || "Erro ao consultar a API.");

@@ -27,11 +27,19 @@ export function renderModalChildren({
   cargaHoraria
 }: ModalChildrenProps): React.ReactNode {
 
-  const formatarData = (data: string) => {
-    const [ano, mes, dia] = data.split('-')
-    const dataFormatada = `${dia.padStart(2, '0')}/${mes.padStart(2, '0')}/${ano}`
-    return dataFormatada
+  const formatarData = (datas: Date[] = []): string => {
+    if (datas.length === 0) return ''
+
+    return datas
+      .map(item => {
+        const d = item instanceof Date
+          ? item
+          : new Date(item)
+        return d.toLocaleDateString('pt-BR')
+      })
+      .join(' – ')
   }
+
   switch (solicitacao.tipoSolicitacaoCod.tipoSolicitacaoCod) {
     case 1:
       return (
