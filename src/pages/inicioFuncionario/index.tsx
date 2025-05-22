@@ -14,6 +14,7 @@ import { Usuario } from '@/interfaces/usuario';
 import HistPontos from '@/interfaces/histPonto';
 import { Skeleton } from '@/components/ui/skeleton';
 import CardHorasTrabalhadas from './_components/cardHorasTrabalhadas/cardHorasTrabalhadas';
+import CardFeriado from './_components/cardFeriado/cardFeriado';
 
 export default function InicioFuncionario() {
     const [nome, setNome] = useState("José");
@@ -47,17 +48,17 @@ export default function InicioFuncionario() {
                 '>
                 <div className="flex flex-row flex-wrap gap-8 justify-between">
                     {/* Skeleton "Bater Ponto" */}
-                        <Skeleton className='h-52 w-[30rem] bg-gray-200' />
+                    <Skeleton className='h-52 w-[30rem] bg-gray-200' />
 
 
                     {/* Skeleton "Carga diária" */}
 
-                        <Skeleton className='h-52 w-[40rem] bg-gray-200' />
-                    
+                    <Skeleton className='h-52 w-[40rem] bg-gray-200' />
+
                 </div>
-                    <div className='flex mt-8'>
-                        <Skeleton className='h-36 w-[45rem] bg-gray-200' />
-                    </div>
+                <div className='flex mt-8'>
+                    <Skeleton className='h-36 w-[45rem] bg-gray-200' />
+                </div>
             </div>
         ); // Renderiza uma mensagem ou spinner enquanto carrega
     }
@@ -72,6 +73,9 @@ export default function InicioFuncionario() {
             <div className='flex mt-8 flex-wrap flex-row gap-8'>
                 <CardHorasTrabalhadas usuarioInfo={usuarioInfo} histPontos={histPontos!} />
                 {/* <TimeClock /> */}
+            </div>
+            <div className='flex mt-8 flex-wrap flex-row gap-8'>
+                <CardFeriado />
             </div>
             
         </div>
