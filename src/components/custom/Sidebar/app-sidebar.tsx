@@ -1,6 +1,6 @@
 import * as React from "react";
 import { usePathname } from "next/navigation";
-import { Users, Building, Home, LogOut, MessageSquare, AlarmClockCheck, UserRound, LucideIcon } from "lucide-react";
+import { Users, Building, Home, LogOut, MessageSquare, AlarmClockCheck, UserRound, LucideIcon, MapPin, UserRoundCheckIcon, House, HouseIcon } from "lucide-react";
 import { LiaBusinessTimeSolid } from "react-icons/lia";
 import { IconType } from "react-icons";
 import { TbClockExclamation } from "react-icons/tb";
@@ -89,6 +89,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {
           title: "ATIVIDADES",
           items: [
+            { title: "Início", url: "/inicio", icon: House},
             { title: "Solicitações", url: "/solicitacao", icon: MessageSquare },
           ],
         },
@@ -108,7 +109,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         },
       ],
       navSecondary: [
-        { title: usuario?.usuario_nome || "Usuário", url: "/administrador", icon: UserRound },
+        { title: usuario?.usuario_nome || "Usuário", url: "/perfil", icon: UserRound },
         { title: "Sair", url: "/logout", icon: LogOut },
       ],
     },
@@ -130,6 +131,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {
           title: "RELATÓRIOS",
           items: [
+            { title: "Pontos Diários", url: "/pontosDiarios", icon: MapPin},
             { title: "Banco de Horas", url: "/bancoHoras", icon: LiaBusinessTimeSolid },
             { title: "Falhas em Marcações", url: "/falhas_marcacoes", icon: TbClockExclamation},
           ],
@@ -137,12 +139,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {
           title: "GESTÃO DA EMPRESA",
           items: [
-            { title: "Colaboradores", url: "/colaboradores", icon: Building },
+            { title: "Colaboradores", url: "/colaboradores", icon: Building },          
           ],
         },
       ],
       navSecondary: [
-        { title: usuario?.usuario_nome || "Usuário", url: "/gestor", icon: UserRound },
+        { title: usuario?.usuario_nome || "Usuário", url: "/perfil", icon: UserRound },
         { title: "Sair", url: "/logout", icon: LogOut },
       ],
     },
@@ -164,7 +166,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         },
       ],
       navSecondary: [
-        { title: usuario?.usuario_nome || "Usuário", url: "/funcionario", icon: UserRound },
+        { title: usuario?.usuario_nome || "Usuário", url: "/perfil", icon: UserRound },
         { title: "Sair", url: "/logout", icon: LogOut },
       ],
     },

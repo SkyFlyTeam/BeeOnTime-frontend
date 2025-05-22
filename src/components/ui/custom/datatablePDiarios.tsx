@@ -35,22 +35,23 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import InputBusca from "../custom/InputBusca/inputBusca"
-import TablePagination from "../custom/TablePagination/TablePagination"
+import InputBusca from "../../custom/InputBusca/inputBusca"
+import TablePagination from "../../custom/TablePagination/TablePagination"
 
 // Defina as propriedades que o componente genérico vai receber
 interface DataTableProps<TData, TValue> {
-    columns: ColumnDef<TData, TValue>[]
-    data: TData[],
-    filterColumns: string[];  
-    title: string;
-    showSearchBar?: boolean;
+  columns: ColumnDef<TData, TValue>[]
+  data: TData[],
+  filterColumns: string[];
+  title: string;
+  showSearchBar?: boolean;
+  dataDay: string
 }
 
-export function DataTable<TData, TValue>({ data, columns, filterColumns, title, showSearchBar = true }: DataTableProps<TData, TValue>) {
+export function DataTable<TData, TValue>({ data, columns, filterColumns, title, dataDay, showSearchBar = true }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({usuarioCod: false, dataMes: false})
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({ usuarioCod: false, dataMes: false })
   const [rowSelection, setRowSelection] = React.useState({})
   const [filterValue, setFilterValue] = React.useState<string>("");
 
@@ -77,7 +78,7 @@ export function DataTable<TData, TValue>({ data, columns, filterColumns, title, 
     setFilterValue(event.target.value);
     setColumnFilters((prevFilters) => [
       {
-        id: filterColumns[0], 
+        id: filterColumns[0],
         value: event.target.value,
       },
     ]);
@@ -87,40 +88,42 @@ export function DataTable<TData, TValue>({ data, columns, filterColumns, title, 
     <div className="w-full">
       <div className="w-full flex justify-between items-center">
         <h1 className="font-bold text-2xl">{title}</h1>
-        <div className="flex items-center gap-4 justify-end py-4">
-          {showSearchBar && 
-            <InputBusca
-              value={filterValue}
-              onChange={handleFilterChange}
-              placeholder="Buscar..."
-            />
-          }
-          
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="bg-white text-base">
-                  Colunas <ChevronDown />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {table
-                  .getAllColumns()
-                  .filter((column) => column.getCanHide())
-                  .map((column) => (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) => column.toggleVisibility(!!value)}
-                    >
-                      {column.id.replace(/([a-z])([A-Z])/g, '$1 $2')}
-                    </DropdownMenuCheckboxItem>
-                  ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+        <h1 className="font-bold text-2xl text-[#F79522]"> {dataDay} </h1>
       </div>
-      
+      <div className="w-full flex justify-between items-center gap-4 py-4">
+        {/* <h1 className="font-bold text-2xl">{title}</h1> */}
+        {showSearchBar &&
+          <InputBusca
+            value={filterValue}
+            onChange={handleFilterChange}
+            placeholder="Buscar..."
+          />
+        }
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="bg-white text-base">
+              Colunas <ChevronDown />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {table
+              .getAllColumns()
+              .filter((column) => column.getCanHide())
+              .map((column) => (
+                <DropdownMenuCheckboxItem
+                  key={column.id}
+                  className="capitalize"
+                  checked={column.getIsVisible()}
+                  onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                >
+                  {column.id}
+                </DropdownMenuCheckboxItem>
+              ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
       <div className="hidden md:block">
         <Table className="min-w-[900px] w-full">
           <TableHeader className="bg-white">
@@ -141,7 +144,7 @@ export function DataTable<TData, TValue>({ data, columns, filterColumns, title, 
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id} data-state={row.getIsSelected() && "selected"} className={row.index % 2 === 0 ? "bg-[#FFF8E1] hover:bg-orange-200" : "bg-[#FFFFFF] hover:bg-orange-200"}>
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="border border-gray-200 text-black text-base p-3">
+                    <TableCell key={cell.id} className="border border-gray-200 text-black text-base p-3 text-center">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
@@ -151,7 +154,7 @@ export function DataTable<TData, TValue>({ data, columns, filterColumns, title, 
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
                   <div className="flex flex-col p-5 w-full justify-center items-center">
-                    <img src="/images/sem_conteudo.svg" alt="" style={{width: "30rem", height: "20rem"}}/>
+                    <img src="/images/sem_conteudo.svg" alt="" style={{ width: "30rem", height: "20rem" }} />
                     <p className="font-medium">Ops! Parece que não tem nada aqui!</p>
                   </div>
                 </TableCell>
@@ -186,7 +189,7 @@ export function DataTable<TData, TValue>({ data, columns, filterColumns, title, 
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
                   <div className="flex flex-col p-3 w-full justify-center items-center">
-                    <img src="/images/sem_conteudo.svg" alt="" style={{width: "40rem", height: "25rem"}}/>
+                    <img src="/images/sem_conteudo.svg" alt="" style={{ width: "40rem", height: "25rem" }} />
                     <p className="font-medium">Ops! Parece que não tem nada aqui!</p>
                   </div>
                 </TableCell>
@@ -200,7 +203,7 @@ export function DataTable<TData, TValue>({ data, columns, filterColumns, title, 
         <div className="flex-1 text-sm text-muted-foreground">
           {table.getFilteredRowModel().rows.length} linha(s).
         </div>
-        <TablePagination 
+        <TablePagination
           currentPage={table.getState().pagination.pageIndex + 1}
           totalPages={table.getPageCount()}
           onPageChange={(pageNumber: number) => table.setPageIndex(pageNumber - 1)}
