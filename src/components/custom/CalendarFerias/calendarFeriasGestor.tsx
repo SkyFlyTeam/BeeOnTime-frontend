@@ -7,6 +7,7 @@ import SolicitacaoInterface from "@/interfaces/Solicitacao";
 import { getUsuario } from "@/services/authService";
 import { solicitacaoServices } from "@/services/solicitacaoServices";
 import { toast } from "react-toastify"; // Importando o toast
+import { ApiUsuario } from "@/config/apiUsuario";
 
 const weekDays = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sab"];
 
@@ -62,9 +63,12 @@ const CalendarFeriasGestor = ({userPedido}: CalendarFeriasGestorProps) => {
       // Pega a primeira data das solicitações
       const primeiraSolicitacao = solicitacoes[0];
       if (primeiraSolicitacao.solicitacaoDataPeriodo) {
-        const [yearStr, monthStr, dayStr] = primeiraSolicitacao.solicitacaoDataPeriodo.split("-");
+        const primeiraData = primeiraSolicitacao.solicitacaoDataPeriodo[0];
+      if (primeiraData) {
+        const [yearStr, monthStr, dayStr] = primeiraData.split("-");
         const data = new Date(+yearStr, +monthStr - 1, +dayStr);
         setCurrentDate(new Date(data.getFullYear(), data.getMonth(), 1));
+      }
         return;
       }
     }
@@ -109,6 +113,62 @@ const CalendarFeriasGestor = ({userPedido}: CalendarFeriasGestorProps) => {
     date1.getFullYear() === date2.getFullYear();
 
   // Função para atualizar o status de todas as solicitações
+  // const handleUpdateStatus = async (status: number) => {
+  //   if (solicitacoes.length === 0) {
+  //     toast.info("Não há solicitações para atualizar", {
+  //       position: "top-right",
+  //       autoClose: 2000,
+  //     });
+  //     return;
+  //   }
+    
+  //   try {
+  //     const updatedSolicitacoes = await Promise.all(
+  //       solicitacoes.map(async (solicitacao) => {
+  //         // Converte o status numérico para string conforme esperado pelo serviço
+  //         const statusString = status === 1 ? "APROVADA" : "REPROVADA";
+          
+  //         // Prepara o objeto para atualização com a justificativa digitada
+  //         const updatedSolicitacao = {
+  //           ...solicitacao,
+  //           solicitacaoStatus: statusString,
+  //           solicitacaoMensagem: justificativaDigitada || solicitacao.solicitacaoMensagem
+  //         };
+          
+  //         return await solicitacaoServices.updateSolicitacao(updatedSolicitacao);
+  //       })
+  //     );
+      
+  //     console.log("Solicitações atualizadas com sucesso:", updatedSolicitacoes);
+      
+  //     // Atualiza a lista local de solicitações removendo as que foram processadas
+  //     setSolicitacoes([]);
+  //     setJustificativaDigitada("");
+      
+  //     // Mostra o toast de sucesso ao invés do alert
+  //     if (status === 1) {
+  //       toast.success("Solicitações de férias aprovadas com sucesso!", {
+  //         position: "top-right",
+  //         autoClose: 2000,
+  //       });
+  //     } else {
+  //       toast.success("Solicitações de férias recusadas com sucesso!", {
+  //         position: "top-right",
+  //         autoClose: 2000,
+  //       });
+  //     }
+
+      
+      
+  //   } catch (error) {
+  //     console.error("Erro ao atualizar solicitações:", error);
+  //     toast.error("Erro ao processar solicitações. Verifique o console para mais detalhes.", {
+  //       position: "top-right",
+  //       autoClose: 3000,
+  //     });
+  //   }
+  // };
+
   const handleUpdateStatus = async (status: number) => {
     if (solicitacoes.length === 0) {
       toast.info("Não há solicitações para atualizar", {
@@ -117,51 +177,104 @@ const CalendarFeriasGestor = ({userPedido}: CalendarFeriasGestorProps) => {
       });
       return;
     }
-    
+
     try {
       const updatedSolicitacoes = await Promise.all(
         solicitacoes.map(async (solicitacao) => {
-          // Converte o status numérico para string conforme esperado pelo serviço
           const statusString = status === 1 ? "APROVADA" : "REPROVADA";
-          
-          // Prepara o objeto para atualização com a justificativa digitada
+
+          console.log("Atualizando solicitação com status:", statusString);
+
           const updatedSolicitacao = {
             ...solicitacao,
             solicitacaoStatus: statusString,
-            solicitacaoMensagem: justificativaDigitada || solicitacao.solicitacaoMensagem
+            solicitacaoMensagem: justificativaDigitada || solicitacao.solicitacaoMensagem,
           };
-          
-          return await solicitacaoServices.updateSolicitacao(updatedSolicitacao);
+
+          const response = await solicitacaoServices.updateSolicitacao(updatedSolicitacao);
+          console.log("Solicitação atualizada com sucesso:", response);
+
+          // Se for aprovado, tenta registrar folgas
+          if (status === 1) {
+            console.log("Iniciando registro de folgas para solicitação:", solicitacao);
+
+            const formattedDates = solicitacao.solicitacaoDataPeriodo.map((data: any) => {
+            const date = new Date(data);
+            return date.toISOString().split('T')[0]; // Formato: YYYY-MM-DD
+          });
+
+          const folgaPayload = {
+            folgaObservacao: solicitacao.folObservacao || "Férias aprovada via solicitação",
+            folTipoCod: 2,
+            usuarioCod: { usuario_cod: userPedido },
+            folgaDataPeriodo: formattedDates, // Enviando todas as datas
+            folgaDiasUteis: 0,
+          };
+
+          try {
+            console.log("Enviando:", folgaPayload);
+            const response = await ApiUsuario.post("/folgas/cadastrar", folgaPayload, {
+              headers: {
+                'Content-Type': 'application/json',
+              }
+            });
+            console.log("Folgas cadastradas com sucesso:", response.data);
+          } catch (error: any) {
+            console.error("Erro ao cadastrar folgas:", error.response?.data || error.message);
+          }
+
+
+          //     const formattedData = solicitacao.folDataPeriodo.map((date: any) =>
+          //       date instanceof Date ? date.toISOString().split('T')[0] : date
+          //     );
+
+          //     console.log("Datas formatadas para folga:", formattedData);
+
+          //     const folgaPayload = {
+          //       folObservacao: solicitacao.folObservacao || "Férias aprovada via solicitação",
+          //       folgaTipo: {
+          //         folTipoCod: 2,
+          //       },
+          //       usuario: { usuario_cod: userPedido },
+          //       folDataPeriodo: formattedData,
+          //     };
+
+          //     console.log("Payload para envio de folga:", folgaPayload);
+
+          //     formData.append("solicitacaoJson", JSON.stringify(folgaPayload));
+
+          //     const folgaResponse = await ApiUsuario.post("/folgas/cadastrar", formData);
+
+          //     console.log("Folga cadastrada com sucesso:", folgaResponse.data);
+          }
+
+          return response;
         })
       );
+
+      console.log("Todas as solicitações foram processadas:", updatedSolicitacoes);
       
-      console.log("Solicitações atualizadas com sucesso:", updatedSolicitacoes);
-      
-      // Atualiza a lista local de solicitações removendo as que foram processadas
       setSolicitacoes([]);
       setJustificativaDigitada("");
-      
-      // Mostra o toast de sucesso ao invés do alert
-      if (status === 1) {
-        toast.success("Solicitações de férias aprovadas com sucesso!", {
+
+      toast.success(
+        status === 1
+          ? "Solicitações aprovadas e folgas cadastradas com sucesso!"
+          : "Solicitações recusadas com sucesso!",
+        {
           position: "top-right",
           autoClose: 2000,
-        });
-      } else {
-        toast.success("Solicitações de férias recusadas com sucesso!", {
-          position: "top-right",
-          autoClose: 2000,
-        });
-      }
-      
+        }
+      );
     } catch (error) {
-      console.error("Erro ao atualizar solicitações:", error);
-      toast.error("Erro ao processar solicitações. Verifique o console para mais detalhes.", {
+      console.error("Erro geral ao atualizar as solicitações:", error);
+      toast.error("Erro ao atualizar as solicitações", {
         position: "top-right",
         autoClose: 3000,
       });
     }
-  };
+  }
+
 
   return (
     <div>
@@ -219,11 +332,15 @@ const CalendarFeriasGestor = ({userPedido}: CalendarFeriasGestorProps) => {
             const cellDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
             
             const isSolicitacaoDay = solicitacoes.some((solicitacao) => {
-              if (!solicitacao.solicitacaoDataPeriodo) return false;
-              const [yearStr, monthStr, dayStr] = solicitacao.solicitacaoDataPeriodo.split("-");
-              const solicitacaoDate = new Date(+yearStr, +monthStr - 1, +dayStr);              
-              return isSameDay(solicitacaoDate, cellDate);
+            if (!solicitacao.solicitacaoDataPeriodo || !Array.isArray(solicitacao.solicitacaoDataPeriodo)) return false;
+
+            return solicitacao.solicitacaoDataPeriodo.some((dataStr: string) => {
+              const [year, month, day] = dataStr.split("-");
+              const date = new Date(+year, +month - 1, +day);
+              return isSameDay(date, cellDate);
             });
+          });
+
 
             return (
               <div

@@ -7,6 +7,7 @@ import SolicitacaoInterface from "@/interfaces/Solicitacao";
 import { getUsuario } from "@/services/authService";
 import { solicitacaoServices } from "@/services/solicitacaoServices";
 import { toast } from "react-toastify"; // Importando o toast
+import { ApiException } from "@/config/apiExceptions";
 
 const weekDays = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sab"];
 const periodoDict = {"30 Dias": 0, "15 e 15 Dias": 1, "20 e 10 Dias": 2, "10, 15 e 5 Dias": 3}
@@ -256,24 +257,48 @@ const CalendarFerias: React.FC<CalendarFeriasProps> = ({ isEdicao }) => {
         autoClose: 2000,
       });
 
-      const promises = allSelectedDates.map(async (data) => {
-        const formData = new FormData();
-        formData.append("solicitacaoJson", JSON.stringify({
-          solicitacaoMensagem: justificativa,
-          solicitacaoDataPeriodo: data,
-          usuarioCod: userCod,
-          tipoSolicitacaoCod: { tipoSolicitacaoCod: 2 },
-        }));
+      const formData = new FormData();
+      formData.append("solicitacaoJson", JSON.stringify({
+        solicitacaoMensagem: justificativa,
+        solicitacaoDataPeriodo: allSelectedDates.map(date =>
+          date.toISOString().split("T")[0] // transforma para formato "YYYY-MM-DD"
+        ),
+        usuarioCod: userCod,
+        tipoSolicitacaoCod: { tipoSolicitacaoCod: 2 },
+      }));
 
-        if (anexar) {
-          formData.append("solicitacaoAnexo", anexar);
+      if (anexar) {
+        formData.append("solicitacaoAnexo", anexar);
+      }
+
+      let res;
+
+      try {
+        const result = await solicitacaoServices.createSolicitacao(formData);
+        res = result;
+        if (result instanceof ApiException) {
+          console.error(result.message);
+        } else {
+          setSolicitacoes([result]);
         }
 
-        return solicitacaoServices.createSolicitacao(formData);
-      });
+        setSelectedDates([]);
+        setJustificativaDigitada("");
 
-      const results = await Promise.all(promises);
-      setSolicitacoes(results as SolicitacaoInterface[]);
+      } catch (error) {
+        console.error("Erro ao enviar solicitação:", error);
+        toast.error("Erro ao enviar solicitação. Verifique o console para mais detalhes.", {
+          position: "top-right",
+          autoClose: 4000,
+        });
+      }
+
+      if (res instanceof ApiException || res === undefined) {
+        console.log("Error!")
+      }
+      else {
+        setSolicitacoes([res]);
+      }
       setSelectedDates([]);
       setJustificativaDigitada("");
 
@@ -281,7 +306,7 @@ const CalendarFerias: React.FC<CalendarFeriasProps> = ({ isEdicao }) => {
         position: "top-right",
         autoClose: 3000,
       });
-      console.log("Solicitações enviadas:", results);
+      console.log("Solicitações enviadas:", res);
     } catch (error) {
       console.error("Erro ao enviar solicitações:", error);
       toast.error("Erro ao enviar solicitações. Verifique o console para mais detalhes.", {
