@@ -3,20 +3,24 @@ import FeriadoItem from "./feriadoItem";
 import { useEffect, useState } from "react";
 import { feriadoServices } from "@/services/feriadoService";
 import dayjs from "dayjs";
+import "dayjs/locale/pt-br";
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+
+dayjs.extend(isSameOrAfter);
 
 dayjs.locale("pt-br");
 
 
 function calcularDiasRestantes(data: string | Date): number {
-  const hoje = dayjs();
-  const feriado = dayjs(data);
+  const hoje = dayjs().startOf("day");
+  const feriado = dayjs(data).startOf("day");
   return feriado.diff(hoje, "day");
 }
 
 function formatarData(data: string) {
-  const date = new Date(data);
-  const dia = String(date.getDate()).padStart(2, "0");
-  const mes = date.toLocaleString("pt-BR", { month: "short" }).toUpperCase().replace('.', '');
+  const date = dayjs(data);
+  const dia = date.format("DD");
+  const mes = date.format("MMM").toUpperCase();
   return { dia, mes };
 }
 
@@ -24,23 +28,24 @@ export default function CardFeriado() {
   const [feriados, setFeriados] = useState<Feriado[]>([])
 
   useEffect(() => {
+  const fetchFeriados = async () => {
+    const response = await feriadoServices.getAllFeriado();
+    if (Array.isArray(response)) {
+      const hoje = dayjs().startOf("day");
+      const proximosFeriados = response
+        .filter((feriado) => dayjs(feriado.feriadoData).isSameOrAfter(hoje))
+        .sort((a, b) =>
+          dayjs(a.feriadoData).diff(dayjs(b.feriadoData))
+        )
+        .slice(0, 6);
+      setFeriados(proximosFeriados);
+    } else {
+      console.error("Erro ao buscar feriados:", response.message);
+    }
+  };
 
-    const fetchFeriados = async () => {
-      const response = await feriadoServices.getAllFeriado();
-      if (Array.isArray(response)) {
-        const hoje = new Date();
-        const proximosFeriados = response
-          .filter((feriado) => new Date(feriado.feriadoData) >= hoje)
-          .sort((a, b) => new Date(a.feriadoData).getTime() - new Date(b.feriadoData).getTime())
-          .slice(0, 6);
-        setFeriados(proximosFeriados);
-      } else {
-        console.error("Erro ao buscar feriados:", response.message);
-      }
-    };
-
-    fetchFeriados();
-  }, []);
+  fetchFeriados();
+}, []);
   return (
     <div className="flex flex-col justify-between bg-white shadow-md p-6 rounded-xl w-[768px] min-w-fit max-[565px]:w-[90%]">
       <div className="relative flex items-center">
