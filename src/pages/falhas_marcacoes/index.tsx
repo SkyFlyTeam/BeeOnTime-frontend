@@ -253,6 +253,7 @@ export default function FalhasMarcacoes() {
         dataInicioPadrao.setDate(hoje.getDate() - 90);
 
         setDataInicio(dataInicioPadrao.toISOString().split("T")[0]);
+        setDataFim(hoje.toISOString().split("T")[0]);
     }, []);
 
     // Função de Paginação
