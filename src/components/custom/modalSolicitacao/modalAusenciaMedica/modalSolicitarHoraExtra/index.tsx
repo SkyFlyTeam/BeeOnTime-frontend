@@ -24,27 +24,28 @@ interface SolicitarHoraExtraContentProps {
 }
 
 
-const ModalSolictarHoraExtra = ({ usuarioCod, cargaHoraria, solicitacao, onClose, onSolicitacaoUpdate }: SolicitarHoraExtraContentProps) => {
+const ModalSolictarAusenciaMedica = ({ usuarioCod, cargaHoraria, solicitacao, onClose, onSolicitacaoUpdate }: SolicitarHoraExtraContentProps) => {
   const [startDate, setStartDate] = useState<Date>(new Date());
   const [isInitialized, setIsInitialized] = useState(false);
   const [mensagem, setMensagem] = useState<string>();
   const [horasSolicitadas, setHorasSolicitadas] = useState<number>();
   const [horarioSaidaPrevista, setHorarioSaidaPrevista] = useState<string>();
   const [file, setFile] = useState<File | null>(null);
-  
+
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const uploaded = e.target.files?.[0];
-      if (uploaded) {
-        setFile(uploaded);
-      }
+    const uploaded = e.target.files?.[0];
+    if (uploaded) {
+      setFile(uploaded);
     }
+  }
+
+  const abrirSeletorArquivo = () => {
+    fileInputRef.current?.click();
+  };
   
-    const abrirSeletorArquivo = () => {
-      fileInputRef.current?.click();
-    };
 
   const fetchPontoAtual = async () => {
     const today = new Date();
@@ -105,7 +106,7 @@ const ModalSolictarHoraExtra = ({ usuarioCod, cargaHoraria, solicitacao, onClose
       }
   
       if (!mensagem) {
-        toast.error('Justifique sua hora extra!');
+        toast.error('Justifique sua ausência médica!');
         return;
       }
   
@@ -114,11 +115,14 @@ const ModalSolictarHoraExtra = ({ usuarioCod, cargaHoraria, solicitacao, onClose
         usuarioCod,
         horasSolicitadas,
         solicitacaoDataPeriodo: format(startDate, 'yyyy-MM-dd'),
-        tipoSolicitacaoCod: { tipoSolicitacaoCod: 5 }
+        tipoSolicitacaoCod: { tipoSolicitacaoCod: 6 }
       };
   
       const formData = new FormData();
       formData.append("solicitacaoJson", JSON.stringify(solicitacaoJson));
+      if (file) {
+        formData.append("solicitacaoAnexo", file);
+      }
       
       if (solicitacao) {
         const updateJson: SolicitacaoInterface = {
@@ -126,7 +130,7 @@ const ModalSolictarHoraExtra = ({ usuarioCod, cargaHoraria, solicitacao, onClose
           solicitacaoMensagem: mensagem,
           horasSolicitadas: horasSolicitadas ?? 0,
           solicitacaoDataPeriodo: format(startDate, 'yyyy-MM-dd'),
-          tipoSolicitacaoCod: { tipoSolicitacaoCod: 5, tipoSolicitacaoNome: 'Hora extra' },
+          tipoSolicitacaoCod: { tipoSolicitacaoCod: 6, tipoSolicitacaoNome: 'Ausência médica' },
           usuarioCod,
         };
       
@@ -139,6 +143,7 @@ const ModalSolictarHoraExtra = ({ usuarioCod, cargaHoraria, solicitacao, onClose
         if (!(updated instanceof ApiException) && onSolicitacaoUpdate) {
           onSolicitacaoUpdate(updated);
         }
+        
       } else {
         const created = await solicitacaoServices.createSolicitacao(formData);
         toast.success('Solicitação enviada com sucesso!');
@@ -148,6 +153,7 @@ const ModalSolictarHoraExtra = ({ usuarioCod, cargaHoraria, solicitacao, onClose
         if (!(created instanceof ApiException) && onSolicitacaoUpdate) {
           onSolicitacaoUpdate(created);
         }
+
       }
       
   
@@ -178,16 +184,6 @@ const ModalSolictarHoraExtra = ({ usuarioCod, cargaHoraria, solicitacao, onClose
 
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-0.5">
-          <label htmlFor="inHoras">Horas diárias</label>
-          <input
-            type="number"
-            className={styles.input_hours}
-            onChange={(e) => setHorasSolicitadas(+e.target.value)}
-            value={horasSolicitadas ?? ''}
-          />
-        </div>
-
-        <div className="flex flex-col gap-0.5">
           <label>Justificativa</label>
           <div className={styles.justificativa_content}>
             <input
@@ -195,17 +191,17 @@ const ModalSolictarHoraExtra = ({ usuarioCod, cargaHoraria, solicitacao, onClose
               value={mensagem}
               onChange={(e) => setMensagem(e.target.value)}
             />
-            {/* <input
-              type='file'
-              ref={fileInputRef}
-              onChange={handleFile}
-              style={{ display: 'none' }}
-            />
-            <Paperclip
-              strokeWidth={1}
-              className={styles.anexo_icon}
-              onClick={abrirSeletorArquivo}
-            /> */}
+            <input
+                type='file'
+                ref={fileInputRef}
+                onChange={handleFile}
+                style={{ display: 'none' }}
+              />
+              <Paperclip
+                strokeWidth={1}
+                className={styles.anexo_icon}
+                onClick={abrirSeletorArquivo}
+              />
           </div>
         </div>
       </div>
@@ -219,4 +215,4 @@ const ModalSolictarHoraExtra = ({ usuarioCod, cargaHoraria, solicitacao, onClose
   );
 };
 
-export default ModalSolictarHoraExtra;
+export default ModalSolictarAusenciaMedica;

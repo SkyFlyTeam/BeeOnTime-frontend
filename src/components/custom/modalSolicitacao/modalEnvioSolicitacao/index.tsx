@@ -23,7 +23,7 @@ interface Ponto {
   id: string;
   usuarioCod: number;
   horasCod: number;
-  data: string | Date;
+  horasData: string | Date;
   pontos: { horarioPonto: string | Date; tipoPonto: number }[];
 }
 
@@ -55,7 +55,7 @@ const ModalCriarSolicitacao = ({ isOpen, onClose, ponto }: ModalCriarSolicitacao
       const solicitacaoJson = {
         solicitacaoMensagem: mensagem,
         usuarioCod: ponto.usuarioCod,
-        solicitacaoDataPeriodo: ponto.data,
+        solicitacaoDataPeriodo: ponto.horasData,
         tipoSolicitacaoCod: {
           tipoSolicitacaoCod: 1
         }
@@ -73,7 +73,7 @@ const ModalCriarSolicitacao = ({ isOpen, onClose, ponto }: ModalCriarSolicitacao
         usuarioCod: ponto.usuarioCod,
         solicitacaoCod: 'solicitacaoCod' in result ? result.solicitacaoCod : 0,
         horasCod: ponto.horasCod,
-        data: ponto.data,
+        data: ponto.horasData,
         pontos: [
           { horarioPonto: entrada as string, tipoPonto: 0 },
           { horarioPonto: inicioAlmoco as string, tipoPonto: 2 },
@@ -113,9 +113,9 @@ const ModalCriarSolicitacao = ({ isOpen, onClose, ponto }: ModalCriarSolicitacao
     if (tipoSaida) setSaida(tipoSaida.horarioPonto as string);  
   };
 
-  const [ano, mes, dia] = typeof ponto.data === 'string'
-    ? ponto.data.split("-")
-    : new Date(ponto.data).toISOString().split("T")[0].split("-");
+  const [ano, mes, dia] = typeof ponto.horasData === 'string'
+    ? ponto.horasData.split("-")
+    : new Date(ponto.horasData).toISOString().split("T")[0].split("-");
 
   const dataFormatada = `${String(dia).padStart(2, '0')}/${String(mes).padStart(2, '0')}/${ano}`;
 

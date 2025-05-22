@@ -20,6 +20,9 @@ import ModalDevolutiva from '../modalDevolutiva'
 // Styles
 import styles from './style.module.css'
 
+// Utils
+import handleDownload from '@/utils/handleDownload'
+
 
 interface AjusteProps {
   diaSelecionado: string
@@ -129,23 +132,7 @@ const ModalAjustePonto: React.FC<AjusteProps> = ({
       })
     }
   }
-
-  const handleDownload = () => {
-    if (!solicitacao?.solicitacaoAnexo || solicitacao.solicitacaoAnexo.length === 0) return
-    const byteArray = new Uint8Array(solicitacao.solicitacaoAnexo)
-    const blob = new Blob([byteArray], {
-      type: 'application/octet-stream',
-    })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = solicitacao.solicitacaoAnexoNome || 'anexo.txt'
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    URL.revokeObjectURL(url)
-  }
-
+  
   const openDevolutivaModal = () => {
     setShowDevolutivaModal(true)
   }
@@ -157,6 +144,7 @@ const ModalAjustePonto: React.FC<AjusteProps> = ({
   return (
     <>
       <form className={styles.form_container}>
+        <p className={styles.colaborador_label}><span>Colaborador: </span>{solicitacao && solicitacao.usuarioNome}</p>
         <div>
           <span className={styles.data_span}>Dia selecionado: </span>{diaSelecionado}
         </div>
@@ -236,7 +224,7 @@ const ModalAjustePonto: React.FC<AjusteProps> = ({
             {solicitacao?.solicitacaoAnexo && (
               <button
                 type="button"
-                onClick={handleDownload}
+                onClick={() => handleDownload(solicitacao.solicitacaoAnexo, solicitacao.solicitacaoAnexoNome || '')}
                 title="Baixar anexo"
                 style={{
                   background: 'none',
