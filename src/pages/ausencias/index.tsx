@@ -181,9 +181,11 @@ export default function Ausencias() {
                     (!dataFim || faltaDate <= new Date(dataFim))
             }),
             licencasMedicas: licencasMedicas.licencasMedicas.filter(solicitacao => {
-                const solicitacaoDate = new Date(solicitacao.solicitacaoDataPeriodo)
-                return (!dataInicio || solicitacaoDate >= new Date(dataInicio)) &&
-                    (!dataFim || solicitacaoDate <= new Date(dataFim))
+                return solicitacao.solicitacaoDataPeriodo.some(dataPeriodo => {
+                    const solicitacaoDate = new Date(dataPeriodo);
+                    return (!dataInicio || solicitacaoDate >= new Date(dataInicio)) &&
+                        (!dataFim || solicitacaoDate <= new Date(dataFim));
+                });
             }),
             folgas: folgas.folgas.filter(folga => filterPeriodArray(folga.folgaDataPeriodo)),
             ferias: ferias.ferias.filter(feria => filterPeriodArray(feria.folgaDataPeriodo))
@@ -285,10 +287,19 @@ export default function Ausencias() {
     }, [usuario])
 
     useEffect(() => {
-        getUser()
-        const currentDate = new Date().toISOString().split("T")[0]
-        setHoje(currentDate)
-    }, [])
+        const hoje = new Date();
+
+        const noventaDiasAtras = new Date();
+        noventaDiasAtras.setDate(hoje.getDate() - 90);
+
+        const formatarData = (data: Date) => data.toISOString().split('T')[0];
+
+        setDataInicio(formatarData(noventaDiasAtras));
+        setHoje(formatarData(hoje));
+
+        getUser();
+    }, []);
+
 
     const filteredData = useMemo(() => {
         return filterData();
@@ -348,8 +359,9 @@ export default function Ausencias() {
                 </div>
 
                 {showGrafico && (
-                    <div className="flex flex-col lg:flex-row gap-6">
-                        <div className="w-full lg:w-[70%]">
+                    <div className="flex flex-col lg:flex-row gap-2 -pt-15">
+
+                        <div className={`w-full lg:w-[65%] min-h-[200px] ${styles.wrapperGrafico}`}>
                             <GraficoAusencias
                             folgas={folgas.filtradas.length}
                             licencasMedicas={licencasMedicas.filtradas.length}
@@ -360,25 +372,23 @@ export default function Ausencias() {
                             />
                         </div>
 
-                        <div className="w-full lg:w-[30%] h-[450px] flex flex-col min-w-0 items-center">
-                            {qtdAusencia && (
-                                <>
-                                    <div className="flex-1 overflow-y-auto overflow-x-auto w-full min-w-0 flex flex-col items-center pt-6">
-                                        <TabelaAusencia
-                                            ausenciaDado={paginatedData}
-                                            titulo={ausenciaSelecionada}
-                                        />
-                                    </div>
-                                    <div className="mt-auto pr-4">
-                                        <TablePagination
-                                            currentPage={currentPage}
-                                            totalPages={totalPages}
-                                            onPageChange={setCurrentPage}
-                                        />
-                                    </div>
-                                </>
-                            )}
-                        </div>
+                        {qtdAusencia && (
+                            <div className={`w-full lg:w-[35%] sm:h-[200px] md:h-[400px] flex flex-col min-w-0 items-center ${styles.wrapperTabela}`}>
+                                <div className="flex-1 md:w-[70%] lg:w-full overflow-y-auto overflow-x-auto w-full min-w-0 flex flex-col items-center pt-6 mb-5">
+                                    <TabelaAusencia
+                                        ausenciaDado={paginatedData}
+                                        titulo={ausenciaSelecionada}
+                                    />
+                                </div>
+                                <div className="mt-auto pr-4 md:w-[50%]">
+                                    <TablePagination
+                                        currentPage={currentPage}
+                                        totalPages={totalPages}
+                                        onPageChange={setCurrentPage}
+                                    />
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
 

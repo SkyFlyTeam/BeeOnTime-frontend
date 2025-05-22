@@ -18,3 +18,32 @@
     display: flex;
     align-items: end;
 }
+
+@media(max-width: 768px){
+    .wrapperTabela {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+}
+
+@media(max-width: 425px){
+    .wrapperGrafico {
+        margin-top: -70px;
+    }
+
+    .wrapperTabela {
+        margin-top: -80px;
+    }
+}
+
+@media(max-width: 375px){
+    .wrapperGrafico {
+        margin-top: -70px;
+    }
+
+    .wrapperTabela {
+        margin-top: -80px;
+    }
+}
