@@ -53,7 +53,7 @@ const ModalCriarSolicitacaoFalta = ({ isOpen, onClose, falta }: ModalCriarSolici
         usuarioCod: falta.usuarioCod,
         solicitacaoDataPeriodo: [dataFormatada], 
         tipoSolicitacaoCod: {
-          tipoSolicitacaoCod: 4
+          tipoSolicitacaoCod: 4,
         }
       };
 

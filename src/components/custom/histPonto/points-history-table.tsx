@@ -17,6 +17,14 @@ import Faltas from "@/interfaces/faltas";
 import ModalCriarSolicitacaoFalta from "../modalSolicitacao/modalEnvioSolicitacaoFalta";
 
 import styles from "./styles.module.css"
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+import TablePagination from "../TablePagination/TablePagination";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
 
 interface PointsHistoryTableProps {
   entries: HistPontos[] | null;
@@ -28,13 +36,24 @@ interface PointsHistoryTableProps {
 
 const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTableProps>(
   ({ entries, onEdit, userInfo, className, accessLevel }, ref) => {
-    if(!userInfo)
+    if (!userInfo)
       return;
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isModalAusenciaOpen, setIsModalAusenciaOpen] = useState(false);
     const [selectedPonto, setSelectedPonto] = useState<HistPontos | null>(null);
     const [selectedFalta, setSelectedFalta] = useState<Faltas | null>(null);
     const [faltas, setFaltas] = useState<{ [key: string]: boolean }>({}); // Store falta data for each entry
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const rowsPerPage = 10; // Altere se quiser mais ou menos por página
+
+    const totalPages = entries ? Math.ceil(entries.length / rowsPerPage) : 0;
+
+    // Corta os dados para mostrar apenas os da página atual
+    const paginatedEntries = entries
+      ? entries.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage)
+      : [];
+
 
     const fetchFaltas = async () => {
       try {
@@ -95,17 +114,24 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
     };
 
     const jornadaFormatada = () => {
-      if(userInfo.jornadas.jornada_horarioFlexivel)
+      if (userInfo.jornadas.jornada_horarioFlexivel)
         return "Horário flexível";
-
+    
       const diasDaSemanaSiglas = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
-      
       const diasTrabalhados = userInfo.jornadas.jornada_diasSemana
         .map((trabalha, index) => trabalha ? diasDaSemanaSiglas[index] : null)
         .filter((dia) => dia !== null);
-
-      return `${diasTrabalhados.join(", ")} das ${userInfo.jornadas.jornada_horarioEntrada.toString().slice(0, 5)} até ${userInfo.jornadas.jornada_horarioSaida.toString().slice(0, 5)}`;
+    
+      const entrada = userInfo.jornadas.jornada_horarioEntrada 
+        ? userInfo.jornadas.jornada_horarioEntrada.toString().slice(0, 5) 
+        : "--:--";
+      const saida = userInfo.jornadas.jornada_horarioSaida 
+        ? userInfo.jornadas.jornada_horarioSaida.toString().slice(0, 5) 
+        : "--:--";
+    
+      return `${diasTrabalhados.join(", ")} das ${entrada} até ${saida}`;
     };
+    
 
     const { horasSemana, horasMes } = calculateCargaHoraria(userInfo.usuario_cargaHoraria!, userInfo.jornadas.jornada_diasSemana?.filter(dia => dia).length ?? 0);
 
@@ -136,22 +162,41 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
               </TableRow>
             </TableHeader>
             <TableBody>
-              {entries &&
-                entries.map((entry, index) => (
-                  <TableRow key={index} className={index % 2 === 0 ? "bg-[#FFF8E1]" : "bg-[#FFFFFF]"}>
+              {paginatedEntries.length > 0 ? (
+                paginatedEntries.map((entry, index) => (
+                  <TableRow
+                    key={index}
+                    className={
+                      (index + (currentPage - 1) * rowsPerPage) % 2 === 0
+                        ? "bg-[#FFF8E1] hover:bg-orange-200"
+                        : "bg-[#FFFFFF] hover:bg-orange-200"
+                    }
+                  >
                     <TableCell className="border border-gray-200 text-center text-black text-base p-3">
-                      {new Date(entry.horasData).toLocaleDateString("pt-BR")}
+                      {dayjs(entry.horasData).tz("America/Sao_Paulo").format("DD/MM/YYYY")}
                     </TableCell>
                     <TableCell className="border border-gray-200 text-center text-black text-base p-3">
                       <div className="flex flex-col">
                         {entry.pontos.length > 0 ? (
-                          <div>{entry.pontos.map((ponto: Ponto) => `${ponto.horarioPonto.toString().substring(0, 5)}`).join(" - ")}</div>
-                        ) : (<div>---</div>)}
+                          <div>
+                            {entry.pontos
+                              .map((ponto: Ponto) => `${ponto.horarioPonto.toString().substring(0, 5)}`)
+                              .join(" - ")}
+                          </div>
+                        ) : (
+                          <div>---</div>
+                        )}
                       </div>
                     </TableCell>
-                    <TableCell className="border border-gray-200 text-center text-black text-base p-3">{entry.horasTrabalhadas}</TableCell>
-                    <TableCell className="border border-gray-200 text-center text-black text-base p-3">{entry.horasExtras}</TableCell>
-                    <TableCell className="border border-gray-200 text-center text-black text-base p-3">{entry.horasFaltantes}</TableCell>
+                    <TableCell className="border border-gray-200 text-center text-black text-base p-3">
+                      {entry.horasTrabalhadas.toFixed(0)}
+                    </TableCell>
+                    <TableCell className="border border-gray-200 text-center text-black text-base p-3">
+                      {entry.horasExtras.toFixed(0)}
+                    </TableCell>
+                    <TableCell className="border border-gray-200 text-center text-black text-base p-3">
+                      {entry.horasFaltantes.toFixed(0)}
+                    </TableCell>
                     {accessLevel === "USER" && (
                       <TableCell className="border border-gray-200 text-center text-black text-base p-3">
                         {!faltas[entry.horasData.toLocaleString()] ? (
@@ -160,10 +205,10 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
                               variant="ghost"
                               size="icon"
                               className="relative bg-[#FFC107] hover:bg-[#e0a800] text-white"
-                              onClick={() => handleModalOpen(entry)} // Open modal for the point
+                              onClick={() => handleModalOpen(entry)}
                             >
                               <PencilLine className="h-4 w-4 text-[#42130F]" />
-                              <span className={styles.tooltip_text}>Solicitar ajuste</span> {/* Tooltip */}
+                              <span className={styles.tooltip_text}>Solicitar ajuste</span>
                             </Button>
                           </div>
                         ) : (
@@ -175,17 +220,149 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
                               onClick={() => handleModalAusenciaOpen(faltas[entry.horasData.toLocaleString()])}
                             >
                               <PencilLine className="h-4 w-4 text-[#42130F]" />
-                              <span className={styles.tooltip_text}>Justificar ausência</span> {/* Tooltip */}
+                              <span className={styles.tooltip_text}>Justificar ausência</span>
                             </Button>
                           </div>
                         )}
                       </TableCell>
                     )}
                   </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={headers.length} className="h-24 text-center">
+                    <div className="flex flex-col p-5 w-full justify-center items-center">
+                      <img src="/images/sem_conteudo.svg" alt="Sem conteúdo" style={{ width: "30rem", height: "20rem" }} />
+                      <p className="font-medium">Ops! Parece que não tem nada aqui!</p>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+
+        </div>
+
+        {/* Mobile - Tabela transposta */}
+        <div className="block md:hidden overflow-x-auto mt-4">
+          <Table className="min-w-[700px] w-full">
+            <TableHeader>
+              <TableRow>
+                <TableHead className="border border-gray-200 text-center font-bold text-black  p-4">
+                  DATA
+                </TableHead>
+                
+                {paginatedEntries.map((entry, index) => (
+                  <TableHead
+                    key={index}
+                    className={`border border-gray-200 text-center  text-black  p-4 ${(index + (currentPage - 1) * rowsPerPage) % 2 === 0
+                        ? "bg-[#FFF8E1]"
+                        : "bg-[#FFFFFF]"
+                      } hover:bg-orange-200`}
+                  >
+                    {dayjs(entry.horasData).tz("America/Sao_Paulo").format("DD/MM/YYYY")}
+                  </TableHead>
                 ))}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow className="">
+                <TableCell className="border border-gray-200 text-center font-bold p-3 ">PONTOS:</TableCell>
+                {paginatedEntries.map((entry, idx) => (
+                  <TableCell
+                    key={idx}
+                    className={`border border-gray-200 text-center p-3 ${(idx + (currentPage - 1) * rowsPerPage) % 2 === 0 ? "bg-[#FFF8E1]" : "bg-[#FFFFFF]"
+                      } hover:bg-orange-200`}
+                  >
+                    {entry.pontos.length > 0
+                      ? entry.pontos.map((ponto: Ponto) => ponto.horarioPonto.substring(0, 5)).join(" - ")
+                      : "---"}
+                  </TableCell>
+                ))}
+              </TableRow>
+
+              <TableRow className="">
+                <TableCell className="border border-gray-200 text-center font-bold p-3 ">HORAS NORMAIS:</TableCell>
+                {paginatedEntries.map((entry, idx) => (
+                  <TableCell
+                    key={idx}
+                    className={`border border-gray-200 text-center p-3 ${(idx + (currentPage - 1) * rowsPerPage) % 2 === 0 ? "bg-[#FFF8E1]" : "bg-[#FFFFFF]"
+                      } hover:bg-orange-200`}
+                  >
+                    {entry.horasTrabalhadas.toFixed(0)}
+                  </TableCell>
+                ))}
+              </TableRow>
+
+              <TableRow className="">
+                <TableCell className="border border-gray-200 text-center font-semibold p-3 ">HORAS EXTRAS:</TableCell>
+                {paginatedEntries.map((entry, idx) => (
+                  <TableCell
+                    key={idx}
+                    className={`border border-gray-200 text-center p-3 ${(idx + (currentPage - 1) * rowsPerPage) % 2 === 0 ? "bg-[#FFF8E1]" : "bg-[#FFFFFF]"
+                      } hover:bg-orange-200`}
+                  >
+                    {entry.horasExtras.toFixed(0)}
+                  </TableCell>
+                ))}
+              </TableRow>
+
+              <TableRow className="">
+                <TableCell className="border border-gray-200 text-center font-semibold p-3 ">HORAS FALTANTES:</TableCell>
+                {paginatedEntries.map((entry, idx) => (
+                  <TableCell
+                    key={idx}
+                    className={`border border-gray-200 text-center p-3 ${(idx + (currentPage - 1) * rowsPerPage) % 2 === 0 ? "bg-[#FFF8E1]" : "bg-[#FFFFFF]"
+                      } hover:bg-orange-200`}
+                  >
+                    {entry.horasFaltantes.toFixed(0)}
+                  </TableCell>
+                ))}
+              </TableRow>
+
+              {accessLevel === "USER" && (
+                <TableRow className="">
+                  <TableCell className="border border-gray-200 text-center font-bold p-3 ">AÇÕES:</TableCell>
+                  {paginatedEntries.map((entry, idx) => (
+                    <TableCell
+                      key={idx}
+                      className={`border border-gray-200 text-center p-3 ${(idx + (currentPage - 1) * rowsPerPage) % 2 === 0 ? "bg-[#FFF8E1]" : "bg-[#FFFFFF]"
+                        } hover:bg-orange-200`}
+                    >
+                      {!faltas[entry.horasData.toLocaleString()] ? (
+                        <div className={styles.relative}>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="relative bg-[#FFC107] hover:bg-[#e0a800] text-white"
+                            onClick={() => handleModalOpen(entry)}
+                          >
+                            <PencilLine className="h-4 w-4 text-[#42130F]" />
+                            <span className={styles.tooltip_text}>Solicitar ajuste</span>
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className={styles.relative}>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="relative bg-[#FFC107] hover:bg-[#e0a800] text-white"
+                            onClick={() => handleModalAusenciaOpen(faltas[entry.horasData.toLocaleString()])}
+                          >
+                            <PencilLine className="h-4 w-4 text-[#42130F]" />
+                            <span className={styles.tooltip_text}>Justificar ausência</span>
+                          </Button>
+                        </div>
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </div>
+
+        
 
         {/* Modal */}
         {isModalOpen && selectedPonto && (
@@ -203,7 +380,19 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
             falta={selectedFalta}
           />
         )}
+
+        <div className="flex justify-end w-full mt-6">
+          <div className="">
+            <TablePagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={(page: number) => setCurrentPage(page)}
+              showPreviousNext
+            />
+          </div>
+        </div>
       </div>
+
     );
   }
 );

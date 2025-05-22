@@ -21,7 +21,9 @@ const accessRoutes = {
         "/historico-ponto",
         "/Colaboradores",
         "/notFound",
-        "/ausencias"
+        "/ausencias",
+        "/falhas_marcacoes",
+        "/pontosDiarios",
     ],
     GESTOR: [
         "/perfil",
@@ -38,7 +40,9 @@ const accessRoutes = {
         "/historico-ponto",
         "/Colaboradores",
         "/notFound",
-        "/ausencias"
+        "/ausencias",
+        "/falhas_marcacoes",
+        "/pontosDiarios",
     ],
     FUNCIONARIO: [
         "/perfil",
