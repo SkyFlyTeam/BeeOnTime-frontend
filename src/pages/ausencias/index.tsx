@@ -295,6 +295,7 @@ export default function Ausencias() {
         const formatarData = (data: Date) => data.toISOString().split('T')[0];
 
         setDataInicio(formatarData(noventaDiasAtras));
+        setDataFim(formatarData(hoje));  // <-- setando dataFim como hoje
         setHoje(formatarData(hoje));
 
         getUser();
