@@ -3,20 +3,6 @@ import HistPontos, { Ponto } from "@/interfaces/hisPonto";
 import { ApiException } from "../config/apiExceptions";
 import { ApiPonto } from "../config/apiPonto";
 import PontoProv, { AprovarPonto } from "../interfaces/pontoProv";
-import HistPonto from "@/interfaces/histPonto";
-
-const getAll = async (): Promise<HistPonto[]> => {
-    try {
-        const { data } = await ApiPonto.get('/mpontos/')
-        return data
-    } catch (error: unknown) {
-        if (error instanceof Error) {
-          return new ApiException(error.message || "Erro ao consultar a API.");
-        }
-    
-        return new ApiException("Erro desconhecido.");
-    }
-}
 
 const baterPonto = async (usuario_cod: number, horasCod: number, ponto: Ponto) => {
     try {
@@ -120,8 +106,7 @@ export const pontoServices = {
     getPontosByHorasCod,
     getSolicitacaoPonto,
     getPontosByUsuario,
-    aproveSolicitacaoPonto,
-    getAll
+    aproveSolicitacaoPonto
   };
 
   

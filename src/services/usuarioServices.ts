@@ -1,8 +1,8 @@
 import axios from "axios";
 import { ApiUsuario } from "@/config/apiUsuario";
 import { ApiException } from "../config/apiExceptions";
-import Usuario from "@/interfaces/usuario";
-import Jornada from "@/interfaces/usuario";
+import UsuarioInfo from "@/interfaces/usuarioInfo";
+import Jornada from "@/interfaces/usuarioInfo";
 
 
 const checkLogin = async (credenciais: any): Promise<any | ApiException> => {
@@ -17,17 +17,15 @@ const checkLogin = async (credenciais: any): Promise<any | ApiException> => {
 };
 
 const cadastrarUsuarioComJornada = async (usuario: any, jornada: any) => {
-  alert(usuario.usuario_status)
   try {
-    alert(JSON.stringify(usuario))
-    const dadosCombinados = { ...usuario, usuario_status: true, ...jornada};
-   alert(JSON.stringify(dadosCombinados))
+    const dadosCombinados = { ...usuario, ...jornada };
+   
     const response = await ApiUsuario.post(`/usuario/cadastrar`, dadosCombinados, {
       headers: { "Content-Type": "application/json" },
       timeout: 5000,
     });
     console.log("Resposta do backend:", response.data);
-    return response.data as Usuario;
+    return response.data as UsuarioInfo;
   } catch (error: any) {
     if (error.response) {
       console.error("Erro no backend:", error.response.data);

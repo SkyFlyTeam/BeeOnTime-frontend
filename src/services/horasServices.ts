@@ -1,19 +1,6 @@
-import Horas, { HorasDTO } from "@/interfaces/horas";
+import Horas from "@/interfaces/horas";
 import { ApiException } from "../config/apiExceptions";
 import { ApiPonto } from "../config/apiPonto";
-
-const getPontuais = async (): Promise<HorasDTO[] | ApiException> => {
-    try {
-        const response = await ApiPonto.get<HorasDTO[]>("/horas/pontuais");
-        return response.data;
-    } catch (error) {
-        if (error instanceof Error) {
-        return new ApiException(error.message || "Erro ao consultar a API.");
-        }
-    
-        return new ApiException("Erro desconhecido.");
-    }
-}
 
 const getHorasByUsuario = async (usuario_cod: number) => {
     try {
@@ -56,7 +43,6 @@ const generateHours = async () => {
 export const horasServices = {
     getHorasByUsuario,
     getHorasByUsuarioAndDate,
-    generateHours,
-    getPontuais
+    generateHours
 };
   

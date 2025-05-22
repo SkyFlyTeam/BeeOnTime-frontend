@@ -22,9 +22,6 @@ import styles from './style.module.css'
 import { faltaServices } from '@/services/faltaService'
 import Faltas from '@/interfaces/faltas'
 
-//Utils
-import handleDownload from '@/utils/handleDownload'
-
 
 interface AjusteProps {
   diaSelecionado: string
@@ -139,6 +136,22 @@ const ModalJustificativaFalta: React.FC<AjusteProps> = ({
     }
   }
 
+  const handleDownload = () => {
+    if (!solicitacao?.solicitacaoAnexo || solicitacao.solicitacaoAnexo.length === 0) return
+    const byteArray = new Uint8Array(solicitacao.solicitacaoAnexo)
+    const blob = new Blob([byteArray], {
+      type: 'application/octet-stream',
+    })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = solicitacao.solicitacaoAnexoNome || 'anexo.txt'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+  }
+
   const openDevolutivaModal = () => {
     setShowDevolutivaModal(true)
   }
@@ -150,16 +163,13 @@ const ModalJustificativaFalta: React.FC<AjusteProps> = ({
   return (
     <>
       <form className={styles.form_container}>
-        <p className={styles.colaborador_label}><span>Colaborador: </span>{solicitacao && solicitacao.usuarioNome}</p>
         <div>
           <span className={styles.data_span}>Dia selecionado: </span>{diaSelecionado}
         </div>
 
-        <div className={clsx(styles.FormGroup, {
-          [styles.justificativa]: !solicitacao?.solicitacaoAnexo,
-          [styles.justificativa_noFile]: solicitacao?.solicitacaoAnexo
-        })}>
-          <label>Justificativa</label>
+        
+          <label>Justificativa: </label>
+          <div className={styles.column}>
           <div className={styles.justificativa_content}>
             <input
               type="text"
@@ -180,7 +190,7 @@ const ModalJustificativaFalta: React.FC<AjusteProps> = ({
             {solicitacao?.solicitacaoAnexo && (
               <button
                 type="button"
-                onClick={() => handleDownload(solicitacao.solicitacaoAnexo, solicitacao.solicitacaoAnexoNome || '')}
+                onClick={handleDownload}
                 title="Baixar anexo"
                 style={{
                   background: 'none',

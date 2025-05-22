@@ -5,11 +5,11 @@ interface TabProps {
   activeTab: string;  // Tab ativo como default
   onClick: (tab: string) => void;  // Ação de clique no tab
   tabLabels: string[];  // Array com os nomes dos tab
-  pendentesLength?: number[];   // Número de pendentes, opcional
+  pendentesLength?: number;  // Número de pendentes, opcional
   showBadge?: boolean;  // Controla se o badge de pendentes deve aparecer
 }
 
-const Tab = ({ activeTab, onClick, tabLabels, pendentesLength, showBadge = true }: TabProps) => {
+const Tab = ({ activeTab, onClick, tabLabels, pendentesLength = 0, showBadge = true }: TabProps) => {
   return (
     <div className={styles.button_container}>
       {tabLabels.map((label, index) => (
@@ -21,9 +21,9 @@ const Tab = ({ activeTab, onClick, tabLabels, pendentesLength, showBadge = true 
           })}
         >
           {label.toUpperCase()} 
-          {(label === 'PENDENTES' || label === 'ANÁLISES' || label === 'MEUS PEDIDOS') && showBadge && pendentesLength && pendentesLength[index] > 0 && (  
+          {label === 'PENDENTES' && showBadge && pendentesLength > 0 && (  
             <span className={styles.pendente_badge}>
-              {pendentesLength[index]}  
+              {pendentesLength}
             </span>
           )}
         </button>

@@ -67,7 +67,6 @@ export default function Home() {
         <div>
           {/* {acessoCod === 0 ? null : <CardCargaHoraria usuarioInfo={usuarioInfo!} />} */}
         </div>
-        
       </div>
     </>
   );
