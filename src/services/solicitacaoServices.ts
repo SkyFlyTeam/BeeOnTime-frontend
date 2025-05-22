@@ -6,17 +6,25 @@ import SolicitacaoInterface, { CriarSolicitacaoInterface } from "../interfaces/S
 
 const getAllSolicitacao = async (): Promise<SolicitacaoInterface[] | ApiException> => {
   try {
-    const { data } = await ApiSolicitacao.get("/solicitacao");
-    return data as SolicitacaoInterface[];
+    const resp = await ApiSolicitacao.get<SolicitacaoInterface[]>("/solicitacao");
+    const rawList = resp.data;
 
+    const data: SolicitacaoInterface[] = rawList.map(item => ({
+      ...item,
+      solicitacaoDataPeriodo: Array.isArray(item.solicitacaoDataPeriodo)
+        ? item.solicitacaoDataPeriodo.map(str => new Date(str))
+        : []
+    }));
+
+    return data;
   } catch (error: unknown) {
     if (error instanceof Error) {
       return new ApiException(error.message || "Erro ao consultar a API.");
     }
-
     return new ApiException("Erro desconhecido.");
   }
 };
+
 
 const getAllSolicitacaoByUsuario = async (id: number) => {
   try {
@@ -35,6 +43,20 @@ const getAllSolicitacaoByUsuario = async (id: number) => {
 const getAllSolicitacaoBySetor = async (id: number) => {
   try {
     const { data } = await ApiSolicitacao.get(`/solicitacao/setor/${id}`);
+    return data;
+
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return new ApiException(error.message || "Erro ao consultar a API.");
+    }
+
+    return new ApiException("Erro desconhecido.");
+  }
+}
+
+const getAllSolicitacaoBySetorTipo = async (tipoSolicitacaoCod: number, setorCod: number) => {
+  try {
+    const { data } = await ApiSolicitacao.get(`/solicitacao/tipo/${tipoSolicitacaoCod}/setor/${setorCod}`);
     return data;
 
   } catch (error: unknown) {
@@ -107,8 +129,6 @@ const createSolicitacao = async (formData: FormData): Promise<SolicitacaoInterfa
   }
 };
 
-
-
 const updateSolicitacao = async (solicitacao: SolicitacaoInterface): Promise<SolicitacaoInterface | ApiException> => {
   try {
     const status: Record<string, number> = {
@@ -160,6 +180,20 @@ const deleteSolicitacao = async (solicitacaoCod: number): Promise<SolicitacaoInt
   }
 }
 
+const getSolicitacaoByTipo = async (solicitacaoTipoCod: number) => {
+  try {
+    const { data } = await ApiSolicitacao.get(`/solicitacao/tipo/${solicitacaoTipoCod}`);
+    return data as SolicitacaoInterface[];
+
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return new ApiException(error.message || "Erro ao consultar a API.");
+    }
+
+    return new ApiException("Erro desconhecido.");
+  }
+}
+
 export const solicitacaoServices = {
   getAllSolicitacao,
   getSolicitacaoById,
@@ -167,5 +201,7 @@ export const solicitacaoServices = {
   deleteSolicitacao,
   createSolicitacao,
   getAllSolicitacaoByUsuario,
-  getAllSolicitacaoBySetor
+  getAllSolicitacaoBySetor,
+  getSolicitacaoByTipo,
+  getAllSolicitacaoBySetorTipo
 };
