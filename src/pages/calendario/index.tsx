@@ -18,6 +18,15 @@ import { faltaServices } from "@/services/faltaService";
 import { CardResumoMensal } from "./components/ResumoMensal";
 import { CardLegenda } from "./components/CardLegenda";
 import Tab from "@/components/custom/tab";
+import { folgaServices } from "@/services/folgaService";
+import Faltas from "@/interfaces/faltas";
+import Folga from "@/interfaces/folga";
+
+interface DadosMes {
+    ferias?: any[]; 
+    faltas?: Faltas[];
+    folgas?: Folga[];
+}
 
 export default function Calendario() {
     const [usuario, setUsuario] = useState<Usuario | null>(null);
@@ -29,10 +38,40 @@ export default function Calendario() {
     const [currentDate, setCurrentDate] = useState(new Date());
 
     const [feriados, setFeriados] = useState<Feriado[] | null>(null);
+    const [dadosMes, setDadosMes] = useState<DadosMes | null>(null);
 
     const [loading, setLoading] = useState(true);
 
     const [showModalDefinirFeriado, setShowModalDefinirFeriado] = useState(false);
+
+    const formatDateToYYYYMMDD = (date: Date): string => {
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    const fetchDadosMes = async (data: string) => {
+        if (!empresa) return;
+        
+        try {
+            setLoading(true);
+            const [folgas_data, faltas_data] = await Promise.all([
+                folgaServices.getFolgaMonthByEmpresa(empresa.empCod, data),
+                faltaServices.getFaltasMonthByEmpresa(empresa.empCod, data)
+            ]);
+
+            setDadosMes({
+                folgas: folgas_data as Folga[],
+                faltas: faltas_data as Faltas[],
+            });
+        } catch (error) {
+            console.error("Erro ao buscar dados do mês:", error);
+            setDadosMes(null);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const getUser = async () => {
         try {
@@ -66,10 +105,10 @@ export default function Calendario() {
             setFeriados(feriado_data);
             setLoading(false);
         } catch (error) {
+            setFeriados(null);
             console.error("Error fetching user data", error);
         }
     };
-
 
     useEffect(() => {
         getUser();
@@ -94,6 +133,13 @@ export default function Calendario() {
             setCardMensalAcesso('adm')
         }
     }, [acessoCod, usuario, activeTab])
+
+    useEffect(() => {
+        if (empresa) {
+            const dataFormatada = formatDateToYYYYMMDD(currentDate);
+            fetchDadosMes(dataFormatada);
+        }
+    }, [empresa, currentDate]);
 
     const handleChangeTab = (status: string) => {
         setActiveTab(status ==  'SETOR' ? "SETOR" : "MEUS DADOS")
@@ -139,6 +185,7 @@ export default function Calendario() {
                             feriados={feriados!}
                             setCurrentDate={setCurrentDate}
                             currentDate={currentDate}
+                            dadosMes={dadosMes}
                         />
                     </div>
                     <div className="flex flex-[2.5] md:flex-col md:gap-16 gap-8 h-full md:justify-start justify-end flex-col-reverse">

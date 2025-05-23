@@ -10,9 +10,12 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Arrow } from "@radix-ui/react-tooltip";
 import ModalResumoDia from "@/components/custom/ModaisCalendario/ModalResumoDia";
 
-import { isBefore, isSameDay, startOfDay } from 'date-fns';
+import { addMonths, isBefore, isSameDay, startOfDay, subMonths } from 'date-fns';
 import ModalDefinirFolgaGeral from "@/components/custom/ModaisCalendario/ModalDefinirFolgaGeral";
 import { Feriado } from "@/interfaces/feriado";
+import Faltas from "@/interfaces/faltas";
+import Folga from "@/interfaces/folga";
+
 
 
 interface CardCalendarioProps {
@@ -22,6 +25,11 @@ interface CardCalendarioProps {
     feriados: Feriado[];
     setCurrentDate: React.Dispatch<React.SetStateAction<Date>>;
     currentDate: Date;
+    dadosMes?: {
+        ferias?: any[];
+        faltas?: Faltas[];
+        folgas?: Folga[];
+    } | null;
 }
 
 const eventColorClasses: Record<string, string> = {
@@ -31,10 +39,10 @@ const eventColorClasses: Record<string, string> = {
 };
 
 type MarkedDay =
-  | { day: number; events: { tipo: string; contagem: number }[] } // usado quando `!funcCalendar`
-  | { day: number; event: string }; // usado quando `funcCalendar`
+  | { day: number; events: { tipo: string; contagem: number }[] }
+  | { day: number; event: string };
 
-export const CardCalendario = ({ funcCalendar, empCod, usuarioCod, feriados, currentDate, setCurrentDate }: CardCalendarioProps) => {
+export const CardCalendario = ({ funcCalendar, empCod, usuarioCod, feriados, currentDate, setCurrentDate, dadosMes }: CardCalendarioProps) => {
     const [formattedFeriados, setFormattedFeriados] = useState<Date[] | undefined>(undefined);
     
     const [selectedDate, setSelectedDate] = useState(new Date());
@@ -46,17 +54,111 @@ export const CardCalendario = ({ funcCalendar, empCod, usuarioCod, feriados, cur
 
     const [loading, setLoading] = useState(false);
 
-    const markedDays: MarkedDay[] = funcCalendar
-    ? [
-        { day: 10, event: 'folga' },
-        { day: 15, event: 'ausencia' },
-        { day: 20, event: 'ferias' }
-        ]
-    : [
-        { day: 10, events: [{ tipo: 'folga', contagem: 5 }, { tipo: 'ferias', contagem: 2 }] },
-        { day: 15, events: [{ tipo: 'folga', contagem: 5 }] },
-        { day: 20, events: [{ tipo: 'folga', contagem: 1 }, { tipo: 'ferias', contagem: 3 }, { tipo: 'ausencia', contagem: 12 }] }
-        ];
+    const markedDays: MarkedDay[] = useMemo(() => {
+        if (!dadosMes) return [];
+
+        if (funcCalendar) {
+            const diasMarcados = new Map<number, string>();
+
+            // Processa folgas
+            if (Array.isArray(dadosMes.folgas)) {
+                dadosMes.folgas.forEach(folga => {
+                    folga.folgaDataPeriodo.forEach(data => {
+                        const dataFolga = new Date(data);
+                        if (dataFolga.getMonth() === currentDate.getMonth() && 
+                            dataFolga.getFullYear() === currentDate.getFullYear()) {
+                            diasMarcados.set(dataFolga.getDate(), 'folga');
+                        }
+                    });
+                });
+            }
+
+            // Processa faltas
+            if (Array.isArray(dadosMes.faltas)) {
+                dadosMes.faltas.forEach(falta => {
+                    const dia = new Date(falta.faltaDia).getDate();
+                    diasMarcados.set(dia, 'ausencia');
+                });
+            }
+
+            // Processa férias
+            if (Array.isArray(dadosMes.ferias)) {
+                dadosMes.ferias.forEach(ferias => {
+                    const dia = new Date(ferias.feriaData).getDate();
+                    diasMarcados.set(dia, 'ferias');
+                });
+            }
+
+            return Array.from(diasMarcados.entries()).map(([day, event]) => ({
+                day,
+                event
+            }));
+        } else {
+            const diasMarcados = new Map<number, { tipo: string; contagem: number }[]>();
+
+            // Processa folgas
+            if (Array.isArray(dadosMes.folgas)) {
+                dadosMes.folgas.forEach(folga => {
+                    folga.folgaDataPeriodo.forEach(data => {
+                        const dataFolga = new Date(data);
+                        if (dataFolga.getMonth() === currentDate.getMonth() && 
+                            dataFolga.getFullYear() === currentDate.getFullYear()) {
+                            const dia = dataFolga.getDate();
+                            if (!diasMarcados.has(dia)) {
+                                diasMarcados.set(dia, []);
+                            }
+                            const eventos = diasMarcados.get(dia)!;
+                            const eventoFolga = eventos.find(e => e.tipo === 'folga');
+                            if (eventoFolga) {
+                                eventoFolga.contagem++;
+                            } else {
+                                eventos.push({ tipo: 'folga', contagem: 1 });
+                            }
+                        }
+                    });
+                });
+            }
+
+            // Processa faltas
+            if (Array.isArray(dadosMes.faltas)) {
+                dadosMes.faltas.forEach(falta => {
+                    const dia = new Date(falta.faltaDia).getDate();
+                    if (!diasMarcados.has(dia)) {
+                        diasMarcados.set(dia, []);
+                    }
+                    const eventos = diasMarcados.get(dia)!;
+                    const eventoFalta = eventos.find(e => e.tipo === 'ausencia');
+                    if (eventoFalta) {
+                        eventoFalta.contagem++;
+                    } else {
+                        eventos.push({ tipo: 'ausencia', contagem: 1 });
+                    }
+                });
+            }
+
+            // Processa férias
+            if (Array.isArray(dadosMes.ferias)) {
+                dadosMes.ferias.forEach(ferias => {
+                    const dia = new Date(ferias.feriaData).getDate();
+                    if (!diasMarcados.has(dia)) {
+                        diasMarcados.set(dia, []);
+                    }
+                    const eventos = diasMarcados.get(dia)!;
+                    const eventoFerias = eventos.find(e => e.tipo === 'ferias');
+                    if (eventoFerias) {
+                        eventoFerias.contagem++;
+                    } else {
+                        eventos.push({ tipo: 'ferias', contagem: 1 });
+                    }
+                });
+            }
+
+            return Array.from(diasMarcados.entries()).map(([day, events]) => ({
+                day,
+                events
+            }));
+        }
+    }, [dadosMes, funcCalendar, currentDate]);
     
     useMemo(() => {
         const formatted_feriados = feriados.map((feriado) => {
@@ -127,10 +229,10 @@ export const CardCalendario = ({ funcCalendar, empCod, usuarioCod, feriados, cur
             {/* Se o dia tiver eventos, exibe o círculo com o número de eventos */}
             {(event && isMultipleEvents) && (
                 <div className="w-full flex gap-1 justify-center flex-wrap">
-                    {event.events?.map((e) => {
+                    {event.events?.map((e, idx) => {
                         const colorClass = eventColorClasses[e.tipo] ?? "bg-gray-500"; 
                         return (
-                        <div className={`flex justify-center md:pt-0.4 pt-0 items-center md:text-xs text-[0.5rem] rounded-full md:w-5 md:h-5 w-3 h-3 ${colorClass}`} >
+                        <div key={idx} className={`flex justify-center md:pt-0.4 pt-0 items-center md:text-xs text-[0.5rem] rounded-full md:w-5 md:h-5 w-3 h-3 ${colorClass}`} >
                             {e.contagem}
                         </div>
                     )})}
@@ -148,8 +250,11 @@ export const CardCalendario = ({ funcCalendar, empCod, usuarioCod, feriados, cur
                 <div className="flex w-full flex-col items-center justify-center gap-6 bg-white shadow-[4px_4px_19px_0px_rgba(0,0,0,0.05)] rounded-xl md:p-4 p-0">
                     <Calendar 
                         fromDate={undefined}
-                        onMonthChange={(date: Date) => {
-                            setCurrentDate(date); 
+                        onNextClick={() => {
+                            setCurrentDate(addMonths(currentDate, 1));
+                        }}
+                        onPrevClick={() => {
+                            setCurrentDate(subMonths(currentDate, 1));
                         }}
                         today={dataHoje}
                         onDayClick={(date: Date) => {setSelectedDate(date);}}
