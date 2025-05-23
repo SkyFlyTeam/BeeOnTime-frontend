@@ -1,4 +1,6 @@
+import Faltas from "@/interfaces/faltas";
 import { Feriado } from "@/interfaces/feriado";
+import Folga from "@/interfaces/folga";
 import { isSameMonth } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
 
@@ -6,11 +8,24 @@ interface CardResumoMensalProps {
     acesso: 'adm' | 'func' | 'jornada'
     feriados: Feriado[];
     dataCalendario: Date;
+    dadosMes: {
+        ferias?: any[];
+        faltas?: Faltas[];
+        folgas?: Folga[];
+    } | null | undefined;
 }
 
-export const CardResumoMensal = ({acesso, feriados, dataCalendario} : CardResumoMensalProps) => {
+type Dados = {
+    faltas: number,
+    folgas: number,
+    ferias: number
+}
+
+export const CardResumoMensal = ({acesso, feriados, dataCalendario, dadosMes} : CardResumoMensalProps) => {
 
     const [feriadosMes, setFeriadosMes] = useState<Feriado[] | null>(null);
+
+    const [dados, setDados] = useState<Dados | null>(null);
 
     useEffect(() => {
        // Filtra apenas os feriados no mesmo mês
@@ -34,6 +49,15 @@ export const CardResumoMensal = ({acesso, feriados, dataCalendario} : CardResumo
         setFeriadosMes(feriados_formatados);
     }, [feriados, dataCalendario])
 
+    useMemo(() => {
+        const formatted_dados: Dados = {
+            faltas: dadosMes?.faltas ? dadosMes?.faltas?.length : 0,
+            folgas: dadosMes?.folgas ? dadosMes?.folgas?.length : 0,
+            ferias: dadosMes?.ferias ? dadosMes?.ferias?.length : 0
+        }
+        setDados(formatted_dados);
+    }, [dadosMes])
+
     return(
         <div className="flex w-full flex-col gap-4 bg-white shadow-[4px_4px_19px_0px_rgba(0,0,0,0.05)] rounded-xl p-6">
             <h1 className="md:text-xl text-lg font-semibold self-center">{acesso == 'jornada' ? 'Informações' : 'Resumo Mensal'}</h1>
@@ -49,9 +73,9 @@ export const CardResumoMensal = ({acesso, feriados, dataCalendario} : CardResumo
                                     ))}
                                 </ul>
                             </div>
-                            <span><b>Colaboradores com ausência:</b> 13 neste mês</span>
-                            <span><b>Colaboradores em férias:</b> 13 neste mês</span>
-                            <span><b>Colaboradores em folga:</b> 13 neste mês</span>
+                            <span><b>Colaboradores com ausência:</b> {dados?.faltas ? dados?.faltas : '-' } neste mês</span>
+                            <span><b>Colaboradores em férias:</b> {dados?.ferias ? dados.ferias : '-'} neste mês</span>
+                            <span><b>Colaboradores em folga:</b> {dados?.folgas ? dados.folgas : '-'} neste mês</span>
                         </>
                     ) : (
                         acesso == 'func' ? (
@@ -64,8 +88,8 @@ export const CardResumoMensal = ({acesso, feriados, dataCalendario} : CardResumo
                                     ))}
                                 </ul>
                             </div>
-                            <span><b>Ausências:</b> 13 neste mês</span>
-                            <span><b>Folgas:</b> 13 neste mês</span>
+                            <span><b>Ausências:</b> {dados?.faltas} neste mês</span>
+                            <span><b>Folgas:</b> {dados?.folgas} neste mês</span>
                         </>
                         ) : (
                         <>

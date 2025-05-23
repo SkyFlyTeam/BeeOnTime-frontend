@@ -7,9 +7,10 @@ interface DefinirFolgaGeral {
 }
 
 import { useEffect, useState } from "react";
+import { isWeekend } from 'date-fns';
 
 // Components
-
+import { toast, ToastContainer } from "react-toastify";
 
 // Styles
 import styles from "../style.module.css";
@@ -24,6 +25,8 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectValue } from "@/c
 import { SelectIcon, SelectItemIndicator, SelectTrigger } from "@radix-ui/react-select";
 import { Setor } from "@/interfaces/setor";
 import { setorServices } from "@/services/setorService";
+import Folga from "@/interfaces/folga";
+import { folgaServices } from "@/services/folgaService";
 
 
 
@@ -51,7 +54,7 @@ const ModalDefinirFolgaGeral: React.FC<DefinirFolgaGeral> = ({
     const fetchUsuarioEmpresa = async (empCod: number) => {
         try{
             const usuarios_response = await usuarioServices.getUsariosByEmpresa(empCod);
-            const usuarios_sem_admin = (usuarios_response as Usuario[]).filter((usuario) => usuario.nivelAcesso.nivelAcesso_cod !== 0 || usuario.usuario_cod == usuarioCod);
+            const usuarios_sem_admin = (usuarios_response as Usuario[]).filter((usuario) => usuario.nivelAcesso.nivelAcesso_cod !== 0 || usuario.usuario_cod != usuarioCod);
             setUsuarios(usuarios_sem_admin);
             setUsuariosFiltrados(usuarios_sem_admin)
             setUsuarioQuantidade(usuarios_sem_admin.length);
@@ -63,6 +66,7 @@ const ModalDefinirFolgaGeral: React.FC<DefinirFolgaGeral> = ({
     const fetchSetorEmpresa = async (empCod: number) => {
         try{
             const setores_response = await setorServices.verificarSetoresPorEmpresa(empCod);
+            console.log("setores", setores_response)
             setSetores(setores_response);
         }catch(e){
             console.log("Erro ao buscar usuários")
@@ -70,30 +74,35 @@ const ModalDefinirFolgaGeral: React.FC<DefinirFolgaGeral> = ({
     }
 
     const handleSave =  async () => {
-        // try{
-        //     if(!usuariosSelecionados || usuariosSelecionados.length < 1 ){ return }
-        //     let mapped_folgas: Folga[] = usuariosSelecionados?.map((usuario) => {
-                // let mapped_folga: Folga = {
-                //     "folgaDataPeriodo": [
-                //        diaSelecionado
-                //     ],
-                //     "folgaObservacao": "Folga",
-                //     "folgaDiasUteis": 15, 
-                //     "usuarioCod": {
-                //          "usuario_cod": usuario.usuario_cod
-                //     },
-                //     "folgaTipo": {
-                //           "tipoFolgaCod": 1
-                //     }
-                // }
-        //         return mapped_feriado
-        //     })
-        //     const feriados_response = await feriadoServices.cadastrarFeriados(mapped_feriados);
-        //     showToast(true);
-        // }catch (err) {
-        //     console.error("Erro ao salvar feriados.");
-        //     showToast(false);
-        // }
+        try{
+            if(!usuariosSelecionados || usuariosSelecionados.length < 1 ){ return }
+            const dia_formatted = formatDateToYYYYMMDD(diaSelecionado);
+            let mapped_folgas = usuariosSelecionados?.map((usuario) => {
+                let mapped_folga = {
+                    "folgaDataPeriodo": [
+                       dia_formatted
+                    ],
+                    "folgaObservacao": "Folga Geral",
+                    "folgaDiasUteis": isWeekend(diaSelecionado) ? 0 : 1, 
+                    "usuarioCod": {
+                         "usuario_cod": usuario.usuario_cod
+                    },
+                    "folgaTipo": {
+                          "tipoFolgaCod": 1
+                    }
+                }
+                return mapped_folga
+            })
+
+            for (const folga of mapped_folgas) {
+                await folgaServices.cadastrarFolga(folga);
+            }
+            
+            showToast(true);
+        }catch (err) {
+            console.error("Erro ao salvar feriados.");
+            showToast(false);
+        }
     }
     
     useEffect(() => {
@@ -170,6 +179,29 @@ const ModalDefinirFolgaGeral: React.FC<DefinirFolgaGeral> = ({
         setUsuariosFiltrados(filtrados);
 
     }, [usuarios, filtro, selectedSetor, textoBusca]);
+
+    const formatDateToYYYYMMDD = (date: Date): string => {
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    const showToast = (success: boolean) => {
+        success ? showSucessToast() : showErrorToast();
+    }
+
+    const showSucessToast = () => {
+        toast.success("Feriados salvos com sucesso!", {
+            position: "top-center",
+        });
+    };
+
+    const showErrorToast = () => {
+        toast.error("Erro salvar feriados.", {
+            position: "top-center",
+        });
+    };
 
 
     return (
@@ -266,6 +298,7 @@ const ModalDefinirFolgaGeral: React.FC<DefinirFolgaGeral> = ({
                 </Button>
             </div>
         </div>
+         <ToastContainer position="top-center" autoClose={3000} />
         </>
     );
 };

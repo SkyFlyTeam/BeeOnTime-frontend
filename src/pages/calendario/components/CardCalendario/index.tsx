@@ -39,8 +39,8 @@ const eventColorClasses: Record<string, string> = {
 };
 
 type MarkedDay =
-  | { day: number; events: { tipo: string; contagem: number }[] }
-  | { day: number; event: string };
+  | { day: Date; events: { tipo: string; contagem: number }[] }
+  | { day: Date; event: string };
 
 export const CardCalendario = ({ funcCalendar, empCod, usuarioCod, feriados, currentDate, setCurrentDate, dadosMes }: CardCalendarioProps) => {
     const [formattedFeriados, setFormattedFeriados] = useState<Date[] | undefined>(undefined);
@@ -58,7 +58,7 @@ export const CardCalendario = ({ funcCalendar, empCod, usuarioCod, feriados, cur
         if (!dadosMes) return [];
 
         if (funcCalendar) {
-            const diasMarcados = new Map<number, string>();
+            const diasMarcados = new Map<Date, string>();
 
             // Processa folgas
             if (Array.isArray(dadosMes.folgas)) {
@@ -67,7 +67,7 @@ export const CardCalendario = ({ funcCalendar, empCod, usuarioCod, feriados, cur
                         const dataFolga = new Date(data);
                         if (dataFolga.getMonth() === currentDate.getMonth() && 
                             dataFolga.getFullYear() === currentDate.getFullYear()) {
-                            diasMarcados.set(dataFolga.getDate(), 'folga');
+                            diasMarcados.set(dataFolga, 'folga');
                         }
                     });
                 });
@@ -76,7 +76,7 @@ export const CardCalendario = ({ funcCalendar, empCod, usuarioCod, feriados, cur
             // Processa faltas
             if (Array.isArray(dadosMes.faltas)) {
                 dadosMes.faltas.forEach(falta => {
-                    const dia = new Date(falta.faltaDia).getDate();
+                    const dia = new Date(falta.faltaDia);
                     diasMarcados.set(dia, 'ausencia');
                 });
             }
@@ -84,7 +84,7 @@ export const CardCalendario = ({ funcCalendar, empCod, usuarioCod, feriados, cur
             // Processa férias
             if (Array.isArray(dadosMes.ferias)) {
                 dadosMes.ferias.forEach(ferias => {
-                    const dia = new Date(ferias.feriaData).getDate();
+                    const dia = new Date(ferias.feriaData);
                     diasMarcados.set(dia, 'ferias');
                 });
             }
@@ -94,7 +94,7 @@ export const CardCalendario = ({ funcCalendar, empCod, usuarioCod, feriados, cur
                 event
             }));
         } else {
-            const diasMarcados = new Map<number, { tipo: string; contagem: number }[]>();
+            const diasMarcados = new Map<Date, { tipo: string; contagem: number }[]>();
 
             // Processa folgas
             if (Array.isArray(dadosMes.folgas)) {
@@ -103,7 +103,7 @@ export const CardCalendario = ({ funcCalendar, empCod, usuarioCod, feriados, cur
                         const dataFolga = new Date(data);
                         if (dataFolga.getMonth() === currentDate.getMonth() && 
                             dataFolga.getFullYear() === currentDate.getFullYear()) {
-                            const dia = dataFolga.getDate();
+                            const dia = dataFolga;
                             if (!diasMarcados.has(dia)) {
                                 diasMarcados.set(dia, []);
                             }
@@ -122,7 +122,7 @@ export const CardCalendario = ({ funcCalendar, empCod, usuarioCod, feriados, cur
             // Processa faltas
             if (Array.isArray(dadosMes.faltas)) {
                 dadosMes.faltas.forEach(falta => {
-                    const dia = new Date(falta.faltaDia).getDate();
+                    const dia = new Date(falta.faltaDia);
                     if (!diasMarcados.has(dia)) {
                         diasMarcados.set(dia, []);
                     }
@@ -139,7 +139,7 @@ export const CardCalendario = ({ funcCalendar, empCod, usuarioCod, feriados, cur
             // Processa férias
             if (Array.isArray(dadosMes.ferias)) {
                 dadosMes.ferias.forEach(ferias => {
-                    const dia = new Date(ferias.feriaData).getDate();
+                    const dia = new Date(ferias.feriaData);
                     if (!diasMarcados.has(dia)) {
                         diasMarcados.set(dia, []);
                     }
@@ -186,7 +186,7 @@ export const CardCalendario = ({ funcCalendar, empCod, usuarioCod, feriados, cur
         const dayRender = useDayRender(props.date, props.displayMonth, buttonRef);
 
         const dayNumber = props.date.getDate();
-        const event = markedDays.find((e) => e.day === dayNumber);
+        const event = markedDays.find((e) => isSameDay(e.day, props.date)); // Agora comparando data completa 
         const isMultipleEvents = event && "events" in event;
 
         return (
@@ -250,12 +250,10 @@ export const CardCalendario = ({ funcCalendar, empCod, usuarioCod, feriados, cur
                 <div className="flex w-full flex-col items-center justify-center gap-6 bg-white shadow-[4px_4px_19px_0px_rgba(0,0,0,0.05)] rounded-xl md:p-4 p-0">
                     <Calendar 
                         fromDate={undefined}
-                        onNextClick={() => {
-                            setCurrentDate(addMonths(currentDate, 1));
+                        onMonthChange={(newMonthDate: Date) => {
+                            setCurrentDate(newMonthDate);
                         }}
-                        onPrevClick={() => {
-                            setCurrentDate(subMonths(currentDate, 1));
-                        }}
+                        month={currentDate}
                         today={dataHoje}
                         onDayClick={(date: Date) => {setSelectedDate(date);}}
                         classNames={{
@@ -283,6 +281,8 @@ export const CardCalendario = ({ funcCalendar, empCod, usuarioCod, feriados, cur
                         diaSelecionado={selectedDate}
                         onClose={() => setShowModalResumoDia(false)}
                         onClick={() => setShowModalResumoDia(false)}
+                        dadosMes={dadosMes}
+                        empCod={empCod}
                     />
                 }
                 {showModalDefinirFolga &&

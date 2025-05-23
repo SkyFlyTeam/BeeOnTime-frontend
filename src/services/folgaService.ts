@@ -14,6 +14,21 @@ const getFolgaMonthByEmpresa = async (empCod: number, date: string) => {
     }
 }
 
+const cadastrarFolga = async (folga: any) => {
+    try {
+        const { data } = await ApiUsuario.post(`/folgas/cadastrar`, folga, {
+        headers: { "Content-Type": "application/json" }
+      });
+        return data as Folga
+    } catch (error) {
+        if (error instanceof Error) {
+            return new ApiException(error.message || "Erro ao consultar horas do usuário.");
+        }
+        return new ApiException("Erro desconhecido.");
+    }
+}
+
 export const folgaServices = {
-    getFolgaMonthByEmpresa
+    getFolgaMonthByEmpresa,
+    cadastrarFolga
 };

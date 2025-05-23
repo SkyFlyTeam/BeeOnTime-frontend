@@ -145,6 +145,10 @@ export default function Calendario() {
         setActiveTab(status ==  'SETOR' ? "SETOR" : "MEUS DADOS")
     }
 
+    // useEffect(() => {
+    //     alert(`currentDate ${currentDate}`)
+    // }, [currentDate])
+
     return(
         loading ? (
             <></>
@@ -177,7 +181,7 @@ export default function Calendario() {
                     }
                 </div>
                 <div className="flex w-full items-center md:gap-16 gap-8 flex-wrap">
-                    <div className="flex flex-1">
+                    <div className="flex flex-[2]">
                         <CardCalendario 
                             funcCalendar={cardMensalAcesso == 'func'} 
                             empCod={usuario!.empCod} 
@@ -188,8 +192,8 @@ export default function Calendario() {
                             dadosMes={dadosMes}
                         />
                     </div>
-                    <div className="flex flex-[2.5] md:flex-col md:gap-16 gap-8 h-full md:justify-start justify-end flex-col-reverse">
-                        <CardResumoMensal acesso={cardMensalAcesso!} feriados={feriados!} dataCalendario={currentDate} />
+                    <div className="flex flex-[1] md:flex-col md:gap-16 gap-8 h-full md:justify-start justify-end flex-col-reverse">
+                        <CardResumoMensal acesso={cardMensalAcesso!} feriados={feriados!} dataCalendario={currentDate} dadosMes={dadosMes} />
                         <CardLegenda />
                     </div>
                 </div>
