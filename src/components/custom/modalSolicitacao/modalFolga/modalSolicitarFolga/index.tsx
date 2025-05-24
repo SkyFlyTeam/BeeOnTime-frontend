@@ -10,6 +10,9 @@ import { Input } from "@/components/ui/input";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPaperclip } from '@fortawesome/free-solid-svg-icons'; // Importa o ícone de clipe
 import { ApiUsuario } from "@/config/apiUsuario";
+import { solicitacaoServices } from "@/services/solicitacaoServices";
+import { SolicitacaoParaEnvio } from "@/interfaces/Solicitacao";
+import { ApiException } from "@/config/apiExceptions";
 
 interface SolicitarFolgaModalProps {
   usuarioLogadoCod: number;
@@ -118,34 +121,28 @@ const SolicitarFolgaModal: React.FC<SolicitarFolgaModalProps> = ({
     }
 
     try {
+      const solicitacaoParaEnvio: SolicitacaoParaEnvio = {
+        solicitacaoMensagem: solicitacao.folObservacao,
+        usuarioCod: usuarioLogadoCod,
+        solicitacaoDataPeriodo: solicitacao.folDataPeriodo.map(date => date.toISOString().slice(0, 10)),
+        tipoSolicitacaoCod: { tipoSolicitacaoCod: 3, tipoSolicitacaoNome: 'Folga' },
+      }
+      console.log(solicitacaoParaEnvio)
+
       const formData = new FormData();
 
-      const formattedData = solicitacao.folDataPeriodo.map(date => 
-        date instanceof Date ? date.toISOString().split('T')[0] : date
-      )
-
-      // const formattedDates = folDataPeriodo.map(date => date.toISOString().split('T')[0]);
-
-
-      // Prepara o payload no formato esperado
-      formData.append("solicitacaoJson", JSON.stringify({
-        folObservacao: solicitacao.folObservacao,
-        folgaTipo: {
-          folTipoCod: solicitacao.folgaTipo.folTipoCod // Assume que você está enviando o ID da folga tipo
-        },
-        usuario: { usuario_cod: usuarioLogadoCod }, // Aqui, você está passando o ID do usuário
-        folDataPeriodo: formattedData, // Envia as datas já como uma lista de strings
-      }));
+      formData.append("solicitacaoJson", JSON.stringify(solicitacaoParaEnvio))
 
       // Se houver um documento, anexa ao FormData
       if (file) {
         formData.append("solicitacaoAnexo", file);
       }
 
+      const created = await solicitacaoServices.createSolicitacao(formData);
       // Faz a requisição POST
-      const response = await ApiUsuario.post("/folgas/cadastrar", formData);
+      // const response = await ApiUsuario.post("/folgas/cadastrar", formData);
 
-      if (response.status === 201) {
+      if (!(created instanceof ApiException)) {
         toast.success("Solicitação de folga enviada com sucesso!");
       } else {
         toast.error("Erro ao enviar a solicitação de folga.");
