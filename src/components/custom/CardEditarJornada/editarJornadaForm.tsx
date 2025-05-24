@@ -92,7 +92,7 @@ export default function EditarJornadaForm({ usuarioInfo, logadoInfo }: EditarJor
 
             if (defaultValues[field as keyof typeof defaultValues].slice(0, 5) !=
                 values[field as keyof typeof defaultValues].slice(0, 5)
-            ) {/*alert("três");*/ return true;}
+            ) {/*alert("três");*/ return true;} 
 
             return false;
         })
