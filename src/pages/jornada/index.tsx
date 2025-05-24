@@ -16,7 +16,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import EditarJornadaForm from "@/components/custom/CardEditarJornada/editarJornadaForm";
 
 
-export default function PointsHistoryPage() {
+export default function JornadaPage() {
     //Simulando o diferente acesso
     const [accessLevel, setAccessLevel] = useState<"USER" | "ADM">("USER")
     const [loading, setLoading] = useState(true); //Estado controle de carregamento
@@ -71,9 +71,7 @@ export default function PointsHistoryPage() {
     return (
         <div className="flex flex-col  p-6 md:p-9">
             <h1 className="text-xl md:text-3xl font-semibold mb-4">
-                {accessLevel === "USER" ? "Jornada de Trabalho" : "Jornada de Trabalho"}    
-                {accessLevel === "ADM" && usuarioInfo ?
-                     <EditarJornadaForm usuarioInfo={usuarioInfo} /> : null}
+                <p>Não permitido</p>
             </h1>
         </div>
     );

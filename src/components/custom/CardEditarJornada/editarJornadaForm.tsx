@@ -73,11 +73,13 @@ export default function EditarJornadaForm({ usuarioInfo, logadoInfo }: EditarJor
             return false;
 
 
+        if(!defaultValues)
+            return false;
 
         const equals = !Object.keys(defaultValues).some((field) => {
             if( !field.includes("_horario") || field.includes("flex"))
                 return false;
-            
+
             if ((!defaultValues[field as keyof typeof defaultValues] &&
                 values[field as keyof typeof defaultValues]) ||
                 (defaultValues[field as keyof typeof defaultValues] &&
