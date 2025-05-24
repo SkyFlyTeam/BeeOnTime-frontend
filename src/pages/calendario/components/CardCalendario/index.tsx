@@ -15,6 +15,7 @@ import ModalDefinirFolgaGeral from "@/components/custom/ModaisCalendario/ModalDe
 import { Feriado } from "@/interfaces/feriado";
 import Faltas from "@/interfaces/faltas";
 import Folga from "@/interfaces/folga";
+import { createDateFromString } from "@/utils/functions/createDateFromString";
 
 
 
@@ -58,63 +59,95 @@ export const CardCalendario = ({ funcCalendar, empCod, usuarioCod, feriados, cur
         if (!dadosMes) return [];
 
         if (funcCalendar) {
-            const diasMarcados = new Map<Date, string>();
+            // Map com chave string e valor objeto com Date e evento (string)
+            const diasMarcados = new Map<string, { dateObj: Date; event: string }>();
+
+            function formatDateKey(date: Date) {
+                return date.toISOString().split("T")[0]; // yyyy-mm-dd
+            }
+
+            function setEvento(date: Date, tipo: string) {
+                const key = formatDateKey(date);
+                diasMarcados.set(key, { dateObj: date, event: tipo });
+            }
 
             // Processa folgas
             if (Array.isArray(dadosMes.folgas)) {
                 dadosMes.folgas.forEach(folga => {
-                    folga.folgaDataPeriodo.forEach(data => {
-                        const dataFolga = new Date(data);
-                        if (dataFolga.getMonth() === currentDate.getMonth() && 
-                            dataFolga.getFullYear() === currentDate.getFullYear()) {
-                            diasMarcados.set(dataFolga, 'folga');
-                        }
-                    });
+                    if(folga.usuarioCod == usuarioCod){
+                        folga.folgaDataPeriodo.forEach(dataStr => {
+                            const dataFolga = createDateFromString(dataStr);
+                            if (
+                                dataFolga.getMonth() === currentDate.getMonth() &&
+                                dataFolga.getFullYear() === currentDate.getFullYear()
+                            ) {
+                                setEvento(dataFolga, "folga");
+                            }
+                        });
+                    }
                 });
             }
 
             // Processa faltas
             if (Array.isArray(dadosMes.faltas)) {
                 dadosMes.faltas.forEach(falta => {
-                    const dia = new Date(falta.faltaDia);
-                    diasMarcados.set(dia, 'ausencia');
+                    if(falta.usuarioCod == usuarioCod){
+                        const dia = createDateFromString(falta.faltaDia as string);
+                        setEvento(dia, "ausencia");
+                    }
                 });
             }
 
             // Processa férias
             if (Array.isArray(dadosMes.ferias)) {
                 dadosMes.ferias.forEach(ferias => {
-                    const dia = new Date(ferias.feriaData);
-                    diasMarcados.set(dia, 'ferias');
+                    if(ferias.usuarioCod){
+                        const dia = createDateFromString(ferias.feriaData);
+                        setEvento(dia, "ferias");
+                    }
                 });
             }
 
-            return Array.from(diasMarcados.entries()).map(([day, event]) => ({
-                day,
+            // Retorna array com Date e evento string
+            return Array.from(diasMarcados.values()).map(({ dateObj, event }) => ({
+                day: dateObj,
                 event
             }));
         } else {
-            const diasMarcados = new Map<Date, { tipo: string; contagem: number }[]>();
+            // Agora o Map tem chave string e valor com data Date + eventos
+            const diasMarcados = new Map<string, { dateObj: Date; eventos: { tipo: string; contagem: number }[] }>();
+
+            // Função para formatar a data para chave
+            function formatDateKey(date: Date) {
+                return date.toISOString().split("T")[0]; // yyyy-mm-dd
+            }
+
+            // Função para garantir que a entrada existe e retorna os eventos
+            function getOrCreateEntry(date: Date) {
+                const key = formatDateKey(date);
+                if (!diasMarcados.has(key)) {
+                    diasMarcados.set(key, { dateObj: date, eventos: [] });
+                }
+                return diasMarcados.get(key)!;
+            }
 
             // Processa folgas
             if (Array.isArray(dadosMes.folgas)) {
                 dadosMes.folgas.forEach(folga => {
-                    folga.folgaDataPeriodo.forEach(data => {
-                        const dataFolga = new Date(data);
-                        if (dataFolga.getMonth() === currentDate.getMonth() && 
-                            dataFolga.getFullYear() === currentDate.getFullYear()) {
-                            const dia = dataFolga;
-                            if (!diasMarcados.has(dia)) {
-                                diasMarcados.set(dia, []);
-                            }
-                            const eventos = diasMarcados.get(dia)!;
-                            const eventoFolga = eventos.find(e => e.tipo === 'folga');
-                            if (eventoFolga) {
-                                eventoFolga.contagem++;
-                            } else {
-                                eventos.push({ tipo: 'folga', contagem: 1 });
-                            }
+                    folga.folgaDataPeriodo.forEach(dataStr => {
+                    const dataFolga = createDateFromString(dataStr);
+                    if (
+                        dataFolga.getMonth() === currentDate.getMonth() &&
+                        dataFolga.getFullYear() === currentDate.getFullYear()
+                    ) {
+                        const entry = getOrCreateEntry(dataFolga);
+                        const eventoFolga = entry.eventos.find(e => e.tipo === "folga");
+                        if (eventoFolga) {
+                            eventoFolga.contagem++;
+                        } else {
+                            entry.eventos.push({ tipo: "folga", contagem: 1 });
                         }
+                    }
                     });
                 });
             }
@@ -122,16 +155,13 @@ export const CardCalendario = ({ funcCalendar, empCod, usuarioCod, feriados, cur
             // Processa faltas
             if (Array.isArray(dadosMes.faltas)) {
                 dadosMes.faltas.forEach(falta => {
-                    const dia = new Date(falta.faltaDia);
-                    if (!diasMarcados.has(dia)) {
-                        diasMarcados.set(dia, []);
-                    }
-                    const eventos = diasMarcados.get(dia)!;
-                    const eventoFalta = eventos.find(e => e.tipo === 'ausencia');
+                    const dia = createDateFromString(falta.faltaDia as string);
+                    const entry = getOrCreateEntry(dia);
+                    const eventoFalta = entry.eventos.find(e => e.tipo === "ausencia");
                     if (eventoFalta) {
                         eventoFalta.contagem++;
                     } else {
-                        eventos.push({ tipo: 'ausencia', contagem: 1 });
+                        entry.eventos.push({ tipo: "ausencia", contagem: 1 });
                     }
                 });
             }
@@ -139,31 +169,28 @@ export const CardCalendario = ({ funcCalendar, empCod, usuarioCod, feriados, cur
             // Processa férias
             if (Array.isArray(dadosMes.ferias)) {
                 dadosMes.ferias.forEach(ferias => {
-                    const dia = new Date(ferias.feriaData);
-                    if (!diasMarcados.has(dia)) {
-                        diasMarcados.set(dia, []);
-                    }
-                    const eventos = diasMarcados.get(dia)!;
-                    const eventoFerias = eventos.find(e => e.tipo === 'ferias');
+                    const dia = createDateFromString(ferias.feriaData);
+                    const entry = getOrCreateEntry(dia);
+                    const eventoFerias = entry.eventos.find(e => e.tipo === "ferias");
                     if (eventoFerias) {
                         eventoFerias.contagem++;
                     } else {
-                        eventos.push({ tipo: 'ferias', contagem: 1 });
+                        entry.eventos.push({ tipo: "ferias", contagem: 1 });
                     }
                 });
             }
 
-            return Array.from(diasMarcados.entries()).map(([day, events]) => ({
-                day,
-                events
+            // Retorna array com objeto Date e eventos
+            return Array.from(diasMarcados.values()).map(({ dateObj, eventos }) => ({
+                day: dateObj,
+                events: eventos
             }));
         }
     }, [dadosMes, funcCalendar, currentDate]);
     
     useMemo(() => {
         const formatted_feriados = feriados.map((feriado) => {
-            const [anoString, mesString, diaString] = (feriado.feriadoData as string).split('-');
-            return new Date(Number(anoString), Number(mesString) - 1, Number(diaString));
+            return createDateFromString(feriado.feriadoData as string);
         })
         setFormattedFeriados(formatted_feriados);
     }, [feriados])

@@ -21,6 +21,8 @@ import Faltas from "@/interfaces/faltas";
 import Folga from "@/interfaces/folga";
 import { Usuario } from "@/interfaces/usuario";
 import { usuarioServices } from "@/services/usuarioServices";
+import { isSameDay } from "date-fns";
+import { createDateFromString } from "@/utils/functions/createDateFromString";
 
 type Dados = {
     faltas: Usuario[],
@@ -44,24 +46,37 @@ const ModalResumoDia: React.FC<ResumoDiaProps> = ({
         let colaboradores_ferias: any[] = [];
         let colaboradores_folgas: any[] = [];
 
-        if(dadosMes?.faltas){
-            colaboradores_faltas = dadosMes.faltas.map((falta) => {
-                return usuarios?.find((usuario) => usuario.usuario_cod == falta.usuarioCod)
-            });
-        }
+        if(dadosMes){
+            if (Array.isArray(dadosMes.faltas)) {
+                colaboradores_faltas = dadosMes.faltas.filter((falta) => {
+                const faltaDate = createDateFromString(falta.faltaDia as string); 
+                return isSameDay(faltaDate, diaSelecionado);
+                }).map((falta) => {
+                    return usuarios?.find((usuario) => usuario.usuario_cod == falta.usuarioCod);
+                });
+            }
 
-        if(dadosMes?.ferias){
-            colaboradores_ferias = dadosMes.ferias.map((ferias) => {
-                return usuarios?.find((usuario) => usuario.usuario_cod == ferias.usuarioCod)
-            });
-        }
+            if (Array.isArray(dadosMes.ferias)) {
+                colaboradores_ferias = dadosMes.ferias.filter((ferias) => {
+                const feriasDate = createDateFromString(ferias.dia as string); 
+                return isSameDay(feriasDate, diaSelecionado);
+                }).map((ferias) => {
+                    return usuarios?.find((usuario) => usuario.usuario_cod == ferias.usuarioCod);
+                });
+            }
 
-        if(dadosMes?.folgas){
-            colaboradores_folgas = dadosMes.folgas.map((folga) => {
-                return usuarios?.find((usuario) => usuario.usuario_cod == folga.usuarioCod)
-            });
+            if (Array.isArray(dadosMes.folgas)) {
+                colaboradores_folgas = dadosMes.folgas.filter((folga) => {
+                    return folga.folgaDataPeriodo.some((dataStr) => {
+                        const data = createDateFromString(dataStr); 
+                        return isSameDay(data, diaSelecionado); 
+                    });
+                }).map((folga) => {
+                    return usuarios?.find((usuario) => usuario.usuario_cod == folga.usuarioCod);
+                });
+            }
         }
-
+        
         const dados_formatados: Dados = {
             faltas: colaboradores_faltas,
             ferias: colaboradores_ferias,
@@ -70,14 +85,14 @@ const ModalResumoDia: React.FC<ResumoDiaProps> = ({
 
         setDados(dados_formatados);
 
-    }, [dadosMes])
+    }, [dadosMes, usuarios])
 
     const fetchUsuarioEmpresa = async (empCod: number) => {
         try{
             const usuarios_response = await usuarioServices.getUsariosByEmpresa(empCod);
             setUsuarios(usuarios_response as Usuario[]);
         }catch(e){
-            console.log("Erro ao buscar usuários")
+            console.error("Erro ao buscar usuários")
         }
     }
 
@@ -99,25 +114,34 @@ const ModalResumoDia: React.FC<ResumoDiaProps> = ({
                     <div className="flex flex-col gap-2">
                         <span className="font-bold">Colaboradores ausentes</span>
                         <ul>
-                            {dados?.faltas.map((colaborador, idx) => (
-                                <li key={idx}>{colaborador.usuario_nome}</li>
-                            ))}
+                            {Array.isArray(dados?.faltas) ? (
+                                dados.faltas.map((colaborador, idx) => {
+                                if (!colaborador) return null;
+                                return <li key={colaborador.usuario_cod ?? idx}>{colaborador.usuario_nome ?? "Sem nome"}</li>;
+                                })
+                            ) : null}
                         </ul>
                     </div>
                     <div className="flex flex-col gap-2">
                         <span className="font-bold">Colaboradores de folga</span>
                         <ul>
-                            {dados?.folgas.map((colaborador, idx) => (
-                                <li key={idx}>{colaborador.usuario_nome}</li>
-                            ))}
+                            {Array.isArray(dados?.folgas) ? (
+                                dados.folgas.map((colaborador, idx) => {
+                                if (!colaborador) return null; 
+                                return <li key={colaborador.usuario_cod ?? idx}>{colaborador.usuario_nome ?? "Sem nome"}</li>;
+                                })
+                            ) : null}
                         </ul>
                     </div>
                     <div className="flex flex-col gap-2">
                         <span className="font-bold">Colaboradores de férias</span>
                         <ul>
-                            {dados?.ferias.map((colaborador, idx) => (
-                                <li key={idx}>{colaborador.usuario_nome}</li>
-                            ))}
+                            {Array.isArray(dados?.ferias) ? (
+                                dados.ferias.map((colaborador, idx) => {
+                                if (!colaborador) return null;
+                                return <li key={colaborador.usuario_cod ?? idx}>{colaborador.usuario_nome ?? "Sem nome"}</li>;
+                                })
+                            ) : null}
                         </ul>
                     </div>
                 </div>

@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 
 interface CardResumoMensalProps {
     acesso: 'adm' | 'func' | 'jornada'
+    usuarioCod: number
     feriados: Feriado[];
     dataCalendario: Date;
     dadosMes: {
@@ -21,7 +22,7 @@ type Dados = {
     ferias: number
 }
 
-export const CardResumoMensal = ({acesso, feriados, dataCalendario, dadosMes} : CardResumoMensalProps) => {
+export const CardResumoMensal = ({acesso, usuarioCod, feriados, dataCalendario, dadosMes} : CardResumoMensalProps) => {
 
     const [feriadosMes, setFeriadosMes] = useState<Feriado[] | null>(null);
 
@@ -50,13 +51,39 @@ export const CardResumoMensal = ({acesso, feriados, dataCalendario, dadosMes} : 
     }, [feriados, dataCalendario])
 
     useMemo(() => {
-        const formatted_dados: Dados = {
-            faltas: dadosMes?.faltas ? dadosMes?.faltas?.length : 0,
-            folgas: dadosMes?.folgas ? dadosMes?.folgas?.length : 0,
-            ferias: dadosMes?.ferias ? dadosMes?.ferias?.length : 0
+        if(acesso == 'adm'){
+            function filtrarUnicoPorUsuarioCod(arr: { usuarioCod: number }[]) {
+                const map = new Map<number, any>();
+
+                for (const item of arr) {
+                    if (!map.has(item.usuarioCod)) {
+                    map.set(item.usuarioCod, item);
+                    }
+                }
+
+                return Array.from(map.values());
+            }
+            const formatted_dados: Dados = {
+                faltas: dadosMes?.faltas ? filtrarUnicoPorUsuarioCod(dadosMes?.faltas).length : 0,
+                folgas: dadosMes?.folgas ? filtrarUnicoPorUsuarioCod(dadosMes?.folgas).length : 0,
+                ferias: dadosMes?.ferias ? filtrarUnicoPorUsuarioCod(dadosMes?.ferias).length : 0
+            }
+            setDados(formatted_dados);
+        }else{
+            let faltas = dadosMes?.faltas?.filter((falta) => falta.usuarioCod == usuarioCod);
+            let folgas = dadosMes?.folgas?.filter((folga) => folga.usuarioCod == usuarioCod);
+            let ferias = dadosMes?.ferias?.filter((ferias) => ferias.usuarioCod == usuarioCod).flatMap(f => f.folgaDataPeriodo);
+            let feriasDias = Array.from(new Set(ferias));
+
+            const formatted_dados: Dados = {
+                faltas: faltas ? faltas.length : 0,
+                folgas: folgas ? folgas.length : 0,
+                ferias: ferias ? feriasDias.length : 0
+            }
+            setDados(formatted_dados);
         }
-        setDados(formatted_dados);
-    }, [dadosMes])
+    }, [dadosMes, acesso])
+
 
     return(
         <div className="flex w-full flex-col gap-4 bg-white shadow-[4px_4px_19px_0px_rgba(0,0,0,0.05)] rounded-xl p-6">
@@ -88,8 +115,9 @@ export const CardResumoMensal = ({acesso, feriados, dataCalendario, dadosMes} : 
                                     ))}
                                 </ul>
                             </div>
-                            <span><b>Ausências:</b> {dados?.faltas} neste mês</span>
-                            <span><b>Folgas:</b> {dados?.folgas} neste mês</span>
+                            <span><b>Ausências:</b> {dados?.faltas ? dados?.faltas : '-' } neste mês</span>
+                            <span><b>Folgas:</b> {dados?.folgas ? dados.folgas : '-'} neste mês</span>
+                            <span><b>Período de Férias:</b> {dados?.ferias ? dados.ferias : '-'} dias</span>
                         </>
                         ) : (
                         <>
