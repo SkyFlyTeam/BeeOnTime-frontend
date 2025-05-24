@@ -185,23 +185,23 @@ export default function Colaboradores() {
                         )
                       )
                     ) ? (
-                      <TableRow
-                        key={index}
-                        className={index % 2 === 0 ? "bg-[#FFF8E1]" : "bg-[#FFFFFF]"}
-                      >
-                        <TableCell className="border border-gray-200 text-center text-black text-base p-3">{usuario.usuario_nome}</TableCell>
-                        <TableCell className="border border-gray-200 text-center text-black text-base p-3">{usuario.usuario_cargo}</TableCell>
-                        <TableCell className="border border-gray-200 text-center text-black text-base p-3">{usuario.setor?.setorNome}</TableCell>
-                        <TableCell className="border border-gray-200 text-center text-black text-base p-3">{usuario.usuario_cargaHoraria}</TableCell>
-                        <TableCell className="border border-gray-200 text-center text-black text-base p-3">{usuario.usuarioTipoContratacao}</TableCell>
-                        <TableCell className="border border-gray-200 text-center text-black text-base p-3">{usuario.nivelAcesso?.nivelAcesso_nome}</TableCell>
-                        <TableCell className="border-r border-gray-300 text-left justify-center flex">
-                          <button
-                            onClick={() => handleViewUser(usuario.usuario_cod)}
-                            className={"bg-[#FFB503] rounded-md p-2 hover:bg-orange-600 " +
-                              (usuario.usuario_cod == thisUser.usuario_cod ? "invisible" : "")
-                            }
-                            disabled={usuario.usuario_cod == thisUser.usuario_cod}
+                    <TableRow
+                      key={index}
+                      className={index % 2 === 0 ? "bg-[#FFF8E1]" : "bg-[#FFFFFF]"}
+                    >
+                      <TableCell className="border border-gray-200 text-center text-black text-base p-3">{usuario.usuario_nome}</TableCell>
+                      <TableCell className="border border-gray-200 text-center text-black text-base p-3">{usuario.usuario_cargo}</TableCell>
+                      <TableCell className="border border-gray-200 text-center text-black text-base p-3">{usuario.setor?.setorNome}</TableCell>
+                      <TableCell className="border border-gray-200 text-center text-black text-base p-3">{usuario.usuario_cargaHoraria}</TableCell>
+                      <TableCell className="border border-gray-200 text-center text-black text-base p-3">{usuario.usuarioTipoContratacao}</TableCell>
+                      <TableCell className="border border-gray-200 text-center text-black text-base p-3">{usuario.nivelAcesso?.nivelAcesso_nome}</TableCell>
+                      <TableCell className="border-r border-gray-300 text-left justify-center flex">
+                        <button
+                          onClick={() => handleViewUser(usuario.usuario_cod)}
+                          className={"rounded-md p-2 " +
+                            (usuario.usuario_cod == thisUser.usuario_cod ? "bg-[#CBD5E1]" : "bg-[#FFB503]  hover:bg-orange-600")
+                          }
+                          disabled={usuario.usuario_cod == thisUser.usuario_cod}
                           >
                             <FontAwesomeIcon icon={faEye} className="text-black-600" />
                           </button>
