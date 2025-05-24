@@ -57,7 +57,7 @@ export default function CadastroUsuario({ onClose, onSave }: { onClose: () => vo
     usuario_DataNascimento: "",
     usuario_cargo: "",
     setorCod: "",
-    empCod: 2,
+    empCod: 1,
     nivelAcesso_cod: ""
   });
   const [formErrors, setFormErrors] = useState<any>({});
