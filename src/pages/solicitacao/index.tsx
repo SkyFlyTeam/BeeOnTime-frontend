@@ -26,6 +26,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import SolicitacaoCardSkeleton from './SolicitacaoCard/cardSkeleton'
 import ModalSolictarHoraExtra from '@/components/custom/modalSolicitacao/modalAusenciaMedica/modalSolicitarHoraExtra'
 import ModalSolictarAusenciaMedica from '@/components/custom/modalSolicitacao/modalAusenciaMedica/modalSolicitarHoraExtra'
+import ModalFerias from '@/components/custom/modalSolicitacao/modalFerias'
 
 interface SolicitacoesState {
   all: SolicitacaoInterface[];
@@ -47,9 +48,13 @@ const Solicitacao = () => {
   // Informações do usuário
   const [usuarioCod, setUsuarioCod] = useState<number>(0)
   const [usuarioCargo, setUsuarioCargo] = useState<string>('')
+  const [usuarioDataContratacao, setUsuarioDataContratacao] = useState<Date>(new Date())
   const [nivelAcessoCod, setNivelAcessoCod] = useState<number>()
   const [setorCod, setSetorCod] = useState()
   const [cargaHoraria, setCargaHoraria] = useState<number>()
+  const [numeroSolicitacoesFeriasAbertas, setNumeroSolicitacoesFeriasAbertas] = useState<number>(0)
+  const [solicitacoesOriginais, setSolicitacoesOriginais] = useState<SolicitacaoInterface[]>([]);
+
 
   const [toogle, setToogle] = useState(false);
 
@@ -103,11 +108,19 @@ const Solicitacao = () => {
 
         setSolicitacoesData({
           all: ordenar([...minhas, ...analises]),
-          pendentes: [],
+          pendentes: [], // usado apenas para admins e funcionários
           historico: [],
-          analisesPendentes: ordenar(analises.filter(s => s.solicitacaoStatus === 'PENDENTE')),
+
+          analisesPendentes: filtrarPrimeirasSolicitacoesFeriasPendentes(
+            ordenar(analises.filter(s => s.solicitacaoStatus === 'PENDENTE'))
+          ),
+
           analisesHistorico: ordenar(analises.filter(s => s.solicitacaoStatus !== 'PENDENTE')),
-          meusPendentes: ordenar(minhas.filter(s => s.solicitacaoStatus === 'PENDENTE')),
+
+          meusPendentes: filtrarPrimeirasSolicitacoesFeriasPendentes(
+            ordenar(minhas.filter(s => s.solicitacaoStatus === 'PENDENTE'))
+          ),
+
           meusHistorico: ordenar(minhas.filter(s => s.solicitacaoStatus !== 'PENDENTE')),
         })
       
@@ -134,8 +147,9 @@ const Solicitacao = () => {
 
       setSolicitacoesData({
         all: solicitacoesFiltradas.filter((s) => s.solicitacaoStatus !== 'PENDENTE'),
-        pendentes: solicitacoesFiltradas.filter((s) => s.solicitacaoStatus === 'PENDENTE'),
-        historico: solicitacoesFiltradas.filter((s) => s.solicitacaoStatus !== 'PENDENTE'),
+        pendentes: filtrarPrimeirasSolicitacoesFeriasPendentes(result.filter((s) => s.solicitacaoStatus === 'PENDENTE')),
+        historico: filtrarPrimeirasSolicitacoesFeriasPendentes(solicitacoesFiltradas.filter((s) => s.solicitacaoStatus !== 'PENDENTE')),
+
       })
 
       setTotalItems(solicitacoesFiltradas.length)
@@ -237,7 +251,7 @@ const Solicitacao = () => {
       // Aplique o filtro novamente para garantir que o cargo do usuário seja levado em consideração
       return {
         ...prevData,
-        pendentes: updatedPendentes,
+        pendentes: filtrarPrimeirasSolicitacoesFeriasPendentes(updatedPendentes),
         historico: updatedHistorico,
       }
     })
@@ -286,6 +300,11 @@ const Solicitacao = () => {
   // Novo mapeamento de Modal para renderização automática
   {/* ========= Modais de solicitações ========= */}
   const modaisMapeados: { [key: string]: JSX.Element } = {
+    'Férias': (
+      <ModalFerias 
+        onClose = {() => setModalAberto(null)}
+      />
+    ),
     'Hora extra': (
       <ModalSolicitarHoraExtra
         usuarioCod={usuarioCod}
@@ -315,9 +334,10 @@ const Solicitacao = () => {
           return;
         }
 
-        const { usuario_cod, usuario_cargo, nivelAcesso_cod, setorCod, usuario_cargaHoraria } = response.data
+        const { usuario_cod, usuario_cargo, usuario_dataContratacao, nivelAcesso_cod, setorCod, usuario_cargaHoraria } = response.data
         setUsuarioCod(usuario_cod)
         setUsuarioCargo(usuario_cargo)
+        setUsuarioDataContratacao(usuario_dataContratacao)
         setNivelAcessoCod(nivelAcesso_cod)
         setSetorCod(setorCod)
         setCargaHoraria(usuario_cargaHoraria)
@@ -336,6 +356,25 @@ const Solicitacao = () => {
     paginateData()
   }, [currentPage, solicitacoesData, toogle])
 
+  
+  useEffect(() => {
+    function countSolicitacoesFeriasAbertas(solicitacoesUser: any) {
+      if (!Array.isArray(solicitacoesUser)) return 0;
+  
+      return solicitacoesUser.filter(
+        (solicitacao: { solicitacaoStatus: string; tipoSolicitacaoCod: { tipoSolicitacaoCod: number } }) =>
+          solicitacao.solicitacaoStatus === "PENDENTE" &&
+          solicitacao.tipoSolicitacaoCod.tipoSolicitacaoCod === 2
+          
+      ).length;
+    }
+  
+    if (solicitacoesData) {
+      const numeroFerias = countSolicitacoesFeriasAbertas(solicitacoesData.pendentes);
+      setNumeroSolicitacoesFeriasAbertas(numeroFerias);
+    }
+  }, [solicitacoesData]);
+
 
   const totalPages = Math.ceil(
     (
@@ -353,8 +392,9 @@ const Solicitacao = () => {
     return (
       <div className={styles.solicitacao_container}>
         <div className={styles.card_container}>
+          
           <h1 className='font-bold text-4xl'>Solicitações</h1>
-
+          
           <div className=' flex items-center justify-center mt-7'>
             <Skeleton className='h-12 w-[16rem] bg-gray-200 ' />
           </div>
@@ -368,6 +408,37 @@ const Solicitacao = () => {
         </div>
       </div>
     )
+  }
+
+  function filtrarPrimeirasSolicitacoesFeriasPendentes(pendentes: SolicitacaoInterface[]) {
+    const primeirasSolicitacoes: { [usuarioCod: number]: SolicitacaoInterface } = {};
+  
+    pendentes.forEach((solicitacao) => {
+      if (
+        solicitacao.tipoSolicitacaoCod!.tipoSolicitacaoCod === 2 && // Tipo: Férias
+        !primeirasSolicitacoes[solicitacao.usuarioCod] // Ainda não peguei a primeira desse usuário
+      ) {
+        primeirasSolicitacoes[solicitacao.usuarioCod] = solicitacao;
+      }
+    });
+  
+    // Pega todas as solicitações normais + primeiras de férias
+    const outrasSolicitacoes = pendentes.filter(
+      (s) => s.tipoSolicitacaoCod!.tipoSolicitacaoCod !== 2
+    );
+  
+    return [...Object.values(primeirasSolicitacoes), ...outrasSolicitacoes];
+  }
+
+  const isContratadoMaisDeUmAno = (usuarioDataContratacao: any) => {
+    const data = new Date(usuarioDataContratacao)
+    const hoje = new Date()
+    const umAnoAtras = new Date()
+    umAnoAtras.setFullYear(hoje.getFullYear() - 1)
+
+    const formatada = data.toLocaleDateString('pt-BR')
+    const maisDeUmAno = data <= umAnoAtras
+    return maisDeUmAno;
   }
 
   return (
@@ -404,11 +475,12 @@ const Solicitacao = () => {
           <BotaoDropdownSolicitacao
               usuarioCod={usuarioCod}
               usuarioCargo={usuarioCargo}
+              isContratadoMaisDeUmAno={isContratadoMaisDeUmAno(usuarioDataContratacao)} 
+              numeroSolicitacoesFeriasAbertas={numeroSolicitacoesFeriasAbertas}
               handleSolicitacaoUpdate={handleSolicitacaoUpdate}
               onOpenModal={handleOpenModal}
             />
           )}
-
 
         </div>
 
