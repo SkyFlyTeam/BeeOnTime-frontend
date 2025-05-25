@@ -326,7 +326,7 @@ export default function Colaboradores() {
             .toLowerCase()
             .includes(filter)
 
-        if (props == "setor")
+        if (props == "setor" && thisUser?.setor.setorCod == 0)
           return (usuario[propUsuario] as Setor).setorNome
             .toLowerCase()
             .includes(filter)
@@ -422,7 +422,7 @@ export default function Colaboradores() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   {fieldsHeaders
-                    .map((headers, idx) => (
+                    .map((headers, idx) => !(headers.toLocaleLowerCase() == "setor" && thisUser.nivelAcesso.nivelAcesso_cod != 0) ?(
                       <DropdownMenuCheckboxItem
                         key={idx}
                         className="capitalize"
@@ -431,8 +431,7 @@ export default function Colaboradores() {
                       >
                         {headers.replace(/([a-z])([A-Z])/g, '$1 $2')}
                       </DropdownMenuCheckboxItem>
-                    )
-                    )
+                    ) : null)
                   }
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -445,7 +444,7 @@ export default function Colaboradores() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   {columnProps
-                    .map((props, idx) => (
+                    .map((props, idx) => (!(props.toLocaleLowerCase() == "setor" && thisUser.nivelAcesso.nivelAcesso_cod != 0) ? (
                       <DropdownMenuCheckboxItem
                         key={idx}
                         className="capitalize"
@@ -454,7 +453,7 @@ export default function Colaboradores() {
                       >
                         {columnHeaders[idx].replace(/([a-z])([A-Z])/g, '$1 $2')}
                       </DropdownMenuCheckboxItem>
-                    )
+                    ) : null)
                     )
                   }
                 </DropdownMenuContent>
@@ -500,7 +499,7 @@ export default function Colaboradores() {
               <TableHeader>
                 <TableRow>
                   {columnHeaders.map((header, idx) => {
-                    if (columnFiltered[idx])
+                    if (columnFiltered[idx] && !(header.toLocaleLowerCase() == "setor" && thisUser.nivelAcesso.nivelAcesso_cod != 0))
                       return (
                         <TableHead
                           key={idx}
@@ -520,7 +519,7 @@ export default function Colaboradores() {
                       className={index % 2 === 0 ? "bg-[#FFF8E1]" : "bg-[#FFFFFF]"}
                     >
                       {columnProps.map((header, idx) => {
-                        if (columnFiltered[idx])
+                        if (columnFiltered[idx] && !(header.toLocaleLowerCase() == "setor" && thisUser.nivelAcesso.nivelAcesso_cod != 0))
                           return (
                             <TableCell key={idx} className="border border-gray-200 text-center text-black text-base p-3">
                               {
@@ -577,7 +576,7 @@ export default function Colaboradores() {
                       <FontAwesomeIcon icon={faEye} className="text-black-600" />
                     </button>)
                   }
-                ].map((row, idx) => (
+                ].map((row, idx) => !(thisUser.nivelAcesso.nivelAcesso_cod != 0 && row.label.toLocaleLowerCase() == "setor") ? (
                   <tr key={idx}>
                     <td className="border border-gray-200 p-3 font-semibold">{row.label}</td>
                     {usuariosFiltered.length > 0 ? (
@@ -594,7 +593,7 @@ export default function Colaboradores() {
                       <td colSpan={6} className="text-center">Nenhum colaborador encontrado</td>
                     )}
                   </tr>
-                ))}
+                ) : null)}
               </tbody>
             </table>
           </div>
