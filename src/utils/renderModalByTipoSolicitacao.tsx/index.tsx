@@ -6,6 +6,8 @@ import ModalSolictarHoraExtra from '@/components/custom/modalSolicitacao/modalHo
 import ModalJustificativaFalta from '@/components/custom/modalSolicitacao/modalJustificativaFalta'
 import ModalDecisaoAusenciaMedica from '@/components/custom/modalSolicitacao/modalAusenciaMedica/modalAusenciaMedica'
 import ModalSolictarAusenciaMedica from '@/components/custom/modalSolicitacao/modalAusenciaMedica/modalSolicitarHoraExtra'
+import ModalFerias from '@/components/custom/modalSolicitacao/modalFerias'
+import ModalFeriasGestor from '@/components/custom/modalSolicitacao/modalFerias/modalGestor'
 
 interface ModalChildrenProps {
   solicitacao: SolicitacaoInterface
@@ -24,7 +26,7 @@ export function renderModalChildren({
   usuarioLogadoCod,
   usuarioCargo,
   nivelAcessoCod,
-  cargaHoraria
+  cargaHoraria,
 }: ModalChildrenProps): React.ReactNode {
 
   const formatarData = (datas: Date[] = []): string => {
@@ -52,6 +54,13 @@ export function renderModalChildren({
           usuarioCargo={usuarioCargo}
         />
       )
+
+    case 2: 
+      return nivelAcessoCod === 0 || nivelAcessoCod === 1 ? (
+        <ModalFeriasGestor userCod={solicitacao.usuarioCod} onClose={onClose} />
+      ) : (
+        <ModalFerias onClose={onClose} isEdicao={true}/>
+      );
     
     case 4:
       return (
