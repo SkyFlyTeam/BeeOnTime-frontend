@@ -113,7 +113,7 @@ export default function Colaboradores() {
       if (Array.isArray(data))
         data.forEach((usuario, index) =>
           Object.keys(usuario).forEach((key) => {
-            if (!columnProps.includes(key))
+            if (!columnProps.includes(key) && key != "usuario_cod")
               delete data[index][key];
           })
         )
@@ -128,7 +128,7 @@ export default function Colaboradores() {
       if (Array.isArray(data))
         ["usuario_cargo", "usuario_cargaHoraria"].forEach((key) =>
           [...new Map(data.map((usuario) => [usuario[key], usuario])).values()]
-            .forEach((usuario) => fields[key as keyof typeof fields].push(usuario[key])))
+            .forEach((usuario) => fields[key as keyof typeof fields].push(usuario[key] ? usuario[key].toString() : "")))
 
       if (Array.isArray(data))
         [...new Map(data.map((usuario) => [usuario["setor"]["setorNome"], usuario])).values()] // Monta um array com valores únicos
@@ -293,7 +293,7 @@ export default function Colaboradores() {
 
   const checkField = (prop: string, usuario: any, filter: string) => {
     let word = "";
-    switch(prop){
+    switch (prop) {
       case "setor":
         word = (usuario as Usuario).setor.setorNome.toString();
         break;
@@ -304,29 +304,6 @@ export default function Colaboradores() {
         word = usuario[prop as keyof typeof usuario].toString();
     }
     return word != filter;
-  }
-  const handleFilterListChange = (fieldName: string, idz: number) => {
-    let newFilterList = Object.assign({}, filterList)
-    const field = fieldName as keyof typeof newFilterList;
-    newFilterList[field][idz] = !filterList[field][idz]
-    setFilterList(newFilterList)
-
-    let newUsuarioFiltered = applyFilter(filterValue)
-
-    Object.keys(newFilterList).forEach((prop) => {
-          filterList[prop as keyof typeof filterList].forEach((checked, id) => {
-            if (!checked)
-              newUsuarioFiltered = newUsuarioFiltered.filter((usuario) =>
-              checkField(
-                prop,
-                usuario,
-                fieldList[prop as keyof typeof fieldList][id].toString()
-              )
-              )
-          })
-    })
-
-    setUsuariosFiltered(newUsuarioFiltered)
   }
 
   const applyFilter = (filterRaw: string) => {
@@ -339,30 +316,54 @@ export default function Colaboradores() {
         return true;
 
       return Object.keys(usuario).some((props) => {
+        const propUsuario = props as keyof typeof usuario
+
         if (!columnProps.includes(props))
           return false
 
         if (props == "nivelAcesso")
-          return (usuario[props as keyof typeof usuario] as NivelAcesso).nivelAcesso_nome
+          return (usuario[propUsuario] as NivelAcesso).nivelAcesso_nome
             .toLowerCase()
             .includes(filter)
 
         if (props == "setor")
-          return (usuario[props as keyof typeof usuario] as Setor).setorNome
+          return (usuario[propUsuario] as Setor).setorNome
             .toLowerCase()
             .includes(filter)
 
-        if ((usuario[props as keyof typeof usuario] as string).length < filter.length)
+        if ((usuario[propUsuario] as string).length < filter.length)
           return false;
 
-        return (usuario[props as keyof typeof usuario] as string)
+        return (usuario[propUsuario] as string)
           .toString()
           .toLowerCase()
           .includes(filter)
       })
     })
-
+    
     return filtered;
+  }
+
+  const handleFilterListChange = (fieldName: string, idz: number) => {
+    let newFilterList = Object.assign({}, filterList)
+    const field = fieldName as keyof typeof newFilterList;
+    newFilterList[field][idz] = !filterList[field][idz]
+    setFilterList(newFilterList)
+
+    let newUsuarioFiltered = applyFilter(filterValue)
+
+    Object.keys(newFilterList).forEach((prop) => {
+      filterList[prop as keyof typeof filterList].forEach((checked, id) => {
+        if (!checked)
+          newUsuarioFiltered = newUsuarioFiltered.filter((usuario) =>
+            checkField(
+              prop,
+              usuario,
+              fieldList[prop as keyof typeof fieldList][id].toString()
+            )
+          )
+      })
+    })
   }
 
   const handleBuscaFilterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
