@@ -22,7 +22,7 @@ import { folgaService } from "@/services/folgaService";
 import Faltas from "@/interfaces/faltas";
 import Folgas from "@/interfaces/folga";
 
-interface DadosMes {
+export interface DadosMes {
     ferias?: Folgas[]; 
     faltas?: Faltas[];
     folgas?: Folgas[];

@@ -1,6 +1,11 @@
 import Faltas from "@/interfaces/faltas";
 import { Feriado } from "@/interfaces/feriado";
 import Folgas from "@/interfaces/folga";
+import Horas from "@/interfaces/horas";
+import { Usuario } from "@/interfaces/usuario";
+import { horasServices } from "@/services/horasService";
+import { createDateFromString } from "@/utils/functions/createDateFromString";
+import { verifyWorkDay } from "@/utils/functions/verifyWorkDay";
 import { isSameMonth } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
 
@@ -14,6 +19,7 @@ interface CardResumoMensalProps {
         faltas?: Faltas[];
         folgas?: Folgas[];
     } | null | undefined;
+    funcInfo?: Usuario;
 }
 
 type Dados = {
@@ -22,11 +28,16 @@ type Dados = {
     ferias: number
 }
 
-export const CardResumoMensal = ({acesso, usuarioCod, feriados, dataCalendario, dadosMes} : CardResumoMensalProps) => {
+export const CardResumoMensal = ({acesso, usuarioCod, feriados, dataCalendario, dadosMes, funcInfo} : CardResumoMensalProps) => {
 
     const [feriadosMes, setFeriadosMes] = useState<Feriado[] | null>(null);
 
     const [dados, setDados] = useState<Dados | null>(null);
+
+    const [funcHorasSem, setFuncHorasSem] = useState<number>(0);
+    const [funcFolgasDias, setFuncFolgasDias] = useState<number>(0);
+    const [funcHoras, setFuncHoras] = useState<Horas[] | null>(null);
+    const [funcDiasExtras, setFuncDiasExtras] = useState<number>(0);
 
     useEffect(() => {
        // Filtra apenas os feriados no mesmo mês
@@ -75,6 +86,12 @@ export const CardResumoMensal = ({acesso, usuarioCod, feriados, dataCalendario, 
             let ferias = dadosMes?.ferias?.filter((ferias) => ferias.usuarioCod == usuarioCod).flatMap(f => f.folgaDataPeriodo as string[]);
             let feriasDias = Array.from(new Set(ferias));
 
+            if(funcInfo && dadosMes?.folgas){
+                folgas = dadosMes?.folgas?.filter((folga) => folga.usuarioCod == funcInfo.usuario_cod);
+                let folgas_dias = Array.from(new Set(folgas!.flatMap(f => f.folgaDataPeriodo as string[])));
+                setFuncFolgasDias(folgas_dias.length);
+            }
+
             const formatted_dados: Dados = {
                 faltas: faltas ? faltas.length : 0,
                 folgas: folgas ? folgas.length : 0,
@@ -84,6 +101,66 @@ export const CardResumoMensal = ({acesso, usuarioCod, feriados, dataCalendario, 
         }
     }, [dadosMes, acesso])
 
+    const calculateFuncHorasSemanal = () => {
+         if (funcInfo) {
+            const dias_trabalhados = funcInfo.jornadas.jornada_diasSemana
+            let total_dias_trabalhados = 0
+
+            dias_trabalhados.forEach((dia) => {
+                if(dia){
+                    total_dias_trabalhados += 1
+                }
+            })
+            
+            return total_dias_trabalhados * funcInfo.usuario_cargaHoraria;
+        }
+        return 0;
+    }
+
+    useEffect(() => {
+        if(funcInfo){
+            let horas = calculateFuncHorasSemanal()
+            setFuncHorasSem(horas);
+            fetchUsuarioHoras(funcInfo.usuario_cod);
+        }
+    }, [funcInfo])
+
+    const fetchUsuarioHoras = async (funcCod: number) => {
+        try{
+            const horas = await horasServices.getHorasByUsuario(funcCod);
+            setFuncHoras(horas as Horas[])
+        }catch(e){
+            console.error('Erro ao pegar horas do funcionário', e)
+        }
+    }
+
+    const calculateFuncDiasExtras = (horas: Horas[], func: Usuario) => {
+        /* dias fora da jornada de trabalho */
+        // Usar um Set para evitar contar datas repetidas
+        const diasForaJornada = new Set<string>();
+
+        horas.forEach(hora => {
+            // Verifica se é dia de trabalho esperado
+            const trabalhouNoDia = true; // pressupõe que o registro indica que trabalhou nesse dia
+
+            if (trabalhouNoDia) {
+                let data = createDateFromString(hora.horasData as string)
+                const estaNaJornada = verifyWorkDay(func, data);
+
+                if (!estaNaJornada) {
+                    diasForaJornada.add(hora.horasData as string);
+                }
+            }
+        })
+        return diasForaJornada.size;
+    }
+
+    useEffect(() => {
+        if(funcHoras && funcInfo){
+            const diasExtras = calculateFuncDiasExtras(funcHoras, funcInfo);
+            setFuncDiasExtras(diasExtras);
+        }
+    }, [funcHoras])
 
     return(
         <div className="flex w-full flex-col gap-4 bg-white shadow-[4px_4px_19px_0px_rgba(0,0,0,0.05)] rounded-xl p-6">
@@ -129,9 +206,9 @@ export const CardResumoMensal = ({acesso, usuarioCod, feriados, dataCalendario, 
                                     ))}
                                 </ul>
                             </div>
-                            <span><b>Carga horária semanal:</b> 44h / semana</span>
-                            <span><b>Folgas programadas:</b> 8 dias neste mês</span>
-                            <span><b>Dias trabalhados fora do padrão:</b> 12 dias</span>
+                            <span><b>Carga horária semanal:</b> {funcHorasSem}h / semana</span>
+                            <span><b>Folgas programadas:</b> {funcFolgasDias} dias neste mês</span>
+                            <span><b>Dias trabalhados fora do padrão:</b> {funcDiasExtras} dias</span>
                         </>
                         )
                     )

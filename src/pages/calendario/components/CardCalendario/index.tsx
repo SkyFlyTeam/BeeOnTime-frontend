@@ -10,12 +10,17 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Arrow } from "@radix-ui/react-tooltip";
 import ModalResumoDia from "@/components/custom/ModaisCalendario/ModalResumoDia";
 
-import { addMonths, isBefore, isSameDay, startOfDay, subMonths } from 'date-fns';
+import { addMonths, isAfter, isBefore, isSameDay, startOfDay, subMonths } from 'date-fns';
 import ModalDefinirFolgaGeral from "@/components/custom/ModaisCalendario/ModalDefinirFolgaGeral";
 import { Feriado } from "@/interfaces/feriado";
 import Faltas from "@/interfaces/faltas";
 import Folgas from "@/interfaces/folga";
 import { createDateFromString } from "@/utils/functions/createDateFromString";
+import ModalDefinirFolgaCalendario from "@/components/custom/ModaisCalendario/ModalDefinirFolgaCalendario";
+import { BancoHoras } from "@/interfaces/bancoHoras";
+import { bancoHorasServices } from "@/services/bancoHorasService";
+import { Usuario } from "@/interfaces/usuario";
+import { formatDateToYYYYMMDD } from "@/utils/functions/formatDateToYDMString";
 
 
 
@@ -31,6 +36,7 @@ interface CardCalendarioProps {
         faltas?: Faltas[];
         folgas?: Folgas[];
     } | null;
+    funcInfo?: Usuario;
 }
 
 const eventColorClasses: Record<string, string> = {
@@ -43,8 +49,9 @@ type MarkedDay =
   | { day: Date; events: { tipo: string; contagem: number }[] }
   | { day: Date; event: string };
 
-export const CardCalendario = ({ funcCalendar, empCod, usuarioCod, feriados, currentDate, setCurrentDate, dadosMes }: CardCalendarioProps) => {
+export const CardCalendario = ({ funcCalendar, empCod, usuarioCod, feriados, currentDate, setCurrentDate, dadosMes, funcInfo }: CardCalendarioProps) => {
     const [formattedFeriados, setFormattedFeriados] = useState<Date[] | undefined>(undefined);
+    const [bancoHoras, setBancoHoras] = useState<BancoHoras | null>(null);
     
     const [selectedDate, setSelectedDate] = useState(new Date());
     const dataHoje = new Date();
@@ -52,6 +59,7 @@ export const CardCalendario = ({ funcCalendar, empCod, usuarioCod, feriados, cur
     // Modais
     const [showModalResumoDia, setShowModalResumoDia] = useState(false);
     const [showModalDefinirFolga, setShowModalDefinirFolga] = useState(false);
+    const [showModalDefinirFolgaInd, setShowModalDefinirFolgaInd] = useState(false);
 
     const [loading, setLoading] = useState(false);
 
@@ -219,12 +227,33 @@ export const CardCalendario = ({ funcCalendar, empCod, usuarioCod, feriados, cur
         setFormattedFeriados(formatted_feriados);
     }, [feriados])
 
+    const fetchFuncBancoHoras = async (usuarioCod: number, date: string) => {
+        try{
+            const bancoHoras = await bancoHorasServices.getBancoHorasSaldoAtual(usuarioCod, date);
+            setBancoHoras(bancoHoras as BancoHoras);
+        }catch(e){
+            console.error("Erro ao buscar saldo de banco de horas", e)
+        }
+    }
+
+    useEffect(() => {
+        if(funcInfo && funcCalendar){
+            fetchFuncBancoHoras(funcInfo.usuario_cod, formatDateToYYYYMMDD(currentDate));
+        }
+    }, [funcInfo, funcCalendar])
+
     useEffect(() => {
         if(!funcCalendar){
             if(isBefore(startOfDay(selectedDate), startOfDay(dataHoje))){
-                setShowModalResumoDia(true)
+                setShowModalResumoDia(true);
             }else if(!isSameDay(selectedDate, dataHoje)){
-                setShowModalDefinirFolga(true)
+                setShowModalDefinirFolga(true);
+            }
+        }else{
+            if(bancoHoras && funcInfo){
+                if(usuarioCod !== 2 && isAfter(startOfDay(selectedDate), startOfDay(dataHoje)) && bancoHoras?.bancoHorasSaldoAtual > funcInfo?.usuario_cargaHoraria){
+                    setShowModalDefinirFolgaInd(true);
+                }
             }
         }
     }, [selectedDate])
@@ -242,7 +271,7 @@ export const CardCalendario = ({ funcCalendar, empCod, usuarioCod, feriados, cur
 
         return (
         <div className="flex flex-col items-center gap-1 w-full h-full">
-            {props.date > dataHoje && !funcCalendar
+            {(props.date > dataHoje) && ( (funcCalendar && funcInfo) || (!funcCalendar))
                 ? (
                     <TooltipProvider>
                         <Tooltip>
@@ -343,6 +372,15 @@ export const CardCalendario = ({ funcCalendar, empCod, usuarioCod, feriados, cur
                         onClick={() => setShowModalDefinirFolga(false)}
                         empCod={empCod}
                         usuarioCod={usuarioCod}
+                    />
+                }
+                {showModalDefinirFolgaInd &&
+                    <ModalDefinirFolgaCalendario
+                        diaSelecionado={selectedDate}
+                        onClose={() => setShowModalDefinirFolgaInd(false)}
+                        onClick={() => setShowModalDefinirFolgaInd(false)}
+                        usuarioCod={usuarioCod}
+                        bancoHoras={bancoHoras!}
                     />
                 }
             </>
