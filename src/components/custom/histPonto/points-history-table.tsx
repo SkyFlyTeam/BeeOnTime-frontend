@@ -128,8 +128,7 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
       "horasTrabalhadas",
       "horasExtras",
       "horasFaltantes",
-      "horasNoturnas",
-      ...(accessLevel === "USER" ? ["_action"] : []),
+      "horasNoturnas"
     ];
 
     useEffect(() => {
@@ -146,9 +145,11 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
 
       setEntriesFiltered(entries)
 
-      setTotalPages(Math.ceil(entriesFiltered.length / rowsPerPage));
+      setTotalPages(Math.ceil(entries.length / rowsPerPage));
 
       setPaginatedEntries(entries.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage));
+
+      
 
       // Cria uma lista isolada de opções únicas
       let fields = Object.assign({}, {
@@ -205,7 +206,7 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
         )
       )
       setFilterList(filters);
-      // Aplica resultados da lista bool das opçções
+      // Aplica resultados da lista bool das opções
     }, [entries]);
 
 
