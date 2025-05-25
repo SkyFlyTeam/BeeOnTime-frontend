@@ -17,11 +17,8 @@ const checkLogin = async (credenciais: any): Promise<any | ApiException> => {
 };
 
 const cadastrarUsuarioComJornada = async (usuario: any, jornada: any) => {
-  alert(usuario.usuario_status)
   try {
-    alert(JSON.stringify(usuario))
     const dadosCombinados = { ...usuario, usuario_status: true, ...jornada};
-   alert(JSON.stringify(dadosCombinados))
     const response = await ApiUsuario.post(`/usuario/cadastrar`, dadosCombinados, {
       headers: { "Content-Type": "application/json" },
       timeout: 5000,
@@ -58,7 +55,7 @@ const getUsuarioById = async (usuario_cod: number) => {
 const getAllUsuarios = async () => {
   try {
     const response = await ApiUsuario.get(`/usuario/usuarios`);
-    return response.data;
+    return response.data as Usuario[];
   } catch (error) {
     if (error instanceof Error) {
       return new ApiException(error.message || "Erro ao consultar a API.");

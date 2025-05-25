@@ -35,16 +35,37 @@ const BancoHorasDiario = () => {
     };
 
     // Buscar relatório de banco de horas de um usuário de um mês
-    const fetchBancoHorasDiarias = async (date: String, usuario: Usuario) => {
+    const fetchBancoHorasDiarias = async (date: string, usuario: Usuario) => {
         try{
             const data = await relatorioBancoHorasServices.getRelatorioDiarioFunc(date, usuario!);
-            setBancoHorasDiario(data as bancoHorasDiarioFunc[]);
-            setLoading(false);
+            const bancoHorasDiario = data as bancoHorasDiarioFunc[];
+            const bancoHorasDiarioOrganizado = bancoHorasDiario
+                .filter((banco) => {
+                    let bancoData = new Date(banco.data)
+                    bancoData.setDate(bancoData.getDate() + 1);
+                    bancoData.setHours(0, 0, 0, 0);
+                    const dataAtual = new Date();
+                    dataAtual.setHours(0, 0, 0, 0); 
+                    
+                    return bancoData <= dataAtual;
+                })
+                .sort(  
+                    (a, b) => new Date(b.data).getTime() - new Date(a.data).getTime()
+                );
+                
+            setBancoHorasDiario(bancoHorasDiarioOrganizado);
         }catch (err) {
             console.error("Erro ao carregar o relatório de banco de horas diarias.");
-            setLoading(false);
         }
     }
+
+    useEffect(() => {
+        if (bancoHorasDiario && bancoHorasDiario.length > 0) {
+            setLoading(false);
+        }else if(bancoHorasDiario && bancoHorasDiario.length == 0){
+            setLoading(false);
+        }
+    }, [bancoHorasDiario])
 
     // Buscar colaborador (em caso do usuário logado ser ADMIN)
     const fetchColaborar = async () => {

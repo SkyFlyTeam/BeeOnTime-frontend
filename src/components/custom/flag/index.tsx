@@ -11,6 +11,7 @@ const Flag = ({ status }: { status: string }) => {
         [styles.extra]: status === "Hora extra",
         [styles.ausencia_medica]: status === "Ausência médica",
         [styles.feriado]: status === "Feriado",
+        [styles.presente]: status === "Presente"
     })}>
       {status === "Ajuste de ponto" ? "Ponto" : status}
     </span>

@@ -92,7 +92,12 @@ const ModalJustificativaFalta: React.FC<AjusteProps> = ({
   }
 
   useEffect(() => {
-    const ajustada = { ...solicitacaoSelected }
+    const ajustada = { 
+      ...solicitacaoSelected,
+      solicitacaoDataPeriodo: Array.isArray(solicitacaoSelected.solicitacaoDataPeriodo)
+        ? solicitacaoSelected.solicitacaoDataPeriodo.map(d => new Date(d))
+        : []
+    }
     setSolicitacao(ajustada)
     fetchPonto(ajustada.solicitacaoCod)
   }, [solicitacaoSelected])
@@ -102,42 +107,53 @@ const ModalJustificativaFalta: React.FC<AjusteProps> = ({
       ...solicitacao,
       solicitacaoStatus: status,
       solicitacaoDevolutiva: message || solicitacao.solicitacaoDevolutiva,
-    }
+    };
 
-    // Atualiza a solicitação no banco de dados
-    await solicitacaoServices.updateSolicitacao(updatedSolicitacao)
+    // Converter para string[] para envio
+    const updatedSolicitacaoParaEnvio = {
+      ...updatedSolicitacao,
+      solicitacaoDataPeriodo: updatedSolicitacao.solicitacaoDataPeriodo.map(d =>
+        d instanceof Date ? d.toISOString().slice(0, 10) : d
+      ),
+    };
+
+    await solicitacaoServices.updateSolicitacao(updatedSolicitacaoParaEnvio as any);
+
     if (ponto && status === 'APROVADA') {
       const solicitacaoPonto: AprovarPonto = {
         id: idApproved,
+      };
+      await pontoServices.aproveSolicitacaoPonto(solicitacaoPonto, solicitacao.solicitacaoCod);
+
+      // Para cada data no período, buscar e atualizar falta
+      for (const data of updatedSolicitacaoParaEnvio.solicitacaoDataPeriodo) {
+        const faltaObj = await faltaServices.getFaltabyUsuarioCodAndDate(usuarioLogadoCod, data);
+        const faltaData = faltaObj as Faltas;
+        await faltaServices.updateFalta(faltaData.faltaCod, updatedSolicitacaoParaEnvio.solicitacaoMensagem);
       }
-      await pontoServices.aproveSolicitacaoPonto(solicitacaoPonto, solicitacao.solicitacaoCod)
-      console.log(updatedSolicitacao.solicitacaoDataPeriodo)
-      const faltaObj = await faltaServices.getFaltabyUsuarioCodAndDate(usuarioLogadoCod, updatedSolicitacao.solicitacaoDataPeriodo)
-      const faltaData = faltaObj as Faltas
-      await faltaServices.updateFalta(faltaData.faltaCod, updatedSolicitacao.solicitacaoMensagem)
     }
 
-    // Chama a função de atualização após a solicitação ser aprovada ou recusada
-    onSolicitacaoUpdate(updatedSolicitacao)
-    onClose()
+    onSolicitacaoUpdate(updatedSolicitacao);
+    onClose();
 
     if (status === 'APROVADA') {
       toast.success('Solicitação aprovada com sucesso!', {
         position: "top-right",
         autoClose: 3000,
-      })
+      });
     } else if (status === 'PENDENTE'){
       toast.success('Solicitação editada com sucesso!', {
         position: "top-right",
         autoClose: 3000,
-      })
+      });
     } else {
       toast.success('Solicitação reprovada com sucesso!', {
         position: "top-right",
         autoClose: 3000,
-      })
+      });
     }
-  }
+  };
+
 
   const openDevolutivaModal = () => {
     setShowDevolutivaModal(true)
@@ -151,8 +167,38 @@ const ModalJustificativaFalta: React.FC<AjusteProps> = ({
     <>
       <form className={styles.form_container}>
         <p className={styles.colaborador_label}><span>Colaborador: </span>{solicitacao && solicitacao.usuarioNome}</p>
-        <div>
-          <span className={styles.data_span}>Dia selecionado: </span>{diaSelecionado}
+
+        <div className={styles.data_span}>
+          <label>Período da Solicitação:</label>
+          {solicitacao.solicitacaoDataPeriodo.map((data, i) => (
+            <input
+              key={i}
+              type="date"
+              value={data instanceof Date ? data.toISOString().slice(0, 10) : data}
+              readOnly={usuarioLogadoCod !== solicitacao.usuarioCod || solicitacao.solicitacaoStatus !== 'PENDENTE'}
+              onChange={(e) => {
+                if (usuarioLogadoCod === solicitacao.usuarioCod) {
+                  const novaData = e.target.value;
+                  setSolicitacao(prev => {
+                    const novoPeriodo = [...prev.solicitacaoDataPeriodo];
+                    novoPeriodo[i] = new Date(novaData);
+                    return { ...prev, solicitacaoDataPeriodo: novoPeriodo };
+                  });
+                }
+              }}
+            />
+          ))}
+          {usuarioLogadoCod === solicitacao.usuarioCod && solicitacao.solicitacaoStatus === 'PENDENTE' && (
+            <button
+              type="button"
+              onClick={() => setSolicitacao(prev => ({
+                ...prev,
+                solicitacaoDataPeriodo: [...prev.solicitacaoDataPeriodo, new Date()]
+              }))}
+            >
+              Adicionar Data
+            </button>
+          )}
         </div>
 
         <div className={clsx(styles.FormGroup, {

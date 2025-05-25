@@ -1,8 +1,9 @@
 import * as React from "react";
 import { usePathname } from "next/navigation";
-import { Users, Building, Home, LogOut, MessageSquare, AlarmClockCheck, UserRound, LucideIcon, CalendarDays } from "lucide-react";
-import { LiaBusinessTimeSolid } from "react-icons/lia";
+import { LiaBusinessTimeSolid, LiaUserTimesSolid  } from "react-icons/lia";
+import { Users, Building, Home, LogOut, MessageSquare, AlarmClockCheck, UserRound, LucideIcon, MapPin, CalendarDays, House } from "lucide-react";
 import { IconType } from "react-icons";
+import { TbClockExclamation } from "react-icons/tb";
 
 // Components
 import {
@@ -88,6 +89,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {
           title: "ATIVIDADES",
           items: [
+            { title: "Início", url: "/inicio", icon: House},
             { title: "Solicitações", url: "/solicitacao", icon: MessageSquare },
           ],
         },
@@ -95,6 +97,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           title: "RELATÓRIOS",
           items: [
             { title: "Banco de Horas", url: "/bancoHoras", icon: LiaBusinessTimeSolid },
+            { title: "Ausências", url: "/ausencias", icon: LiaUserTimesSolid },
+            { title: "Falhas em Marcações", url: "/falhas_marcacoes", icon: TbClockExclamation},
           ],
         },
         {
@@ -107,7 +111,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         },
       ],
       navSecondary: [
-        { title: usuario?.usuario_nome || "Usuário", url: "/administrador", icon: UserRound },
+        { title: usuario?.usuario_nome || "Usuário", url: "/perfil", icon: UserRound },
         { title: "Sair", url: "/logout", icon: LogOut },
       ],
     },
@@ -129,7 +133,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {
           title: "RELATÓRIOS",
           items: [
+            { title: "Pontos Diários", url: "/pontosDiarios", icon: MapPin},
             { title: "Banco de Horas", url: "/bancoHoras", icon: LiaBusinessTimeSolid },
+            { title: "Ausências", url: "/ausencias", icon: LiaUserTimesSolid },
+            { title: "Falhas em Marcações", url: "/falhas_marcacoes", icon: TbClockExclamation},
           ],
         },
         {
@@ -141,7 +148,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         },
       ],
       navSecondary: [
-        { title: usuario?.usuario_nome || "Usuário", url: "/gestor", icon: UserRound },
+        { title: usuario?.usuario_nome || "Usuário", url: "/perfil", icon: UserRound },
         { title: "Sair", url: "/logout", icon: LogOut },
       ],
     },
@@ -164,7 +171,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         },
       ],
       navSecondary: [
-        { title: usuario?.usuario_nome || "Usuário", url: "/funcionario", icon: UserRound },
+        { title: usuario?.usuario_nome || "Usuário", url: "/perfil", icon: UserRound },
         { title: "Sair", url: "/logout", icon: LogOut },
       ],
     },
@@ -196,7 +203,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                           style={{
                             backgroundColor: isActive ? "#FFF4D9" : undefined,
                             color: isActive ? "#FFB503" : "black",
-                            fontSize: "18px"
+                            fontSize: item.title === "Falhas em Marcações" ? "16px" : "18px"
                           }}
                         >
                           <Icon className="!w-[1.5rem] !h-[1.5rem]" style={{ color: isActive ? "#FFB503" : "#6b7280" }} />

@@ -11,9 +11,6 @@ import { toast } from "react-toastify"
 
 // Services
 import { solicitacaoServices } from "@/services/solicitacaoServices"
-import { bancoHorasServices } from "@/services/bancoHorasService"
-import { extrasPagasServices } from "@/services/extraPagaService"
-import { horasServices } from "@/services/horasService"
 import { ApiException } from "@/config/apiExceptions"
 import { FileText } from "lucide-react"
 import clsx from "clsx"
@@ -41,11 +38,12 @@ const ModalDecisaoAusenciaMedica: React.FC<ModalBancoHorasProps> = ({
     const [solicitacao, setSolicitacao] = useState<SolicitacaoInterface>(solicitacaoSelected)
     const [mensagem, setMensagem] = useState<string>('');
     
+    // Converte horasSolicitadas para string e extrai horas e minutos
     const horasToString = solicitacao && solicitacao.horasSolicitadas ? solicitacao.horasSolicitadas.toString() : ''
     let [horas, min] = horasToString.split('.')
     const minutos = min ? Math.round(Number('0.' + min) * 60) : 0
     
-    const handleSubmit = async (status: string, toastMensagem: string, tipo: string) => {
+    const handleSubmit = async (status: string, toastMensagem: string) => {
         if(!solicitacao) return 
 
         const updatedSolicitacao: SolicitacaoInterface = {
@@ -54,39 +52,38 @@ const ModalDecisaoAusenciaMedica: React.FC<ModalBancoHorasProps> = ({
             solicitacaoMensagem: mensagem 
         }
 
-        await solicitacaoServices.updateSolicitacao(updatedSolicitacao)
+        const response = await solicitacaoServices.updateSolicitacao(updatedSolicitacao);
+
+        if (response instanceof ApiException) {
+          toast.error('Erro ao atualizar a solicitação.');
+          return;
+        }
 
         toast.success(toastMensagem, {
             position: "top-right",
             autoClose: 2000,
-        })
-        onSolicitacaoUpdate(updatedSolicitacao)
-        onClose()
+        });
+        onSolicitacaoUpdate(updatedSolicitacao);
+        onClose();
     }
 
-    const handleRecusar = async () => {
-        const status = 'REPROVADA'
-        const mensagem = 'Solicitação recusada com sucesso!'
-        const tipo = "Recusa"
-        handleSubmit(status, mensagem, tipo)
+    const handleRecusar = () => {
+        handleSubmit('REPROVADA', 'Solicitação recusada com sucesso!');
     }
 
-    const handleAprovarAusencia= async () => {
-        const status = 'APROVADA'
-        const mensagem = 'Ausência médica aprovada com sucesso!'
-        const tipo = "Ausencia médica"
-        handleSubmit(status, mensagem, tipo)
+    const handleAprovarAusencia= () => {
+        handleSubmit('APROVADA', 'Ausência médica aprovada com sucesso!');
     }
 
     useEffect(() => {
         const solicitacaoSelecionada = { ...solicitacaoSelected };
         setSolicitacao(solicitacaoSelecionada);
-        setMensagem(solicitacao.solicitacaoMensagem || ''); 
+        setMensagem(solicitacaoSelecionada.solicitacaoMensagem || ''); 
     }, [solicitacaoSelected]); 
 
     return(
         <>  
-            <p className={styles.colaborador_label}><span>Colaborador: </span>{solicitacao && solicitacao.usuarioNome}</p>
+            <p className={styles.colaborador_label}><span>Colaborador: </span>{solicitacao?.usuarioNome}</p>
             <form className={styles.form_container}>
                 <div>
                     <span className={styles.data_span}>Dia(s) selecionado(s): </span>{diaSelecionado}
@@ -102,7 +99,7 @@ const ModalDecisaoAusenciaMedica: React.FC<ModalBancoHorasProps> = ({
                             value={mensagem} 
                             readOnly={
                                 usuarioLogadoCod !== solicitacao?.usuarioCod ||
-                                solicitacao.solicitacaoStatus !== 'PENDENTE'
+                                solicitacao?.solicitacaoStatus !== 'PENDENTE'
                             }
                             onChange={(e) => setMensagem(e.target.value)} 
                         />
@@ -122,20 +119,20 @@ const ModalDecisaoAusenciaMedica: React.FC<ModalBancoHorasProps> = ({
                             </button>
                         )}
                     </div>
-                    </div>
-                {solicitacao && usuarioLogadoCod != solicitacao.usuarioCod  && solicitacao.solicitacaoStatus == "PENDENTE" && (
+                </div>
+                {solicitacao && usuarioLogadoCod !== solicitacao.usuarioCod && solicitacao.solicitacaoStatus === "PENDENTE" && (
                     <div className={styles.button_container}>
                         <Button
-                            variant={"outline-danger"}
-                            size={"sm"}
+                            variant="outline-danger"
+                            size="sm"
                             onClick={handleRecusar}
                             className={styles.button}
                         >
                             Recusar
                         </Button>
                         <Button
-                            variant={"outline-success"}
-                            size={"sm"}
+                            variant="outline-success"
+                            size="sm"
                             onClick={handleAprovarAusencia}
                             className={styles.button}
                         >
