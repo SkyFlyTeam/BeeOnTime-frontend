@@ -10,7 +10,7 @@ interface CardResumoMensalProps {
     feriados: Feriado[];
     dataCalendario: Date;
     dadosMes: {
-        ferias?: any[];
+        ferias?: Folga[];
         faltas?: Faltas[];
         folgas?: Folga[];
     } | null | undefined;

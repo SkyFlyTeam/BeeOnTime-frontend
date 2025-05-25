@@ -55,7 +55,6 @@ const ModalDefinirFolgaGeral: React.FC<DefinirFolgaGeral> = ({
         try{
             const usuarios_response = await usuarioServices.getUsariosByEmpresa(empCod);
             const usuarios_sem_admin = (usuarios_response as Usuario[]).filter((usuario) => usuario.nivelAcesso.nivelAcesso_cod !== 0 && usuario.usuario_cod != usuarioCod);
-            console.log("usuario sem admin", usuarios_sem_admin)
             setUsuarios(usuarios_sem_admin);
             setUsuariosFiltrados(usuarios_sem_admin)
             setUsuarioQuantidade(usuarios_sem_admin.length);

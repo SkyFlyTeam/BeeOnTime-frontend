@@ -27,7 +27,7 @@ interface CardCalendarioProps {
     setCurrentDate: React.Dispatch<React.SetStateAction<Date>>;
     currentDate: Date;
     dadosMes?: {
-        ferias?: any[];
+        ferias?: Folga[];
         faltas?: Faltas[];
         folgas?: Folga[];
     } | null;
@@ -101,9 +101,26 @@ export const CardCalendario = ({ funcCalendar, empCod, usuarioCod, feriados, cur
             // Processa férias
             if (Array.isArray(dadosMes.ferias)) {
                 dadosMes.ferias.forEach(ferias => {
-                    if(ferias.usuarioCod){
-                        const dia = createDateFromString(ferias.feriaData);
-                        setEvento(dia, "ferias");
+                    if(ferias.usuarioCod == usuarioCod){
+                        ferias.folgaDataPeriodo.forEach(dataStr => {
+                            const dataFerias = createDateFromString(dataStr);
+                            if (
+                                dataFerias.getMonth() === currentDate.getMonth() &&
+                                dataFerias.getFullYear() === currentDate.getFullYear()
+                            ) {
+                                setEvento(dataFerias, "folga");
+                            }
+                        });
+                    }
+                });
+            }
+
+            // Processa faltas
+            if (Array.isArray(dadosMes.faltas)) {
+                dadosMes.faltas.forEach(falta => {
+                    if(falta.usuarioCod == usuarioCod){
+                        const dia = createDateFromString(falta.faltaDia as string);
+                        setEvento(dia, "ausencia");
                     }
                 });
             }
@@ -169,14 +186,21 @@ export const CardCalendario = ({ funcCalendar, empCod, usuarioCod, feriados, cur
             // Processa férias
             if (Array.isArray(dadosMes.ferias)) {
                 dadosMes.ferias.forEach(ferias => {
-                    const dia = createDateFromString(ferias.feriaData);
-                    const entry = getOrCreateEntry(dia);
-                    const eventoFerias = entry.eventos.find(e => e.tipo === "ferias");
-                    if (eventoFerias) {
-                        eventoFerias.contagem++;
-                    } else {
-                        entry.eventos.push({ tipo: "ferias", contagem: 1 });
-                    }
+                    ferias.folgaDataPeriodo.forEach(dataStr => {
+                        const dataFerias = createDateFromString(dataStr);
+                        if (
+                            dataFerias.getMonth() === currentDate.getMonth() &&
+                            dataFerias.getFullYear() === currentDate.getFullYear()
+                        ) {
+                             const entry = getOrCreateEntry(dataFerias);
+                            const eventoFerias = entry.eventos.find(e => e.tipo === "ferias");
+                            if (eventoFerias) {
+                                eventoFerias.contagem++;
+                            } else {
+                                entry.eventos.push({ tipo: "ferias", contagem: 1 });
+                            }
+                        }
+                    });
                 });
             }
 

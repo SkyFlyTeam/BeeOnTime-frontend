@@ -61,9 +61,13 @@ export default function Calendario() {
                 faltaServices.getFaltasMonthByEmpresa(empresa.empCod, data)
             ]);
 
+            let ferias = (folgas_data as Folga[]).filter((folga) => folga.folgaTipo.tipoFolgaCod == 2)
+            let folgas = (folgas_data as Folga[]).filter((folga) => folga.folgaTipo.tipoFolgaCod == 1)
+
             setDadosMes({
-                folgas: folgas_data as Folga[],
+                folgas: folgas,
                 faltas: faltas_data as Faltas[],
+                ferias: ferias
             });
         } catch (error) {
             console.error("Erro ao buscar dados do mês:", error);
