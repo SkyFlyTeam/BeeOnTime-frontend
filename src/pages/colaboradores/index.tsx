@@ -334,6 +334,11 @@ export default function Colaboradores() {
         if ((usuario[propUsuario] as string).length < filter.length)
           return false;
 
+
+        alert((usuario[propUsuario] as string)
+          .toString()
+          .toLowerCase()
+          .includes(filter))
         return (usuario[propUsuario] as string)
           .toString()
           .toLowerCase()
@@ -364,6 +369,8 @@ export default function Colaboradores() {
           )
       })
     })
+
+    setUsuariosFiltered(newUsuarioFiltered)
   }
 
   const handleBuscaFilterChange = (event: React.ChangeEvent<HTMLInputElement>) => {
