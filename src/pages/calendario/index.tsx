@@ -18,14 +18,14 @@ import { faltaServices } from "@/services/faltaService";
 import { CardResumoMensal } from "./components/ResumoMensal";
 import { CardLegenda } from "./components/CardLegenda";
 import Tab from "@/components/custom/tab";
-import { folgaServices } from "@/services/folgaService";
+import { folgaService } from "@/services/folgaService";
 import Faltas from "@/interfaces/faltas";
-import Folga from "@/interfaces/folga";
+import Folgas from "@/interfaces/folga";
 
 interface DadosMes {
-    ferias?: any[]; 
+    ferias?: Folgas[]; 
     faltas?: Faltas[];
-    folgas?: Folga[];
+    folgas?: Folgas[];
 }
 
 export default function Calendario() {
@@ -57,12 +57,12 @@ export default function Calendario() {
         try {
             setLoading(true);
             const [folgas_data, faltas_data] = await Promise.all([
-                folgaServices.getFolgaMonthByEmpresa(empresa.empCod, data),
+                folgaService.getFolgaMonthByEmpresa(empresa.empCod, data),
                 faltaServices.getFaltasMonthByEmpresa(empresa.empCod, data)
             ]);
 
-            let ferias = (folgas_data as Folga[]).filter((folga) => folga.folgaTipo.tipoFolgaCod == 2)
-            let folgas = (folgas_data as Folga[]).filter((folga) => folga.folgaTipo.tipoFolgaCod == 1)
+            let ferias = (folgas_data as Folgas[]).filter((folga) => folga.folgaTipo.tipoFolgaCod == 2)
+            let folgas = (folgas_data as Folgas[]).filter((folga) => folga.folgaTipo.tipoFolgaCod == 1)
 
             setDadosMes({
                 folgas: folgas,

@@ -1,6 +1,6 @@
 export default interface Folgas {
     folgaCod?: number
-    folgaDataPeriodo: Date[]
+    folgaDataPeriodo: Date[] | string[]
     folgaObservacao: string
     folgaDiasUteis: number
     usuarioCod: number

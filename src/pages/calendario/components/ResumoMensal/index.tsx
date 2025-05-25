@@ -1,6 +1,6 @@
 import Faltas from "@/interfaces/faltas";
 import { Feriado } from "@/interfaces/feriado";
-import Folga from "@/interfaces/folga";
+import Folgas from "@/interfaces/folga";
 import { isSameMonth } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
 
@@ -10,9 +10,9 @@ interface CardResumoMensalProps {
     feriados: Feriado[];
     dataCalendario: Date;
     dadosMes: {
-        ferias?: Folga[];
+        ferias?: Folgas[];
         faltas?: Faltas[];
-        folgas?: Folga[];
+        folgas?: Folgas[];
     } | null | undefined;
 }
 
@@ -72,7 +72,7 @@ export const CardResumoMensal = ({acesso, usuarioCod, feriados, dataCalendario, 
         }else{
             let faltas = dadosMes?.faltas?.filter((falta) => falta.usuarioCod == usuarioCod);
             let folgas = dadosMes?.folgas?.filter((folga) => folga.usuarioCod == usuarioCod);
-            let ferias = dadosMes?.ferias?.filter((ferias) => ferias.usuarioCod == usuarioCod).flatMap(f => f.folgaDataPeriodo);
+            let ferias = dadosMes?.ferias?.filter((ferias) => ferias.usuarioCod == usuarioCod).flatMap(f => f.folgaDataPeriodo as string[]);
             let feriasDias = Array.from(new Set(ferias));
 
             const formatted_dados: Dados = {

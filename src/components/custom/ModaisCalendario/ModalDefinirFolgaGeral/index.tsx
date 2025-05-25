@@ -26,7 +26,7 @@ import { SelectIcon, SelectItemIndicator, SelectTrigger } from "@radix-ui/react-
 import { Setor } from "@/interfaces/setor";
 import { setorServices } from "@/services/setorService";
 import Folga from "@/interfaces/folga";
-import { folgaServices } from "@/services/folgaService";
+import { folgaService } from "@/services/folgaService";
 
 
 
@@ -95,7 +95,7 @@ const ModalDefinirFolgaGeral: React.FC<DefinirFolgaGeral> = ({
             })
 
             for (const folga of mapped_folgas) {
-                await folgaServices.cadastrarFolga(folga);
+                await folgaService.cadastrarFolga(folga);
             }
             
             showToast(true);

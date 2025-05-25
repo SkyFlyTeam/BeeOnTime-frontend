@@ -4,8 +4,8 @@ interface ResumoDiaProps {
     diaSelecionado: Date;
     empCod: number;
     dadosMes: {
-        ferias?: any[];
-        faltas?: Faltas[];
+        ferias?: Folga[];
+        faltas?: Falta[];
         folgas?: Folga[];
     } | null | undefined;
 }
@@ -17,7 +17,7 @@ import { useEffect, useMemo, useState } from "react";
 
 // Styles
 import styles from "../style.module.css";
-import Faltas from "@/interfaces/faltas";
+import Falta from "@/interfaces/faltas";
 import Folga from "@/interfaces/folga";
 import { Usuario } from "@/interfaces/usuario";
 import { usuarioServices } from "@/services/usuarioServices";
@@ -58,17 +58,19 @@ const ModalResumoDia: React.FC<ResumoDiaProps> = ({
 
             if (Array.isArray(dadosMes.ferias)) {
                 colaboradores_ferias = dadosMes.ferias.filter((ferias) => {
-                const feriasDate = createDateFromString(ferias.dia as string); 
-                return isSameDay(feriasDate, diaSelecionado);
-                }).map((ferias) => {
-                    return usuarios?.find((usuario) => usuario.usuario_cod == ferias.usuarioCod);
+                    return ferias.folgaDataPeriodo.some((dataStr) => {
+                        const data = createDateFromString(dataStr as string); 
+                        return isSameDay(data, diaSelecionado); 
+                    });
+                }).map((folga) => {
+                    return usuarios?.find((usuario) => usuario.usuario_cod == folga.usuarioCod);
                 });
             }
 
             if (Array.isArray(dadosMes.folgas)) {
                 colaboradores_folgas = dadosMes.folgas.filter((folga) => {
                     return folga.folgaDataPeriodo.some((dataStr) => {
-                        const data = createDateFromString(dataStr); 
+                        const data = createDateFromString(dataStr as string); 
                         return isSameDay(data, diaSelecionado); 
                     });
                 }).map((folga) => {

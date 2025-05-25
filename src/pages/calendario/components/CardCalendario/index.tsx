@@ -14,7 +14,7 @@ import { addMonths, isBefore, isSameDay, startOfDay, subMonths } from 'date-fns'
 import ModalDefinirFolgaGeral from "@/components/custom/ModaisCalendario/ModalDefinirFolgaGeral";
 import { Feriado } from "@/interfaces/feriado";
 import Faltas from "@/interfaces/faltas";
-import Folga from "@/interfaces/folga";
+import Folgas from "@/interfaces/folga";
 import { createDateFromString } from "@/utils/functions/createDateFromString";
 
 
@@ -27,9 +27,9 @@ interface CardCalendarioProps {
     setCurrentDate: React.Dispatch<React.SetStateAction<Date>>;
     currentDate: Date;
     dadosMes?: {
-        ferias?: Folga[];
+        ferias?: Folgas[];
         faltas?: Faltas[];
-        folgas?: Folga[];
+        folgas?: Folgas[];
     } | null;
 }
 
@@ -76,7 +76,7 @@ export const CardCalendario = ({ funcCalendar, empCod, usuarioCod, feriados, cur
                 dadosMes.folgas.forEach(folga => {
                     if(folga.usuarioCod == usuarioCod){
                         folga.folgaDataPeriodo.forEach(dataStr => {
-                            const dataFolga = createDateFromString(dataStr);
+                            const dataFolga = createDateFromString(dataStr as string);
                             if (
                                 dataFolga.getMonth() === currentDate.getMonth() &&
                                 dataFolga.getFullYear() === currentDate.getFullYear()
@@ -103,7 +103,7 @@ export const CardCalendario = ({ funcCalendar, empCod, usuarioCod, feriados, cur
                 dadosMes.ferias.forEach(ferias => {
                     if(ferias.usuarioCod == usuarioCod){
                         ferias.folgaDataPeriodo.forEach(dataStr => {
-                            const dataFerias = createDateFromString(dataStr);
+                            const dataFerias = createDateFromString(dataStr as string);
                             if (
                                 dataFerias.getMonth() === currentDate.getMonth() &&
                                 dataFerias.getFullYear() === currentDate.getFullYear()
@@ -152,7 +152,7 @@ export const CardCalendario = ({ funcCalendar, empCod, usuarioCod, feriados, cur
             if (Array.isArray(dadosMes.folgas)) {
                 dadosMes.folgas.forEach(folga => {
                     folga.folgaDataPeriodo.forEach(dataStr => {
-                    const dataFolga = createDateFromString(dataStr);
+                    const dataFolga = createDateFromString(dataStr as string);
                     if (
                         dataFolga.getMonth() === currentDate.getMonth() &&
                         dataFolga.getFullYear() === currentDate.getFullYear()
@@ -187,7 +187,7 @@ export const CardCalendario = ({ funcCalendar, empCod, usuarioCod, feriados, cur
             if (Array.isArray(dadosMes.ferias)) {
                 dadosMes.ferias.forEach(ferias => {
                     ferias.folgaDataPeriodo.forEach(dataStr => {
-                        const dataFerias = createDateFromString(dataStr);
+                        const dataFerias = createDateFromString(dataStr as string);
                         if (
                             dataFerias.getMonth() === currentDate.getMonth() &&
                             dataFerias.getFullYear() === currentDate.getFullYear()
