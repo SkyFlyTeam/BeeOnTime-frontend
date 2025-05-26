@@ -335,10 +335,6 @@ export default function Colaboradores() {
           return false;
 
 
-        alert((usuario[propUsuario] as string)
-          .toString()
-          .toLowerCase()
-          .includes(filter))
         return (usuario[propUsuario] as string)
           .toString()
           .toLowerCase()

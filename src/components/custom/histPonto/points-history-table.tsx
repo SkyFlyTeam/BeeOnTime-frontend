@@ -149,7 +149,8 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
 
       setPaginatedEntries(entries.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage));
 
-      
+      if (entries.length < 1)
+        return;
 
       // Cria uma lista isolada de opções únicas
       let fields = Object.assign({}, {
@@ -186,8 +187,6 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
               : "---"
           ))
       setFieldList(fields)
-      setDataMin(fields.horasData[0].toString())
-      setDataMax(fields.horasData[fields.horasData.length - 1].toString())
       // Aplica resultados da lista de opções
 
       // Cria uma lista isolada de booleana de acordo com a lista de opções anterior
@@ -207,6 +206,12 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
       )
       setFilterList(filters);
       // Aplica resultados da lista bool das opções
+
+      // Aplica horas se houver jornada.
+      if (fields.horasData[0])
+        setDataMin(fields.horasData[0].toString())
+      if (fields.horasData[fields.horasData.length - 1])
+        setDataMax(fields.horasData[fields.horasData.length - 1].toString())
     }, [entries]);
 
 
@@ -332,7 +337,7 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
       }
 
       const min = fieldList.horasData[0].toString();
-      const max = fieldList.horasData[fieldList.horasData.length - 1].toString() 
+      const max = fieldList.horasData[fieldList.horasData.length - 1].toString()
       setDataMin(min)
       setDataMax(max)
       applyFilters(newFilterList, min, max)
@@ -378,15 +383,15 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
             <p className="text-base md:text-lg text-black">{horasSemana}h/semana - {horasMes}h/mês</p>
 
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+              <DropdownMenuTrigger asChild disabled={totalPages < 1}>
                 <Button variant="outline" className="bg-white text-base">
                   Filtros <ChevronDown />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 {headersProps
-                  .map((header, idx) => (
-                    <DropdownMenuCheckboxItem
+                  .map((header, idx) => {
+                    return (<DropdownMenuCheckboxItem
                       key={idx}
                       className="capitalize"
                       checked={headersFiltered[idx]}
@@ -395,7 +400,8 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
                       {headers[idx].replace(/([a-z])([A-Z])/g, '$1 $2')}
                       {/* {header.replace(/([a-z])([A-Z])/g, '$1 $2')} */}
                     </DropdownMenuCheckboxItem>
-                  )
+                    )
+                  }
                   )
                 }
               </DropdownMenuContent>
