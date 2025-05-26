@@ -226,7 +226,7 @@ export default function EditarFuncionarioForm({ usuarioInfo, logadoInfo }: Edita
       <form onSubmit={forms.handleSubmit(onSubmit)}>
         <div className="flex flex-row flex-wrap gap-6">
           {/* Status Toggle */}
-          <FormField
+          {/* <FormField
             control={forms.control}
             name="usuario_status"
             render={({ field }) => (
@@ -254,7 +254,7 @@ export default function EditarFuncionarioForm({ usuarioInfo, logadoInfo }: Edita
                 <FormMessage />
               </FormItem>
             )}
-          />
+          /> */}
 
           {/* Name */}
           <FormField
