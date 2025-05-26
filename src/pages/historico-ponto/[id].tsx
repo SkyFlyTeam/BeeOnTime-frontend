@@ -23,6 +23,14 @@ import EditarFuncionarioForm from "@/components/custom/CardEditarFuncionario/edi
 import CardBancoHoras from "./_components/CardBancoHoras/cardBancoHoras";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ToastContainer } from "react-toastify";
+import EspelhoPonto from "@/interfaces/espelhoPonto";
+import { espelhoPontoService } from "@/services/espelhoPontoService";
+
+//Date services
+import { format, subDays } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import ModalPDFViewer from "@/components/custom/PDFVizualizer/ModalPDFViewer";
+import EspelhoPontoCard from "@/components/custom/espelhoPontoCard/espelhoPontoCard";
 
 // Styles
 
@@ -32,6 +40,9 @@ export default function PointsHistoryPage() {
   const [accessLevel, setAccessLevel] = useState<"USER" | "ADM">("USER");
   const [histPontos, setHistPontos] = useState<HistPonto[] | null>(null);
   const [usuarioInfo, setUsuarioInfo] = useState<Usuario | null>(null);
+  const [espelhoPontos, setEspelhoPontos] = useState<EspelhoPonto[] | null>(null);
+  const [selectedEspelhoPonto, setSelectedEspelhoPonto] = useState<EspelhoPonto | null>(null);
+  const [pdfShowModal, setPdfShowModal] = useState(false);
 
   const [usuarioLogado, setUsuarioLogado] = useState<Usuario | null>(null);
 
@@ -60,7 +71,10 @@ export default function PointsHistoryPage() {
     }
   };
 
-
+  const handleOpenEspelhoPontoModal = (espelhoPonto: EspelhoPonto) => {
+    setSelectedEspelhoPonto(espelhoPonto);
+    setPdfShowModal(true);
+  } 
 
   // Função para combinar as horas e os pontos
   const fetchHistPontos = async (usuario_cod: number) => {
@@ -93,7 +107,16 @@ export default function PointsHistoryPage() {
     }
   };
 
-
+    const fetchEspelhosPonto = async (usuario_cod: number) => {
+      try {
+        const espelhoPonto_data = await espelhoPontoService.getAllEspelhoPontoById(usuario_cod) as EspelhoPonto[];
+        setEspelhoPontos(espelhoPonto_data);
+      } catch (error) {
+        console.log("Erro ao recuperar espelhoPonto de id de usuário " + usuario_cod);
+      } finally {
+        setIsLoading(false);
+      }
+    }
 
   useEffect(() => {
     const onMount = async () => {
@@ -104,7 +127,6 @@ export default function PointsHistoryPage() {
 
       const usuario = await getUser();
       setUsuarioLogado(usuario);
-
 
       if (usuario.nivelAcesso.nivelAcesso_cod == 2) {
         fetchHistPontos(usuario.usuario_cod);
@@ -122,14 +144,14 @@ export default function PointsHistoryPage() {
         (usuarioId.nivelAcesso_cod < usuario.nivelAcesso.nivelAcesso_cod)
       )
         return;
-
+      await fetchEspelhosPonto(usuarioId.usuario_cod);
       setAccessLevel("ADM");
       fetchHistPontos(parseInt(id.toString()));
     };
 
     onMount();
-    if (id)
-      setIsLoading(false); // Set loading to false after data is fetched
+    // if (id)
+    //   setIsLoading(false); // Set loading to false after data is fetched
   }, [id]); // Empty dependency array ensures the effect runs once after mount
 
 
@@ -208,11 +230,52 @@ export default function PointsHistoryPage() {
           onEdit={handleEdit}
           accessLevel={accessLevel}
         />
-        <div className="flex w-full justify-end mt-10">
+        <h5 className="text-xl md:text-3xl mt-10 font-semibold mb-4">Espelho de ponto</h5>
+        <div className="flex w-full items-start justify-between">
+            <div className="flex flex-col">
+              <div className="flex flex-col gap-6 overflow-y-auto whitespace-nowrap min-w-[20rem] pb-2 max-h-[10rem]">
+              {espelhoPontos!.map((espelho) => {
+                const dataGeracao = new Date(espelho.espelhoPontoDataGeracao);
+                const dataReal = subDays(dataGeracao, 1); // Subtrai um dia
+                const mesAno = format(dataReal, "M/yy", { locale: ptBR }); // Ex: março/25
+        
+                return (
+                  <EspelhoPontoCard
+                    key={espelho.espelhoPontoCod}
+                    mesAno={espelho.espelhoPontoMes + mesAno.slice(1)} // Capitaliza o mês
+                    status={
+                      espelho.espelhoPontoAssinado
+                        ? "assinado"
+                        : "pendente"
+                    }
+                    onClick={() => {
+                      handleOpenEspelhoPontoModal(espelho);
+                    }}
+                  />
+                );
+              })}
+              </div>
+            </div>
+
           {(usuarioLogado?.nivelAcesso.nivelAcesso_cod == 0 || (usuarioLogado?.nivelAcesso.nivelAcesso_cod == 1 && parseInt(id!.toString()) != usuarioLogado?.usuario_cod)) &&
-            <CardBancoHoras usuarioCod={parseInt(id!.toString())} />
+            <div>
+              <CardBancoHoras usuarioCod={parseInt(id!.toString())} />
+            </div>
           }
         </div>
+              {selectedEspelhoPonto && (
+              <ModalPDFViewer
+                isOpen={pdfShowModal}
+                onClose={() => setPdfShowModal(false)}
+                usuarioCod={selectedEspelhoPonto!.usuarioCod}
+                espelhoPontoCod={selectedEspelhoPonto!.espelhoPontoCod}
+                mes={selectedEspelhoPonto!.espelhoPontoMes}
+                usuarioNome={usuarioInfo!.usuario_nome}
+                isEspelhoPontoAssinado={selectedEspelhoPonto.espelhoPontoAssinado}
+                geracaoData={selectedEspelhoPonto.espelhoPontoDataGeracao}
+                isUser={false}
+              />
+              )}
 
       </div>
     )

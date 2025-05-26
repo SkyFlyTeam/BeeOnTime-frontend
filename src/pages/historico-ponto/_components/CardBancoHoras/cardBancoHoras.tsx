@@ -224,7 +224,7 @@ export const CardBancoHoras = ({ usuarioCod }: CardBancoHorasProps) => {
             <></>
         ) : (
             <>
-                <div className="w-[40rem] flex flex-col items-center justify-center gap-6 bg-white shadow-[4px_4px_19px_0px_rgba(0,0,0,0.05)] rounded-xl p-6">
+                <div className="w-[40rem] h-[10rem] flex flex-col items-center justify-center gap-6 bg-white shadow-[4px_4px_19px_0px_rgba(0,0,0,0.05)] rounded-xl p-6">
                     <h1 className="text-xl font-semibold">Banco de Horas</h1>
                     <div className="flex flex-col gap-2 w-full">
                         <div className="flex justify-between w-full">
