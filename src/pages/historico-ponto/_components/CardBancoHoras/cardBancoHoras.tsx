@@ -203,21 +203,21 @@ export const CardBancoHoras = ({ usuarioCod }: CardBancoHorasProps) => {
         setValorAdicional(0);
     }
 
-      const showToast = (success: boolean) => {
-          success ? showSucessToast() : showErrorToast();
-      }
-    
-      const showSucessToast = () => {
+    const showToast = (success: boolean) => {
+        success ? showSucessToast() : showErrorToast();
+    }
+
+    const showSucessToast = () => {
         toast.success("Banco de horas convertido em extras pagas com sucesso!", {
-          position: "top-center",
+            position: "top-center",
         });
-      };
-    
-      const showErrorToast = () => {
+    };
+
+    const showErrorToast = () => {
         toast.error("Erro ao converter banco de horas em extra paga.", {
-          position: "top-center",
+            position: "top-center",
         });
-      };
+    };
 
     return(
         loading ? (

@@ -1,7 +1,7 @@
 import * as React from "react";
 import { usePathname } from "next/navigation";
 import { LiaBusinessTimeSolid, LiaUserTimesSolid  } from "react-icons/lia";
-import { Users, Building, Home, LogOut, MessageSquare, AlarmClockCheck, UserRound, LucideIcon, MapPin, UserRoundCheckIcon, House, HouseIcon } from "lucide-react";
+import { Users, Building, Home, LogOut, MessageSquare, AlarmClockCheck, UserRound, LucideIcon, MapPin, CalendarDays, House } from "lucide-react";
 import { IconType } from "react-icons";
 import { TbClockExclamation } from "react-icons/tb";
 
@@ -106,6 +106,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           items: [
             { title: "Empresa", url: "/empresa", icon: Building },
             { title: "Colaboradores", url: "/colaboradores", icon: Users },
+            { title: "Calendário", url: "/calendario", icon: CalendarDays },
           ],
         },
       ],
@@ -141,7 +142,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {
           title: "GESTÃO DA EMPRESA",
           items: [
-            { title: "Colaboradores", url: "/colaboradores", icon: Building },          
+            { title: "Colaboradores", url: "/colaboradores", icon: Building },
+            { title: "Calendário", url: "/calendario", icon: CalendarDays },
           ],
         },
       ],
@@ -157,6 +159,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           items: [
             { title: "Início", url: "/inicio", icon: Home },
             { title: "Solicitações", url: "/solicitacao", icon: MessageSquare },
+            { title: "Calendário", url: "/calendario", icon: CalendarDays },
           ],
         },
         {

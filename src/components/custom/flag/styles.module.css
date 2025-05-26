@@ -38,6 +38,11 @@
     color: #D61818;
 }
 
+.feriado{
+    background-color: #D61818;
+    color: white;
+}
+
 @media (max-width: 426px) {
     .badge {
         padding: .3rem .4rem;
