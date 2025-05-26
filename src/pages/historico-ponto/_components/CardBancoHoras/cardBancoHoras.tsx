@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
-import BancoHoras, { HistoricoCompensacao } from "@/interfaces/bancoHoras";
+import { SliderCustom } from "@/components/ui/custom/sliderCustom";
+import { HistoricoCompensacao, BancoHoras } from "@/interfaces/bancoHoras";
 import ExtrasPagas from "@/interfaces/extraPaga";
 import { Usuario } from "@/interfaces/usuario";
 import { getUsuario } from "@/services/authService";
@@ -15,10 +15,10 @@ interface CardBancoHorasProps {
 }
 
 export const CardBancoHoras = ({ usuarioCod }: CardBancoHorasProps) => {
-    
+
     const [bancoHoras, setBancoHoras] = useState<BancoHoras | null>(null);
     const [extrasPagas, seExtrasPagas] = useState<ExtrasPagas | null>(null);
-    
+
     const [loading, setLoading] = useState(true);
     const currentData = new Date();
 
@@ -65,7 +65,7 @@ export const CardBancoHoras = ({ usuarioCod }: CardBancoHorasProps) => {
     useEffect(() => {
         getUser();
     }, [])
-    
+
     useEffect(() => {
         const dataFormatada = currentData.toISOString().split('T')[0];
 
@@ -179,7 +179,7 @@ export const CardBancoHoras = ({ usuarioCod }: CardBancoHorasProps) => {
             showToast(false);
             return;
         }
-        
+
         const histCompesacao = {
             histCompensacaoTotal: valorAdicional,
             tipoCompensacaoCod: {
@@ -201,18 +201,21 @@ export const CardBancoHoras = ({ usuarioCod }: CardBancoHorasProps) => {
         showToast(true);
         setShowChangeBanco(false);
         setValorAdicional(0);
+
+        fetchBancoHoras(dataFormatada, usuarioCod);
+        fetchExtrasPaga(dataFormatada, usuarioCod);
     }
 
       const showToast = (success: boolean) => {
           success ? showSucessToast() : showErrorToast();
       }
-    
+
       const showSucessToast = () => {
         toast.success("Banco de horas convertido em extras pagas com sucesso!", {
           position: "top-center",
         });
       };
-    
+
       const showErrorToast = () => {
         toast.error("Erro ao converter banco de horas em extra paga.", {
           position: "top-center",
@@ -231,7 +234,7 @@ export const CardBancoHoras = ({ usuarioCod }: CardBancoHorasProps) => {
                             <span>Horas extras pagas</span>
                             <span>Banco de horas</span>
                         </div>
-                        <Slider 
+                        <SliderCustom 
                             key={sliderKey}
                             value={[extraSlider]}
                             min={extrasPagas?.extrasPagasSaldoAtual}
@@ -253,7 +256,7 @@ export const CardBancoHoras = ({ usuarioCod }: CardBancoHorasProps) => {
                 <ToastContainer position="top-center" autoClose={3000} />
             </>
         )
-        
+
     )
 }
 
