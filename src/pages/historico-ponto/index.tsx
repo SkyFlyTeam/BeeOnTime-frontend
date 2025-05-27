@@ -20,15 +20,27 @@ import MarcacaoPonto from "@/interfaces/marcacaoPonto";
 import { PointsHistoryTable } from "@/components/custom/histPonto/points-history-table";
 import { Skeleton } from "@/components/ui/skeleton";
 import CardBancoHoras from "./_components/CardBancoHoras/cardBancoHoras";
+import EspelhoPontoCard from "@/components/custom/espelhoPontoCard/espelhoPontoCard";
+import EspelhoPonto from "@/interfaces/espelhoPonto";
+import { espelhoPontoService } from "@/services/espelhoPontoService";
+
+//Date services
+import { format, subDays } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import ModalPDFViewer from "@/components/custom/PDFVizualizer/ModalPDFViewer";
 
 
 export default function PointsHistoryPage() {
   //Simulando o diferente acesso
   const[accessLevel, setAccessLevel] = useState<"USER" | "ADM">("USER")
   const[ histPontos, setHistPontos ] = useState<HistPontos[] | null>(null)
+  const [espelhoPontos, setEspelhoPontos] = useState<EspelhoPonto[] | null>(null)
   const [loading, setLoading] = useState(true); //Estado controle de carregamento
+  const [selectedEspelhoPonto, setSelectedEspelhoPonto] = useState<EspelhoPonto | null>(null);
 
-  const[ usuarioInfo, setUsuarioInfo ] = useState<Usuario | null>(null)
+  const[usuarioInfo, setUsuarioInfo] = useState<Usuario | null>(null)
+
+  const [pdfShowModal, setPdfShowModal] = useState(false);
 
   // const { usuarioCargo, usuarioCod } = useAuth(); 
 
@@ -36,6 +48,11 @@ export default function PointsHistoryPage() {
     // Lógica para editar a entrada (ex.: abrir um modal)
     console.log("Editar entrada:", entry);
   };
+
+  const handleOpenEspelhoPontoModal = (espelhoPonto: EspelhoPonto) => {
+    setSelectedEspelhoPonto(espelhoPonto);
+    setPdfShowModal(true);
+  } 
 
   // Função para combinar as horas e os pontos
   const fetchHistPontos = async (usuario_cod: number) => {
@@ -81,10 +98,20 @@ export default function PointsHistoryPage() {
     }
   };
 
+  const fetchEspelhosPonto = async (usuario_cod: number) => {
+    try {
+      const espelhoPonto_data = await espelhoPontoService.getAllEspelhoPontoById(usuario_cod) as EspelhoPonto[];
+      setEspelhoPontos(espelhoPonto_data);
+    } catch (error) {
+      console.log("Erro ao recuperar espelhoPonto de id de usuário " + usuario_cod);
+    }
+  }
+
   const getUser = async () => {
     try {
       const user = await getUsuario();
       console.log(user);
+      await fetchEspelhosPonto(user.data.usuario_cod);
       return user.data;
     } finally {
       setLoading(false)
@@ -141,6 +168,7 @@ export default function PointsHistoryPage() {
     )
   }
   return (
+    <div>
     <div className="flex flex-col  p-6 md:p-9">
       <h1 className="text-xl md:text-3xl font-semibold mb-4">
         {accessLevel === "USER" ? "Meus Pontos" : "Pontos"}
@@ -151,6 +179,46 @@ export default function PointsHistoryPage() {
         onEdit={handleEdit}
         accessLevel={accessLevel}
       />
+    </div>
+    <div className="flex flex-col  p-6 md:p-9">
+      <h2 className="text-xl md:text-3xl font-semibold mb-4">Espelho de ponto</h2>
+      <div className="flex gap-4 overflow-x-auto whitespace-nowrap pb-2 min-h-[7rem]">
+      {espelhoPontos!.map((espelho) => {
+        const dataGeracao = new Date(espelho.espelhoPontoDataGeracao);
+        const dataReal = subDays(dataGeracao, 1); // Subtrai um dia
+        const mesAno = format(dataReal, "M/yy", { locale: ptBR }); // Ex: março/25
+
+        return (
+          <EspelhoPontoCard
+            key={espelho.espelhoPontoCod}
+            mesAno={espelho.espelhoPontoMes + mesAno.slice(1)} // Capitaliza o mês
+            status={
+              espelho.espelhoPontoAssinado
+                ? "assinado"
+                : "pendente"
+            }
+            onClick={() => {
+              handleOpenEspelhoPontoModal(espelho);
+            }}
+          />
+        );
+      })}
+      </div>
+    </div>
+
+    {selectedEspelhoPonto && (
+    <ModalPDFViewer
+      isOpen={pdfShowModal}
+      onClose={() => setPdfShowModal(false)}
+      usuarioCod={selectedEspelhoPonto!.usuarioCod}
+      espelhoPontoCod={selectedEspelhoPonto!.espelhoPontoCod}
+      mes={selectedEspelhoPonto!.espelhoPontoMes}
+      usuarioNome={usuarioInfo!.usuario_nome}
+      isEspelhoPontoAssinado={selectedEspelhoPonto.espelhoPontoAssinado}
+      geracaoData={selectedEspelhoPonto.espelhoPontoDataGeracao}
+      isUser={true}
+    />
+    )}
     </div>
   );
 }
