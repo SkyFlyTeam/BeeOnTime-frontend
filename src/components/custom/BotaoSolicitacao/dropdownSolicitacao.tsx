@@ -39,7 +39,7 @@ export default function BotaoDropdownSolicitacao({
           )}
         </DropdownMenuTrigger>
         <DropdownMenuContent className="bg-white border border-gray-200 mr-[3rem] w-full">
-        {['Férias', 'Hora extra', 'Ausência médica'].map((tipo) => {
+        {['Férias', 'Hora extra', 'Ausência médica', 'Folga'].map((tipo) => {
           const isFerias = tipo === 'Férias';
           const desabilitarFerias = isFerias && (!isContratadoMaisDeUmAno || numeroSolicitacoesFeriasAbertas >= 1);
 

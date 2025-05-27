@@ -8,6 +8,8 @@ import ModalDecisaoAusenciaMedica from '@/components/custom/modalSolicitacao/mod
 import ModalSolictarAusenciaMedica from '@/components/custom/modalSolicitacao/modalAusenciaMedica/modalSolicitarHoraExtra'
 import ModalFerias from '@/components/custom/modalSolicitacao/modalFerias'
 import ModalFeriasGestor from '@/components/custom/modalSolicitacao/modalFerias/modalGestor'
+import ModalSolicitarFolga from '@/components/custom/modalSolicitacao/modalFolga/modalSolicitarFolga'
+import ModalDecidirFolga from '@/components/custom/modalSolicitacao/modalFolga/modalDecidirFolga'
 
 interface ModalChildrenProps {
   solicitacao: SolicitacaoInterface
@@ -61,6 +63,28 @@ export function renderModalChildren({
       ) : (
         <ModalFerias onClose={onClose} isEdicao={true}/>
       );
+
+    case 3:
+        if (solicitacao.solicitacaoStatus === 'PENDENTE' && usuarioLogadoCod === solicitacao.usuarioCod) {
+          return (
+            <ModalSolicitarFolga
+              solicitacao={solicitacao}
+              usuarioCod={usuarioLogadoCod}
+              cargaHoraria={cargaHoraria ? cargaHoraria : 0}
+              onClose={onClose}
+              onSolicitacaoUpdate={onSolicitacaoUpdate}
+            />
+          )
+        } else {
+          return(
+            <ModalDecidirFolga
+              solicitacaoSelected={solicitacao}
+              onSolicitacaoUpdate={onSolicitacaoUpdate}
+              onClose={onClose}
+              usuarioLogadoCod={usuarioLogadoCod}
+            />
+          )
+        }
     
     case 4:
       return (

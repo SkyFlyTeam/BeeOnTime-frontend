@@ -27,6 +27,7 @@ import SolicitacaoCardSkeleton from './SolicitacaoCard/cardSkeleton'
 import ModalSolictarHoraExtra from '@/components/custom/modalSolicitacao/modalAusenciaMedica/modalSolicitarHoraExtra'
 import ModalSolictarAusenciaMedica from '@/components/custom/modalSolicitacao/modalAusenciaMedica/modalSolicitarHoraExtra'
 import ModalFerias from '@/components/custom/modalSolicitacao/modalFerias'
+import ModalSolicitarFolga from '@/components/custom/modalSolicitacao/modalFolga/modalSolicitarFolga'
 
 interface SolicitacoesState {
   all: SolicitacaoInterface[];
@@ -321,6 +322,12 @@ const Solicitacao = () => {
         cargaHoraria={cargaHoraria ? cargaHoraria : 0}
         onClose={() => setModalAberto(null)}
         onSolicitacaoUpdate={handleSolicitacaoUpdate}
+      />
+    ),
+    'Folga': (
+      <ModalSolicitarFolga 
+        usuarioCod={usuarioCod} 
+        cargaHoraria={cargaHoraria ? cargaHoraria : 0}      
       />
     )
   };
