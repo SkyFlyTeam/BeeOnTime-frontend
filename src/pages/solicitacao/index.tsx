@@ -257,6 +257,7 @@ const Solicitacao = () => {
     })
 
     paginateData()
+    setModalAberto(null);
     await fetchSolicitacoes(usuarioCargo, usuarioCod, nivelAcessoCod, setorCod);
   }
 
@@ -303,6 +304,7 @@ const Solicitacao = () => {
     'Férias': (
       <ModalFerias 
         onClose = {() => setModalAberto(null)}
+        onSolicitacaoUpdate={handleSolicitacaoUpdate}
       />
     ),
     'Hora extra': (
@@ -325,32 +327,32 @@ const Solicitacao = () => {
 
 
 
-  useEffect(() => {
-    const initialize = async () => {
-      try {
-        const response = await getUsuario();
-        if (!response || !response.data) {
-          console.error('Usuário não encontrado.');
-          return;
+      useEffect(() => {
+      const initialize = async () => {
+        try {
+          const response = await getUsuario();
+          if (!response || !response.data) {
+            console.error('Usuário não encontrado.');
+            return;
+          }
+
+          const { usuario_cod, usuario_cargo, usuario_dataContratacao, nivelAcesso_cod, setorCod, usuario_cargaHoraria } = response.data
+          setUsuarioCod(usuario_cod)
+          setUsuarioCargo(usuario_cargo)
+          setUsuarioDataContratacao(usuario_dataContratacao)
+          setNivelAcessoCod(nivelAcesso_cod)
+          setSetorCod(setorCod)
+          setCargaHoraria(usuario_cargaHoraria)
+
+          await fetchSolicitacoes(usuario_cargo, usuario_cod, nivelAcesso_cod, setorCod);
+        } catch (error) {
+          console.error('Erro ao obter usuário:', error);
         }
-
-        const { usuario_cod, usuario_cargo, usuario_dataContratacao, nivelAcesso_cod, setorCod, usuario_cargaHoraria } = response.data
-        setUsuarioCod(usuario_cod)
-        setUsuarioCargo(usuario_cargo)
-        setUsuarioDataContratacao(usuario_dataContratacao)
-        setNivelAcessoCod(nivelAcesso_cod)
-        setSetorCod(setorCod)
-        setCargaHoraria(usuario_cargaHoraria)
-
-
-        await fetchSolicitacoes(usuario_cargo, usuario_cod, nivelAcesso_cod, setorCod);
-      } catch (error) {
-        console.error('Erro ao obter usuário:', error);
       }
-    }
 
-    initialize()
-  }, [usuarioCod, usuarioCargo, nivelAcessoCod, setorCod])
+      initialize()
+    }, []); // <<< remove as dependências para evitar loop
+
 
   useEffect(() => {
     paginateData()

@@ -14,9 +14,10 @@ const periodoDict = {"30 Dias": 0, "15 e 15 Dias": 1, "20 e 10 Dias": 2, "10, 15
 
 interface CalendarFeriasProps {
   isEdicao?: boolean;
+  onSolicitacaoUpdate?: (updated: SolicitacaoInterface) => void;
 }
 
-const CalendarFerias: React.FC<CalendarFeriasProps> = ({ isEdicao }) => {
+const CalendarFerias: React.FC<CalendarFeriasProps> = ({ isEdicao, onSolicitacaoUpdate }) => {
   const [userCod, setUserCod] = useState<number>()
   const [selectedPeriodo, setSelectedPeriodo] = useState<string>("30 Dias");
   const [selectedDates, setSelectedDates] = useState<Date[][]>([]);
@@ -306,6 +307,9 @@ const CalendarFerias: React.FC<CalendarFeriasProps> = ({ isEdicao }) => {
         position: "top-right",
         autoClose: 3000,
       });
+      if (!(res instanceof ApiException) && onSolicitacaoUpdate && res) {
+        onSolicitacaoUpdate(res);
+      }
       console.log("Solicitações enviadas:", res);
     } catch (error) {
       console.error("Erro ao enviar solicitações:", error);
