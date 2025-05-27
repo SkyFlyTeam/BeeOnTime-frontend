@@ -1,13 +1,15 @@
 import CalendarFerias from '@/components/custom/CalendarFerias/calendarFerias';
 import styles from './style.module.css';
 import { useState } from 'react';
+import SolicitacaoInterface from '@/interfaces/Solicitacao';
 
 interface ModalFeriasProps {
   onClose: () => void;
   isEdicao?: boolean;
+  onSolicitacaoUpdate?: (updated: SolicitacaoInterface) => void;
 }
 
-const ModalFerias: React.FC<ModalFeriasProps> = ({ onClose, isEdicao }) => {
+const ModalFerias: React.FC<ModalFeriasProps> = ({ onClose, isEdicao, onSolicitacaoUpdate }) => {
   const [selectedPeriodo, setSelectedPeriodo] = useState<string>("30 Dias");
 
   const periodos = ["30 Dias", "15 e 15 Dias", "20 e 10 Dias", "10, 15 e 5 Dias"];
@@ -26,7 +28,7 @@ const ModalFerias: React.FC<ModalFeriasProps> = ({ onClose, isEdicao }) => {
         )}
 
         <div>
-          <CalendarFerias isEdicao={isEdicao}/>
+          <CalendarFerias isEdicao={isEdicao} onSolicitacaoUpdate={onSolicitacaoUpdate}/>
         </div>
       </div>
     </div>
