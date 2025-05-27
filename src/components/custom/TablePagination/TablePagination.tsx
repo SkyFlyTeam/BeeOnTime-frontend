@@ -1,58 +1,59 @@
-import { Button } from  "@/components/ui/button"; // Ajuste conforme o nome do componente de botão do ShadCN
-import { PaginationItem, Pagination, PaginationContent, PaginationPrevious, PaginationNext } from "@/components/ui/pagination";
-import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'; // Ícones de navegação
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { Button } from "@/components/ui/button"; // Caso queira usar botão, mas aqui usamos PaginationLink para páginas
 
-const generatePaginationLinks = (currentPage: number, totalPages: number, onPageChange: (page: number) => void) => {
-  const pages = [];
-  
-  let startPage = Math.max(currentPage - 1, 1);  // A página inicial não pode ser menor que 1
-  let endPage = Math.min(currentPage + 1, totalPages);  // A página final não pode ser maior que o total de páginas
-  
-  // Adiciona as páginas dentro da janela visível
-  for (let i = startPage; i <= endPage; i++) {
-    pages.push(
-      <PaginationItem key={i}>
-        <Button
-          variant="ghost"
-          size="sm"
-          className={`text-black ${i === currentPage ? "font-bold bg-[#FFB503] rounded" : ""}`}
-          onClick={() => onPageChange(i)}
-        >
-          {i}
-        </Button>
-      </PaginationItem>
-    );
-  }
+interface TablePaginationProps {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  showPreviousNext?: boolean;
+}
 
-  return pages;
-};
+const TablePagination = ({ currentPage, totalPages, onPageChange, showPreviousNext = true }: TablePaginationProps) => {
+  // Função para gerar os links das páginas (você pode ajustar janela de páginas se quiser)
+  const generatePaginationLinks = () => {
+    const pages = [];
+    const startPage = Math.max(currentPage - 1, 1);
+    const endPage = Math.min(currentPage + 1, totalPages);
 
-const TablePagination  = ({ currentPage, totalPages, onPageChange, showPreviousNext = true }: any) => {
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(
+        <PaginationItem key={i}>
+          <PaginationLink
+            isActive={i === currentPage}
+            onClick={() => onPageChange(i)}
+          >
+            {i}
+          </PaginationLink>
+        </PaginationItem>
+      );
+    }
+    return pages;
+  };
+
   return (
     <Pagination className="w-fit">
       <PaginationContent>
-        {showPreviousNext && totalPages ? (
+        {showPreviousNext && totalPages > 1 && (
           <PaginationItem>
             <PaginationPrevious
-              className="bg-transparent border-none cursor-pointer"
-              onClick={() => onPageChange(currentPage - 1)}
-              isActive={currentPage > totalPages - 1}  
+              onClick={() => onPageChange(Math.max(currentPage - 1, 1))}
+              className={currentPage === 1 ? "cursor-not-allowed opacity-50" : ""}
+              aria-disabled={currentPage === 1}
             />
           </PaginationItem>
-        ) : null}
+        )}
 
-        {/* Gerar links de paginação */}
-        {generatePaginationLinks(currentPage, totalPages, onPageChange)}
+        {generatePaginationLinks()}
 
-        {showPreviousNext && totalPages ? (
+        {showPreviousNext && totalPages > 1 && (
           <PaginationItem>
             <PaginationNext
-              className="bg-transparent border-none cursor-pointer"
-              onClick={() => onPageChange(currentPage + 1)}
-              isActive={currentPage - 1 < 1} 
+              onClick={() => onPageChange(Math.min(currentPage + 1, totalPages))}
+              className={currentPage === totalPages ? "cursor-not-allowed opacity-50" : ""}
+              aria-disabled={currentPage === totalPages}
             />
           </PaginationItem>
-        ) : null}
+        )}
       </PaginationContent>
     </Pagination>
   );
