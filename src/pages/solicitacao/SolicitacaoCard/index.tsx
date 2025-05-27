@@ -44,28 +44,41 @@ const SolicitacaoCard = ({
   usuarioLogadoCod,
   onDelete, // Adicionando função onDelete
 }: SolicitacaoCard) => {
+
+  // antes do return do seu componente:
+  const datas = Array.isArray(solicitacao.solicitacaoDataPeriodo)
+    ? solicitacao.solicitacaoDataPeriodo
+    : []
+
+  const formatado = datas.map(item => {
+    const d = item instanceof Date ? item : new Date(item)
+    return d.toLocaleDateString('pt-BR')
+  })
+
   const dataFormatada =
-    solicitacao && solicitacao.solicitacaoDataPeriodo
-      ? (() => {
-          const [ano, mes, dia] = solicitacao.solicitacaoDataPeriodo.split('-')
-          return `${String(dia).padStart(2, '0')}/${String(mes).padStart(2, '0')}/${ano}`
-        })()
-      : ''
+    formatado.length === 0
+      ? ''
+      : formatado.length === 1
+      ? formatado[0]
+      : `${formatado[0]} – ${formatado[formatado.length - 1]}`
+
+
 
   const isOwnSolicitacao = solicitacao && solicitacao.usuarioCod === usuarioLogadoCod
 
   const handleDelete = async (idToDelete: number) => {
     try {
-      const deleted = await solicitacaoServices.deleteSolicitacao(idToDelete)
-
+      const deleted = await solicitacaoServices.deleteSolicitacao(idToDelete);
+  
       if (!(deleted instanceof ApiException)) {
-        // Chama a função passada como prop para atualizar o estado na página principal
-        onDelete(idToDelete)
+        // Chama a função onDelete para remover a solicitação na página principal
+        onDelete(idToDelete);
       }
     } catch (error) {
-      console.error('Erro ao excluir a solicitação:', error)
+      console.error('Erro ao excluir a solicitação:', error);
     }
-  }
+  };
+  
 
   const showName = usuarioLogadoCargo !== 'Funcionário' && solicitacao?.usuarioCod !== usuarioLogadoCod
 

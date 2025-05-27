@@ -13,6 +13,7 @@ const accessRoutes = {
         "/ausencias",
         "/falhas",
         "/colaboradores",
+        "/jornada",
         "/solicitacao",
         "/pendencias",
         "/calendario",
@@ -20,7 +21,10 @@ const accessRoutes = {
         "/perfil",
         "/historico-ponto",
         "/Colaboradores",
-        "/notFound"
+        "/notFound",
+        "/ausencias",
+        "/falhas_marcacoes",
+        "/pontosDiarios",
     ],
     GESTOR: [
         "/perfil",
@@ -29,6 +33,7 @@ const accessRoutes = {
         "/ausencias",
         "/falhas",
         "/colaboradores",
+        "/jornada",
         "/solicitacao",
         "/pendencias",
         "/calendario",
@@ -36,7 +41,10 @@ const accessRoutes = {
         "/inicioFuncionario",
         "/historico-ponto",
         "/Colaboradores",
-        "/notFound"
+        "/notFound",
+        "/ausencias",
+        "/falhas_marcacoes",
+        "/pontosDiarios",
     ],
     FUNCIONARIO: [
         "/perfil",
@@ -47,6 +55,7 @@ const accessRoutes = {
         "/pendencias",
         "/inicioFuncionario",
         "/historico-ponto",
+        "/calendario",
         "/notFound"
     ]
 }

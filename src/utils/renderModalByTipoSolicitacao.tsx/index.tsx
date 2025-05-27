@@ -4,6 +4,10 @@ import ModalAjustePonto from '@/components/custom/modalSolicitacao/modalAjustePo
 import ModalDecisaoHoraExtra from '@/components/custom/modalSolicitacao/modalHoraExtra/modalHoraExtra'
 import ModalSolictarHoraExtra from '@/components/custom/modalSolicitacao/modalHoraExtra/modalSolicitarHoraExtra'
 import ModalJustificativaFalta from '@/components/custom/modalSolicitacao/modalJustificativaFalta'
+import ModalDecisaoAusenciaMedica from '@/components/custom/modalSolicitacao/modalAusenciaMedica/modalAusenciaMedica'
+import ModalSolictarAusenciaMedica from '@/components/custom/modalSolicitacao/modalAusenciaMedica/modalSolicitarHoraExtra'
+import ModalFerias from '@/components/custom/modalSolicitacao/modalFerias'
+import ModalFeriasGestor from '@/components/custom/modalSolicitacao/modalFerias/modalGestor'
 
 interface ModalChildrenProps {
   solicitacao: SolicitacaoInterface
@@ -22,13 +26,20 @@ export function renderModalChildren({
   usuarioLogadoCod,
   usuarioCargo,
   nivelAcessoCod,
-  cargaHoraria
+  cargaHoraria,
 }: ModalChildrenProps): React.ReactNode {
 
-  const formatarData = (data: string) => {
-    const [ano, mes, dia] = data.split('-')
-    const dataFormatada = `${dia.padStart(2, '0')}/${mes.padStart(2, '0')}/${ano}`
-    return dataFormatada
+  const formatarData = (datas: Date[] = []): string => {
+    if (datas.length === 0) return ''
+
+    return datas
+      .map(item => {
+        const d = item instanceof Date
+          ? item
+          : new Date(item)
+        return d.toLocaleDateString('pt-BR')
+      })
+      .join(' – ')
   }
 
   switch (solicitacao.tipoSolicitacaoCod.tipoSolicitacaoCod) {
@@ -43,22 +54,39 @@ export function renderModalChildren({
           usuarioCargo={usuarioCargo}
         />
       )
+
+    case 2: 
+      return nivelAcessoCod === 0 || nivelAcessoCod === 1 ? (
+        <ModalFeriasGestor userCod={solicitacao.usuarioCod} onClose={onClose} />
+      ) : (
+        <ModalFerias onClose={onClose} isEdicao={true}/>
+      );
     
     case 4:
       return (
         <ModalJustificativaFalta
-        diaSelecionado={formatarData(solicitacao.solicitacaoDataPeriodo)}
-        solicitacaoSelected={solicitacao}
-        onSolicitacaoUpdate={onSolicitacaoUpdate}
-        onClose={onClose}
-        usuarioLogadoCod={usuarioLogadoCod}
-        usuarioCargo={usuarioCargo}
-      />
+          diaSelecionado={formatarData(solicitacao.solicitacaoDataPeriodo)}
+          solicitacaoSelected={solicitacao}
+          onSolicitacaoUpdate={onSolicitacaoUpdate}
+          onClose={onClose}
+          usuarioLogadoCod={usuarioLogadoCod}
+          usuarioCargo={usuarioCargo}
+        />
       )
 
     case 5:
-      if (solicitacao.solicitacaoStatus !== 'PENDENTE' || nivelAcessoCod === 0 || nivelAcessoCod === 1) {
+      if (solicitacao.solicitacaoStatus === 'PENDENTE' && usuarioLogadoCod === solicitacao.usuarioCod) {
         return (
+          <ModalSolictarHoraExtra 
+            solicitacao={solicitacao}
+            usuarioCod={solicitacao.usuarioCod} 
+            cargaHoraria={cargaHoraria ?? 0}
+            onClose={onClose}
+            onSolicitacaoUpdate={onSolicitacaoUpdate}
+          />
+        )
+      } else {
+        return(
           <ModalDecisaoHoraExtra
             diaSelecionado={formatarData(solicitacao.solicitacaoDataPeriodo)}
             solicitacaoSelected={solicitacao}
@@ -68,18 +96,30 @@ export function renderModalChildren({
             usuarioCargo={usuarioCargo}
           />
         )
-      } else {
-        return(
-          <ModalSolictarHoraExtra 
-            solicitacao={solicitacao}
-            usuarioCod={solicitacao.usuarioCod} 
-            cargaHoraria={cargaHoraria ?? 0}
-            onClose={onClose}
-            onSolicitacaoUpdate={onSolicitacaoUpdate}
-          />
-        )
       }
-      return null
+      case 6:
+        if (solicitacao.solicitacaoStatus === 'PENDENTE' && usuarioLogadoCod === solicitacao.usuarioCod) {
+          return (
+            <ModalSolictarAusenciaMedica
+              solicitacao={solicitacao}
+              usuarioCod={usuarioLogadoCod}
+              cargaHoraria={cargaHoraria ? cargaHoraria : 0}
+              onClose={onClose}
+              onSolicitacaoUpdate={onSolicitacaoUpdate}
+            />
+          )
+        } else {
+          return(
+            <ModalDecisaoAusenciaMedica
+              diaSelecionado={formatarData(solicitacao.solicitacaoDataPeriodo)}
+              solicitacaoSelected={solicitacao}
+              onSolicitacaoUpdate={onSolicitacaoUpdate}
+              onClose={onClose}
+              usuarioLogadoCod={usuarioLogadoCod}
+              usuarioCargo={usuarioCargo}
+            />
+          )
+        }
 
     default:
       return null

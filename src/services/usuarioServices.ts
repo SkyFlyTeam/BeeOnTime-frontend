@@ -1,8 +1,8 @@
 import axios from "axios";
 import { ApiUsuario } from "@/config/apiUsuario";
 import { ApiException } from "../config/apiExceptions";
-import UsuarioInfo from "@/interfaces/usuarioInfo";
-import Jornada from "@/interfaces/usuarioInfo";
+import {Usuario} from "@/interfaces/usuario";
+import {Jornada} from "@/interfaces/jornada";
 
 
 const checkLogin = async (credenciais: any): Promise<any | ApiException> => {
@@ -18,14 +18,13 @@ const checkLogin = async (credenciais: any): Promise<any | ApiException> => {
 
 const cadastrarUsuarioComJornada = async (usuario: any, jornada: any) => {
   try {
-    const dadosCombinados = { ...usuario, ...jornada };
-   
+    const dadosCombinados = { ...usuario, usuario_status: true, ...jornada};
     const response = await ApiUsuario.post(`/usuario/cadastrar`, dadosCombinados, {
       headers: { "Content-Type": "application/json" },
       timeout: 5000,
     });
     console.log("Resposta do backend:", response.data);
-    return response.data as UsuarioInfo;
+    return response.data as Usuario;
   } catch (error: any) {
     if (error.response) {
       console.error("Erro no backend:", error.response.data);
@@ -56,7 +55,19 @@ const getUsuarioById = async (usuario_cod: number) => {
 const getAllUsuarios = async () => {
   try {
     const response = await ApiUsuario.get(`/usuario/usuarios`);
-    return response.data;
+    return response.data as Usuario[];
+  } catch (error) {
+    if (error instanceof Error) {
+      return new ApiException(error.message || "Erro ao consultar a API.");
+    }
+    return new ApiException("Erro desconhecido.");
+  }
+};
+
+const getUsariosByEmpresa = async (empCod: number) => {
+  try {
+    const response = await ApiUsuario.get(`/usuario/empresa/${empCod}`);
+    return response.data as Usuario[];
   } catch (error) {
     if (error instanceof Error) {
       return new ApiException(error.message || "Erro ao consultar a API.");
@@ -89,6 +100,18 @@ const atualizarUsuario = async (usuario: any) => {
   }
 };
 
+const atualizarJornada = async (jornada: any) => {
+  try {
+    const response = await ApiUsuario.put(`/jornada/atualizar`, jornada);
+    return response.data;
+  } catch (error) {
+    if (error instanceof Error) {
+      return new ApiException(error.message || "Erro ao consultar a API.");
+    }
+    return new ApiException("Erro desconhecido.");
+  }
+};
+
 const excluirUsuario = async (id: number) => {
   try {
     const response = await ApiUsuario.request({
@@ -110,8 +133,10 @@ export const usuarioServices = {
   cadastrarUsuarioComJornada,
   getUsuarioById,
   getAllUsuarios,
+  getUsariosByEmpresa,
   obterUsuarioPorId,
   atualizarUsuario,
-  excluirUsuario
+  excluirUsuario,
+  atualizarJornada
 };
   

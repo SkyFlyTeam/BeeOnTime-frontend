@@ -45,7 +45,7 @@ export default function BancoHoras() {
             const data = await relatorioBancoHorasServices.getRelatorioMensalAdmin(date);
             const bancoHorasFiltrado = (data as bancoHorasMensalAdmin[]).filter(banco => 
                 banco.usuarioCod !== usuario?.usuario_cod
-              );
+            );
             setBancoHorasMensal(bancoHorasFiltrado);
             setLoading(false);
         }catch (err) {

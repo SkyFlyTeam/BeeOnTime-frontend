@@ -1,6 +1,4 @@
-// components/custom/modalSolicitacao/modalHoraExtra/SolicitarHoraExtraContent.tsx
-
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import "react-datepicker/dist/react-datepicker.css";
 import { Paperclip } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -12,7 +10,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { pt } from 'date-fns/locale';
 import { pontoServices } from '@/services/pontoServices';
 import MarcacaoPonto from '@/interfaces/marcacaoPonto';
-import SolicitacaoInterface from '@/interfaces/Solicitacao';
+import SolicitacaoInterface, { SolicitacaoParaEnvio } from '@/interfaces/Solicitacao';
 import { ApiException } from '@/config/apiExceptions';
 
 interface SolicitarHoraExtraContentProps {
@@ -23,13 +21,26 @@ interface SolicitarHoraExtraContentProps {
   onSolicitacaoUpdate?: (updated: SolicitacaoInterface) => void;
 }
 
-
 const ModalSolictarHoraExtra = ({ usuarioCod, cargaHoraria, solicitacao, onClose, onSolicitacaoUpdate }: SolicitarHoraExtraContentProps) => {
-  const [startDate, setStartDate] = useState<Date>(new Date());
+  const [selectedDates, setSelectedDates] = useState<Date[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
   const [mensagem, setMensagem] = useState<string>();
   const [horasSolicitadas, setHorasSolicitadas] = useState<number>();
   const [horarioSaidaPrevista, setHorarioSaidaPrevista] = useState<string>();
+  const [file, setFile] = useState<File | null>(null);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const uploaded = e.target.files?.[0];
+    if (uploaded) {
+      setFile(uploaded);
+    }
+  }
+  
+  const abrirSeletorArquivo = () => {
+    fileInputRef.current?.click();
+  };
 
   const fetchPontoAtual = async () => {
     const today = new Date();
@@ -55,95 +66,107 @@ const ModalSolictarHoraExtra = ({ usuarioCod, cargaHoraria, solicitacao, onClose
 
   useEffect(() => {
     if (solicitacao && !isInitialized) {
-      const [ano, mes, dia] = solicitacao.solicitacaoDataPeriodo.split('-').map(Number);
-      const data = new Date(ano, mes - 1, dia);
-      setStartDate(data);
+      const datas = Array.isArray(solicitacao.solicitacaoDataPeriodo)
+        ? solicitacao.solicitacaoDataPeriodo.map(d => new Date(d))
+        : [new Date()];
+      setSelectedDates(datas);
       setMensagem(solicitacao.solicitacaoMensagem);
       setHorasSolicitadas(solicitacao.horasSolicitadas || 0);
-      setIsInitialized(true)
+      setIsInitialized(true);
     } else if (!solicitacao && !isInitialized) {
       fetchPontoAtual();
       setIsInitialized(true);
     }
   }, [solicitacao, isInitialized]);
-  
+
+  // Função que aceita tanto Date quanto Date[]
+  const toggleDate = (dateOrDates: Date | Date[]) => {
+    if (Array.isArray(dateOrDates)) {
+      setSelectedDates(dateOrDates);
+    } else {
+      setSelectedDates(prev => {
+        const exists = prev.some(d => d.toDateString() === dateOrDates.toDateString());
+        if (exists) {
+          return prev.filter(d => d.toDateString() !== dateOrDates.toDateString());
+        } else {
+          return [...prev, dateOrDates];
+        }
+      });
+    }
+  };
 
   const handleSubmit = async () => {
     try {
       const agora = new Date();
       const horaAtual = `${agora.getHours()}:${agora.getMinutes()}`;
-  
+
       const toMinutes = (h: string): number => {
         const [hr, min] = h.split(':').map(Number);
         return hr * 60 + min;
       };
-  
+
       const hoje = new Date();
-      const ehHoje = 
-        startDate.getDate() === hoje.getDate() &&
-        startDate.getMonth() === hoje.getMonth() &&
-        startDate.getFullYear() === hoje.getFullYear();
-  
+      const ehHoje = selectedDates.some(d =>
+        d.getDate() === hoje.getDate() &&
+        d.getMonth() === hoje.getMonth() &&
+        d.getFullYear() === hoje.getFullYear()
+      );
+
       if (ehHoje && (toMinutes(horarioSaidaPrevista || '00:00') - toMinutes(horaAtual)) < 120) {
         toast.error('A solicitação de hora extra deve ter uma diferença de pelo menos 2 horas!');
         return;
       }
-  
+
       if (!mensagem) {
         toast.error('Justifique sua hora extra!');
         return;
       }
-  
-      const solicitacaoJson = {
+
+      const solicitacaoJson: SolicitacaoParaEnvio = {
         solicitacaoMensagem: mensagem,
         usuarioCod,
         horasSolicitadas,
-        solicitacaoDataPeriodo: format(startDate, 'yyyy-MM-dd'),
+        solicitacaoDataPeriodo: selectedDates.map(d => d.toISOString().slice(0, 10)),
         tipoSolicitacaoCod: { tipoSolicitacaoCod: 5 }
       };
-  
+
       const formData = new FormData();
       formData.append("solicitacaoJson", JSON.stringify(solicitacaoJson));
-      
+
       if (solicitacao) {
-        const updateJson: SolicitacaoInterface = {
+        const updateJson: SolicitacaoParaEnvio = {
           ...solicitacao,
           solicitacaoMensagem: mensagem,
           horasSolicitadas: horasSolicitadas ?? 0,
-          solicitacaoDataPeriodo: format(startDate, 'yyyy-MM-dd'),
+          solicitacaoDataPeriodo: selectedDates.map(d => d.toISOString().slice(0, 10)),
           tipoSolicitacaoCod: { tipoSolicitacaoCod: 5, tipoSolicitacaoNome: 'Hora extra' },
           usuarioCod,
         };
-      
-        const updated = await solicitacaoServices.updateSolicitacao(updateJson);
-        
+
+        const updated = await solicitacaoServices.updateSolicitacao(updateJson as any);
+
         toast.success('Solicitação atualizada com sucesso!');
-        
+
         onClose?.();
-      
+
         if (!(updated instanceof ApiException) && onSolicitacaoUpdate) {
           onSolicitacaoUpdate(updated);
         }
-        
-      
       } else {
         const created = await solicitacaoServices.createSolicitacao(formData);
         toast.success('Solicitação enviada com sucesso!');
-      
+
         onClose?.();
-      
+
         if (!(created instanceof ApiException) && onSolicitacaoUpdate) {
           onSolicitacaoUpdate(created);
         }
-        
       }
-      
-  
+
     } catch (error) {
       toast.error('Erro ao enviar solicitação!');
     }
   };
-  
 
   return (
     <>
@@ -153,12 +176,10 @@ const ModalSolictarHoraExtra = ({ usuarioCod, cargaHoraria, solicitacao, onClose
       <div className={styles.calendar_container}>
         <Calendar
           locale={pt}
-          mode="single"
-          selected={startDate}
+          mode="multiple"
+          selected={selectedDates}
           onSelect={(date) => {
-            if (date) {
-              setStartDate(date);
-            }
+            if (date) toggleDate(date);
           }}
           className="rounded-md border"
         />
@@ -183,8 +204,18 @@ const ModalSolictarHoraExtra = ({ usuarioCod, cargaHoraria, solicitacao, onClose
               value={mensagem}
               onChange={(e) => setMensagem(e.target.value)}
             />
-            <input type="file" style={{ display: 'none' }} />
-            <Paperclip strokeWidth={1} className={styles.anexo_icon} />
+            {/* Upload de arquivo comentado */}
+            {/* <input
+              type='file'
+              ref={fileInputRef}
+              onChange={handleFile}
+              style={{ display: 'none' }}
+            />
+            <Paperclip
+              strokeWidth={1}
+              className={styles.anexo_icon}
+              onClick={abrirSeletorArquivo}
+            /> */}
           </div>
         </div>
       </div>

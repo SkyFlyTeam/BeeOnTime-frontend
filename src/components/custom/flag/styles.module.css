@@ -23,9 +23,24 @@
     color: #66b98a;
 }
 
+.presente {
+    background-color: #A4FF9F;
+    color: #2A7926;
+}
+
 .ausencia {
-    background-color: #b4c8fb;
-    color: #6d7ca7;
+    background-color: #FFAAAA;
+    color: #D61818;
+}
+
+.ausencia_medica {
+    background-color: #FFAAAA;
+    color: #D61818;
+}
+
+.feriado{
+    background-color: #D61818;
+    color: white;
 }
 
 @media (max-width: 426px) {
