@@ -131,8 +131,8 @@ const ModalDefinirFeriado: React.FC<DefinirFeriadoProps> = ({
                 return mapped_feriado
             })
             const feriados_response = await feriadoServices.cadastrarFeriados(mapped_feriados);
-            showToast(true);
             onClose();
+            showToast(true);
         }catch (err) {
            console.error("Erro ao salvar feriados.");
             showToast(false);
