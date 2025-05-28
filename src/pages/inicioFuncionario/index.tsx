@@ -15,6 +15,7 @@ import HistPontos from '@/interfaces/histPonto';
 import { Skeleton } from '@/components/ui/skeleton';
 import CardHorasTrabalhadas from './_components/cardHorasTrabalhadas/cardHorasTrabalhadas';
 import CardFeriado from './_components/cardFeriado/cardFeriado';
+import CardHistPonto from './_components/cardHistPonto/cardHistPonto';
 
 export default function InicioFuncionario() {
     const [nome, setNome] = useState("José");
@@ -71,13 +72,35 @@ export default function InicioFuncionario() {
 
             </div>
             <div className='flex mt-8 flex-wrap flex-row gap-8'>
-                <CardHorasTrabalhadas usuarioInfo={usuarioInfo} histPontos={histPontos!} />
-                {/* <TimeClock /> */}
+                <div className='flex mt-8 flex-wrap flex-col gap-8'>
+                    <CardHorasTrabalhadas 
+                        usuarioInfo={usuarioInfo} histPontos={histPontos!} />
+                    {/* <TimeClock /> */}
+                    <CardFeriado />
+                </div>
+                <div className='flex mt-8 flex-wrap gap-8'> {/* w-[600px] min-w-fit max-[565px]:w-[90%] */}
+                    <CardHistPonto className="w-[600px] min-w-fit"
+                        lastPointsFirst={histPontos ?
+                            (
+                                histPontos.length - 1 > 0 ? (
+                                    histPontos[histPontos.length - 1] ?
+                                        histPontos[histPontos.length - 1]
+                                        : null)
+                                    : null)
+                            : null
+                        }
+                        lastPointsSecond={histPontos ?
+                            (
+                                histPontos.length - 2 > 0 ? (
+                                    histPontos[histPontos.length - 2] ?
+                                        histPontos[histPontos.length - 2]
+                                        : null)
+                                    : null)
+                            : null
+                        }
+                    />
+                </div>
             </div>
-            <div className='flex mt-8 flex-wrap flex-row gap-8'>
-                <CardFeriado />
-            </div>
-            
         </div>
     );
 }
