@@ -27,6 +27,7 @@ import SolicitacaoCardSkeleton from './SolicitacaoCard/cardSkeleton'
 import ModalSolictarHoraExtra from '@/components/custom/modalSolicitacao/modalAusenciaMedica/modalSolicitarHoraExtra'
 import ModalSolictarAusenciaMedica from '@/components/custom/modalSolicitacao/modalAusenciaMedica/modalSolicitarHoraExtra'
 import ModalFerias from '@/components/custom/modalSolicitacao/modalFerias'
+import SolicitarFolgaModal from '@/components/custom/modalSolicitacao/modalFolga/modalSolicitarFolga'
 
 interface SolicitacoesState {
   all: SolicitacaoInterface[];
@@ -301,6 +302,12 @@ const Solicitacao = () => {
   // Novo mapeamento de Modal para renderização automática
   {/* ========= Modais de solicitações ========= */}
   const modaisMapeados: { [key: string]: JSX.Element } = {
+    'Folga': (
+      <SolicitarFolgaModal
+        usuarioLogadoCod={usuarioCod}
+        onClose={() => setModalAberto(null)}
+      />
+    ),
     'Férias': (
       <ModalFerias 
         onClose = {() => setModalAberto(null)}
