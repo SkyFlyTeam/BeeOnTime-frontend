@@ -68,7 +68,7 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
     const [dataMax, setDataMax] = useState<string>("");
 
     const [currentPage, setCurrentPage] = useState(1);
-    const rowsPerPage = 10; // Altere se quiser mais ou menos por página
+    const rowsPerPage = 2; // Altere se quiser mais ou menos por página
 
 
 
@@ -130,6 +130,11 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
       "horasFaltantes",
       "horasNoturnas"
     ];
+
+
+    useEffect(() => {
+      setPaginatedEntries(entriesFiltered.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage));
+    }, [currentPage])
 
     useEffect(() => {
       // Fetch faltas when the component mounts or entries change
@@ -308,7 +313,7 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
       })
 
       setEntriesFiltered(newEntriesFiltered)
-      setTotalPages(Math.ceil(newEntriesFiltered.length / rowsPerPage));
+      alert(JSON.stringify(newEntriesFiltered.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage)))
       setPaginatedEntries(newEntriesFiltered.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage));
     }
 
