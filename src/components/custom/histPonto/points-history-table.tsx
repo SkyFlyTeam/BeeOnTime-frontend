@@ -24,6 +24,7 @@ import TablePagination from "../TablePagination/TablePagination";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import HistPonto from "@/interfaces/histPonto";
 import { Input } from "@/components/ui/input";
+import Link from "next/link";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -382,6 +383,14 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
           <div className="flex flex-row items-center gap-2 md:gap-4">
             <h1 className="text-base md:text-lg font-bold">Jornada de Trabalho:</h1>
             <p className="text-base md:text-lg text-black">{jornadaFormatada()}</p>
+            {accessLevel == "ADM" ? (
+              <Button asChild>
+                <Link className="text-base md:text-lg" href={"/jornada/" + userInfo.usuario_cod}> Editar
+                  <PencilLine />
+                </Link>
+              </Button>
+              ) : null
+            }
           </div>
           <div className="flex flex-row items-center gap-2 md:gap-4">
             <h1 className="text-base md:text-lg font-bold">Carga horária:</h1>
@@ -658,8 +667,8 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
               {accessLevel === "USER" && (
                 <TableRow className="">
                   <TableCell className="border border-gray-200 text-center font-bold p-3 ">
-                  {headers[6].toUpperCase()}:
-                </TableCell>
+                    {headers[6].toUpperCase()}:
+                  </TableCell>
                   {paginatedEntries.map((entry, idx) => (
                     <TableCell
                       key={idx}

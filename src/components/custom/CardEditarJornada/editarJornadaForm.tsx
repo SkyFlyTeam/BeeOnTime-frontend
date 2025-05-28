@@ -271,14 +271,14 @@ export default function EditarJornadaForm({ usuarioInfo, logadoInfo }: EditarJor
         <>
             <Form {...forms}>
                 <form onSubmit={forms.handleSubmit(onSubmit)}>
-                    <div className="flex flex-row flex-wrap gap-6">
+                    <div className="flex flex-row flex-wrap gap-6 text-base md:text-lg">
                         {/* Horário Flexível */}
                         <FormField
                             control={forms.control}
                             name="jornada_horarioFlexivel"
                             render={({ field }) => (
                                 <FormItem className="space-y-3 mr-24 relative">
-                                    <FormLabel>Horas flexível?</FormLabel>
+                                    <FormLabel className="text-base md:text-lg">Horas flexível?</FormLabel>
                                     <div className="ml-8 absolute top-3  inline">
                                         <FormControl>
                                             <RadioGroup
@@ -290,7 +290,7 @@ export default function EditarJornadaForm({ usuarioInfo, logadoInfo }: EditarJor
                                                     <FormControl>
                                                         <RadioGroupItem value="true" />
                                                     </FormControl>
-                                                    <FormLabel className="font-normal">
+                                                    <FormLabel className="font-normal text-base md:text-lg">
                                                         Sim
                                                     </FormLabel>
                                                 </FormItem>
@@ -298,7 +298,7 @@ export default function EditarJornadaForm({ usuarioInfo, logadoInfo }: EditarJor
                                                     <FormControl>
                                                         <RadioGroupItem value="false" />
                                                     </FormControl>
-                                                    <FormLabel className="font-normal">
+                                                    <FormLabel className="font-normal text-base md:text-lg">
                                                         Não
                                                     </FormLabel>
                                                 </FormItem>
@@ -320,9 +320,9 @@ export default function EditarJornadaForm({ usuarioInfo, logadoInfo }: EditarJor
                                     disabled={horarioFlexivel}
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Entrada</FormLabel>
+                                            <FormLabel className="text-base md:text-lg">Entrada</FormLabel>
                                             <FormControl>
-                                                <Input type="time" className="border p-2 rounded-md bg-white" {...field} />
+                                                <Input type="time" className="border p-2 rounded-md bg-white text-base md:text-lg" {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -335,11 +335,11 @@ export default function EditarJornadaForm({ usuarioInfo, logadoInfo }: EditarJor
                                     name="jornada_horarioAlmoco"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Horário Almoço</FormLabel>
+                                            <FormLabel className="text-base md:text-lg">Horário Almoço</FormLabel>
                                             <FormControl>
                                                 <Input
                                                     type="time"
-                                                    className="border p-2 rounded-md bg-white" {...field} />
+                                                    className="border p-2 rounded-md bg-white text-base md:text-lg" {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -353,9 +353,9 @@ export default function EditarJornadaForm({ usuarioInfo, logadoInfo }: EditarJor
                                     disabled={horarioFlexivel}
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Saída</FormLabel>
+                                            <FormLabel className="text-base md:text-lg">Saída</FormLabel>
                                             <FormControl>
-                                                <Input type="time" className="border p-2 rounded-md bg-white" {...field} />
+                                                <Input type="time" className="border p-2 rounded-md bg-white text-base md:text-lg" {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -373,9 +373,9 @@ export default function EditarJornadaForm({ usuarioInfo, logadoInfo }: EditarJor
                             name="usuario_cargaHoraria"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Carga Horária Diária</FormLabel>
+                                    <FormLabel  className="text-base md:text-lg">Carga Horária Diária</FormLabel>
                                     <FormControl>
-                                        <Input type="number" className="border p-2 rounded-md bg-white w-32"  {...field} onChange={onChange_cargaHoraria(field)} />
+                                        <Input type="number" className="border p-2 rounded-md bg-white w-32 text-base md:text-lg"  {...field} onChange={onChange_cargaHoraria(field)} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -388,7 +388,7 @@ export default function EditarJornadaForm({ usuarioInfo, logadoInfo }: EditarJor
                             name="jornada_diasSemana"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Dias da Semana</FormLabel>
+                                    <FormLabel className="text-base md:text-lg">Dias da Semana</FormLabel>
                                     <ToggleGroup
                                         type="multiple"
                                         value={field.value}
@@ -396,25 +396,25 @@ export default function EditarJornadaForm({ usuarioInfo, logadoInfo }: EditarJor
                                         onValueChange={ToggleOnChange(field)}
                                         className="border pr-1 pl-1 rounded-md bg-white"
                                     >
-                                        <ToggleGroupItem value="0" className="ml-1 mr-1 data-[state=on]:bg-yellow-400 data-[state=on]:text-[#42130F]">
+                                        <ToggleGroupItem value="0" className="ml-1 mr-1 data-[state=on]:bg-yellow-400 data-[state=on]:text-[#42130F] text-base md:text-lg">
                                             Dom
                                         </ToggleGroupItem>
-                                        <ToggleGroupItem value="1" className="mr-1 data-[state=on]:bg-yellow-400 data-[state=on]:text-[#42130F]">
+                                        <ToggleGroupItem value="1" className="mr-1 data-[state=on]:bg-yellow-400 data-[state=on]:text-[#42130F] text-base md:text-lg">
                                             Seg
                                         </ToggleGroupItem>
-                                        <ToggleGroupItem value="2" className="mr-1 data-[state=on]:bg-yellow-400 data-[state=on]:text-[#42130F]">
+                                        <ToggleGroupItem value="2" className="mr-1 data-[state=on]:bg-yellow-400 data-[state=on]:text-[#42130F] text-base md:text-lg">
                                             Ter
                                         </ToggleGroupItem>
-                                        <ToggleGroupItem value="3" className="mr-1 data-[state=on]:bg-yellow-400 data-[state=on]:text-[#42130F]">
+                                        <ToggleGroupItem value="3" className="mr-1 data-[state=on]:bg-yellow-400 data-[state=on]:text-[#42130F] text-base md:text-lg">
                                             Qua
                                         </ToggleGroupItem>
-                                        <ToggleGroupItem value="4" className="mr-1 data-[state=on]:bg-yellow-400 data-[state=on]:text-[#42130F]">
+                                        <ToggleGroupItem value="4" className="mr-1 data-[state=on]:bg-yellow-400 data-[state=on]:text-[#42130F] text-base md:text-lg">
                                             Qui
                                         </ToggleGroupItem>
-                                        <ToggleGroupItem value="5" className="mr-1 data-[state=on]:bg-yellow-400 data-[state=on]:text-[#42130F]">
+                                        <ToggleGroupItem value="5" className="mr-1 data-[state=on]:bg-yellow-400 data-[state=on]:text-[#42130F] text-base md:text-lg">
                                             Sex
                                         </ToggleGroupItem>
-                                        <ToggleGroupItem value="6" className="mr-1 data-[state=on]:bg-yellow-400 data-[state=on]:text-[#42130F]">
+                                        <ToggleGroupItem value="6" className="mr-1 data-[state=on]:bg-yellow-400 data-[state=on]:text-[#42130F] text-base md:text-lg">
                                             Sab
                                         </ToggleGroupItem>
                                     </ToggleGroup>
