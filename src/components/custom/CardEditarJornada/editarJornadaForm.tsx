@@ -427,7 +427,7 @@ export default function EditarJornadaForm({ usuarioInfo, logadoInfo }: EditarJor
                         <Button
                             onClick={(e) => setIsSaving(true)}
                             isSubmitButton={true}
-                            className={"hover:bg-yellow-400 text-[#42130F] " +
+                            className={"text-base md:text-lg hover:bg-yellow-400 text-[#42130F] " +
                                 (isSaveDisabled() ? "bg-[#CBD5E1] " : "bg-[#FFB503] ") +
                                 (isFormsJornadaDefault() ? "invisible" : "visible")
                             }
