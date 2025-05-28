@@ -88,7 +88,7 @@ export default function Colaboradores() {
 
   const [columnFiltered, setColumnFiltered] = useState<boolean[]>([]);
   const columnProps = ["usuario_nome", "usuario_cargo", "setor", "usuario_cargaHoraria", "usuarioTipoContratacao", "nivelAcesso"]
-  const columnHeaders = ["Nome", "CARGO", "SETOR", "CARGA HORÁRIA DIÁRIA", "CONTRATO", "NÍVEL ACESSO", "AÇÕES"]
+  const columnHeaders = ["Nome", "Cargo", "Setor", "Carga Horária Diária", "Contrato", "Nível Acesso", "Ações"]
 
 
   const router = useRouter();
@@ -272,23 +272,7 @@ export default function Colaboradores() {
     setColumnFiltered(newColumnFilter)
   }
 
-  const handleFieldFilterChange = (idx: number) => {
-    let newFieldsFilter = Object.assign([] as Boolean[], fieldsFiltered)
-    newFieldsFilter[idx] = !fieldsFiltered[idx]
 
-    setFieldsFiltered(newFieldsFilter)
-
-    if (!newFieldsFilter[idx])
-      return;
-
-    let newFilterList = Object.assign({}, filterList)
-    const field = columnProps[idx + 1] as keyof typeof newFilterList;
-    newFilterList[field].forEach((bool, idx) =>
-      newFilterList[field][idx] = true
-    )
-
-    setFilterList(newFilterList)
-  }
 
 
   const checkField = (prop: string, usuario: any, filter: string) => {
@@ -326,7 +310,7 @@ export default function Colaboradores() {
             .toLowerCase()
             .includes(filter)
 
-        if (props == "setor" && thisUser?.setor.setorCod == 0)
+        if (props == "setor" && thisUser?.nivelAcesso.nivelAcesso_cod == 0)
           return (usuario[propUsuario] as Setor).setorNome
             .toLowerCase()
             .includes(filter)
@@ -341,7 +325,7 @@ export default function Colaboradores() {
           .includes(filter)
       })
     })
-    
+
     return filtered;
   }
 
@@ -365,6 +349,47 @@ export default function Colaboradores() {
           )
       })
     })
+
+
+
+    setUsuariosFiltered(newUsuarioFiltered)
+  }
+
+  const handleFieldFilterChange = (idx: number) => {
+    let newFieldsFilter = Object.assign([] as Boolean[], fieldsFiltered)
+    newFieldsFilter[idx] = !fieldsFiltered[idx]
+
+    setFieldsFiltered(newFieldsFilter)
+
+    if (newFieldsFilter[idx])
+      return;
+
+    let newFilterList = Object.assign({}, filterList)
+    const field = columnProps[idx + 1] as keyof typeof newFilterList;
+    newFilterList[field].forEach((bool, idx) =>
+      newFilterList[field][idx] = true
+    )
+
+    setFilterList(newFilterList)
+
+
+    let newUsuarioFiltered = applyFilter(filterValue)
+
+    Object.keys(newFilterList).forEach((prop) => {
+      filterList[prop as keyof typeof filterList].forEach((checked, id) => {
+        if (!checked)
+          newUsuarioFiltered = newUsuarioFiltered.filter((usuario) =>
+            checkField(
+              prop,
+              usuario,
+              fieldList[prop as keyof typeof fieldList][id].toString()
+            )
+          )
+      })
+    })
+
+
+    alert(JSON.stringify(newUsuarioFiltered))
 
     setUsuariosFiltered(newUsuarioFiltered)
   }
@@ -409,7 +434,7 @@ export default function Colaboradores() {
             />
 
 
-            <div className="flex items-center gap-4 justify-between py-4">
+            <div className="flex items-center gap-4 justify-between py-4 ml-4">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="bg-white text-base">
@@ -418,7 +443,7 @@ export default function Colaboradores() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   {fieldsHeaders
-                    .map((headers, idx) => !(headers.toLocaleLowerCase() == "setor" && thisUser.nivelAcesso.nivelAcesso_cod != 0) ?(
+                    .map((headers, idx) => !(headers.toLocaleLowerCase() == "setor" && thisUser.nivelAcesso.nivelAcesso_cod != 0) ? (
                       <DropdownMenuCheckboxItem
                         key={idx}
                         className="capitalize"
@@ -501,7 +526,7 @@ export default function Colaboradores() {
                           key={idx}
                           className="border border-gray-200 text-center font-bold text-black text-base p-4"
                         >
-                          {header}
+                          {header.toUpperCase()}
                         </TableHead>
                       )
                   })}
@@ -560,12 +585,12 @@ export default function Colaboradores() {
             <table className="min-w-[900px] w-full border-collapse text-sm text-black">
               <tbody>
                 {[
-                  { label: "NOME", render: (usuario: Usuario) => usuario.usuario_nome },
-                  { label: "CARGO", render: (usuario: Usuario) => usuario.usuario_cargo },
-                  { label: "SETOR", render: (usuario: Usuario) => usuario.setor?.setorNome },
-                  { label: "CARGA HORÁRIA DIÁRIA", render: (usuario: Usuario) => usuario.usuario_cargaHoraria },
-                  { label: "CONTRATO", render: (usuario: Usuario) => usuario.usuarioTipoContratacao },
-                  { label: "NÍVEL ACESSO", render: (usuario: Usuario) => usuario.nivelAcesso?.nivelAcesso_nome },
+                  { label: columnHeaders[0].toUpperCase(), render: (usuario: Usuario) => usuario.usuario_nome },
+                  { label: columnHeaders[1].toUpperCase(), render: (usuario: Usuario) => usuario.usuario_cargo },
+                  { label: columnHeaders[2].toUpperCase(), render: (usuario: Usuario) => usuario.setor?.setorNome },
+                  { label: columnHeaders[3].toUpperCase(), render: (usuario: Usuario) => usuario.usuario_cargaHoraria },
+                  { label: columnHeaders[4].toUpperCase(), render: (usuario: Usuario) => usuario.usuarioTipoContratacao },
+                  { label: columnHeaders[5].toUpperCase(), render: (usuario: Usuario) => usuario.nivelAcesso?.nivelAcesso_nome },
                   {
                     label: "AÇÕES", render: (usuario: Usuario) => (<button onClick={() => handleViewUser(usuario.usuario_cod)}
                       className="bg-[#FFB503] rounded-md p-2 hover:bg-orange-600">

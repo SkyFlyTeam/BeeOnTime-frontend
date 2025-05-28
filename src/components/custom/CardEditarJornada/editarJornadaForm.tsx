@@ -73,28 +73,33 @@ export default function EditarJornadaForm({ usuarioInfo, logadoInfo }: EditarJor
             return false;
 
 
-        if(!defaultValues)
+        if (!defaultValues)
             return false;
 
         const equals = !Object.keys(defaultValues).some((field) => {
-            if( !field.includes("_horario") || field.includes("flex"))
+            if (!field.includes("_horario") || field.includes("flex"))
                 return false;
 
             if ((!defaultValues[field as keyof typeof defaultValues] &&
                 values[field as keyof typeof defaultValues]) ||
                 (defaultValues[field as keyof typeof defaultValues] &&
                     !values[field as keyof typeof defaultValues])
-            ){/* alert("one");*/ return true;}
+            ) {/* alert("one");*/ return true; }
 
+            if(!defaultValues[field as keyof typeof defaultValues] &&
+                    !values[field as keyof typeof defaultValues]
+            ) { return false; }
+            
+                    
             if (defaultValues[field as keyof typeof defaultValues].length < 4 ||
                 values[field as keyof typeof defaultValues].length < 4
-            ){/*alert("dois");*/ return true;}
+            ) {/*alert("dois");*/ return true; }
 
             // alert(defaultValues[field as keyof typeof defaultValues].slice(0, 5) + "\n\n"+ values[field as keyof typeof defaultValues].slice(0, 5))
 
             if (defaultValues[field as keyof typeof defaultValues].slice(0, 5) !=
                 values[field as keyof typeof defaultValues].slice(0, 5)
-            ) {/*alert("três");*/ return true;} 
+            ) {/*alert("três");*/ return true; }
 
             return false;
         })
@@ -157,7 +162,7 @@ export default function EditarJornadaForm({ usuarioInfo, logadoInfo }: EditarJor
     });
 
     useEffect(() => {
-        
+
 
         const onMount = async () => {
             setHorarioFlexivel(usuarioInfo.jornadas.jornada_horarioFlexivel)
@@ -249,9 +254,9 @@ export default function EditarJornadaForm({ usuarioInfo, logadoInfo }: EditarJor
         const carga = parseInt(field.value);
         const entrada = values.jornada_horarioEntrada.split(":")
         const saida = values.jornada_horarioSaida.split(":")
-        entrada.forEach((unit:  any) => unit = parseInt(unit));
-        saida.forEach((unit:  any) => unit = parseInt(unit));
-        
+        entrada.forEach((unit: any) => unit = parseInt(unit));
+        saida.forEach((unit: any) => unit = parseInt(unit));
+
 
 
         return field.onChange;
@@ -324,22 +329,6 @@ export default function EditarJornadaForm({ usuarioInfo, logadoInfo }: EditarJor
                                     )}
                                 />
 
-                                {/* Horario Saida */}
-                                <FormField
-                                    control={forms.control}
-                                    name="jornada_horarioSaida"
-                                    disabled={horarioFlexivel}
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Saída</FormLabel>
-                                            <FormControl>
-                                                <Input type="time" className="border p-2 rounded-md bg-white" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
                                 {/* Horario Almoco */}
                                 <FormField
                                     control={forms.control}
@@ -356,6 +345,24 @@ export default function EditarJornadaForm({ usuarioInfo, logadoInfo }: EditarJor
                                         </FormItem>
                                     )}
                                 />
+
+                                {/* Horario Saida */}
+                                <FormField
+                                    control={forms.control}
+                                    name="jornada_horarioSaida"
+                                    disabled={horarioFlexivel}
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Saída</FormLabel>
+                                            <FormControl>
+                                                <Input type="time" className="border p-2 rounded-md bg-white" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+
                             </>
                         )}
 
@@ -389,25 +396,25 @@ export default function EditarJornadaForm({ usuarioInfo, logadoInfo }: EditarJor
                                         onValueChange={ToggleOnChange(field)}
                                         className="border pr-1 pl-1 rounded-md bg-white"
                                     >
-                                        <ToggleGroupItem value="0" className="ml-1 mr-1">
+                                        <ToggleGroupItem value="0" className="ml-1 mr-1 data-[state=on]:bg-yellow-400 data-[state=on]:text-[#42130F]">
                                             Dom
                                         </ToggleGroupItem>
-                                        <ToggleGroupItem value="1" className="mr-1 data-[state=checked]:bg-[#FFB503]">
+                                        <ToggleGroupItem value="1" className="mr-1 data-[state=on]:bg-yellow-400 data-[state=on]:text-[#42130F]">
                                             Seg
                                         </ToggleGroupItem>
-                                        <ToggleGroupItem value="2" className="mr-1">
+                                        <ToggleGroupItem value="2" className="mr-1 data-[state=on]:bg-yellow-400 data-[state=on]:text-[#42130F]">
                                             Ter
                                         </ToggleGroupItem>
-                                        <ToggleGroupItem value="3" className="mr-1">
+                                        <ToggleGroupItem value="3" className="mr-1 data-[state=on]:bg-yellow-400 data-[state=on]:text-[#42130F]">
                                             Qua
                                         </ToggleGroupItem>
-                                        <ToggleGroupItem value="4" className="mr-1">
+                                        <ToggleGroupItem value="4" className="mr-1 data-[state=on]:bg-yellow-400 data-[state=on]:text-[#42130F]">
                                             Qui
                                         </ToggleGroupItem>
-                                        <ToggleGroupItem value="5" className="mr-1">
+                                        <ToggleGroupItem value="5" className="mr-1 data-[state=on]:bg-yellow-400 data-[state=on]:text-[#42130F]">
                                             Sex
                                         </ToggleGroupItem>
-                                        <ToggleGroupItem value="6" className="mr-1">
+                                        <ToggleGroupItem value="6" className="mr-1 data-[state=on]:bg-yellow-400 data-[state=on]:text-[#42130F]">
                                             Sab
                                         </ToggleGroupItem>
                                     </ToggleGroup>
@@ -420,11 +427,11 @@ export default function EditarJornadaForm({ usuarioInfo, logadoInfo }: EditarJor
                         <Button
                             onClick={(e) => setIsSaving(true)}
                             isSubmitButton={true}
-                            className={"hover:bg-yellow-400 text-white " +
+                            className={"hover:bg-yellow-400 text-[#42130F] " +
                                 (isSaveDisabled() ? "bg-[#CBD5E1] " : "bg-[#FFB503] ") +
                                 (isFormsJornadaDefault() ? "invisible" : "visible")
                             }
-                            disabled={isSaveDisabled() }
+                            disabled={isSaveDisabled()}
                         >
                             {isSaving ? "Salvar" : "Salvar"}
                         </Button>

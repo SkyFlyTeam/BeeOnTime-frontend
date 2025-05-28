@@ -113,13 +113,13 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
     };
 
     const headers = [
-      "DATA",
-      "PONTOS",
-      "HORAS NORMAIS",
-      "HORAS EXTRAS",
-      "HORAS FALTANTES",
-      "ADICIONAL NOTURNO",
-      ...(accessLevel === "USER" ? ["AÇÕES"] : []),
+      "Data",
+      "Pontos",
+      "Horas Normais",
+      "Horas Extras",
+      "Horas Faltantes",
+      "Adicional Noturno",
+      ...(accessLevel === "USER" ? ["Ações"] : []),
     ];
 
     const headersProps = [
@@ -383,7 +383,7 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
             <p className="text-base md:text-lg text-black">{horasSemana}h/semana - {horasMes}h/mês</p>
 
             <DropdownMenu>
-              <DropdownMenuTrigger asChild disabled={totalPages < 1}>
+              <DropdownMenuTrigger asChild disabled={entries ? entries.length < 1 : true}>
                 <Button variant="outline" className="bg-white text-base">
                   Filtros <ChevronDown />
                 </Button>
@@ -460,7 +460,7 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
               <TableRow>
                 {headers.map((header, idx) => (
                   <TableHead key={idx} className="border border-gray-200 text-center font-bold text-black text-base p-4">
-                    {header}
+                    {header.toUpperCase()}
                   </TableHead>
                 ))}
               </TableRow>
@@ -556,7 +556,7 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
             <TableHeader>
               <TableRow>
                 <TableHead className="border border-gray-200 text-center font-bold text-black  p-4">
-                  DATA
+                  {headers[0].toUpperCase()}
                 </TableHead>
 
                 {paginatedEntries.map((entry, index) => (
@@ -574,7 +574,9 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
             </TableHeader>
             <TableBody>
               <TableRow className="">
-                <TableCell className="border border-gray-200 text-center font-bold p-3 ">PONTOS:</TableCell>
+                <TableCell className="border border-gray-200 text-center font-bold p-3 ">
+                  {headers[1].toUpperCase()}:
+                </TableCell>
                 {paginatedEntries.map((entry, idx) => (
                   <TableCell
                     key={idx}
@@ -589,7 +591,9 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
               </TableRow>
 
               <TableRow className="">
-                <TableCell className="border border-gray-200 text-center font-bold p-3 ">HORAS NORMAIS:</TableCell>
+                <TableCell className="border border-gray-200 text-center font-bold p-3 ">
+                  {headers[2].toUpperCase()}:
+                </TableCell>
                 {paginatedEntries.map((entry, idx) => (
                   <TableCell
                     key={idx}
@@ -602,7 +606,9 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
               </TableRow>
 
               <TableRow className="">
-                <TableCell className="border border-gray-200 text-center font-semibold p-3 ">HORAS EXTRAS:</TableCell>
+                <TableCell className="border border-gray-200 text-center font-semibold p-3 ">
+                  {headers[3].toUpperCase()}:
+                </TableCell>
                 {paginatedEntries.map((entry, idx) => (
                   <TableCell
                     key={idx}
@@ -615,7 +621,9 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
               </TableRow>
 
               <TableRow className="">
-                <TableCell className="border border-gray-200 text-center font-semibold p-3 ">HORAS FALTANTES:</TableCell>
+                <TableCell className="border border-gray-200 text-center font-semibold p-3 ">
+                  {headers[4].toUpperCase()}:
+                </TableCell>
                 {paginatedEntries.map((entry, idx) => (
                   <TableCell
                     key={idx}
@@ -628,7 +636,9 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
               </TableRow>
 
               <TableRow className="">
-                <TableCell className="border border-gray-200 text-center font-semibold p-3 ">ADICIONAL NOTURNO:</TableCell>
+                <TableCell className="border border-gray-200 text-center font-semibold p-3 ">
+                  {headers[5].toUpperCase()}:
+                </TableCell>
                 {paginatedEntries.map((entry, idx) => (
                   <TableCell
                     key={idx}
@@ -642,7 +652,9 @@ const PointsHistoryTable = React.forwardRef<HTMLDivElement, PointsHistoryTablePr
 
               {accessLevel === "USER" && (
                 <TableRow className="">
-                  <TableCell className="border border-gray-200 text-center font-bold p-3 ">AÇÕES:</TableCell>
+                  <TableCell className="border border-gray-200 text-center font-bold p-3 ">
+                  {headers[6].toUpperCase()}:
+                </TableCell>
                   {paginatedEntries.map((entry, idx) => (
                     <TableCell
                       key={idx}
