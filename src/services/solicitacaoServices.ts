@@ -134,7 +134,7 @@ const createSolicitacao = async (formData: FormData): Promise<SolicitacaoInterfa
     }
     
     const notificacao: NotificacaoInterface = {
-      alertaMensagem: `A solicitação de ${dataSolicitacao["usuarioNome"]} referente a ${dataSolicitacao["tipoSolicitacaoCod"]["tipoSolicitacaoCod"]} foi ${dataSolicitacao["solicitacaoStatus"]}`,
+      alertaMensagem: `Uma nova solicitação foi criada! Clique aqui para ver a solicitação.`,
       alertaDataCriacao: new Date(),
       tipoAlerta: {tipoAlertaCod: 1},
       alertaSetorDirecionado: 'Todos',

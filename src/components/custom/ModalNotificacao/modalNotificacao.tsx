@@ -4,6 +4,7 @@ import NotificacaoInterface from "@/interfaces/notificacao";
 import { notificacaoServices } from "@/services/notificacaoService";
 import { ApiException } from "@/config/apiExceptions";
 import { getUsuario } from "@/services/authService";
+import { useRouter } from "next/router";
 
 interface NotificationModalProps {
   isOpen: boolean;
@@ -20,6 +21,8 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({ isOpen, on
   const [userCod, setUserCod] = useState<number>()
   const [userCargo, setUserCargo] = useState<string>()
   const [setorNome, setSetorNome] = useState<string>();
+
+  const router = useRouter();
 
   useEffect(() => {
       getUser()
@@ -100,22 +103,21 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({ isOpen, on
     setActiveTab(tab);
   };
 
-  const notificacoesFiltradas = notificacoes.filter((n) => {
-    const direcionadaAoSetor = n.alertaSetorDirecionado === setorNome || n.alertaSetorDirecionado === 'Todos';
-    const direcionadaAoUsuario = n.alertaUserAlvo === userCod;
+  const notificacoesFiltradas = notificacoes
+    .filter((n) => {
+      const direcionadaAoSetor = n.alertaSetorDirecionado === setorNome || n.alertaSetorDirecionado === 'Todos';
+      const direcionadaAoUsuario = n.alertaUserAlvo === userCod;
+      const pertenceAoUsuario = direcionadaAoSetor || direcionadaAoUsuario;
 
-    const pertenceAoUsuario = direcionadaAoSetor || direcionadaAoUsuario;
+      if (!pertenceAoUsuario) return false;
 
-    if (!pertenceAoUsuario) return false;
+      if (activeTab === "todas") return true;
+      if (activeTab === "não lidas") return n.alertaCod === 1;
+      if (activeTab === "importantes") return [2, 3, 4].includes(n.tipoAlerta.tipoAlertaCod);
 
-    if (activeTab === "todas") return true;
-    if (activeTab === "não lidas") return n.alertaCod === 1;
-    if (activeTab === "importantes") return n.alertaCod === 2 || n.alertaCod === 3 || n.alertaCod === 4;
-
-    return true;
-  });
-
-
+      return true;
+    })
+    .sort((a, b) => new Date(b.alertaDataCriacao ?? '').getTime() - new Date(a.alertaDataCriacao ?? '').getTime());
 
   return (
     <>
@@ -189,6 +191,11 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({ isOpen, on
                 <div
                   key={n.alertaCod}
                   className="p-3 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                  onClick={() => {
+                    if (n.tipoAlerta.tipoAlertaCod === 1) {
+                      router.push("/solicitacao");
+                    }
+                  }}
                 >
                   <div className="flex justify-between items-start">
                     <p className="font-medium">{n.tipoAlerta.tipoAlertaNome ?? "Notificação"}</p>
@@ -207,7 +214,7 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({ isOpen, on
                 <p className="text-gray-600">Nenhuma notificação disponível</p>
               </div>
             )}
-          
+
           {/* Se não houver notificações */}
           {/* 
           <div className="flex flex-col items-center justify-center py-10 text-center">
