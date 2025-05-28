@@ -438,7 +438,7 @@ export default function EditarFuncionarioForm({ usuarioInfo, logadoInfo }: Edita
           <Button
             onClick={(e) => setIsSaving(true)}
             isSubmitButton={true}
-            className={"hover:bg-yellow-400 text-white " +
+            className={"hover:bg-yellow-400 text-[#42130F] " +
               (isSaveDisabled() ? "bg-[#CBD5E1] " : "bg-[#FFB503] ") +
               (isFormsUsuarioDefault() ? "invisible" : "visible")
             }
