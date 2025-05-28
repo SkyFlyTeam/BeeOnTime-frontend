@@ -224,7 +224,9 @@ const CalendarFeriasGestor = ({userPedido}: CalendarFeriasGestorProps) => {
              const notificacao: NotificacaoInterface = {
               alertaMensagem: `Sua solicitação de folga foi aprovada`,
               alertaDataCriacao: new Date(),
-              tipoAlerta: {tipoAlertaCod: 1}
+              tipoAlerta: {tipoAlertaCod: 1},
+              alertaSetorDirecionado: 'Todos',
+              alertaUserAlvo: userPedido
             }
             notificacaoServices.createNotificacao(notificacao)
           } catch (error: any) {

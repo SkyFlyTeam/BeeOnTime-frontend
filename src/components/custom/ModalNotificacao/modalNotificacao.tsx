@@ -3,6 +3,7 @@ import { useSidebar } from "@/components/ui/sidebar";
 import NotificacaoInterface from "@/interfaces/notificacao";
 import { notificacaoServices } from "@/services/notificacaoService";
 import { ApiException } from "@/config/apiExceptions";
+import { getUsuario } from "@/services/authService";
 
 interface NotificationModalProps {
   isOpen: boolean;
@@ -16,6 +17,34 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({ isOpen, on
   const isExpanded = state === "expanded";
   const [activeTab, setActiveTab] = useState<TabType>("todas");
   const [notificacoes, setNotificacoes] = useState<NotificacaoInterface[]>([])
+  const [userCod, setUserCod] = useState<number>()
+  const [userCargo, setUserCargo] = useState<string>()
+  const [setorNome, setSetorNome] = useState<string>();
+
+  useEffect(() => {
+      getUser()
+    }, [])
+  
+  const getUser = async () => {
+    try {
+      const user = await getUsuario(); // Aqui você chama sua função de API
+      console.log("Usuário retornado:", user);
+
+      const usuario = user.data;
+
+      setUserCod(usuario.usuario_cod);
+      setUserCargo(usuario.usuario_cargo)
+
+      if (usuario.setor && usuario.setor.setorNome) {
+        setSetorNome(usuario.setor.setorNome);
+      } else {
+        console.warn("Setor ou setorNome não definido no usuário.");
+      }
+
+    } catch (error) {
+      console.error("Erro ao buscar dados do usuário:", error);
+    }
+  };
 
   const fetchNotificacoes = async () => {
     try {
@@ -72,11 +101,20 @@ export const NotificationModal: React.FC<NotificationModalProps> = ({ isOpen, on
   };
 
   const notificacoesFiltradas = notificacoes.filter((n) => {
+    const direcionadaAoSetor = n.alertaSetorDirecionado === setorNome || n.alertaSetorDirecionado === 'Todos';
+    const direcionadaAoUsuario = n.alertaUserAlvo === userCod;
+
+    const pertenceAoUsuario = direcionadaAoSetor || direcionadaAoUsuario;
+
+    if (!pertenceAoUsuario) return false;
+
     if (activeTab === "todas") return true;
-    if (activeTab === "não lidas") return n.alertaCod === 1; // ← Solicitações
-    if (activeTab === "importantes") return n.alertaCod === 2; // ← Exemplo de uso para outra aba
+    if (activeTab === "não lidas") return n.alertaCod === 1;
+    if (activeTab === "importantes") return n.alertaCod === 2 || n.alertaCod === 3 || n.alertaCod === 4;
+
     return true;
   });
+
 
 
   return (

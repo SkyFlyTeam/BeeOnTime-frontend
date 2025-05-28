@@ -136,7 +136,9 @@ const createSolicitacao = async (formData: FormData): Promise<SolicitacaoInterfa
     const notificacao: NotificacaoInterface = {
       alertaMensagem: `A solicitação de ${dataSolicitacao["usuarioNome"]} referente a ${dataSolicitacao["tipoSolicitacaoCod"]["tipoSolicitacaoCod"]} foi ${dataSolicitacao["solicitacaoStatus"]}`,
       alertaDataCriacao: new Date(),
-      tipoAlerta: {tipoAlertaCod: 1}
+      tipoAlerta: {tipoAlertaCod: 1},
+      alertaSetorDirecionado: 'Todos',
+      alertaUserAlvo: usuarioCod
     }
 
     notificacaoServices.createNotificacao(notificacao)
@@ -178,7 +180,9 @@ const updateSolicitacao = async (solicitacao: SolicitacaoInterface): Promise<Sol
     const notificacao: NotificacaoInterface = {
       alertaMensagem: `A solicitação de ${solicitacao.usuarioNome} referente a ${tipos_solicitacao[solicitacao.tipoSolicitacaoCod.tipoSolicitacaoCod]} foi ${solicitacao.solicitacaoStatus}`,
       alertaDataCriacao: new Date(),
-      tipoAlerta: {tipoAlertaCod: 1}
+      tipoAlerta: {tipoAlertaCod: 1},
+      alertaSetorDirecionado: 'Todos',
+      alertaUserAlvo: solicitacao.usuarioCod
     }
 
     notificacaoServices.createNotificacao(notificacao)

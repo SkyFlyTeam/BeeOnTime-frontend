@@ -100,6 +100,7 @@ export default function Home() {
             if (res.status === 200) {
             const userResponse = await getUsuario()
             const user = userResponse.data;
+            const userPedido = user.usuario_cod;
             const jornada = user.jornadas;
             const cargaHorariaHoras = user.usuario_cargaHoraria; // em horas
             const now = new Date();
@@ -113,7 +114,9 @@ export default function Home() {
                     const notificacao: NotificacaoInterface = {
                         alertaMensagem: `Você se esqueceu de bater seu ponto até as ${jornada.jornada_horarioEntrada} horas. Não esqueca de registrar seu horário. Se necessário, solicite o ajuste de ponto`,
                         alertaDataCriacao: new Date(),
-                        tipoAlerta: {tipoAlertaCod: 3}
+                        tipoAlerta: {tipoAlertaCod: 3},
+                        alertaSetorDirecionado: 'Todos',
+                        alertaUserAlvo: userPedido
                     }
                     notificacaoServices.createNotificacao(notificacao) // Notifica atraso na jornada fixa
                 }
@@ -127,7 +130,9 @@ export default function Home() {
                         const notificacao: NotificacaoInterface = {
                             alertaMensagem: `Você não bateu seu ponto a tempo de completar sua jornada diária. Não esqueca de registrar seu horário. Se necessário, solicite o ajuste de ponto`,
                             alertaDataCriacao: new Date(),
-                            tipoAlerta: {tipoAlertaCod: 3}
+                            tipoAlerta: {tipoAlertaCod: 3},
+                            alertaSetorDirecionado: 'Todos',
+                            alertaUserAlvo: userPedido
                         }
                         notificacaoServices.createNotificacao(notificacao)
                     }
