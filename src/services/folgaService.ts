@@ -26,7 +26,35 @@ const getBySetor = async (setorCod: number): Promise<Folgas[] | ApiException> =>
     }
 }
 
+const getFolgaMonthByEmpresa = async (empCod: number, date: string) => {
+    try {
+        const { data } = await ApiUsuario.get(`/folgas/empresa/${empCod}/mes/${date}`)
+        return data as Folgas[]
+    } catch (error) {
+        if (error instanceof Error) {
+            return new ApiException(error.message || "Erro ao consultar horas do usuário.");
+        }
+        return new ApiException("Erro desconhecido.");
+    }
+}
+
+const cadastrarFolga = async (folga: any) => {
+    try {
+        const { data } = await ApiUsuario.post(`/folgas/cadastrar`, folga, {
+        headers: { "Content-Type": "application/json" }
+      });
+        return data as Folgas
+    } catch (error) {
+        if (error instanceof Error) {
+            return new ApiException(error.message || "Erro ao consultar horas do usuário.");
+        }
+        return new ApiException("Erro desconhecido.");
+    }
+}
+
 export const folgaService = {
     getAll,
-    getBySetor
+    getBySetor,
+    getFolgaMonthByEmpresa,
+    cadastrarFolga
 }

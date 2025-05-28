@@ -50,10 +50,15 @@ const SolicitacaoCard = ({
     ? solicitacao.solicitacaoDataPeriodo
     : []
 
+  const parseDateToLocal = (dateString: string): Date => {
+    const [year, month, day] = dateString.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  };
+
   const formatado = datas.map(item => {
-    const d = item instanceof Date ? item : new Date(item)
-    return d.toLocaleDateString('pt-BR')
-  })
+    const d = item instanceof Date ? item : parseDateToLocal(item);
+    return d.toLocaleDateString('pt-BR');
+  });
 
   const dataFormatada =
     formatado.length === 0

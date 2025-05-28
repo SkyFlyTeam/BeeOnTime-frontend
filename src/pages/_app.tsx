@@ -35,7 +35,7 @@ function MyApp({ Component, pageProps }: AppProps) {
       <AppSidebar />
       <SidebarInset>
         <Header />
-        <main className="flex flex-1 flex-col gap-4 px-8 sm:px-12 py-0">
+        <main className="flex flex-1 flex-col gap-4 md:px-12 px-4 py-0">
           <Component {...pageProps} />
           <ToastContainer />
         </main>
@@ -48,7 +48,7 @@ function MyApp({ Component, pageProps }: AppProps) {
 function Header() {
   const { state, isMobile, openMobile } = useSidebar();
   return (
-    <header className="flex h-8 shrink-0 items-center gap-2 px-7 py-9" style={{ backgroundColor: "#fafbfc" }}>
+    <header className="flex h-8 shrink-0 items-center gap-2 md:px-12 px-3 py-9" style={{ backgroundColor: "#fafbfc" }}>
       {(!isMobile && state === "collapsed") || (isMobile && !openMobile) ? (
         <SidebarTrigger className="-ml-1" />
       ) : null}

@@ -203,28 +203,28 @@ export const CardBancoHoras = ({ usuarioCod }: CardBancoHorasProps) => {
         setValorAdicional(0);
     }
 
-      const showToast = (success: boolean) => {
-          success ? showSucessToast() : showErrorToast();
-      }
-    
-      const showSucessToast = () => {
+    const showToast = (success: boolean) => {
+        success ? showSucessToast() : showErrorToast();
+    }
+
+    const showSucessToast = () => {
         toast.success("Banco de horas convertido em extras pagas com sucesso!", {
-          position: "top-center",
+            position: "top-center",
         });
-      };
-    
-      const showErrorToast = () => {
+    };
+
+    const showErrorToast = () => {
         toast.error("Erro ao converter banco de horas em extra paga.", {
-          position: "top-center",
+            position: "top-center",
         });
-      };
+    };
 
     return(
         loading ? (
             <></>
         ) : (
             <>
-                <div className="w-[40rem] flex flex-col items-center justify-center gap-6 bg-white shadow-[4px_4px_19px_0px_rgba(0,0,0,0.05)] rounded-xl p-6">
+                <div className="w-[40rem] h-[10rem] flex flex-col items-center justify-center gap-6 bg-white shadow-[4px_4px_19px_0px_rgba(0,0,0,0.05)] rounded-xl p-6">
                     <h1 className="text-xl font-semibold">Banco de Horas</h1>
                     <div className="flex flex-col gap-2 w-full">
                         <div className="flex justify-between w-full">

@@ -226,7 +226,7 @@ export default function EditarFuncionarioForm({ usuarioInfo, logadoInfo }: Edita
       <form onSubmit={forms.handleSubmit(onSubmit)}>
         <div className="flex flex-row flex-wrap gap-6">
           {/* Status Toggle */}
-          <FormField
+          {/* <FormField
             control={forms.control}
             name="usuario_status"
             render={({ field }) => (
@@ -254,7 +254,7 @@ export default function EditarFuncionarioForm({ usuarioInfo, logadoInfo }: Edita
                 <FormMessage />
               </FormItem>
             )}
-          />
+          /> */}
 
           {/* Name */}
           <FormField
@@ -438,7 +438,7 @@ export default function EditarFuncionarioForm({ usuarioInfo, logadoInfo }: Edita
           <Button
             onClick={(e) => setIsSaving(true)}
             isSubmitButton={true}
-            className={"hover:bg-yellow-400 text-white " +
+            className={"hover:bg-yellow-400 text-[#42130F] " +
               (isSaveDisabled() ? "bg-[#CBD5E1] " : "bg-[#FFB503] ") +
               (isFormsUsuarioDefault() ? "invisible" : "visible")
             }
