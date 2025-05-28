@@ -116,7 +116,7 @@ export const CardCalendario = ({ funcCalendar, empCod, usuarioCod, feriados, cur
                                 dataFerias.getMonth() === currentDate.getMonth() &&
                                 dataFerias.getFullYear() === currentDate.getFullYear()
                             ) {
-                                setEvento(dataFerias, "folga");
+                                setEvento(dataFerias, "ferias");
                             }
                         });
                     }
@@ -339,7 +339,7 @@ export const CardCalendario = ({ funcCalendar, empCod, usuarioCod, feriados, cur
                         classNames={{
                             caption_label: "md:text-[1.5rem] text-[1rem] capitalize", 
                             head_cell: "text-black rounded-md w-full font-normal md:text-[1rem] text-[0.6rem] capitalize",
-                            cell: "md:h-20 md:w-24 h-14 w-8 flex flex-col items-center justify-between md:text-[1rem] text-[0.6rem] p-0 relative",
+                            cell: "md:h-24 md:w-32 h-14 w-8 flex flex-col items-center justify-between md:text-[1rem] text-[0.6rem] p-0 relative",
                             day: cn(
                                 buttonVariants({ variant: "ghost" }),
                                 "md:h-9 md:w-9 h-5 w-5 p-0 font-normal md:text-[1rem] text-[0.5rem] aria-selected:opacity-100"

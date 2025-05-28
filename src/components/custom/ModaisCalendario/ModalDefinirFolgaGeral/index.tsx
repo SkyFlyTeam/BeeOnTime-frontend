@@ -97,7 +97,7 @@ const ModalDefinirFolgaGeral: React.FC<DefinirFolgaGeral> = ({
             for (const folga of mapped_folgas) {
                 await folgaService.cadastrarFolga(folga);
             }
-            
+            onClose();
             showToast(true);
         }catch (err) {
             console.error("Erro ao salvar feriados.");

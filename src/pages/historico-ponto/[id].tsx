@@ -277,6 +277,46 @@ export default function PointsHistoryPage() {
               />
               )}
 
+            <div className="flex flex-col  p-6 md:p-9">
+              <h2 className="text-xl md:text-3xl font-semibold mb-4">Espelho de ponto</h2>
+              <div className="flex gap-4 overflow-x-auto whitespace-nowrap pb-2 min-h-[7rem]">
+              {espelhoPontos!.map((espelho) => {
+                const dataGeracao = new Date(espelho.espelhoPontoDataGeracao);
+                const dataReal = subDays(dataGeracao, 1); // Subtrai um dia
+                const mesAno = format(dataReal, "M/yy", { locale: ptBR }); // Ex: março/25
+        
+                return (
+                  <EspelhoPontoCard
+                    key={espelho.espelhoPontoCod}
+                    mesAno={espelho.espelhoPontoMes + mesAno.slice(1)} // Capitaliza o mês
+                    status={
+                      espelho.espelhoPontoAssinado
+                        ? "assinado"
+                        : "pendente"
+                    }
+                    onClick={() => {
+                      handleOpenEspelhoPontoModal(espelho);
+                    }}
+                  />
+                );
+              })}
+              </div>
+            </div>
+
+              {selectedEspelhoPonto && (
+              <ModalPDFViewer
+                isOpen={pdfShowModal}
+                onClose={() => setPdfShowModal(false)}
+                usuarioCod={selectedEspelhoPonto!.usuarioCod}
+                espelhoPontoCod={selectedEspelhoPonto!.espelhoPontoCod}
+                mes={selectedEspelhoPonto!.espelhoPontoMes}
+                usuarioNome={usuarioInfo!.usuario_nome}
+                isEspelhoPontoAssinado={selectedEspelhoPonto.espelhoPontoAssinado}
+                geracaoData={selectedEspelhoPonto.espelhoPontoDataGeracao}
+                isUser={false}
+              />
+              )}
+
       </div>
     )
   );
