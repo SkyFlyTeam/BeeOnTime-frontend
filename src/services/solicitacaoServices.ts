@@ -1,7 +1,9 @@
+import NotificacaoInterface from "@/interfaces/notificacao";
 import { ApiException } from "../config/apiExceptions";
 import { ApiSolicitacao } from "../config/apiSolicitacao";
 // import SolicitacaoInterface, { EnviarSolciitacaoInterface } from "../interfaces/Solicitacao";
 import SolicitacaoInterface, { CriarSolicitacaoInterface } from "../interfaces/Solicitacao";
+import { notificacaoServices } from "./notificacaoService";
 
 
 const getAllSolicitacao = async (): Promise<SolicitacaoInterface[] | ApiException> => {
@@ -121,6 +123,26 @@ const createSolicitacao = async (formData: FormData): Promise<SolicitacaoInterfa
     const { data } = await ApiSolicitacao.post("/solicitacao/cadastrar", formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
+
+    const tipos_solicitacao: Record<number, String> = {
+      "1": "Ajuste de Ponto",
+      "2": "Férias",
+      "3": "Folga",
+      "4": "Ausência",
+      "5": "Hora extra",
+      "6": "Ausência Médica",
+    }
+    
+    const notificacao: NotificacaoInterface = {
+      alertaMensagem: `Uma nova solicitação foi criada! Clique aqui para ver a solicitação.`,
+      alertaDataCriacao: new Date(),
+      tipoAlerta: {tipoAlertaCod: 1},
+      alertaSetorDirecionado: 'Todos',
+      alertaUserAlvo: usuarioCod
+    }
+
+    notificacaoServices.createNotificacao(notificacao)
+
     return data as SolicitacaoInterface;
 
   } catch (error: any) {
@@ -145,6 +167,25 @@ const updateSolicitacao = async (solicitacao: SolicitacaoInterface): Promise<Sol
     const { data } = await ApiSolicitacao.put("/solicitacao/editar", updatedSolicitacao, {
       headers: { 'Content-Type': 'application/json' }
     })
+
+    const tipos_solicitacao: Record<number, String> = {
+      "1": "Ajuste de Ponto",
+      "2": "Férias",
+      "3": "Folga",
+      "4": "Ausência",
+      "5": "Hora extra",
+      "6": "Ausência Médica",
+    }
+    
+    const notificacao: NotificacaoInterface = {
+      alertaMensagem: `A solicitação de ${solicitacao.usuarioNome} referente a ${tipos_solicitacao[solicitacao.tipoSolicitacaoCod.tipoSolicitacaoCod]} foi ${solicitacao.solicitacaoStatus}`,
+      alertaDataCriacao: new Date(),
+      tipoAlerta: {tipoAlertaCod: 1},
+      alertaSetorDirecionado: 'Todos',
+      alertaUserAlvo: solicitacao.usuarioCod
+    }
+
+    notificacaoServices.createNotificacao(notificacao)
 
     const solicitacaoModificada: SolicitacaoInterface = data as SolicitacaoInterface;
     return solicitacaoModificada;

@@ -33,6 +33,8 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from '@/components/ui/input';
 import { toast, ToastContainer} from "react-toastify"
 import CadastroEmpresaForm from '@/components/custom/CadastroEmpresa/CadastroEmpresa';
+import { notificacaoServices } from '@/services/notificacaoService';
+import NotificacaoInterface from '@/interfaces/notificacao';
 
 
 const formSchema = z.object({
@@ -94,20 +96,59 @@ export default function Home() {
         const res = await setLogIn(creds);
 
         const id = await getRoleID();
-        
-        if(res.status === 200)
-            router.push("/inicio")
-
-        else{
-            showErrorToast()
+        try {
+            if (res.status === 200) {
+            const userResponse = await getUsuario()
+            const user = userResponse.data;
+            const userPedido = user.usuario_cod;
+            const jornada = user.jornadas;
+            const cargaHorariaHoras = user.usuario_cargaHoraria; // em horas
+            const now = new Date();
+            if (!jornada.jornada_horarioFlexivel) {
+                // ✅ Jornada fixa: verifica atraso de mais de 10 minutos
+                const [entradaHour, entradaMinute] = jornada.jornada_horarioEntrada.split(":").map(Number);
+                const entradaTime = new Date();
+                entradaTime.setHours(entradaHour, entradaMinute, 0, 0);
+                const diffMinutes = (now.getTime() - entradaTime.getTime()) / (1000 * 60);
+                if (diffMinutes > 10) {
+                    const notificacao: NotificacaoInterface = {
+                        alertaMensagem: `Você se esqueceu de bater seu ponto até as ${jornada.jornada_horarioEntrada} horas. Não esqueca de registrar seu horário. Se necessário, solicite o ajuste de ponto`,
+                        alertaDataCriacao: new Date(),
+                        tipoAlerta: {tipoAlertaCod: 3},
+                        alertaSetorDirecionado: 'Todos',
+                        alertaUserAlvo: userPedido
+                    }
+                    notificacaoServices.createNotificacao(notificacao) // Notifica atraso na jornada fixa
+                }
+                } else {
+                    // ✅ Jornada flexível: verifica se ainda é possível cumprir a carga horária no dia
+                    const endOfDay = new Date();
+                    endOfDay.setHours(23, 59, 59, 999);
+                    const remainingMillis = endOfDay.getTime() - now.getTime();
+                    const remainingHours = remainingMillis / (1000 * 60 * 60); // milissegundos para horas
+                    if (remainingHours < cargaHorariaHoras) {
+                        const notificacao: NotificacaoInterface = {
+                            alertaMensagem: `Você não bateu seu ponto a tempo de completar sua jornada diária. Não esqueca de registrar seu horário. Se necessário, solicite o ajuste de ponto`,
+                            alertaDataCriacao: new Date(),
+                            tipoAlerta: {tipoAlertaCod: 3},
+                            alertaSetorDirecionado: 'Todos',
+                            alertaUserAlvo: userPedido
+                        }
+                        notificacaoServices.createNotificacao(notificacao)
+                    }
+            }
+            }
+            else{
+                showErrorToast()
+            }
+    }
+        catch(error) {
+            console.log(error)
         }
 
-        
+        router.push("/inicio")
 
       }
-
-
-    
 
   // Checa o tamanho da tela em pixels quando a janela é reajustada
   useEffect(() => {

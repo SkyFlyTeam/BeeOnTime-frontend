@@ -1,7 +1,7 @@
 import * as React from "react";
 import { usePathname } from "next/navigation";
 import { LiaBusinessTimeSolid, LiaUserTimesSolid  } from "react-icons/lia";
-import { Users, Building, Home, LogOut, MessageSquare, AlarmClockCheck, UserRound, LucideIcon, MapPin, CalendarDays, House } from "lucide-react";
+import { Users, Building, Home, LogOut, MessageSquare, AlarmClockCheck, UserRound, LucideIcon, MapPin, CalendarDays, UserRoundCheckIcon, House, HouseIcon, Bell } from "lucide-react";
 import { IconType } from "react-icons";
 import { TbClockExclamation } from "react-icons/tb";
 
@@ -25,6 +25,7 @@ import { getUsuario } from "@/services/authService";
 import { useEffect, useState } from "react";
 import { Usuario } from "@/interfaces/usuario";
 import { empresaServices } from "@/services/empresaService";
+import { NotificationModal } from "../ModalNotificacao/modalNotificacao";
 
 // Tipos
 type RoleKey = "Administrador" | "Gestor" | "Funcionário";
@@ -33,6 +34,7 @@ type SubNavItem = {
   title: string;
   url: string;
   icon: LucideIcon | IconType;
+  isNotification?: boolean; 
 };
 
 type NavItem = {
@@ -46,12 +48,40 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [selectedRole, setSelectedRole] = React.useState<RoleKey>("Administrador");
   const [enterpriseName, setEnterpriseName] = React.useState<string | undefined>(undefined);
   const [usuario, setUsuario] = useState<undefined | Usuario>(undefined);
-  
-  
+  const [showNotifications, setShowNotifications] = React.useState(false);
+  const [hasNewNotification, setHasNewNotification] = React.useState(false);
 
   useEffect(() => {
     getUser();
   }, []);
+
+  useEffect(() => {
+    const socket = new WebSocket("ws://localhost:8086/ws");
+
+    socket.onopen = () => {
+      console.log("Conectado ao WebSocket");
+    };
+
+    socket.onmessage = (event) => {
+      console.log("Mensagem recebida:", event.data);
+      setHasNewNotification(true); // Ativa a bolinha
+    };
+
+
+    socket.onerror = (error) => {
+      console.error("Erro no WebSocket:", error);
+    };
+
+    socket.onclose = () => {
+      console.log("WebSocket desconectado");
+    };
+
+    // Limpeza na desmontagem do componente
+    return () => {
+      socket.close();
+    };
+  }, []);
+
   
   useEffect(() => {
     if (usuario?.empCod) {
@@ -83,6 +113,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     }
   };
 
+  const handleNotificationClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setShowNotifications(!showNotifications);
+    setHasNewNotification(false); // Oculta a bolinha após abrir
+  };
+
+
   const rolesData: Record<RoleKey, { navMain: NavItem[]; navSecondary: SubNavItem[] }> = {
     Administrador: {
       navMain: [
@@ -91,6 +128,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           items: [
             { title: "Início", url: "/inicio", icon: House},
             { title: "Solicitações", url: "/solicitacao", icon: MessageSquare },
+            { title: "Notificações", url: "#", icon: Bell, isNotification: true }
           ],
         },
         {
@@ -122,6 +160,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           items: [
             { title: "Início", url: "/inicio", icon: Home },
             { title: "Solicitações", url: "/solicitacao", icon: MessageSquare },
+            { title: "Notificações", url: "#", icon: Bell, isNotification: true }
           ],
         },
         {
@@ -159,6 +198,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           items: [
             { title: "Início", url: "/inicio", icon: Home },
             { title: "Solicitações", url: "/solicitacao", icon: MessageSquare },
+            { title: "Notificações", url: "#", icon: Bell, isNotification: true },
             { title: "Calendário", url: "/calendario", icon: CalendarDays },
           ],
         },
@@ -178,6 +218,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   };
 
   return (
+    <>
     <Sidebar {...props}>
       <SidebarHeader>
         <div className="p-3">
@@ -191,9 +232,32 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarGroupLabel style={{ fontSize: '14px' }}>{section.title}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {section.items.map((item: SubNavItem) => {
+                {section.items.map((item: SubNavItem & { isNotification?: boolean }) => {
                   const Icon = item.icon;
                   const isActive = pathname === item.url;
+                  if (item.isNotification) {
+                    return (
+                      <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton asChild>
+                          <button
+                            onClick={handleNotificationClick}
+                            className="flex items-center gap-2 px-4 py-5 rounded-lg transition text-left w-full"
+                            style={{
+                              fontSize: "18px"
+                            }}
+                          >
+                            <Icon className="!w-[1.5rem] !h-[1.5rem]" style={{ color: "#6b7280" }} />
+                            <span className="relative flex items-center">
+                              {item.title}
+                              {hasNewNotification && (
+                                <span className="ml-2 w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></span>
+                              )}
+                            </span>
+                          </button>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    );
+                  }
                   return (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild isActive={isActive}>
@@ -223,5 +287,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
       <SidebarRail />
     </Sidebar>
+    <NotificationModal isOpen={showNotifications} onClose={() => setShowNotifications(false)} />
+    </>
   );
 }

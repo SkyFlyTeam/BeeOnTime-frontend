@@ -8,6 +8,8 @@ import { getUsuario } from "@/services/authService";
 import { solicitacaoServices } from "@/services/solicitacaoServices";
 import { toast } from "react-toastify"; // Importando o toast
 import { ApiUsuario } from "@/config/apiUsuario";
+import NotificacaoInterface from "@/interfaces/notificacao";
+import { notificacaoServices } from "@/services/notificacaoService";
 
 const weekDays = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sab"];
 
@@ -219,6 +221,14 @@ const CalendarFeriasGestor = ({userPedido}: CalendarFeriasGestorProps) => {
               }
             });
             console.log("Folgas cadastradas com sucesso:", response.data);
+             const notificacao: NotificacaoInterface = {
+              alertaMensagem: `Sua solicitação de folga foi aprovada`,
+              alertaDataCriacao: new Date(),
+              tipoAlerta: {tipoAlertaCod: 1},
+              alertaSetorDirecionado: 'Todos',
+              alertaUserAlvo: userPedido
+            }
+            notificacaoServices.createNotificacao(notificacao)
           } catch (error: any) {
             console.error("Erro ao cadastrar folgas:", error.response?.data || error.message);
           }
